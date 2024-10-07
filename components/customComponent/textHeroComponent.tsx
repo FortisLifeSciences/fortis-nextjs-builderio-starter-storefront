@@ -22,37 +22,39 @@ const TextHero: React.FC<TextHeroProps> = ({ FirstImage, SecondImage, paragraphT
       : paragraphText
 
   return (
-    <Box sx={{ ...TextHeroStyle.container }}>
-      {(mdScreen || smScreen) && (
-        <>
-          {/* First Image */}
-          <Box sx={{ ...TextHeroStyle.image1 }}>
-            <Image src={FirstImage} alt="First Image" fill />
-          </Box>
+    <Box sx={{ ...TextHeroStyle.containerBox }}>
+      <Box sx={{ ...TextHeroStyle.heroComponent }}>
+        {(mdScreen || smScreen) && (
+          <>
+            {/* First Image */}
+            <Box sx={{ ...TextHeroStyle.image1 }}>
+              <Image src={FirstImage} alt="First Image" fill />
+            </Box>
 
-          {/* Second Image */}
-          <Box sx={{ ...TextHeroStyle.image2 }}>
-            <Image src={SecondImage} alt="Second Image" fill />
-          </Box>
-        </>
-      )}
-
-      <Box
-        sx={{ ...TextHeroStyle.paragraphText }}
-        style={{
-          backgroundImage: `url('/Center Text Hero Background (1).svg')`,
-        }}
-      >
-        {truncatedText && (
-          <Typography
-            component="div"
-            sx={{ ...TextHeroStyle.paragraphTextP, color: '#30299a' }}
-            dangerouslySetInnerHTML={{ __html: truncatedText }}
-            style={{
-              color: '#30299a',
-            }}
-          />
+            {/* Second Image */}
+            <Box sx={{ ...TextHeroStyle.image2 }}>
+              <Image src={SecondImage} alt="Second Image" fill />
+            </Box>
+          </>
         )}
+
+        <Box
+          sx={{ ...TextHeroStyle.paragraphText }}
+          style={{
+            backgroundImage: `url('/Center Text Hero Background (1).svg')`,
+          }}
+        >
+          {truncatedText && (
+            <Typography
+              component="div"
+              sx={{ ...TextHeroStyle.paragraphTextP, color: '#30299a' }}
+              dangerouslySetInnerHTML={{ __html: truncatedText }}
+              style={{
+                color: '#30299a',
+              }}
+            />
+          )}
+        </Box>
       </Box>
     </Box>
   )

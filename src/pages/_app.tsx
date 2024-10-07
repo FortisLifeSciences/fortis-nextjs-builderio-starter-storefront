@@ -52,7 +52,6 @@ const App = (props: KiboAppProps) => {
     Component.getLayout ?? ((page) => <DefaultLayout pageProps={pageProps}>{page}</DefaultLayout>)
   const pageTitle = `${siteTitle} | ${pageProps?.metaData?.title || defaultTitle}`
 
-
   const [googleReCaptcha, setGoogleReCaptcha] = useState()
 
   useEffect(() => {
@@ -109,7 +108,6 @@ const App = (props: KiboAppProps) => {
   if (loading) {
     return null // Or a loading spinner
   }
-
 
   return (
     <CacheProvider value={emotionCache}>
