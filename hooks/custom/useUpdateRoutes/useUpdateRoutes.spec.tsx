@@ -1,15 +1,26 @@
 import '@testing-library/jest-dom'
+import { useRouter } from 'next/router' // Import useRouter from next/router
+
 import { useUpdateRoutes } from './useUpdateRoutes'
 
-const useRouter = jest.spyOn(require('next/router'), 'useRouter')
+// Mock next/router
+jest.mock('next/router', () => ({
+  useRouter: jest.fn(),
+}))
+
 const push = jest.fn()
-useRouter.mockImplementation(() => ({
+
+// Cast useRouter to jest.Mock to enable mockImplementation
+const mockedUseRouter = useRouter as jest.Mock
+
+mockedUseRouter.mockImplementation(() => ({
   query: { categoryCode: '41', filters: 'Tenant~color:black,Tenant~color:blue' },
   push,
 }))
 
 describe('useUpdateRoutes', () => {
   const { updateRoute } = useUpdateRoutes()
+
   it('should add the filter to the url if filter is not present', () => {
     updateRoute('Tenant~color:black')
     expect(push).toHaveBeenCalledWith(

@@ -1,6 +1,6 @@
 // // next-logger.config.js
 
-const { createLogger, format, transports } = require('winston')
+import { createLogger, format, transports } from 'winston'
 
 function esformatter(info) {
   const result = {
@@ -25,6 +25,9 @@ const logger = createLogger({
   ],
 })
 
-module.exports = {
+const loggerConfig = {
   logger,
 }
+
+// Export the config as the default export (with a named variable)
+export default loggerConfig

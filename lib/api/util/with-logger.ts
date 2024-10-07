@@ -2,12 +2,14 @@ import getConfig from 'next/config'
 import { NextApiRequest, NextApiResponse } from 'next/types'
 
 import { NextApiRequestWithLogger } from '@/lib/types'
-import { logger } from '@/next-logger.config'
+import loggerConfig from '@/next-logger.config'
 
 type ApiHandler = (
   req: NextApiRequest | NextApiRequestWithLogger,
   res: NextApiResponse
 ) => Promise<any>
+
+const { logger } = loggerConfig
 
 const getDecodeCookie = (req: NextApiRequest) => {
   const config = getConfig()
