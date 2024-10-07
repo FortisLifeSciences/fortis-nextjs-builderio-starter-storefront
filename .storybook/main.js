@@ -1,10 +1,11 @@
-const path = require('path')
-const { TsconfigPathsPlugin } = require('tsconfig-paths-webpack-plugin')
+import path from 'path'
+import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin'
 
 function resolve(dir) {
   return path.join(__dirname, dir)
 }
-module.exports = {
+
+export default {
   webpackFinal: async (config) => {
     // config.resolve.modules.push(path.resolve(__dirname, '../'));
     ;[].push.apply(config.resolve.plugins, [

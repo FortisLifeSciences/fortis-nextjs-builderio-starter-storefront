@@ -12,7 +12,13 @@ i18n.use(initReactI18next).init({
 
 const localeAssets = ['common']
 for (const asset of localeAssets) {
-  i18n.addResourceBundle('en', asset, require(`../public/locales/en/${asset}.json`))
+  import(`../public/locales/en/${asset}.json`)
+    .then((resources) => {
+      i18n.addResourceBundle('en', asset, resources.default)
+    })
+    .catch((error) => {
+      console.error(`Failed to load resource bundle: ${asset}`, error)
+    })
 }
 
 export default i18n

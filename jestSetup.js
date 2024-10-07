@@ -14,14 +14,16 @@ jest.mock('next-i18next', () => ({
     return {
       t: (str) => str,
       i18n: {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         changeLanguage: () => new Promise(() => {}),
       },
     }
   },
 }))
 
-jest.mock('next/router', () => require('next-router-mock'))
-jest.mock('next/dist/client/router', () => require('next-router-mock'))
+// Replace require() with dynamic import()
+jest.mock('next/router', async () => await import('next-router-mock'))
+jest.mock('next/dist/client/router', async () => await import('next-router-mock'))
 
 const originalWarn = console.warn
 const originalLog = console.log

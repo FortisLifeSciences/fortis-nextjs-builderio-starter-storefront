@@ -53,5 +53,4 @@ const customJestConfig = {
   setupFilesAfterEnv: ['./jestSetup.js'],
 }
 
-// Export the configuration
 export default createJestConfig(customJestConfig)
