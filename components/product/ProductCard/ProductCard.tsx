@@ -1,10 +1,22 @@
-import React, { MouseEvent } from 'react'
+import React, { MouseEvent, useState } from 'react'
 
+import ArrowForwardIos from '@mui/icons-material/ArrowForwardIos'
 import FavoriteBorderRounded from '@mui/icons-material/FavoriteBorderRounded'
 import FavoriteRounded from '@mui/icons-material/FavoriteRounded'
 import StarRounded from '@mui/icons-material/StarRounded'
 import { LoadingButton } from '@mui/lab'
-import { Card, Typography, CardMedia, Box, Stack, Skeleton, Button, Rating } from '@mui/material'
+import {
+  Card,
+  Typography,
+  CardMedia,
+  Box,
+  Stack,
+  Skeleton,
+  Button,
+  Rating,
+  IconButton,
+} from '@mui/material'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 
@@ -12,11 +24,31 @@ import { ProductCardStyles } from './ProductCard.styles'
 import { KiboImage, Price } from '@/components/common'
 import { usePriceRangeFormatter } from '@/hooks'
 import { FulfillmentOptions as FulfillmentOptionsConstant } from '@/lib/constants'
+import abcore from '@/public/Brand_Logo/abcore-logo.png'
+import arista from '@/public/Brand_Logo/arista-logo.png'
+import bethyl from '@/public/Brand_Logo/bethyl-logo.png'
+import empirical from '@/public/Brand_Logo/empirical-logo.png'
+import fortis from '@/public/Brand_Logo/fortis-logo.png'
+import ipoc from '@/public/Brand_Logo/ipoc-logo.png'
+import nanocomposix from '@/public/Brand_Logo/nanocomposix-logo.png'
+import vector from '@/public/Brand_Logo/vector-logo.png'
 import DefaultImage from '@/public/noImage.png'
+const brandImages: Record<string, string> = {
+  arista: arista.src,
+  bethyl: bethyl.src,
+  abcore: abcore.src,
+  empirical: empirical.src,
+  nanocomposix: nanocomposix.src,
+  vector: vector.src,
+  ipoc: ipoc.src,
+  fortis: fortis.src,
+}
 
 import type { CrProductOption, Product, ProductPriceRange } from '@/lib/gql/types'
 export interface ProductCardProps {
   title?: string
+  newProduct?: string
+  brand?: string
   link: string
   imageUrl?: string
   placeholderImageUrl?: string
@@ -25,6 +57,7 @@ export interface ProductCardProps {
   salePrice?: string
   priceRange?: ProductPriceRange
   productCode?: string
+  variantProductName?: string
   variationProductCode?: string
   rating?: number
   imageHeight?: number
@@ -57,10 +90,13 @@ const ProductCard = (props: ProductCardProps) => {
   const {
     productCode,
     variationProductCode,
+    variantProductName,
     price,
     salePrice,
     priceRange,
     title,
+    brand = '',
+    newProduct,
     link,
     imageUrl,
     placeholderImageUrl = DefaultImage,
@@ -79,12 +115,14 @@ const ProductCard = (props: ProductCardProps) => {
     onClickQuickViewModal,
     onClickAddToCart,
   } = props
+
   const productPriceRange = usePriceRangeFormatter(priceRange as ProductPriceRange)
   const { t } = useTranslation('common')
   const handleAddOrRemoveWishlistItem = (event: MouseEvent<HTMLElement>) => {
     event.preventDefault()
     onAddOrRemoveWishlistItem?.()
   }
+
   const handleOpenProductQuickViewModal = (event: MouseEvent<HTMLElement>) => {
     event.preventDefault()
     onClickQuickViewModal?.()
@@ -113,6 +151,14 @@ const ProductCard = (props: ProductCardProps) => {
           <Box>
             <Card sx={{ ...ProductCardStyles.cardRoot, minHeight: 321 }} data-testid="product-card">
               <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} pb={1}>
+                {newProduct && (
+                  <Box
+                    sx={{ ...ProductCardStyles.newTag }}
+                    style={{
+                      backgroundImage: `url('/NewTag.svg')`,
+                    }}
+                  />
+                )}
                 {/* Badge start */}
                 {badge ? (
                   <Box
@@ -153,7 +199,7 @@ const ProductCard = (props: ProductCardProps) => {
                 }}
               >
                 <KiboImage
-                  src={imageUrl || placeholderImageUrl}
+                  src={imageUrl || brandImages[brand.toLowerCase()] || placeholderImageUrl}
                   alt={imageAltText}
                   fill
                   quality={100}
@@ -164,14 +210,17 @@ const ProductCard = (props: ProductCardProps) => {
               </CardMedia>
               <Box flexDirection="column" m={1}>
                 <Typography variant="body1" gutterBottom color="text.primary">
-                  {title}
+                  {brand}
                 </Typography>
-                <Price
+                <Typography variant="body1" gutterBottom color="text.primary">
+                  {variationProductCode ? variantProductName : title}
+                </Typography>
+                {/* <Price
                   price={price}
                   salePrice={salePrice}
                   priceRange={productPriceRange}
                   variant="body1"
-                />
+                /> */}
                 {/* <Rating
                   name="read-only"
                   value={rating}
@@ -189,7 +238,7 @@ const ProductCard = (props: ProductCardProps) => {
                   className="quick-actions"
                   data-testid="quick-actions"
                 >
-                  {showQuickViewButton && (
+                  {/* {showQuickViewButton && (
                     <Button
                       sx={{ mr: 2 }}
                       variant="contained"
@@ -198,7 +247,7 @@ const ProductCard = (props: ProductCardProps) => {
                     >
                       {t('quick-view')}
                     </Button>
-                  )}
+                  )} */}
                   {isShowWishlistIcon && (
                     <LoadingButton
                       variant="contained"
@@ -211,6 +260,9 @@ const ProductCard = (props: ProductCardProps) => {
                   )}
                 </Box>
               </Box>
+              <IconButton sx={ProductCardStyles.iconButton}>
+                <ArrowForwardIos sx={{ color: 'white' }} />
+              </IconButton>
             </Card>
           </Box>
         </Link>

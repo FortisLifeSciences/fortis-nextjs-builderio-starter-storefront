@@ -37,6 +37,9 @@ export interface ProductCardListViewProps {
   isShowWishlistIcon?: boolean
   showQuickViewButton?: boolean
   badge?: string
+  brand?: string
+  variantProductName?: string
+  newProduct?: string
   isATCLoading?: boolean
   fulfillmentTypesSupported?: string[]
   onAddOrRemoveWishlistItem?: () => Promise<void>

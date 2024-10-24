@@ -56,13 +56,13 @@ describe('[components] Product Card Component', () => {
       expect(title).toBeVisible()
     })
 
-    it('should render price', () => {
-      setup()
+    // it('should render price', () => {
+    //   setup()
 
-      const price = screen.getByText(Common.args?.price as string)
+    //   const price = screen.getByText(Common.args?.price as string)
 
-      expect(price).toBeVisible()
-    })
+    //   expect(price).toBeVisible()
+    // })
 
     it('should render product image', () => {
       setup()
@@ -91,15 +91,15 @@ describe('[components] Product Card Component', () => {
     // })
   })
 
-  describe('Sale Price Product Card', () => {
-    it('should render sale price text', () => {
-      render(<WithSalePrice {...WithSalePrice.args} />)
+  // describe('Sale Price Product Card', () => {
+  //   it('should render sale price text', () => {
+  //     render(<WithSalePrice {...WithSalePrice.args} />)
 
-      const salePrice = screen.getByText(WithSalePrice.args?.salePrice as string)
+  //     const salePrice = screen.getByText(WithSalePrice.args?.salePrice as string)
 
-      expect(salePrice).toBeVisible()
-    })
-  })
+  //     expect(salePrice).toBeVisible()
+  //   })
+  // })
 
   // describe('Rating Product Card', () => {
   //   it('should render rating component with provided rating value', () => {
@@ -168,30 +168,30 @@ describe('[components] Product Card Component', () => {
     })
   })
 
-  describe('Product Card with Quick-View Button', () => {
-    it('should  render Product Card without quick-view button', async () => {
-      quickViewSetup()
+  // describe('Product Card with Quick-View Button', () => {
+  //   it('should  render Product Card without quick-view button', async () => {
+  //     quickViewSetup()
 
-      const quickViewButton = screen.getAllByRole('button', {
-        name: /quick-view/i,
-      })
+  //     const quickViewButton = screen.getAllByRole('button', {
+  //       name: /quick-view/i,
+  //     })
 
-      expect(quickViewButton[0]).not.toBeVisible()
-    })
+  //     expect(quickViewButton[0]).not.toBeVisible()
+  //   })
 
-    it('should call onClickQuickViewModal method when user clicks on quick-view button', async () => {
-      const { user } = quickViewSetup()
+  //   it('should call onClickQuickViewModal method when user clicks on quick-view button', async () => {
+  //     const { user } = quickViewSetup()
 
-      const quickViewButton = screen.getByRole('button', { name: /quick-view/i })
-      act(() => {
-        user.click(quickViewButton)
-      })
+  //     const quickViewButton = screen.getByRole('button', { name: /quick-view/i })
+  //     act(() => {
+  //       user.click(quickViewButton)
+  //     })
 
-      await waitFor(() => {
-        expect(onClickQuickViewModalMock).toBeCalled()
-      })
-    })
-  })
+  //     await waitFor(() => {
+  //       expect(onClickQuickViewModalMock).toBeCalled()
+  //     })
+  //   })
+  // })
 
   describe('Product Card with Add to Cart Button', () => {
     it('should add item to cart button with ship fulfillment', async () => {

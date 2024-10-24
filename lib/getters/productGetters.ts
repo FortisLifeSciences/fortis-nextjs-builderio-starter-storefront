@@ -168,6 +168,32 @@ export const getBadgeAttribute = (properties: ProductProperties[]): string => {
   return properties?.find((prop) => prop.attributeFQN?.toLowerCase() === badgeAttributeFQN)
     ?.value as string
 }
+export const getBrandName = (properties: ProductProperties[]): string => {
+  const brandAttrName = publicRuntimeConfig?.brandAttrName?.toLowerCase()
+  if (Array.isArray(properties)) {
+    return properties.find((prop) => prop.attributeFQN?.toLowerCase() === brandAttrName)
+      ?.value as string
+  }
+  return 'attribute not found'
+}
+export const getVariantProductAttributeName = (properties: ProductProperties[]): string => {
+  const variantProductAttributeName =
+    publicRuntimeConfig?.variantProductAttributeName?.toLowerCase()
+  if (Array.isArray(properties)) {
+    return properties.find(
+      (prop) => prop.attributeFQN?.toLowerCase() === variantProductAttributeName
+    )?.value as string
+  }
+  return 'attribute not found'
+}
+export const getNewProductAttrName = (properties: ProductProperties[]): string => {
+  const newProductAttrName = publicRuntimeConfig?.newProductAttrName?.toLowerCase()
+  if (Array.isArray(properties)) {
+    return properties.find((prop) => prop.attributeFQN?.toLowerCase() === newProductAttrName)
+      ?.value as string
+  }
+  return 'false'
+}
 
 const getOptionSelectedValue = (option: ProductOption) => {
   const selectedValue = option?.values?.find((value) => value?.isSelected)
@@ -389,4 +415,7 @@ export const productGetters = {
   getCoverImageAlt,
   getSeoFriendlyUrl,
   getDescription,
+  getBrandName,
+  getNewProductAttrName,
+  getVariantProductAttributeName,
 }
