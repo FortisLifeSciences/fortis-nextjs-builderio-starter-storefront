@@ -33,7 +33,7 @@ export const LeftTextHeroStyle = {
     '@media (max-width: 600px)': {
       width: '100%',
       height: 'auto',
-      position: 'relative',
+      position: 'absolute',
       top: '30%',
       padding: '20px',
       zIndex: 1,
@@ -49,7 +49,7 @@ export const LeftTextHeroStyle = {
   },
   leftTxtHeading: {
     color: '#30299A',
-    width: { md: '589px', sm: '400px', xs: '345px' },
+    width: { md: '589px', sm: '400px', xs: '100%' },
     height: { md: 'auto', xs: 'auto' },
     fontFamily: 'Poppins',
     fontSize: { md: '40px', xs: '30px' },
@@ -63,7 +63,7 @@ export const LeftTextHeroStyle = {
   },
   leftTxtParagraph: {
     color: '#020027',
-    width: { md: '589px', sm: '350px', xs: '345px' },
+    width: { md: '589px', sm: '350px', xs: '100%' },
     height: 'auto',
     fontFamily: 'Poppins',
     fontSize: { md: '22px', xs: '18px' },
@@ -117,12 +117,25 @@ export const LeftTextHeroStyle = {
     right: 0,
     zIndex: 2,
     '@media (max-width: 600px)': {
-      position: 'relative',
+      position: 'absolute',
       width: '100%',
-      height: '100%',
-      top: 0,
+      height: '230px',
+      top: '70%',
       right: 0,
       zIndex: 2,
+      marginTop: '20px',
+      '@media (min-width: 384px) and (max-width: 427px)': {
+        top: '69%',
+      },
+      '@media (min-width: 428px) and (max-width: 500px)': {
+        top: '65%',
+      },
+      '@media (min-width: 501px) and (max-width: 577px)': {
+        top: '63%',
+      },
+      '@media (min-width: 578px) and (max-width: 599px)': {
+        top: '59%',
+      },
     },
     '@media (min-width: 601px) and (max-width: 990px)': {
       width: '48%',
