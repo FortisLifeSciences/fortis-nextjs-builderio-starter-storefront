@@ -35,7 +35,7 @@
     "@emotion/styled": "latest",
     "@hookform/resolvers": "^2.8.8",
     "@kibocommerce/graphql-client": "1.0.3-beta.10",
-    "@mui/icons-material": "^5.10.16",
+    "@mui/icons-material": "^5.16.7",
     "@mui/lab": "^5.0.0-alpha.123",
     "@mui/material": "^5.10.16",
     "@mui/x-date-pickers": "^5.0.13",

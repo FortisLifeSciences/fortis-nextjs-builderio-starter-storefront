@@ -65,6 +65,10 @@ module.exports = {
     occasionAttributeFQN: 'Tenant~occasion',
     colorAttributeFQN: 'Tenant~Color',
     sizeAttributeFQN: 'Tenant~Size',
+    validationTextAttrFQN: 'tenant~validation-text',
+    citationCountVariantAttrFQN: 'tenant~citation-count-variant',
+    mfgCertificationAttrFQN: 'tenant~mfgcertification',
+    mfgAvailabilityAttrFQN: 'tenant~mfgavailability',
     paymentTypes: [
       {
         id: 'PurchaseOrder',

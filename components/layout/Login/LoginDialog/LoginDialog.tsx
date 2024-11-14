@@ -7,7 +7,7 @@ import { useTranslation } from 'next-i18next'
 
 import { CustomDialog, KiboDialog } from '@/components/common'
 import { B2BAccountFormDialog } from '@/components/dialogs'
-import { RegisterAccountDialog, ResetPasswordDialog } from '@/components/layout'
+import { RegisterAccountDialog, ResetPasswordDialog, ExistingUserDialog } from '@/components/layout'
 import LoginContent, { LoginData } from '@/components/layout/Login/LoginContent/LoginContent'
 import { useAuthContext } from '@/context'
 import { useModalContext } from '@/context/ModalContext'
@@ -88,60 +88,76 @@ const LoginDialog = () => {
 
   const handleAccountRequest = async (formValues: CreateCustomerB2bAccountParams) => {
     const variables = buildCreateCustomerB2bAccountParams(formValues)
-    const emailDomain = extractDomain(formValues?.emailAddress)
+    const emailAddress = formValues?.emailAddress
+    const emailDomain = extractDomain(emailAddress)
     const entityListFullName = 'B2BAccountMapping@fortis'
     const entityPayLoad = {
       entityListFullName: entityListFullName,
       id: emailDomain,
     }
-    const entityResponse = await fetch('/api/user/get-entity', {
+
+    const getExistingUser = await fetch('/api/user/getAccountsByUser', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ entityPayLoad }),
+      body: JSON.stringify({ emailAddress }),
     })
 
-    const entityResult = await entityResponse.json()
+    const userDetails = await getExistingUser.json()
 
-    if ((googleReCaptcha as any)?.reCaptchAccountCreation) {
-      try {
-        // Ensure grecaptcha is available and ready
-        const siteKey = (googleReCaptcha as any)?.accountCreationSiteKey
-          ? (googleReCaptcha as any)?.accountCreationSiteKey
-          : process.env.accountCreationSiteKey
+    if (userDetails.success === true) {
+      showModal({ Component: ExistingUserDialog })
+    } else {
+      const entityResponse = await fetch('/api/user/get-entity', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ entityPayLoad }),
+      })
 
-        if (typeof grecaptcha !== 'undefined' && grecaptcha.enterprise) {
-          grecaptcha.enterprise.ready(async () => {
-            try {
-              const reCaptchaResponseCode = await grecaptcha.enterprise.execute(siteKey, {
-                action: 'signup',
-              })
-              const payLoad = {
-                googleReCaptcha: googleReCaptcha,
-                responseKey: reCaptchaResponseCode,
+      const entityResult = await entityResponse.json()
+
+      if ((googleReCaptcha as any)?.reCaptchAccountCreation) {
+        try {
+          // Ensure grecaptcha is available and ready
+          const siteKey = (googleReCaptcha as any)?.accountCreationSiteKey
+            ? (googleReCaptcha as any)?.accountCreationSiteKey
+            : process.env.accountCreationSiteKey
+
+          if (typeof grecaptcha !== 'undefined' && grecaptcha.enterprise) {
+            grecaptcha.enterprise.ready(async () => {
+              try {
+                const reCaptchaResponseCode = await grecaptcha.enterprise.execute(siteKey, {
+                  action: 'signup',
+                })
+                const payLoad = {
+                  googleReCaptcha: googleReCaptcha,
+                  responseKey: reCaptchaResponseCode,
+                }
+                const response = await fetch('/api/user/validate-recaptcha', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ payLoad }),
+                })
+                const data = await response.json()
+                processUpdatedVariables(data, entityResult, variables)
+              } catch (error) {
+                processUpdatedVariables(null, entityResult, variables)
               }
-              const response = await fetch('/api/user/validate-recaptcha', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ payLoad }),
-              })
-              const data = await response.json()
-              processUpdatedVariables(data, entityResult, variables)
-            } catch (error) {
-              processUpdatedVariables(null, entityResult, variables)
-            }
-          })
-        } else {
+            })
+          } else {
+            processUpdatedVariables(null, entityResult, variables)
+          }
+        } catch (error) {
           processUpdatedVariables(null, entityResult, variables)
         }
-      } catch (error) {
+      } else {
         processUpdatedVariables(null, entityResult, variables)
       }
-    } else {
-      processUpdatedVariables(null, entityResult, variables)
     }
   }
 

@@ -1,0 +1,13 @@
+.customLink {
+  text-decoration-line: underline;
+  text-decoration-style: solid;
+  text-decoration-skip-ink: none;
+  text-underline-offset: auto;
+}
+
+.customLink:hover,
+.customLink:focus,
+.customLink:visited {
+  color: #4c47c4;
+  text-decoration: none;
+}
