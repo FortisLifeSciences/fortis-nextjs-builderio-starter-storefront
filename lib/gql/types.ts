@@ -9880,6 +9880,7 @@ export type Product = {
   catalogEndDate?: Maybe<Scalars['DateTime']>
   catalogStartDate?: Maybe<Scalars['DateTime']>
   categories?: Maybe<Array<Maybe<PrCategory>>>
+  childPriority?: number
   collectionMembersProductContent?: Maybe<Array<Maybe<ProductContent>>>
   content?: Maybe<ProductContent>
   createDate: Scalars['DateTime']
@@ -9897,6 +9898,7 @@ export type Product = {
   mfgPartNumber?: Maybe<Scalars['String']>
   mfgPartNumbers?: Maybe<Array<Scalars['String']>>
   options?: Maybe<Array<Maybe<ProductOption>>>
+  option?: Maybe<Array<Maybe<ProductOption>>>
   personalizationScore: Scalars['Float']
   price?: Maybe<ProductPrice>
   priceRange?: Maybe<ProductPriceRange>
@@ -10186,6 +10188,7 @@ export type ProductOption = {
   isProductImageGroupSelector?: Maybe<Scalars['Boolean']>
   isRequired?: Maybe<Scalars['Boolean']>
   values?: Maybe<Array<Maybe<ProductOptionValue>>>
+  value?: string
 }
 
 export type ProductOption_GetArgs = {
@@ -10212,15 +10215,19 @@ export type ProductOptionValue = {
   _root?: Maybe<ProductOptionValue>
   attributeValueId: Scalars['Int']
   bundledProduct?: Maybe<PrBundledProduct>
+  childPriority?: number
   deltaPrice?: Maybe<Scalars['Float']>
   deltaWeight?: Maybe<Scalars['Float']>
   displayInfo?: Maybe<AttributeVocabularyValueDisplayInfo>
   isDefault?: Maybe<Scalars['Boolean']>
   isEnabled?: Maybe<Scalars['Boolean']>
   isSelected?: Maybe<Scalars['Boolean']>
+  price?: any
   shopperEnteredValue?: Maybe<Scalars['Object']>
   stringValue?: Maybe<Scalars['String']>
   value?: Maybe<Scalars['Object']>
+  variationProductCode?: string
+  properties?: Maybe<Scalars['Object']>
 }
 
 export type ProductOptionValue_GetArgs = {

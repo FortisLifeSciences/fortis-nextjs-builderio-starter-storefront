@@ -147,6 +147,7 @@ export const useProductDetailTemplate = (props: UseProductDetailTemplateProps) =
         }) as ProductOptionSelectionInput[]
 
       setUpdatedShopperEnteredValues(responseOptions)
+
       setCurrentProduct({
         ...currentProduct,
         priceRange,

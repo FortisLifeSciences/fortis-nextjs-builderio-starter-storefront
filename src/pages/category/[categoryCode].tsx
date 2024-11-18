@@ -73,7 +73,7 @@ export async function getStaticPaths(): Promise<GetStaticPathsResult> {
   if (maxPathsToGenerate && paths.length > maxPathsToGenerate) {
     paths = paths.slice(0, maxPathsToGenerate)
   }
-  return { paths, fallback: true }
+  return { paths, fallback: 'blocking' }
 }
 
 export async function getStaticProps(
