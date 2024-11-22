@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft'
 import { LoadingButton } from '@mui/lab'
@@ -18,7 +18,8 @@ import { useTranslation } from 'next-i18next'
 import { CartItemList } from '@/components/cart'
 import { PromoCodeBadge, OrderSummary } from '@/components/common'
 import { ConfirmationDialog, StoreLocatorDialog } from '@/components/dialogs'
-import { useModalContext } from '@/context'
+import { LoginDialog } from '@/components/layout'
+import { useModalContext, useAuthContext } from '@/context'
 import {
   useGetCart,
   useInitiateOrder,
@@ -31,6 +32,7 @@ import {
   useInitiateCheckout,
   useCartActions,
   useProductCardActions,
+  useRefetchCart,
 } from '@/hooks'
 import { orderGetters, cartGetters } from '@/lib/getters'
 
@@ -46,6 +48,7 @@ export interface CartTemplateProps {
 const CartTemplate = (props: CartTemplateProps) => {
   const { isMultiShipEnabled } = props
   const { data: cart } = useGetCart(props?.cart)
+  const { refetchCart } = useRefetchCart()
   const { cartTopContentSection, cartBottomContentSection } = props
   const { t } = useTranslation('common')
   const theme = useTheme()
@@ -56,6 +59,7 @@ const CartTemplate = (props: CartTemplateProps) => {
   const { updateCartItemQuantity } = useUpdateCartItemQuantity()
   const { deleteCartItem } = useDeleteCartItem()
   const { showModal, closeModal } = useModalContext()
+  const { isAuthenticated } = useAuthContext()
 
   const cartItemCount = cartGetters.getCartItemCount(cart)
   const cartItems = cartGetters.getCartItems(cart)
@@ -102,13 +106,41 @@ const CartTemplate = (props: CartTemplateProps) => {
   const handleItemActions = () => {
     // your code here
   }
+  const handleRefetch = async () => {
+    try {
+      const data = await refetchCart()
+      return data
+    } catch (error) {
+      console.error('Error fetching cart:', error)
+    }
+  }
+
+  const handleForceLogin = async () => {
+    if (!isAuthenticated) {
+      showModal({
+        Component: LoginDialog,
+        props: {
+          isCartCheckout: true,
+          onLoginSuccess: proceedWithCheckout,
+        },
+      })
+      return
+    }
+    await handleGotoCheckout()
+  }
+
+  const proceedWithCheckout = async () => {
+    closeModal()
+    await handleGotoCheckout()
+  }
 
   const handleGotoCheckout = async () => {
     setShowLoadingButton(true)
     try {
+      const currentCart = (await handleRefetch()) || cart
       const initiateOrderResponse = isMultiShipEnabled
-        ? await initiateCheckout.mutateAsync(cart?.id)
-        : await initiateOrder.mutateAsync({ cartId: cart?.id as string })
+        ? await initiateCheckout.mutateAsync(currentCart?.id)
+        : await initiateOrder.mutateAsync({ cartId: currentCart?.id as string })
 
       if (initiateOrderResponse?.id) {
         router.push(`/checkout/${initiateOrderResponse.id}`)
@@ -216,7 +248,7 @@ const CartTemplate = (props: CartTemplateProps) => {
                   color="primary"
                   name="goToCart"
                   fullWidth
-                  onClick={handleGotoCheckout}
+                  onClick={handleForceLogin}
                   loading={showLoadingButton}
                   disabled={!cartItemCount || showLoadingButton}
                 >

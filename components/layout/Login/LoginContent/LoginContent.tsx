@@ -161,6 +161,7 @@ const LoginContent = (props: LoginContentProps) => {
         /> */}
         <Link
           component="button"
+          type="button"
           variant="body1"
           color="text.primary"
           onClick={handleForgotPassword}
@@ -205,6 +206,7 @@ const LoginContent = (props: LoginContentProps) => {
               </Typography>
               <Link
                 component="button"
+                type="button"
                 variant="body2"
                 color="text.primary"
                 onClick={registerNow}
@@ -226,8 +228,8 @@ const LoginContent = (props: LoginContentProps) => {
               variant="contained"
               sx={{
                 width: 'auto',
-                backgroundColor: !isValid ? 'grey.600' : 'primary.main',
-                color: 'secondary.light',
+                backgroundColor: !isValid ? '#8D8D8D !important' : 'primary.main',
+                color: !isValid ? '#fff' : 'secondary.light',
                 textAlign: 'center',
                 fontFamily: 'Poppins',
                 fontSize: '16px',

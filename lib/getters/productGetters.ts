@@ -76,8 +76,8 @@ const getCoverImageAlt = (product: Product | ProductCustom): string =>
 const getSeoFriendlyUrl = (product: Product | ProductCustom): string =>
   product?.content?.seoFriendlyUrl as string
 
-const getDescription = (product: Product | ProductCustom): string =>
-  product?.content?.productFullDescription as string
+const getDescription = (product: Product | ProductCustom): any =>
+  product?.content?.productFullDescription as any
 
 const getShortDescription = (product: Product | ProductCustom): string =>
   product?.content?.productShortDescription as string

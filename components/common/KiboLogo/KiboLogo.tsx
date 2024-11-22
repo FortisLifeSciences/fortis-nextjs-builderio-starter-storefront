@@ -8,7 +8,7 @@ interface KiboLogoProps {
   logo?: string | StaticImageData // URL or File
   alt?: string
   small?: boolean
-  mobile?: boolean
+  mobileRatio?: boolean
 }
 
 const styles = {
@@ -32,13 +32,13 @@ const styles = {
   },
 }
 
-const KiboLogo = ({ logo = Logo, alt = 'kibo-logo', small, mobile }: KiboLogoProps) => {
+const KiboLogo = ({ logo = Logo, alt = 'kibo-logo', small, mobileRatio }: KiboLogoProps) => {
   return (
     <Box
       width={'100%'}
-      sx={small ? styles.smallLogo : mobile ? styles.mobileLogo : styles.logoContainer}
+      sx={small ? styles.smallLogo : mobileRatio ? styles.mobileLogo : styles.logoContainer}
     >
-      <KiboImage src={logo} alt={alt} fill mobile loading="eager" />
+      <KiboImage src={logo} alt={alt} fill mobileRatio loading="eager" />
     </Box>
   )
 }

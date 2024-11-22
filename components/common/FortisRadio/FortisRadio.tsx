@@ -12,12 +12,14 @@ import {
   Box,
 } from '@mui/material'
 
-interface KiboRadioProps {
+interface FortisRadioProps {
   name?: string
   title?: string | React.ReactNode
   selected?: string
   align?: 'baseline' | 'center' | 'flex-start'
   row?: boolean
+  skuStatusText?: string | null
+  showPrices?: boolean | null
   radioOptions: {
     variationProductCode?: string
     price?: any
@@ -31,11 +33,13 @@ interface KiboRadioProps {
   onChange: (value: string) => void
 }
 
-export const FortisRadio = (props: KiboRadioProps) => {
+export const FortisRadio = (props: FortisRadioProps) => {
   const {
     name,
     title,
     radioOptions,
+    skuStatusText,
+    showPrices,
     selected = '',
     sx,
     align = 'center',
@@ -75,12 +79,14 @@ export const FortisRadio = (props: KiboRadioProps) => {
         >
           Catalog #
         </Typography>
-        <Typography
-          variant="body2"
-          sx={{ color: 'grey.900', flex: '0 0 80px', textAlign: 'right' }}
-        >
-          Price
-        </Typography>
+        {(skuStatusText === 'CustomCTA' ? showPrices : true) && (
+          <Typography
+            variant="body2"
+            sx={{ color: 'grey.900', flex: '0 0 80px', textAlign: 'right' }}
+          >
+            Price
+          </Typography>
+        )}
       </Box>
 
       <Box
@@ -160,16 +166,18 @@ export const FortisRadio = (props: KiboRadioProps) => {
               </Typography>
 
               {/* Price */}
-              <Typography
-                variant="body2"
-                sx={{
-                  flex: '0 0 80px',
-                  color: 'text.primary',
-                  textAlign: 'right',
-                }}
-              >
-                ${radio.price?.price}
-              </Typography>
+              {(skuStatusText === 'CustomCTA' ? showPrices : true) && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    flex: '0 0 80px',
+                    color: 'text.primary',
+                    textAlign: 'right',
+                  }}
+                >
+                  ${radio.price?.price}
+                </Typography>
+              )}
             </Box>
           ))}
         </RadioGroup>

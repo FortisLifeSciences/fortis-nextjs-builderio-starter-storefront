@@ -11,224 +11,166 @@ import { imageGalleryData } from '@/__mocks__/stories/imageGalleryDataMock'
 
 const { Gallery, Zoomed } = composeStories(stories)
 
+// Utility Functions
 const setupGallery = () => {
   const user = userEvent.setup()
   render(<Gallery {...Gallery.args} />)
-  return {
-    user,
-  }
+  return { user }
 }
 
 const setupZoomedGallery = () => {
   const user = userEvent.setup()
   render(<Zoomed {...Zoomed.args} />)
-  return {
-    user,
-  }
+  return { user }
 }
 
-const setUpTouchElement = () => {
-  Element.prototype.getBoundingClientRect = jest.fn(() => {
-    return {
-      width: 300,
-      height: 300,
-      top: 0,
-      left: 0,
-      bottom: 0,
-      right: 0,
-    }
+const mockTouchElement = () => {
+  Element.prototype.getBoundingClientRect = jest.fn(() => ({
+    width: 300,
+    height: 300,
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+  }))
+}
+
+const createTouchEvent = (type, { screenX, screenY }) =>
+  new TouchEvent(type, {
+    changedTouches: [{ screenX, screenY }],
   })
+
+const swipeEvents = {
+  leftSwipe: {
+    start: { screenX: 210, screenY: 248 },
+    end: { screenX: 118, screenY: 254 },
+  },
+  rightSwipe: {
+    start: { screenX: 80, screenY: 280 },
+    end: { screenX: 200, screenY: 287 },
+  },
 }
 
-const createTouchStartEvent = (value) => {
-  return new TouchEvent('touchstart', {
-    changedTouches: [value],
-  })
-}
-
-const createTouchEndEvent = (value) => {
-  return new TouchEvent('touchend', {
-    changedTouches: [value],
-  })
-}
-
-const setUpLeftSwipe = () => {
-  return {
-    touchStartEvent: createTouchStartEvent({
-      screenX: 210,
-      screenY: 248,
-    }),
-    touchEndEvent: createTouchEndEvent({
-      screenX: 118,
-      screenY: 254,
-    }),
-  }
-}
-
-const setUpRightSwipe = () => {
-  return {
-    touchStartEvent: createTouchStartEvent({
-      screenX: 80,
-      screenY: 280,
-    }),
-    touchEndEvent: createTouchEndEvent({
-      screenX: 200,
-      screenY: 287,
-    }),
-  }
-}
-
+// Tests
 describe('[component] ImageGallery component', () => {
   describe('Gallery without Zoom', () => {
-    it('should not render title', () => {
+    it('should not render the title', () => {
       setupGallery()
-
-      expect(screen.getByText(Gallery.args.title)).not.toBeVisible()
+      expect(screen.queryByText(Gallery.args.title)).not.toBeInTheDocument()
     })
 
-    it('should render all the images provided by props', () => {
+    it('should render all the images provided in props', () => {
       setupGallery()
-
-      const thumbnails = screen.getAllByLabelText(/kibo-image-thumbnail/)
-
+      const thumbnails = screen.getAllByLabelText(/kibo-image-thumbnail/i)
       expect(thumbnails).toHaveLength(imageGalleryData.images.length)
     })
 
-    it('should render the selected image', () => {
+    it('should render the selected image by default', () => {
       setupGallery()
-
       const selectedImage = screen.getByTestId(/selected-image/i)
-
       expect(selectedImage).toBeVisible()
     })
 
-    it('should render the downArrowButton for thumbnails when thumnail count > 4', () => {
+    it('should show the down arrow button if thumbnail count exceeds limit', () => {
       setupGallery()
-
-      const downArrowButton = screen.getByRole('button', {
-        name: /down/i,
-      })
-
+      const downArrowButton = screen.getByRole('button', { name: /down/i })
       expect(downArrowButton).toBeVisible()
     })
 
-    it('should call handleVerticalSlider if clicked on downArrowButton', async () => {
+    it('should navigate thumbnails on down arrow click', async () => {
       const { user } = setupGallery()
-
       Element.prototype.scrollBy = jest.fn()
 
-      const downArrowButton = screen.getByRole('button', {
-        name: /down/i,
-      })
+      const downArrowButton = screen.getByRole('button', { name: /down/i })
+      await user.click(downArrowButton)
 
-      user.click(downArrowButton)
-
-      const upArrowButton = await screen.findByRole('button', {
-        name: /up/i,
-      })
-
+      const upArrowButton = await screen.findByRole('button', { name: /up/i })
       expect(upArrowButton).toBeVisible()
     })
 
-    it('should change the selected thumbnail on click', async () => {
+    it('should update the selected thumbnail on click', async () => {
       const { user } = setupGallery()
+      const thumbnails = screen.getAllByLabelText(/kibo-image-thumbnail/i)
 
-      const thumbnails = screen.getAllByLabelText(/kibo-image-thumbnail/)
-
+      // Assert initial selection
       thumbnails.forEach((thumbnail, i) => {
-        if (i === 0) expect(thumbnail).toHaveAttribute('aria-selected', 'true')
-        else expect(thumbnail).toHaveAttribute('aria-selected', 'false')
+        const expectedState = i === 0 ? 'true' : 'false'
+        expect(thumbnail).toHaveAttribute('aria-selected', expectedState)
       })
 
-      user.click(thumbnails[1])
+      // Click second thumbnail
+      await user.click(thumbnails[1])
 
+      // Assert new selection
       await waitFor(() => {
         thumbnails.forEach((thumbnail, i) => {
-          if (i === 1) expect(thumbnail).toHaveAttribute('aria-selected', 'true')
-          else expect(thumbnail).toHaveAttribute('aria-selected', 'false')
+          const expectedState = i === 1 ? 'true' : 'false'
+          expect(thumbnail).toHaveAttribute('aria-selected', expectedState)
         })
       })
     })
 
-    it('should call handleSwipe method on touch swipe', () => {
+    it('should handle swipe gestures to navigate images', () => {
       setupGallery()
-      setUpTouchElement()
+      mockTouchElement()
 
-      let initialImage = screen.getByTestId(/selected-image/)
+      const gestureZone = screen.getByTestId('gestureZone')
 
-      expect(initialImage).toHaveAttribute('alt', Gallery.args.images[0].altText)
+      const performSwipe = (swipeType) => {
+        const { start, end } = swipeEvents[swipeType]
+        act(() => {
+          gestureZone.dispatchEvent(createTouchEvent('touchstart', start))
+          gestureZone.dispatchEvent(createTouchEvent('touchend', end))
+        })
+      }
 
-      const element = screen.getByTestId('gestureZone')
+      const getCurrentImage = () => screen.getByTestId(/selected-image/i)
 
-      // testing left swipe
-      const { touchStartEvent: leftStart, touchEndEvent: leftEnd } = setUpLeftSwipe()
+      // Initial image
+      let selectedImage = getCurrentImage()
+      expect(selectedImage).toHaveAttribute('alt', Gallery.args.images[0].altText)
 
-      act(() => {
-        element.dispatchEvent(leftStart)
-        element.dispatchEvent(leftEnd)
-      })
+      // Perform left swipe
+      performSwipe('leftSwipe')
+      selectedImage = getCurrentImage()
+      expect(selectedImage).toHaveAttribute('alt', Gallery.args.images[1].altText)
 
-      initialImage = screen.getByTestId(/selected-image/)
-      expect(initialImage).toHaveAttribute('alt', Gallery.args.images[1].altText)
-
-      // testing right swipe
-      const { touchStartEvent: rightStart, touchEndEvent: rightEnd } = setUpRightSwipe()
-
-      act(() => {
-        element.dispatchEvent(rightStart)
-        element.dispatchEvent(rightEnd)
-      })
-
-      initialImage = screen.getByTestId(/selected-image/)
-      expect(initialImage).toHaveAttribute('alt', Gallery.args.images[0].altText)
+      // Perform right swipe
+      performSwipe('rightSwipe')
+      selectedImage = getCurrentImage()
+      expect(selectedImage).toHaveAttribute('alt', Gallery.args.images[0].altText)
     })
   })
 
   describe('Zoomed Gallery', () => {
-    it('should render title', () => {
+    it('should render the title', () => {
       setupZoomedGallery()
-
       expect(screen.getByText(Gallery.args.title)).toBeVisible()
     })
 
-    it('should change the selected thumbnail on left/right arrow click', async () => {
+    it('should navigate thumbnails using left/right arrow buttons', async () => {
       const { user } = setupZoomedGallery()
+      const thumbnails = screen.getAllByLabelText(/kibo-image-thumbnail/i)
 
-      const thumbnails = screen.getAllByLabelText(/kibo-image-thumbnail/)
+      const nextButton = screen.getByRole('button', { name: /next/i })
+      const previousButton = screen.getByRole('button', { name: /previous/i })
 
-      const previousButton = screen.getByRole('button', {
-        name: /previous/i,
-      })
-
-      const nextButton = screen.getByRole('button', {
-        name: /next/i,
-      })
-
-      user.click(nextButton)
-
+      await user.click(nextButton)
       await waitFor(() => {
         expect(thumbnails[1]).toHaveAttribute('aria-selected', 'true')
       })
 
-      user.click(previousButton)
-
+      await user.click(previousButton)
       await waitFor(() => {
         expect(thumbnails[0]).toHaveAttribute('aria-selected', 'true')
       })
     })
 
-    it('should render zoom controls and call the respective functions', () => {
+    it('should render and display zoom controls', () => {
       setupZoomedGallery()
-
-      const reset = screen.getByRole('button', {
-        name: /reset/i,
-      })
-      const zoomIn = screen.getByRole('button', {
-        name: /zoom in/i,
-      })
-      const zoomOut = screen.getByRole('button', {
-        name: /zoom out/i,
-      })
+      const reset = screen.getByRole('button', { name: /reset/i })
+      const zoomIn = screen.getByRole('button', { name: /zoom in/i })
+      const zoomOut = screen.getByRole('button', { name: /zoom out/i })
 
       expect(reset).toBeVisible()
       expect(zoomIn).toBeVisible()

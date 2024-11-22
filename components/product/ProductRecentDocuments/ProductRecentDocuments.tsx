@@ -64,8 +64,7 @@ const ProductRecentDocuments = (props: any) => {
         (document: any) =>
           document.properties.assettype &&
           document.properties.assettype !== 'ProductImage' &&
-          document.properties.displayonpdp &&
-          document.name.toLowerCase() === code.toLowerCase()
+          document.properties.displayonpdp
       )
     }
   }

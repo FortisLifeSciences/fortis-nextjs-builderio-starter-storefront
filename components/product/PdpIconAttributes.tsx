@@ -15,6 +15,7 @@ const styles = {
   spaceBetween: {
     display: 'flex',
     justifyContent: 'space-between',
+    marginTop: '10px',
   },
   iconCss: {
     display: 'flex',

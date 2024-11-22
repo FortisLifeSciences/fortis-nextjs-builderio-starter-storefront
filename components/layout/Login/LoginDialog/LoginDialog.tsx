@@ -45,9 +45,10 @@ const LoginFooter = (props: LoginFooterProps) => {
   )
 }
 
-const LoginDialog = () => {
+const LoginDialog = (props: any) => {
   const { t } = useTranslation('common')
 
+  const { isCartCheckout, onLoginSuccess } = props
   const { login } = useAuthContext()
   const { showModal, closeModal } = useModalContext()
   const { createCustomerB2bAccount } = useCreateCustomerB2bAccountMutation()
@@ -81,7 +82,7 @@ const LoginDialog = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       const settings = await builder.get('theme-setting').promise()
-      setGoogleReCaptcha(settings.data?.googleReCaptcha)
+      setGoogleReCaptcha(settings?.data?.googleReCaptcha)
     }
     fetchSettings()
   }, [])
@@ -251,7 +252,11 @@ const LoginDialog = () => {
   }
 
   const handleLogin = (params: LoginData) => {
-    login(params, closeModal)
+    if (isCartCheckout) {
+      login(params, onLoginSuccess)
+    } else {
+      login(params, closeModal)
+    }
   }
 
   return (
