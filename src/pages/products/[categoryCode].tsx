@@ -73,6 +73,7 @@ export async function getStaticPaths(): Promise<GetStaticPathsResult> {
   if (maxPathsToGenerate && paths.length > maxPathsToGenerate) {
     paths = paths.slice(0, maxPathsToGenerate)
   }
+  console.log('paths', paths)
   return { paths, fallback: 'blocking' }
 }
 
@@ -82,8 +83,10 @@ export async function getStaticProps(
   const { locale, params } = context
   const { publicRuntimeConfig } = getConfig()
   const { categoryCode } = params as { categoryCode: string }
+  console.log('categorycode', categoryCode)
   const categoriesTree = await getCategoryTree()
   const category = await categoryTreeSearchByCode({ categoryCode }, categoriesTree)
+  console.log('category', category)
   if (!category) {
     return { notFound: true }
   }

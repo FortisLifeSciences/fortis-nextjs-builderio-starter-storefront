@@ -568,17 +568,11 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     setShowPrices(showPricesProperty ? Boolean(showPricesProperty?.values?.[0]?.value) : null)
   }, [updatedProduct])
 
-  // Update breadcrumbs links
-  const updatedBreadcrumbsList = breadcrumbs.map((breadcrumb) => ({
-    ...breadcrumb,
-    link: breadcrumb.link ? breadcrumb.link.replace('/category/', '/products/') : breadcrumb.link,
-  }))
-
   return (
     <Grid container>
       {!isQuickViewModal && (
         <Grid item xs={12} alignItems="center" sx={{ paddingBlock: 4 }}>
-          <KiboBreadcrumbs breadcrumbs={updatedBreadcrumbsList} />
+          <KiboBreadcrumbs breadcrumbs={breadcrumbs} />
         </Grid>
       )}
 
