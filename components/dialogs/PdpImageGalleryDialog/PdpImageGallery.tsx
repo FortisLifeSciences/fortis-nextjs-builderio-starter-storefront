@@ -76,7 +76,7 @@ const B2BAccountFormDialog = (props: ImageCalleryDialogProps) => {
                   position="relative"
                   sx={{
                     border: '1px solid #ccc',
-                    width: '100%',
+                    width: { xs: '40vh', md: '100%' },
                     height: { xs: '40vh', md: 680 },
                     maxWidth: '600px',
                   }}

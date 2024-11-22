@@ -54,12 +54,12 @@ const StyledDialog = styled(Dialog, {
   '& .MuiDialog-paper': {
     margin: 0,
     width: '100%',
-    height: '100%',
     borderRadius: 0,
     ...(customMaxWidth && {
       maxWidth: customMaxWidth,
     }),
     ...(customMaxHeight && {
+      height: '100%',
       maxHeight: customMaxHeight,
     }),
   },
@@ -100,6 +100,7 @@ const CustomDialog = (props: KiboDialogProps) => {
     Content,
     Actions,
     customMaxWidth = '',
+    customMaxHeight = '',
     showContentTopDivider = true,
     showContentBottomDivider = true,
     onClose,
@@ -113,6 +114,7 @@ const CustomDialog = (props: KiboDialogProps) => {
       aria-labelledby="kibo-dialog-title"
       open={isOpen}
       customMaxWidth={customMaxWidth}
+      customMaxHeight={customMaxHeight}
       isDialogCentered={mdScreen ? true : false}
       data-test-id="kibo-dialog"
     >
