@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
@@ -92,7 +92,7 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
   const { updateOrderPersonalInfo } = useUpdateOrderPersonalInfo()
 
   const updateCheckoutPersonalInfo = async (formData: PersonalDetails) => {
-    const { email } = formData
+    const { email } = formData ?? user
 
     if (allowInvalidAddresses && order?.fulfillmentInfo?.fulfillmentContact?.address) {
       order.fulfillmentInfo.fulfillmentContact.address.isValidated = true
@@ -180,6 +180,10 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
 
   const { shipItems, pickupItems, digitalItems } = orderGetters.getCheckoutDetails(order as CrOrder)
 
+  useEffect(() => {
+    updateCheckoutPersonalInfo({ email: user?.emailAddress })
+  }, [])
+
   return (
     <>
       <CheckoutUITemplate
@@ -188,10 +192,10 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
         handleRemoveCouponCode={handleRemoveCouponCode}
         promoError={promoError}
       >
-        <DetailsStep
+        {/* <DetailsStep
           checkout={order as CrOrder}
           updateCheckoutPersonalInfo={updateCheckoutPersonalInfo}
-        />
+        /> */}
         <StandardShippingStep
           checkout={order as CrOrder}
           savedUserAddressData={addressCollection}
@@ -212,7 +216,7 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
           shipItems={shipItems}
           pickupItems={pickupItems}
           digitalItems={digitalItems}
-          personalDetails={personalDetails}
+          // personalDetails={personalDetails}
           orderSummaryProps={orderDetails?.orderSummary}
           onCreateOrder={handleCreateOrder}
         />
