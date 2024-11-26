@@ -377,6 +377,18 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
       })
     }
   }, [])
+
+  // useEffect(() => {
+  //   const fetchDocumentData = async () => {
+  //     const digitalDocRes = await getDocumentListDocuments(
+  //       'digitalassets@Fortis',
+  //       `name eq ${variationProductCode} or name eq ${productCode}`
+  //     )
+  //     setDigitalDocumentData(digitalDocRes)
+  //   }
+  //   fetchDocumentData()
+  // }, [variationProductCode, productCode])
+
   // Update breadcrumbs links
   const updatedBreadcrumbsList = breadcrumbs.map((breadcrumb) => ({
     ...breadcrumb,
