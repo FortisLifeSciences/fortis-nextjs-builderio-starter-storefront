@@ -5,7 +5,7 @@ export type ResourceType = {
 
 const resourceTypeArr: ResourceType[] = [
   {
-    resourceType: 'Articles',
+    resourceType: 'Article',
     value: 'article',
   },
   {

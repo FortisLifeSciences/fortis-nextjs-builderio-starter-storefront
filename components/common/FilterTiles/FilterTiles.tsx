@@ -17,14 +17,19 @@ const styles = {
   },
   closeIcon: {
     '& .MuiChip-deleteIcon': {
-      color: 'text.primary',
+      color: '#2B2B2B',
       typography: 'body1',
       marginTop: '1',
     },
-    typography: 'body2',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: 'text.primary',
+    color: '#2B2B2B',
+    fontFamily: 'Roboto',
+    fontSize: '14px',
+    fontStyle: 'normal',
+    fontWeight: '400',
+    lineHeight: '20px',
+    textTransform: 'capitalize',
+    borderRadius: '16px',
+    border: '1px solid #020027',
   },
 }
 const FilterTiles = (props: FilterTilesProps) => {
@@ -43,7 +48,7 @@ const FilterTiles = (props: FilterTilesProps) => {
             variant="outlined"
             sx={{ ...styles.closeIcon }}
             label={filter.label}
-            deleteIcon={<CloseIcon />}
+            deleteIcon={<CloseIcon sx={{ height: '16px', width: '16px' }} />}
             onDelete={() => onSelectedTileRemoval(filter?.filterValue as string)}
           />
         </Stack>

@@ -65,24 +65,53 @@ export const FortisRadio = (props: FortisRadioProps) => {
         sx={{
           display: 'flex',
           flexDirection: 'row',
-          alignItems: 'center',
-          padding: '8px 11px',
-          borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
+          gap: '10px',
+          padding: '8px 10px',
+          borderBottom: '1px solid #8D8D8D',
         }}
       >
-        <Typography variant="body2" sx={{ color: 'grey.900', flex: '1', textAlign: 'left' }}>
+        <Typography
+          sx={{
+            flex: '1',
+            textAlign: 'left',
+            color: '#020027',
+            fontFamily: 'Poppins',
+            fontSize: { md: '16px', sm: '14px', xs: '14px' },
+            fontStyle: 'normal',
+            fontWeight: '400',
+            lineHeight: 'normal',
+          }}
+        >
           Option
         </Typography>
         <Typography
-          variant="body2"
-          sx={{ color: 'grey.900', flex: '0 0 100px', textAlign: 'left' }}
+          sx={{
+            flex: { md: '0 0 120px', sm: '0 0 100px', xs: '0 0 80px' },
+            flexShrink: '0',
+            textAlign: 'center',
+            color: '#020027',
+            fontFamily: 'Poppins',
+            fontSize: { md: '16px', sm: '14px', xs: '14px' },
+            fontStyle: 'normal',
+            fontWeight: '400',
+            lineHeight: 'normal',
+          }}
         >
           Catalog #
         </Typography>
         {(skuStatusText === 'CustomCTA' ? showPrices : true) && (
           <Typography
-            variant="body2"
-            sx={{ color: 'grey.900', flex: '0 0 80px', textAlign: 'right' }}
+            sx={{
+              flex: { md: '0 0 120px', sm: '0 0 100px', xs: '0 0 80px' },
+              flexShrink: '0',
+              textAlign: 'right',
+              color: '#020027',
+              fontFamily: 'Poppins',
+              fontSize: { md: '16px', sm: '14px', xs: '14px' },
+              fontStyle: 'normal',
+              fontWeight: '400',
+              lineHeight: 'normal',
+            }}
           >
             Price
           </Typography>
@@ -91,9 +120,8 @@ export const FortisRadio = (props: FortisRadioProps) => {
 
       <Box
         sx={{
-          paddingTop: '5px',
-          paddingBottom: '5px',
-          borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
+          padding: '5px 0px',
+          borderBottom: '1px solid #8D8D8D',
         }}
       >
         <RadioGroup
@@ -109,16 +137,20 @@ export const FortisRadio = (props: FortisRadioProps) => {
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'center',
-                marginBottom: '5px',
-                height: '36px',
-                padding: '0px 11px',
-                borderRadius: '4px',
+                gap: '10px',
+                padding: '0px 10px',
+                paddingLeft: '0',
+                borderRadius: '3px',
                 bgcolor: selected === radio.value ? 'secondary.main' : 'transparent',
                 border:
                   selected === radio.value
                     ? '0px solid rgba(0, 0, 255, 0.3)'
                     : '0px solid transparent',
                 width: '100%',
+                marginBottom: '5px',
+                '&:last-child': {
+                  marginBottom: '0',
+                },
                 cursor: 'pointer', // Add this to show a pointer cursor
                 '&:hover': {
                   bgcolor: selected === radio.value ? 'secondary.main' : 'grey.200',
@@ -129,37 +161,43 @@ export const FortisRadio = (props: FortisRadioProps) => {
                 onChange(radio.value)
               }}
             >
-              {/* Radio Button and Label */}
-              <Radio
-                value={radio.value}
-                checked={selected === radio.value}
-                onChange={handleChange}
-                inputProps={{ 'aria-label': radio.name }}
-                sx={{
-                  padding: '0px 9px 0px 0px', // Adjust padding for better alignment
-                }}
-                {...(radio.disabled && { disabled: radio.disabled })}
-              />
-              <Typography
-                variant="body2"
-                sx={{
-                  flex: '1',
-                  width: 'fit-content',
-                  alignItems: align,
-                  marginRight: 2,
-                }}
-              >
-                {radio.label}
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', flex: '1' }}>
+                {/* Radio Button and Label */}
+                <Radio
+                  sx={{ flexShrink: '0' }}
+                  value={radio.value}
+                  checked={selected === radio.value}
+                  onChange={handleChange}
+                  inputProps={{ 'aria-label': radio.name }}
+                  {...(radio.disabled && { disabled: radio.disabled })}
+                />
+                <Typography
+                  sx={{
+                    flex: '1',
+                    color: '#000',
+                    fontFamily: 'Poppins',
+                    fontSize: { md: '16px', sm: '14px', xs: '14px' },
+                    fontStyle: 'normal',
+                    fontWeight: '300',
+                    lineHeight: { md: '40px', sm: '20px', xs: '20px' },
+                  }}
+                >
+                  {radio.label}
+                </Typography>
+              </Box>
 
               {/* Catalog Number */}
               <Typography
-                variant="body2"
                 sx={{
-                  flex: '0 0 100px',
-                  color: 'text.primary',
-                  textAlign: 'left',
-                  paddingRight: 2,
+                  flex: { md: '0 0 120px', sm: '0 0 100px', xs: '0 0 80px' },
+                  flexShrink: '0',
+                  textAlign: 'center',
+                  color: '#000',
+                  fontFamily: 'Poppins',
+                  fontSize: { md: '16px', sm: '14px', xs: '14px' },
+                  fontStyle: 'normal',
+                  fontWeight: '300',
+                  lineHeight: { md: '40px', sm: '20px', xs: '20px' },
                 }}
               >
                 {radio.variationProductCode}
@@ -168,14 +206,19 @@ export const FortisRadio = (props: FortisRadioProps) => {
               {/* Price */}
               {(skuStatusText === 'CustomCTA' ? showPrices : true) && (
                 <Typography
-                  variant="body2"
                   sx={{
-                    flex: '0 0 80px',
-                    color: 'text.primary',
+                    flex: { md: '0 0 120px', sm: '0 0 100px', xs: '0 0 80px' },
+                    flexShrink: '0',
                     textAlign: 'right',
+                    color: '#000',
+                    fontFamily: 'Poppins',
+                    fontSize: { md: '16px', sm: '14px', xs: '14px' },
+                    fontStyle: 'normal',
+                    fontWeight: '300',
+                    lineHeight: { md: '40px', sm: '20px' },
                   }}
                 >
-                  ${radio.price?.price}
+                  ${radio.price?.price.toFixed(2)}
                 </Typography>
               )}
             </Box>

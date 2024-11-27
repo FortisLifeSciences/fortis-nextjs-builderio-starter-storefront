@@ -91,10 +91,28 @@ const ImageGallery = (props: ImageGalleryProps) => {
 
   const images = mergeAndSortArrays(imageAssets, kiboImages)
 
+  const [showArrow, setArrowVisibility] = useState({
+    up: false,
+    down: false,
+  })
+
   // Set isLoading to false when images are loaded or processed
   useEffect(() => {
     if (images && images.length > 0) {
-      setIsLoading(false)
+      setIsLoading((prev) => {
+        if (!prev) return false // Avoid unnecessary state updates
+        return false
+      })
+    }
+
+    if (images && images.length > 2) {
+      setArrowVisibility((prevState) => {
+        if (prevState.down) return prevState // Avoid unnecessary state updates
+        return {
+          ...prevState,
+          down: true,
+        }
+      })
     }
   }, [images])
 
@@ -105,10 +123,6 @@ const ImageGallery = (props: ImageGalleryProps) => {
   })
 
   // handle if vertical slider arrow should be visible or not
-  const [showArrow, setArrowVisibility] = useState({
-    up: false,
-    down: true,
-  })
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
 

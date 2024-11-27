@@ -15,6 +15,7 @@ export const ProductCardStyles = {
     borderStyle: 'solid',
     boxShadow: 'none',
     cursor: 'pointer',
+    borderRadius: '0 0 25px 0',
     '&:hover': {
       boxShadow: '0 2px 16px 4px rgb(11 32 61 / 7%)',
       borderColor: 'primary.light',
@@ -89,8 +90,7 @@ export const ProductCardStyles = {
     justifyContent: 'flexStart',
     padding: '0px 10px',
     alignItems: 'end',
-    marginBottom: '30px',
-    marginTop: '30px',
+    margin: '10px 0',
   },
   brandLable: {
     color: '#020027',
@@ -100,17 +100,22 @@ export const ProductCardStyles = {
     lineHeight: 'normal',
     fontFamily: 'Poppins',
   },
-  brandLogoImage: {
+  brandLogoContainer: {
     width: '127px',
     height: '45px',
     display: 'flex',
-    top: '13px',
-    right: '13px',
-    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'end',
+    flexShrink: '0',
+  },
+  brandLogoImage: {
+    width: 'auto',
+    maxWidth: '100%',
+    maxHeight: '45px',
+    display: 'block',
   },
   productTitle: {
-    width: '75%',
-    height: 'auto',
+    flex: '1',
     color: '#2B2B2B',
   },
 }

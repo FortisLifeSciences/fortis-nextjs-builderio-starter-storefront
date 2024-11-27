@@ -3,7 +3,17 @@ import React, { useState, PropsWithChildren } from 'react'
 import Add from '@mui/icons-material/Add'
 import Apps from '@mui/icons-material/Apps'
 import ReorderRounded from '@mui/icons-material/ReorderRounded'
-import { Grid, MenuItem, Box, Button, Link, Typography, Breadcrumbs, Stack } from '@mui/material'
+import {
+  Grid,
+  MenuItem,
+  Box,
+  Button,
+  Link,
+  Typography,
+  Breadcrumbs,
+  Stack,
+  useMediaQuery,
+} from '@mui/material'
 import getConfig from 'next/config'
 import { useTranslation } from 'next-i18next'
 
@@ -63,6 +73,7 @@ export interface ProductListingTemplateProps extends PropsWithChildren<any> {
 
 // Component
 const ProductListingTemplate = (props: ProductListingTemplateProps) => {
+  const isMobile = useMediaQuery('(max-width:600px)')
   const {
     breadCrumbsList,
     productListingHeader,
@@ -131,6 +142,9 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
   }
 
   const productCardProps = (product: Product): ProductCardListViewProps => {
+    const resourceType =
+      product?.properties?.find((item: any) => item.attributeFQN === 'tenant~resourcetype')
+        ?.values?.[0] ?? null
     const productProperties = product.properties as ProductProperties[]
     const properties = productGetters.getProperties(product) as ProductProperties[]
     const productCode = productGetters.getProductId(product)
@@ -154,6 +168,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
       productCode,
       properties,
       resourceTypeName,
+      resourceType,
       categoryCode,
       parentCategoryName,
       productType,
@@ -235,8 +250,30 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
                 />
               )}
               <Box pt={4} textAlign={'center'}>
-                <Button variant="contained" color="primary" onClick={handleClearAllFilters}>
-                  {t('clear-settings')}
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  sx={{
+                    color: '#30299A',
+                    fontFamily: 'Poppins',
+                    fontSize: '16px',
+                    fontStyle: 'normal',
+                    fontWeight: '500',
+                    lineHeight: '24px',
+                    width: 'auto',
+                    backgroundColor: '#fff',
+                    textAlign: 'center',
+                    borderRadius: '0px 26px',
+                    border: '1px solid #30299A',
+                    padding: '12px 18px',
+                    '&:hover': {
+                      backgroundColor: '#E3E2FF;',
+                      border: '1px solid #E3E2FF',
+                    },
+                  }}
+                  onClick={handleClearAllFilters}
+                >
+                  {t('reset-filters')}
                 </Button>
               </Box>
             </Box>
@@ -253,13 +290,13 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
                     </Box>
                     {!isLoading && onPaginationChange && (
                       <Box display="flex" pr={4} ml="auto">
-                        <Typography
+                        {/* <Typography
                           variant="body1"
                           color="text.primary"
                           sx={{ marginRight: '1rem' }}
                         >
                           {t('view')}
-                        </Typography>
+                        </Typography> */}
                         {productsPerPageArray.length > 1 && (
                           <Breadcrumbs separator={'|'}>
                             {productsPerPageArray?.map((item: number) => {
@@ -285,23 +322,32 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
 
                   <Box sx={{ ...PLPStyles.navBarSort }}>
                     <Box sx={{ ...PLPStyles.sorting }}>
-                      <Typography
-                        component="span"
-                        variant="body2"
-                        pt={0.4}
-                        sx={{ ...PLPStyles.navBarLabel }}
-                      >
-                        {t('sort-by')}
+                      <Typography component="span" sx={{ ...PLPStyles.navBarLabel }}>
+                        {t('sort')}
                       </Typography>
                       <KiboSelect
                         name="sort-plp"
-                        sx={{ typography: 'body2' }}
+                        sx={{
+                          color: '#2B2B2B',
+                          fontFamily: 'Roboto',
+                          fontSize: '14px',
+                          fontStyle: 'normal',
+                          fontWeight: '400',
+                          lineHeight: '20px',
+                        }}
                         value={sortingValues?.selected}
                         onChange={(_name, value) => onSortItemSelection(value)}
                       >
                         {sortingValues?.options?.map((sortingVal) => (
                           <MenuItem
-                            sx={{ typography: 'body2' }}
+                            sx={{
+                              color: '#2B2B2B',
+                              fontFamily: 'Roboto',
+                              fontSize: '14px',
+                              fontStyle: 'normal',
+                              fontWeight: '400',
+                              lineHeight: '20px',
+                            }}
                             key={sortingVal?.id}
                             value={sortingVal?.id}
                           >
@@ -332,13 +378,13 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
                         onSelectedTileRemoval={handleSelectedTileRemoval}
                       >
                         <Link sx={{ ...PLPStyles.clearAllButton }} onClick={handleClearAllFilters}>
-                          {t('clear-settings')}
+                          {t('clear-all-filters')}
                         </Link>
                       </FilterTiles>
                     )}
                   </Box>
                   <Box sx={{ ...PLPStyles.totalResults }} pb={1}>
-                    {t('results', { count: totalResults })}
+                    {t('no-of-products', { count: totalResults })}
                   </Box>
                 </Box>
               )}
@@ -375,7 +421,13 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
                     >
                       {isListView ? (
                         product?.productType === 'Resources' ? (
-                          <ResourceProductCardListView {...productCardProps(product)} />
+                          isMobile ? (
+                            <ResourceProductCardGridView {...productCardProps(product)} />
+                          ) : (
+                            <ResourceProductCardListView {...productCardProps(product)} />
+                          )
+                        ) : isMobile ? (
+                          <ProductCard {...productCardProps(product)} />
                         ) : (
                           <ProductCardListView {...productCardProps(product)} />
                         )

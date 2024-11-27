@@ -225,7 +225,9 @@ const ProductCard = (props: ProductCardProps) => {
                   fill
                   quality={100}
                   sizes="(max-width: 240px) 240px, 240px"
-                  style={{ objectFit: 'contain' }}
+                  objectFit={
+                    imageUrl ? 'contain' : brandImages[brand.toLowerCase()] ? 'none' : 'contain'
+                  }
                   data-testid="product-image"
                 />
               </CardMedia>
