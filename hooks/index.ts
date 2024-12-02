@@ -8,7 +8,6 @@ export * from './queries/card/useGetCards/useGetCards'
 
 // cart
 export * from './queries/cart/useGetCart/useGetCart'
-export * from './queries/cart/useRefetchCart/useRefetchCart'
 
 // category
 export * from './queries/category/useGetCategoryTree/useGetCategoryTree'

@@ -86,15 +86,9 @@ async function getCustomRedirects() {
 
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl
-  if (
-    request.nextUrl.pathname.startsWith('/my-account') ||
-    request.nextUrl.pathname.startsWith('/checkout')
-  ) {
+  if (request.nextUrl.pathname.startsWith('/my-account')) {
     if (checkIsAuthenticated(request)) {
       return NextResponse.next()
-    } else if (request.nextUrl.pathname.startsWith('/checkout')) {
-      const cartUrl = new URL('/cart', request.url)
-      return NextResponse.redirect(cartUrl)
     }
 
     const homeUrl = new URL('/', request.url)

@@ -153,7 +153,7 @@ const SearchSuggestions = (props: SearchSuggestionsProps) => {
                 key={category?.suggestion?.categoryCategoryCode}
                 code={category?.suggestion?.categoryCategoryCode}
                 name={category?.suggestion?.categoryName}
-                path={'/products/'}
+                path={'/category/'}
                 onSearchSuggestionClose={handleClose}
               />
             ))}

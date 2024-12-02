@@ -3,9 +3,7 @@ import {
   Box,
   Card,
   Divider,
-  Grid,
   IconButton,
-  Link,
   SxProps,
   Theme,
   Typography,
@@ -17,7 +15,6 @@ import { useTranslation } from 'next-i18next'
 
 import { CartItemActions, CartItemActionsMobile } from '@/components/cart'
 import { FulfillmentOptions, Price, ProductItem, QuantitySelector } from '@/components/common'
-import { ProductOptionList } from '@/components/product'
 import { QuoteStatus } from '@/lib/constants'
 import { cartGetters, productGetters } from '@/lib/getters'
 import { uiHelpers } from '@/lib/helpers'
@@ -49,8 +46,8 @@ const styles = {
       md: '1.5rem',
     },
     border: {
-      xs: `2px solid ${grey[300]}`,
-      md: `2px solid ${grey[300]}`,
+      xs: 'none',
+      md: `2px solid ${grey[200]}`,
     },
     boxShadow: 'none',
   },
@@ -129,127 +126,13 @@ const CartItem = (props: CartItemProps) => {
   const handleProductPickupLocation = (cartItemId: string) => onProductPickupLocation(cartItemId)
   const subscriptionDetails = cartGetters.getSubscriptionDetails(cartItem)
 
-  const link = getProductLink(cartItem?.product?.productCode as string)
-  const options = productGetters.getOptions(cartItem?.product as CrProduct)
-
   return (
     <>
       <Card sx={{ ...styles.card }} role="group">
         <Box sx={{ position: 'relative' }}>
           <Box sx={{ ...styles.cartItemContainer }}>
             <Box sx={{ ...styles.subContainer }}>
-              <Grid container>
-                <Grid item sm={12}>
-                  <Grid container>
-                    <Grid item sm={8}>
-                      <Link href={link || ''}>
-                        <Typography variant="body1" data-testid="productName" pb={0.375}>
-                          {productGetters.getName(cartItem?.product as CrProduct)}
-                        </Typography>
-                      </Link>
-                    </Grid>
-                    <Grid item sm={4}>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'flex-end',
-                        }}
-                      >
-                        <Price
-                          variant="body1"
-                          fontWeight="500"
-                          color="gray.900"
-                          price={t('currency', {
-                            val: productGetters
-                              .getPrice(cartItem?.product as CrProduct)
-                              .regular?.toString(),
-                          })}
-                          salePrice={
-                            productGetters.getPrice(cartItem?.product as CrProduct).special
-                              ? t('currency', {
-                                  val: productGetters.getPrice(cartItem?.product as CrProduct)
-                                    .special,
-                                })
-                              : undefined
-                          }
-                        />
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </Grid>
-                <Grid item sm={12}>
-                  <Grid container>
-                    <Grid item sm={12} md={4} sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Typography variant="body2" sx={{ color: 'gray.900' }}>
-                        {options && options[0]?.value}
-                      </Typography>
-                    </Grid>
-                    <Grid
-                      item
-                      sm={12}
-                      md={4}
-                      sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}
-                    >
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        {/* TBD */}
-                        {/* <Box sx={{ display: { xs: 'block', sm: 'block', md: 'none' } }}>
-                          <CartItemActionsMobile
-                            actions={actions || []}
-                            onMenuItemSelection={() => handleActionSelection()}
-                          />
-                        </Box> */}
-                        <Typography variant="body2" sx={{ color: 'gray.900' }}>
-                          {cartItem?.product?.productCode}
-                        </Typography>
-
-                        {QuoteStatus[status as string] !== QuoteStatus.InReview &&
-                          QuoteStatus[status as string] !== QuoteStatus.Completed &&
-                          QuoteStatus[status as string] !== QuoteStatus.Expired &&
-                          (mode === 'create' || mode === 'edit' || !isQuote) && (
-                            <IconButton
-                              sx={{ p: 0.5, color: 'primary.main' }}
-                              aria-label="item-delete"
-                              name="item-delete"
-                              onClick={() => handleDelete(cartItem?.id as string)}
-                            >
-                              <span className="material-symbols-outlined">delete</span>
-                            </IconButton>
-                          )}
-                      </Box>
-                    </Grid>
-                    <Grid
-                      item
-                      sm={12}
-                      md={4}
-                      sx={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end' }}
-                    >
-                      <Box sx={{ py: '0.5rem' }}>
-                        {QuoteStatus[status as string] === QuoteStatus.InReview ||
-                        QuoteStatus[status as string] === QuoteStatus.Completed ||
-                        QuoteStatus[status as string] === QuoteStatus.Expired ||
-                        (!mode && isQuote) ? (
-                          <Typography variant="body2" sx={{ color: 'gray.900' }}>
-                            {t('quantity')}:{cartItemQuantity}
-                          </Typography>
-                        ) : (
-                          <QuantitySelector
-                            quantity={cartItemQuantity}
-                            label={t('quantity')}
-                            maxQuantity={maxQuantity}
-                            onIncrease={() => handleQuantityUpdate(cartItemQuantity + 1)}
-                            onDecrease={() => handleQuantityUpdate(cartItemQuantity - 1)}
-                            onQuantityUpdate={(q) => handleQuantityUpdate(q)}
-                          />
-                        )}
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </Grid>
-              </Grid>
-            </Box>
-
-            {/* cart fulfillment, quotes, image and other related code are here currently not in design, may use in future */}
-            {/* <ProductItem
+              <ProductItem
                 image={productGetters.handleProtocolRelativeUrl(
                   productGetters.getProductImage(cartItem?.product as CrProduct)
                 )}
@@ -259,17 +142,58 @@ const CartItem = (props: CartItemProps) => {
                 subscriptionFrequency={subscriptionDetails as string}
                 discounts={cartItem?.productDiscounts}
               >
-              </ProductItem> */}
-            {/* TBD */}
-            {/* <Box sx={{ display: { xs: 'none', sm: 'none', md: 'block', ml: 1 } }}>
+                <Box>
+                  <Price
+                    variant="body2"
+                    fontWeight="bold"
+                    price={t('currency', {
+                      val: productGetters
+                        .getPrice(cartItem?.product as CrProduct)
+                        .regular?.toString(),
+                    })}
+                    salePrice={
+                      productGetters.getPrice(cartItem?.product as CrProduct).special
+                        ? t('currency', {
+                            val: productGetters.getPrice(cartItem?.product as CrProduct).special,
+                          })
+                        : undefined
+                    }
+                  />
+                </Box>
+                <Box sx={{ py: '0.5rem' }}>
+                  {QuoteStatus[status as string] === QuoteStatus.InReview ||
+                  QuoteStatus[status as string] === QuoteStatus.Completed ||
+                  QuoteStatus[status as string] === QuoteStatus.Expired ||
+                  (!mode && isQuote) ? (
+                    <Typography>
+                      {t('qty')}:{cartItemQuantity}
+                    </Typography>
+                  ) : (
+                    <QuantitySelector
+                      quantity={cartItemQuantity}
+                      label={t('qty')}
+                      maxQuantity={maxQuantity}
+                      onIncrease={() => handleQuantityUpdate(cartItemQuantity + 1)}
+                      onDecrease={() => handleQuantityUpdate(cartItemQuantity - 1)}
+                      onQuantityUpdate={(q) => handleQuantityUpdate(q)}
+                    />
+                  )}
+                </Box>
+              </ProductItem>
+
+              {/* TBD */}
+              {/* <Box sx={{ display: { xs: 'none', sm: 'none', md: 'block', ml: 1 } }}>
                 <CartItemActions />
               </Box> */}
-            {/* <Divider
+            </Box>
+
+            <Divider
               orientation={orientationVertical ? 'vertical' : 'horizontal'}
               sx={orientationVertical ? { borderTopWidth: '1px ' } : { borderLeftWidth: '1px' }}
               flexItem
-            /> */}
-            {/* <Box sx={{ ...styles.subContainer }}>
+            />
+
+            <Box sx={{ ...styles.subContainer }}>
               {QuoteStatus[status as string] === QuoteStatus.InReview ||
               QuoteStatus[status as string] === QuoteStatus.Completed ||
               QuoteStatus[status as string] === QuoteStatus.Expired ||
@@ -289,7 +213,30 @@ const CartItem = (props: CartItemProps) => {
                   onStoreSetOrUpdate={() => handleProductPickupLocation(cartItem?.id as string)} // change store: Open storelocator modal. Should not change global store.
                 />
               )}
+            </Box>
+          </Box>
+
+          <Box sx={{ ...styles.icon }}>
+            {/* TBD */}
+            {/* <Box sx={{ display: { xs: 'block', sm: 'block', md: 'none' } }}>
+              <CartItemActionsMobile
+                actions={actions || []}
+                onMenuItemSelection={() => handleActionSelection()}
+              />
             </Box> */}
+            {QuoteStatus[status as string] !== QuoteStatus.InReview &&
+              QuoteStatus[status as string] !== QuoteStatus.Completed &&
+              QuoteStatus[status as string] !== QuoteStatus.Expired &&
+              (mode === 'create' || mode === 'edit' || !isQuote) && (
+                <IconButton
+                  sx={{ p: 0.5 }}
+                  aria-label="item-delete"
+                  name="item-delete"
+                  onClick={() => handleDelete(cartItem?.id as string)}
+                >
+                  <Delete />
+                </IconButton>
+              )}
           </Box>
         </Box>
       </Card>
