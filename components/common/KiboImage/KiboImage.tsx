@@ -9,7 +9,7 @@ import DefaultImage from '@/public/product_placeholder.svg'
 interface KiboImageProps extends ImageProps {
   errorimage?: ImageData | SvgIconComponent
   objectFit?: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down'
-  mobile?: boolean
+  mobileRatio?: boolean
   fallbackSrc?: ImageData
 }
 
@@ -26,7 +26,11 @@ const onImageError = (
 
 const KiboImage = (props: KiboImageProps) => {
   errorImage.image = props.errorimage
-  const mobile = props.mobile
+
+  let mobileRatio
+  if (props.mobileRatio) {
+    mobileRatio = props.mobileRatio
+  }
 
   const { src, ...rest } = props
   const [imgSrc, setImgSrc] = useState(src)
@@ -42,7 +46,7 @@ const KiboImage = (props: KiboImageProps) => {
       style={{
         objectFit: props.objectFit ?? 'contain',
         ...(props.alt === 'kibo-logo' && { position: 'relative' }),
-        ...(mobile && { width: 'inherit', height: 'inherit' }),
+        ...(mobileRatio && { width: 'inherit', height: 'inherit' }),
         ...(props.alt === 'cardType' && { width: '45px', height: '35px' }), // Apply only when mobile is true
       }}
       // Only add the "fill" property if the alt is NOT "kibo-logo"

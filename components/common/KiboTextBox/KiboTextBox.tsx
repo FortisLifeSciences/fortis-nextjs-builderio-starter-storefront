@@ -76,6 +76,7 @@ const KiboTextBox = (props: KiboTextBoxProps) => {
           fontStyle: 'normal',
           fontWeight: '300',
           lineHeight: '25px',
+          transform: 'translate(0, -1.5px) scale(1)',
         }}
         shrink
         htmlFor={label}

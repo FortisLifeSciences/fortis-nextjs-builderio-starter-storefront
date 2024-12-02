@@ -20,3 +20,4 @@ export { default as QuoteCommentThreadDialog } from './b2b/QuotesCommentThreadDi
 export { default as EmailQuoteDialog } from './b2b/EmailQuoteDialog/EmailQuoteDialog'
 export { default as QuotesHistoryDialog } from './b2b/QuotesHistoryDialog/QuotesHistoryDialog'
 export { default as B2BAccountFormDialog } from './b2b/B2BAccountFormDialog/B2BAccountFormDialog'
+export { default as PdpImageGalleryDialog } from './PdpImageGalleryDialog/PdpImageGallery'

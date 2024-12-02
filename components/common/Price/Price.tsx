@@ -7,7 +7,7 @@ interface PriceProps extends PriceOnly, SalePrice, PriceStyles {
 }
 interface PriceStyles {
   variant?: 'body2' | 'body1' | 'subtitle1'
-  fontWeight?: 'bold' | 'normal'
+  fontWeight?: 'bold' | 'normal' | string
   color?: string
 }
 interface PriceTypographyProps extends PriceStyles {

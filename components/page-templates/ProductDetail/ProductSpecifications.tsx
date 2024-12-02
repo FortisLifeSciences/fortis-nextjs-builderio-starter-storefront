@@ -50,7 +50,12 @@ const ProductSpecifications = ({ product }: { product: any }) => {
       const property = product.properties.find((data: any) => data.attributeFQN === attributeFQN)
       if (property) {
         const name = property.attributeDetail.name || 'No Name Available'
-        const value = property.values[0]?.stringValue || 'No Value Available'
+        const valueArray: string[] = []
+        if (property?.values) {
+          property?.values.forEach((element: any) => {
+            valueArray.push(element.stringValue)
+          })
+        }
         return (
           <TableRow key={attributeFQN}>
             <TableCell
@@ -81,10 +86,14 @@ const ProductSpecifications = ({ product }: { product: any }) => {
                 lineHeight: '42px',
                 padding: 0,
                 paddingLeft: '20px',
+                ul: {
+                  marginLeft: '20px',
+                },
               }}
-            >
-              {value}
-            </TableCell>
+              dangerouslySetInnerHTML={{
+                __html: valueArray.join(', '),
+              }}
+            />
           </TableRow>
         )
       }

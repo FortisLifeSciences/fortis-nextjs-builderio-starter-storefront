@@ -8,32 +8,37 @@ import FortisMegaMenu from '../FortisMegaMenu/FortisMegaMenu'
 import logo from '@/assets/fortisLogo.png'
 import { KiboLogo } from '@/components/common'
 
-const NavigationBar = () => {
+const NavigationBar = (props: any) => {
   const [scrolled, setScrolled] = useState(false)
+  const { isCheckoutPage } = props
 
   useEffect(() => {
-    let lastScrollY = window.scrollY
-    const buffer = 20 // Buffer of 20px
+    // If it's a checkout page, force the `scrolled` state to true and exit
+    if (isCheckoutPage) {
+      setScrolled(true)
+      return
+    }
+
+    // Normal scroll behavior for non-checkout pages
+    const buffer = 20
+    const scrollThreshold = 70
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY
-      const scrollThreshold = 70 // Trigger at 70px
-
       if (currentScrollY > scrollThreshold + buffer && !scrolled) {
-        setScrolled(true) // Add 'scrolled' class
+        setScrolled(true)
       } else if (currentScrollY < scrollThreshold - buffer && scrolled) {
-        setScrolled(false) // Remove 'scrolled' class
+        setScrolled(false)
       }
-
-      lastScrollY = currentScrollY
     }
 
     window.addEventListener('scroll', handleScroll)
 
+    // Cleanup event listener on unmount
     return () => {
       window.removeEventListener('scroll', handleScroll)
     }
-  }, [scrolled])
+  }, [isCheckoutPage, scrolled]) // Listen for changes to `isCheckoutPage` and `scrolled`
 
   return (
     <Box component="nav" sx={navbarStyles} className={scrolled ? 'scrolled' : ''}>
@@ -43,7 +48,7 @@ const NavigationBar = () => {
         </Link>
       </Box>
       <Box component="ul" sx={navMenuStyles}>
-        <FortisMegaMenu scrolled={scrolled} />
+        {!isCheckoutPage && <FortisMegaMenu scrolled={scrolled} />}
       </Box>
     </Box>
   )

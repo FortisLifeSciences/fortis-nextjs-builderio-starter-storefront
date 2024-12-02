@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, PropsWithChildren } from 'react'
 
-import { BuilderComponent, builder, Builder } from '@builder.io/react'
+import { BuilderComponent, builder } from '@builder.io/react'
 import getConfig from 'next/config'
 import ErrorPage from 'next/error'
 import { useRouter } from 'next/router'
@@ -73,7 +73,8 @@ export async function getStaticPaths(): Promise<GetStaticPathsResult> {
   if (maxPathsToGenerate && paths.length > maxPathsToGenerate) {
     paths = paths.slice(0, maxPathsToGenerate)
   }
-  return { paths, fallback: true }
+  console.log('paths', paths)
+  return { paths, fallback: 'blocking' }
 }
 
 export async function getStaticProps(
@@ -82,8 +83,10 @@ export async function getStaticProps(
   const { locale, params } = context
   const { publicRuntimeConfig } = getConfig()
   const { categoryCode } = params as { categoryCode: string }
+  console.log('categorycode', categoryCode)
   const categoriesTree = await getCategoryTree()
   const category = await categoryTreeSearchByCode({ categoryCode }, categoriesTree)
+  console.log('category', category)
   if (!category) {
     return { notFound: true }
   }
@@ -116,9 +119,11 @@ export async function getStaticProps(
 const CategoryPage: NextPage<CategoryPageType> = (props) => {
   const router = useRouter()
   const { publicRuntimeConfig } = getConfig()
-  const code = props.categoryCode
+  const { categoryCode } = router.query
+  const code = props.categoryCode || categoryCode
+
   const [searchParams, setSearchParams] = useState<CategorySearchParams>({
-    categoryCode: props.categoryCode,
+    categoryCode: code,
   } as unknown as CategorySearchParams)
 
   useEffect(() => {
@@ -149,15 +154,14 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
   const facetList = productSearchResult?.facets as Facet[]
   const products = productSearchResult?.items as Product[]
 
-  const categoryFacet = productSearchGetters.getCategoryFacet(
-    productSearchResult,
-    props.categoryCode
-  )
+  const categoryFacet = productSearchGetters.getCategoryFacet(productSearchResult, code)
   const appliedFilters = facetGetters.getSelectedFacets(productSearchResult?.facets as Facet[])
 
   const categoryPageHeading = categoryFacet.header
     ? categoryFacet.header
-    : breadcrumbs[breadcrumbs.length - 1].text
+    : breadcrumbs.length > 0
+    ? breadcrumbs[breadcrumbs.length - 1]?.text
+    : categoryFacet.header
 
   const sortingValues = facetGetters.getSortOptions(
     {

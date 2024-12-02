@@ -46,6 +46,17 @@ fragment configureProductInfo on ConfiguredProduct {
         purchasableState {
           isPurchasable
         }
+        properties {
+            attributeFQN
+            attributeDetail {
+              name
+            }
+            isHidden
+            values {
+              value
+              stringValue
+            }
+        }
         ...configureProductOptions
 }
 ${configureProductOptions}

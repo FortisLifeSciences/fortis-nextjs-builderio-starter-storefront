@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft'
 import { LoadingButton } from '@mui/lab'
@@ -11,14 +11,17 @@ import {
   useTheme,
   Divider,
   useMediaQuery,
+  Card,
+  CardContent,
 } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
 import { CartItemList } from '@/components/cart'
-import { PromoCodeBadge, OrderSummary } from '@/components/common'
+import { PromoCodeBadge, OrderSummary, Price } from '@/components/common'
 import { ConfirmationDialog, StoreLocatorDialog } from '@/components/dialogs'
-import { useModalContext } from '@/context'
+import { LoginDialog } from '@/components/layout'
+import { useModalContext, useAuthContext } from '@/context'
 import {
   useGetCart,
   useInitiateOrder,
@@ -31,22 +34,25 @@ import {
   useInitiateCheckout,
   useCartActions,
   useProductCardActions,
+  useRefetchCart,
 } from '@/hooks'
-import { orderGetters, cartGetters } from '@/lib/getters'
+import { orderGetters, cartGetters, checkoutGetters } from '@/lib/getters'
 
-import type { CrCart, Location, CrCartItem } from '@/lib/gql/types'
+import type { CrCart, Location, CrCartItem, Checkout, CrOrder } from '@/lib/gql/types'
 
 export interface CartTemplateProps {
   isMultiShipEnabled: boolean
   cart: CrCart
   cartTopContentSection?: any
   cartBottomContentSection?: any
+  cartEmptyContentSection?: any
 }
 
 const CartTemplate = (props: CartTemplateProps) => {
   const { isMultiShipEnabled } = props
   const { data: cart } = useGetCart(props?.cart)
-  const { cartTopContentSection, cartBottomContentSection } = props
+  const { refetchCart } = useRefetchCart()
+  const { cartTopContentSection, cartBottomContentSection, cartEmptyContentSection } = props
   const { t } = useTranslation('common')
   const theme = useTheme()
   const isMobileViewport = useMediaQuery(theme.breakpoints.down('md'))
@@ -56,6 +62,7 @@ const CartTemplate = (props: CartTemplateProps) => {
   const { updateCartItemQuantity } = useUpdateCartItemQuantity()
   const { deleteCartItem } = useDeleteCartItem()
   const { showModal, closeModal } = useModalContext()
+  const { isAuthenticated } = useAuthContext()
 
   const cartItemCount = cartGetters.getCartItemCount(cart)
   const cartItems = cartGetters.getCartItems(cart)
@@ -102,13 +109,41 @@ const CartTemplate = (props: CartTemplateProps) => {
   const handleItemActions = () => {
     // your code here
   }
+  const handleRefetch = async () => {
+    try {
+      const data = await refetchCart()
+      return data
+    } catch (error) {
+      console.error('Error fetching cart:', error)
+    }
+  }
+
+  const handleForceLogin = async () => {
+    if (!isAuthenticated) {
+      showModal({
+        Component: LoginDialog,
+        props: {
+          isCartCheckout: true,
+          onLoginSuccess: proceedWithCheckout,
+        },
+      })
+      return
+    }
+    await handleGotoCheckout()
+  }
+
+  const proceedWithCheckout = async () => {
+    closeModal()
+    await handleGotoCheckout()
+  }
 
   const handleGotoCheckout = async () => {
     setShowLoadingButton(true)
     try {
+      const currentCart = (await handleRefetch()) || cart
       const initiateOrderResponse = isMultiShipEnabled
-        ? await initiateCheckout.mutateAsync(cart?.id)
-        : await initiateOrder.mutateAsync({ cartId: cart?.id as string })
+        ? await initiateCheckout.mutateAsync(currentCart?.id)
+        : await initiateOrder.mutateAsync({ cartId: currentCart?.id as string })
 
       if (initiateOrderResponse?.id) {
         router.push(`/checkout/${initiateOrderResponse.id}`)
@@ -121,7 +156,8 @@ const CartTemplate = (props: CartTemplateProps) => {
 
   const orderSummaryArgs = {
     nameLabel: t('cart-summary'),
-    subTotalLabel: `${t('subtotal')} (${t('item-quantity', { count: cartItemCount })})`,
+    subTotalLabel: `${t('subtotal')}`,
+    totalCount: `${t('item-quantity', { count: cartItemCount })}`,
     totalLabel: t('estimated-order-total'),
     orderDetails: cart,
     isShippingTaxIncluded: false,
@@ -152,10 +188,17 @@ const CartTemplate = (props: CartTemplateProps) => {
       props: {
         onConfirm: handleDeleteCurrentCart,
         contentText: t('clear-cart-confirmation-text'),
-        primaryButtonText: t('delete'),
+        primaryButtonText: t('clear-cart'),
+        title: t('clear-cart'),
       },
     })
   }
+
+  const orderDetails = orderSummaryArgs?.orderDetails
+  const subTotal = orderGetters.getSubtotal(orderDetails)
+  const discountedSubtotal =
+    orderGetters.getDiscountedSubtotal(orderDetails as CrOrder | CrCart) ||
+    checkoutGetters.getDiscountedSubtotal(orderDetails as Checkout)
 
   return (
     <Grid container>
@@ -167,12 +210,12 @@ const CartTemplate = (props: CartTemplateProps) => {
       )}
       <Grid item xs={12} md={8} sx={{ paddingX: { xs: 2, md: 0 }, paddingY: { xs: 2 } }}>
         <Box display="flex" gap={1}>
-          <Typography variant="h1" gutterBottom>
+          <Typography variant="h1" gutterBottom sx={{ color: 'primary.main' }}>
             {t('shopping-cart')}
           </Typography>
-          <Typography variant="h1" fontWeight={'normal'}>
+          {/* <Typography variant="h1" fontWeight={'normal'}>
             ({t('item-quantity', { count: cartItemCount })})
-          </Typography>
+          </Typography> */}
         </Box>
       </Grid>
       {isMobileViewport && (
@@ -183,7 +226,48 @@ const CartTemplate = (props: CartTemplateProps) => {
       {/* Cart item Section */}
       {!!cart?.items?.length && (
         <>
-          <Grid item xs={12} md={8} sx={{ paddingRight: { md: 2 } }}>
+          <Grid
+            item
+            xs={12}
+            md={8}
+            sx={{
+              paddingRight: { md: 2 },
+              position: { md: 'relative' },
+              top: { md: '-36px', sm: '0' },
+            }}
+          >
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end ' }}>
+              <Button
+                variant="text"
+                sx={{
+                  color: 'primary.main',
+                  width: 'fit-content',
+                  fontFamily: 'Poppins',
+                  fontSize: '16px',
+                  fontStyle: 'normal',
+                  fontWeight: 300,
+                  lineHeight: '25px',
+                  textDecorationLine: 'underline',
+                  textDecorationStyle: 'solid',
+                  textDecorationSkipInk: 'none',
+                  textDecorationThickness: 'auto',
+                  textUnderlineOffset: 'auto',
+                  textUnderlinePosition: 'from-font',
+                  '&:hover': {
+                    textDecorationLine: 'underline',
+                    background: 'transparent',
+                    color: 'primary.light',
+                  },
+                }}
+                name="clearCart"
+                fullWidth
+                onClick={openClearCartConfirmation}
+                disabled={!cartItemCount}
+              >
+                {t('clear-cart')}
+              </Button>
+            </Box>
+
             <CartItemList
               cartItems={cartItems}
               fulfillmentLocations={
@@ -196,7 +280,7 @@ const CartTemplate = (props: CartTemplateProps) => {
               onProductPickupLocation={handleProductPickupLocation}
               onCartItemActionSelection={handleItemActions}
             />
-            <Box py={5}>
+            {/* <Box py={5}>
               <Button
                 variant="contained"
                 color="secondary"
@@ -205,54 +289,97 @@ const CartTemplate = (props: CartTemplateProps) => {
               >
                 {t('continue-shopping')}
               </Button>
-            </Box>
+            </Box> */}
           </Grid>
           {/* Order Summary */}
           <Grid item xs={12} md={4} sx={{ paddingRight: { xs: 0, md: 2 } }}>
-            <OrderSummary {...orderSummaryArgs}>
+            <Box>
+              <Card
+                sx={{
+                  bgcolor: 'grey.300',
+                  width: '380px',
+                  height: '330px',
+                  flexShrink: '0',
+                  padding: '20px',
+                  boxShadow: 'none',
+                }}
+              >
+                <CardContent sx={{ padding: '0px' }}>
+                  <Typography variant="h3" color="gray.900" fontWeight="500" pt={0.5}>
+                    {orderSummaryArgs?.nameLabel}
+                  </Typography>
+                  <Typography sx={{}} variant="body1">
+                    {orderSummaryArgs?.subTotalLabel}
+                  </Typography>
+                  <Divider />
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      marginBottom: '25px',
+                    }}
+                  >
+                    {orderSummaryArgs?.totalCount}
+                    <Price
+                      variant="body1"
+                      fontWeight="normal"
+                      price={t('currency', { val: subTotal })}
+                      salePrice={
+                        discountedSubtotal > 0 && discountedSubtotal !== subTotal
+                          ? t('currency', { val: discountedSubtotal })
+                          : ''
+                      }
+                    />
+                  </Box>
+
+                  <Typography variant="body2" sx={{ marginBottom: '25px' }}>
+                    {t('shipping-tax-at-checkout')}
+                  </Typography>
+
+                  <Stack direction="column" gap={2} sx={{ alignItems: 'center' }}>
+                    <LoadingButton
+                      variant="contained"
+                      color="primary"
+                      name="goToCart"
+                      fullWidth
+                      onClick={handleForceLogin}
+                      loading={showLoadingButton}
+                      disabled={!cartItemCount || showLoadingButton}
+                      sx={{
+                        borderRadius: '0px 26px',
+                        padding: '12px 30px',
+                        width: 'fit-content',
+                      }}
+                    >
+                      {t('checkout')}
+                    </LoadingButton>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Box>
+
+            {/* <OrderSummary {...orderSummaryArgs}>
               <Stack direction="column" gap={2}>
                 <LoadingButton
                   variant="contained"
                   color="primary"
                   name="goToCart"
                   fullWidth
-                  onClick={handleGotoCheckout}
+                  onClick={handleForceLogin}
                   loading={showLoadingButton}
                   disabled={!cartItemCount || showLoadingButton}
                 >
                   {t('go-to-checkout')}
                 </LoadingButton>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  name="clearCart"
-                  fullWidth
-                  onClick={openClearCartConfirmation}
-                  disabled={!cartItemCount}
-                >
-                  {t('clear-cart')}
-                </Button>
               </Stack>
-            </OrderSummary>
+            </OrderSummary> */}
           </Grid>
         </>
       )}
-      {!cart?.items?.length && (
-        <Box data-testid="empty-cart">
-          <Typography variant="subtitle2" fontWeight={'bold'}>
-            {t('empty-cart-message')}
-          </Typography>
-          <Box maxWidth="23.5rem">
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ width: '100%', marginTop: '3.063rem' }}
-              onClick={() => router.push('/')}
-            >
-              {t('shop-now')}
-            </Button>
-          </Box>
-        </Box>
+      {!cart?.items?.length && cartEmptyContentSection && (
+        <Grid item xs={12}>
+          {cartEmptyContentSection}
+        </Grid>
       )}
       {cartBottomContentSection && (
         <Grid item xs={12}>

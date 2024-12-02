@@ -12,7 +12,7 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material'
-import { Container } from '@mui/system'
+import { Container, maxHeight } from '@mui/system'
 
 import FullWidthDivider from '../FullWidthDivider/FullWidthDivider'
 import theme from '@/styles/theme'
@@ -26,6 +26,7 @@ export interface KiboDialogProps {
   Actions?: ReactNode
   isDialogCentered?: boolean
   customMaxWidth?: string
+  customMaxHeight?: string
   showContentTopDivider?: boolean
   showContentBottomDivider?: boolean
   onClose: () => void
@@ -34,12 +35,13 @@ export interface KiboDialogProps {
 interface StyledDialogProps {
   theme?: Theme
   customMaxWidth?: string
+  customMaxHeight?: string
   isDialogCentered: boolean
 }
 
 const StyledDialog = styled(Dialog, {
   shouldForwardProp: (prop) => prop !== 'customMaxWidth' && prop !== 'isDialogCentered',
-})(({ customMaxWidth, isDialogCentered }: StyledDialogProps) => ({
+})(({ customMaxWidth, customMaxHeight, isDialogCentered }: StyledDialogProps) => ({
   '& .MuiDialogContent-root': {
     padding: 0,
     paddingBlock: '1rem',
@@ -55,6 +57,10 @@ const StyledDialog = styled(Dialog, {
     borderRadius: 0,
     ...(customMaxWidth && {
       maxWidth: customMaxWidth,
+    }),
+    ...(customMaxHeight && {
+      height: '100%',
+      maxHeight: customMaxHeight,
     }),
   },
   ...(isDialogCentered === false && {
@@ -94,6 +100,7 @@ const CustomDialog = (props: KiboDialogProps) => {
     Content,
     Actions,
     customMaxWidth = '',
+    customMaxHeight = '',
     showContentTopDivider = true,
     showContentBottomDivider = true,
     onClose,
@@ -107,6 +114,7 @@ const CustomDialog = (props: KiboDialogProps) => {
       aria-labelledby="kibo-dialog-title"
       open={isOpen}
       customMaxWidth={customMaxWidth}
+      customMaxHeight={customMaxHeight}
       isDialogCentered={mdScreen ? true : false}
       data-test-id="kibo-dialog"
     >

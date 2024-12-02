@@ -1,0 +1,12 @@
+{
+  "normalAvailability": "Order within {CountDown} to receive by {DeliveryDate}",
+  "limitedInventoryNoBackorder": "Only {QtyOnHand} remaining",
+  "onBackorderRestockUnknown": "Item on backorder. Please call 800.338.9579 for availablility",
+  "onBackorderRestockDateAvailable": "In production. Order now for expected delivery by {DeliveryDate}",
+  "onBackorderRestockAnticipated": "Expected back in stock in {StockLeadTime}",
+  "leadTimeRequired": "Expected delivery in {StockLeadTime}",
+  "noInventoryNoBackorder": "Product no longer available",
+  "discontinuedProduct": "Product is discontinued. Please inquire if you need a bulk or custom order",
+  "productDiscontinuedMessage": "Product has been discontinued",
+  "newProductNotYetForSale": "Product not currently available"
+}

@@ -52,7 +52,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
 const CheckoutPage: NextPage<CheckoutPageProps> = (props) => {
   const { t } = useTranslation('common')
-  const steps = [t('details'), t('shipping'), t('payment'), t('review')]
+  const steps = [t('shipping'), t('payment'), t('review')] //t('details'),
   const { checkout, isMultiShipEnabled, ...rest } = props
   const quoteCheckout = !isMultiShipEnabled ? (checkout as CrOrder) : null
   const quoteId = quoteCheckout?.originalQuoteId

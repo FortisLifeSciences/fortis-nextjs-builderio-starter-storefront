@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 
 import { Box, Stack, Button, SxProps } from '@mui/material'
 import { Theme } from '@mui/material/styles'
@@ -39,10 +39,10 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
   const { t } = useTranslation('common')
   const { activeStep, stepStatus, steps, setStepStatusSubmit, setStepBack } =
     useCheckoutStepContext()
-  const buttonLabels = [t('go-to-shipping'), t('go-to-payment'), t('review-order')]
-  const detailsStepIndex = steps.findIndex(
-    (step: string) => step.toLowerCase() === t('details').toLowerCase()
-  )
+  const buttonLabels = [t('go-to-payment'), t('review-order')] //t('go-to-shipping'),
+  // const detailsStepIndex = steps.findIndex(
+  //   (step: string) => step.toLowerCase() === t('details').toLowerCase()
+  // )
   const reviewStepIndex = steps.findIndex(
     (step: string) => step.toLowerCase() === t('review').toLowerCase()
   )
@@ -109,7 +109,7 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
                 >
                   {buttonLabels[activeStep]}
                 </Button>
-                <Button
+                {/* <Button
                   variant="contained"
                   color="secondary"
                   sx={{ ...buttonStyle }}
@@ -118,7 +118,7 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
                   disabled={activeStep === detailsStepIndex}
                 >
                   {t('go-back')}
-                </Button>
+                </Button> */}
               </Stack>
             )}
           </OrderSummary>
@@ -146,4 +146,5 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
     </React.Fragment>
   )
 }
+
 export default CheckoutUITemplate

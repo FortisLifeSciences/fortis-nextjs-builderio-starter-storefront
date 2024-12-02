@@ -9,3 +9,4 @@ export { default as ProductRecommendations } from './ProductRecommendations/Prod
 export { default as ProductVariantSizeSelector } from './ProductVariantSizeSelector/ProductVariantSizeSelector'
 export { default as ProductQuickViewDialog } from './ProductQuickViewModal/ProductQuickViewDialog'
 export { default as ProductCardListView } from './ProductCardListView/ProductCardListView'
+export { default as ProductRecentDocuments } from './ProductRecentDocuments/ProductRecentDocuments'
