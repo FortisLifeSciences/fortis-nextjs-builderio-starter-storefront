@@ -59,6 +59,12 @@ const BuilderComponents = () => {
         helperText: 'Upload the image for the component.',
       },
       {
+        name: 'ImageAltText',
+        type: 'text',
+        friendlyName: 'Image Alt Text',
+        helperText: 'Image Alt Text.',
+      },
+      {
         name: 'leftTextHeading',
         type: 'text',
         friendlyName: 'Heading Text',

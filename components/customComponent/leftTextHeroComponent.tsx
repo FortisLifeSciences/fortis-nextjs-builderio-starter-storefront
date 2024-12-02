@@ -8,6 +8,7 @@ import { LeftTextHeroStyle } from './leftTextHeroComponent.style'
 interface LeftTextHeroProps {
   leftTextImage: string
   leftTextHeading: string
+  ImageAltText: string
   backgroundImage?: string
   leftTextParagraph: string
   primaryButtonText: string
@@ -18,6 +19,7 @@ interface LeftTextHeroProps {
 
 const LeftTextHero: React.FC<LeftTextHeroProps> = ({
   leftTextImage,
+  ImageAltText,
   leftTextHeading,
   backgroundImage,
   leftTextParagraph,
@@ -78,7 +80,7 @@ const LeftTextHero: React.FC<LeftTextHeroProps> = ({
           )}
         </Box>
         <Box sx={{ ...LeftTextHeroStyle.leftTxtImage }}>
-          <Image src={leftTextImage} alt="Left Text Image" fill />
+          <Image src={leftTextImage} alt={ImageAltText} fill />
         </Box>
       </Box>
     </Box>
