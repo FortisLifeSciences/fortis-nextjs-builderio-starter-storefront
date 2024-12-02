@@ -46,6 +46,9 @@ export interface CartTemplateProps {
 const CartTemplate = (props: CartTemplateProps) => {
   const { isMultiShipEnabled } = props
   const { data: cart } = useGetCart(props?.cart)
+
+  const { refetchCart } = useRefetchCart()
+
   const { cartTopContentSection, cartBottomContentSection } = props
   const { t } = useTranslation('common')
   const theme = useTheme()

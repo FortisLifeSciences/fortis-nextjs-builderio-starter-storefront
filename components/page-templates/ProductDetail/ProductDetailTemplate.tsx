@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 
+import { RttOutlined } from '@mui/icons-material'
+
 import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded'
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded'
 import StarRounded from '@mui/icons-material/StarRounded'
@@ -16,6 +18,10 @@ import {
   Theme,
   MenuItem,
 } from '@mui/material'
+
+import { data } from 'cheerio/dist/commonjs/api/attributes'
+import { any } from 'jest-mock-extended'
+
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 
@@ -52,6 +58,16 @@ import { FulfillmentOptions as FulfillmentOptionsConstant, PurchaseTypes } from 
 import { productGetters, subscriptionGetters, wishlistGetters } from '@/lib/getters'
 import { uiHelpers } from '@/lib/helpers'
 import type { ProductCustom, BreadCrumb, LocationCustom } from '@/lib/types'
+
+import abcore from '@/public/Brand_Logo/abcore-logo.png'
+import arista from '@/public/Brand_Logo/arista-logo.png'
+import bethyl from '@/public/Brand_Logo/bethyl-logo.png'
+import empirical from '@/public/Brand_Logo/empirical-logo.png'
+import fortis from '@/public/Brand_Logo/fortis-logo.png'
+import ipoc from '@/public/Brand_Logo/ipoc-logo.png'
+import nanocomposix from '@/public/Brand_Logo/nanocomposix-logo.png'
+import vector from '@/public/Brand_Logo/vector-logo.png'
+
 
 import type {
   AttributeDetail,
@@ -123,9 +139,16 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     (type) => type === FulfillmentOptionsConstant.DIGITAL
   )
 
+
+  console.log('This is updatedProduct ---> ', updatedProduct)
+
   const [purchaseType, setPurchaseType] = useState<string>(PurchaseTypes.ONETIMEPURCHASE)
   const [selectedFrequency, setSelectedFrequency] = useState<string>('')
   const [isSubscriptionPricingSelected, setIsSubscriptionPricingSelected] = useState<boolean>(false)
+  const [skuStatusText, setSkuStatusText] = useState<string | null>('')
+  const [showPrices, setShowPrices] = useState<boolean | null>()
+  // const [radioProductOptions, setRadioProductOptions] = useState<any>()
+
 
   const isSubscriptionModeAvailable = subscriptionGetters.isSubscriptionModeAvailable(product)
   const isSubscriptionOnly = subscriptionGetters.isSubscriptionOnly(product)
@@ -377,11 +400,63 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
       })
     }
   }, [])
-  // Update breadcrumbs links
-  const updatedBreadcrumbsList = breadcrumbs.map((breadcrumb) => ({
-    ...breadcrumb,
-    link: breadcrumb.link ? breadcrumb.link.replace('/category/', '/products/') : breadcrumb.link,
-  }))
+
+
+  useEffect(() => {
+    const fetchDocumentData = async () => {
+      const digitalDocRes = await getDocumentListDocuments(
+        'digitalassets@Fortis',
+        `name eq ${variationProductCode} or name eq ${productCode}`
+      )
+      setDigitalDocumentData(digitalDocRes)
+    }
+    fetchDocumentData()
+  }, [variationProductCode, productCode])
+
+  useEffect(() => {
+    const mergeProductProperties = () => {
+      if (!product || !currentProduct) return
+
+      // Create a map of currentProduct properties by attributeFQN for quick lookup
+      const currentProductMap = new Map(
+        currentProduct.properties?.map((item: any) => [item.attributeFQN, item])
+      )
+
+      // Merge properties from product and currentProduct
+      const mergedProperties = product.properties
+        ?.filter(
+          (item: any) => !currentProductMap.has(item.attributeFQN) // Remove duplicates from product
+        )
+        ?.concat(currentProduct.properties || []) // Add currentProduct values
+
+      // Update the product properties immutably
+      setUpdatedProduct({ ...product, properties: mergedProperties })
+      const variantTitle =
+        currentProduct?.properties?.find(
+          (data: any) => data?.attributeFQN === 'tenant~variant-product-name'
+        )?.values?.[0]?.stringValue || null
+      setVariantProductTitle(variantTitle as string)
+    }
+
+    mergeProductProperties()
+  }, [product, currentProduct])
+
+  useEffect(() => {
+    const skuStatusTextProperty = updatedProduct?.properties?.find(
+      (prop) => prop?.attributeFQN === 'tenant~sku-status-text'
+    )
+
+    const showPricesProperty = updatedProduct?.properties?.find(
+      (prop) => prop?.attributeFQN === 'tenant~show-prices'
+    )
+
+    setSkuStatusText(
+      skuStatusTextProperty ? String(skuStatusTextProperty?.values?.[0]?.value) : null
+    )
+
+    setShowPrices(showPricesProperty ? Boolean(showPricesProperty?.values?.[0]?.value) : null)
+  }, [updatedProduct])
+
 
   return (
     <Grid container>
@@ -539,17 +614,31 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                   </MenuItem>
                 )
               })}
-            </KiboSelect>
-          )}
-          {!addItemToList &&
-            purchaseType === PurchaseTypes.ONETIMEPURCHASE &&
-            !isDigitalFulfillment && (
-              <FulfillmentOptions
-                title={t('fulfillment-options')}
-                fulfillmentOptions={fulfillmentOptions}
-                selected={selectedFulfillmentOption?.method}
-                onFulfillmentOptionChange={(value: string) => handleFulfillmentOptionChange(value)}
-                onStoreSetOrUpdate={() => handleProductPickupLocation()}
+
+            </Box>
+            <Box>
+              {currentProduct.properties?.map((item: any, index: number) => {
+                if (item?.attributeFQN === 'tenant~description-variant') {
+                  return (
+                    <Typography
+                      key={index}
+                      dangerouslySetInnerHTML={{
+                        __html: item?.values[0]?.stringValue,
+                      }}
+                      sx={{ fontSize: (theme) => theme.typography.body2, color: '#000' }}
+                    />
+                  )
+                }
+              })}
+            </Box>
+            <PdpIconAttributes product={product} />
+            <Box paddingY={1}>
+              <QuantitySelector
+                label="Qty"
+                quantity={quantity}
+                onIncrease={() => setQuantity((prevQuantity: number) => Number(prevQuantity) + 1)}
+                onDecrease={() => setQuantity((prevQuantity: number) => Number(prevQuantity) - 1)}
+
               />
             )}
         </Box>
