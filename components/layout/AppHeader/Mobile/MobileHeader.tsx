@@ -69,7 +69,7 @@ const MobileHeader = ({ children, hideIcons = false }: MobileHeaderProps) => {
           </Grid>
           <Grid item xs={6} sx={MobileHeaderStyles.item}>
             <Link href="/" passHref>
-              <KiboLogo mobileRatio logo={fortisLogo} />
+              <KiboLogo mobile logo={fortisLogo} />
             </Link>
           </Grid>
           <Grid item xs={1.5} sx={MobileHeaderStyles.item}>

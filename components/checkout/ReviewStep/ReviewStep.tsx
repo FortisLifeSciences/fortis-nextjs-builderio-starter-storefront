@@ -128,9 +128,7 @@ const ReviewStep = (props: ReviewStepProps) => {
   } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
-    defaultValues: personalDetails
-      ? { ...personalDetails, email: checkout?.email }
-      : { email: checkout?.email },
+    defaultValues: personalDetails ? { ...personalDetails, email: checkout?.email } : undefined,
     resolver: yupResolver(useDetailsSchema()),
     shouldFocusError: true,
   })
@@ -178,9 +176,7 @@ const ReviewStep = (props: ReviewStepProps) => {
     }
   }
 
-  const onInvalidForm = (error: any) => {
-    console.log('Invalid Form', error)
-  }
+  const onInvalidForm = () => console.log('Invalid Form')
   const handleComplete = () => handleSubmit(onValid, onInvalidForm)()
 
   const orderPriceProps = {

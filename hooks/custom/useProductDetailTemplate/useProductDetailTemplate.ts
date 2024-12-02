@@ -124,7 +124,6 @@ export const useProductDetailTemplate = (props: UseProductDetailTemplateProps) =
         inventoryInfo,
         priceRange,
         price,
-        properties,
       }: ConfiguredProduct = await configureProduct.mutateAsync({
         productCode,
         updatedOptions: updatedOptions.map((option) => {
@@ -148,12 +147,10 @@ export const useProductDetailTemplate = (props: UseProductDetailTemplateProps) =
         }) as ProductOptionSelectionInput[]
 
       setUpdatedShopperEnteredValues(responseOptions)
-
       setCurrentProduct({
         ...currentProduct,
         priceRange,
         price,
-        properties,
         variationProductCode: variationProductCode,
         options: options,
         purchasableState: purchasableState,

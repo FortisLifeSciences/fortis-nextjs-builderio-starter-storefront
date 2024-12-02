@@ -191,18 +191,20 @@ const KiboHeader = (props: KiboHeaderProps) => {
           }}
           data-testid="mega-menu-container"
         >
-          <Container
-            disableGutters
-            sx={{
-              position: 'relative', // Ensure the parent remains stable
-              // overflow: 'hidden', // Avoid overflow-induced layout shifts
-              width: '100%',
-            }}
-          >
-            <Box sx={{ display: 'flex', width: '100%', flexDirection: 'column' }}>
-              <NavigationBar isCheckoutPage={isCheckoutPage} />
-            </Box>
-          </Container>
+          {!isCheckoutPage && (
+            <Container
+              disableGutters
+              sx={{
+                position: 'relative', // Ensure the parent remains stable
+                // overflow: 'hidden', // Avoid overflow-induced layout shifts
+                width: '100%',
+              }}
+            >
+              <Box sx={{ display: 'flex', width: '100%', flexDirection: 'column' }}>
+                <NavigationBar />
+              </Box>
+            </Container>
+          )}
         </Box>
       </AppBar>
     </>

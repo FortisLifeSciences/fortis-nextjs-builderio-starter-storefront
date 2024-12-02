@@ -7,7 +7,7 @@ import { useTranslation } from 'next-i18next'
 
 import { CustomDialog, KiboDialog } from '@/components/common'
 import { B2BAccountFormDialog } from '@/components/dialogs'
-import { RegisterAccountDialog, ResetPasswordDialog, ExistingUserDialog } from '@/components/layout'
+import { RegisterAccountDialog, ResetPasswordDialog } from '@/components/layout'
 import LoginContent, { LoginData } from '@/components/layout/Login/LoginContent/LoginContent'
 import { useAuthContext } from '@/context'
 import { useModalContext } from '@/context/ModalContext'
@@ -45,10 +45,9 @@ const LoginFooter = (props: LoginFooterProps) => {
   )
 }
 
-const LoginDialog = (props: any) => {
+const LoginDialog = () => {
   const { t } = useTranslation('common')
 
-  const { isCartCheckout, onLoginSuccess } = props
   const { login } = useAuthContext()
   const { showModal, closeModal } = useModalContext()
   const { createCustomerB2bAccount } = useCreateCustomerB2bAccountMutation()
@@ -82,83 +81,67 @@ const LoginDialog = (props: any) => {
   useEffect(() => {
     const fetchSettings = async () => {
       const settings = await builder.get('theme-setting').promise()
-      setGoogleReCaptcha(settings?.data?.googleReCaptcha)
+      setGoogleReCaptcha(settings.data?.googleReCaptcha)
     }
     fetchSettings()
   }, [])
 
   const handleAccountRequest = async (formValues: CreateCustomerB2bAccountParams) => {
     const variables = buildCreateCustomerB2bAccountParams(formValues)
-    const emailAddress = formValues?.emailAddress
-    const emailDomain = extractDomain(emailAddress)
+    const emailDomain = extractDomain(formValues?.emailAddress)
     const entityListFullName = 'B2BAccountMapping@fortis'
     const entityPayLoad = {
       entityListFullName: entityListFullName,
       id: emailDomain,
     }
-
-    const getExistingUser = await fetch('/api/user/getAccountsByUser', {
+    const entityResponse = await fetch('/api/user/get-entity', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ emailAddress }),
+      body: JSON.stringify({ entityPayLoad }),
     })
 
-    const userDetails = await getExistingUser.json()
+    const entityResult = await entityResponse.json()
 
-    if (userDetails.success === true) {
-      showModal({ Component: ExistingUserDialog })
-    } else {
-      const entityResponse = await fetch('/api/user/get-entity', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ entityPayLoad }),
-      })
+    if ((googleReCaptcha as any)?.reCaptchAccountCreation) {
+      try {
+        // Ensure grecaptcha is available and ready
+        const siteKey = (googleReCaptcha as any)?.accountCreationSiteKey
+          ? (googleReCaptcha as any)?.accountCreationSiteKey
+          : process.env.accountCreationSiteKey
 
-      const entityResult = await entityResponse.json()
-
-      if ((googleReCaptcha as any)?.reCaptchAccountCreation) {
-        try {
-          // Ensure grecaptcha is available and ready
-          const siteKey = (googleReCaptcha as any)?.accountCreationSiteKey
-            ? (googleReCaptcha as any)?.accountCreationSiteKey
-            : process.env.accountCreationSiteKey
-
-          if (typeof grecaptcha !== 'undefined' && grecaptcha.enterprise) {
-            grecaptcha.enterprise.ready(async () => {
-              try {
-                const reCaptchaResponseCode = await grecaptcha.enterprise.execute(siteKey, {
-                  action: 'signup',
-                })
-                const payLoad = {
-                  googleReCaptcha: googleReCaptcha,
-                  responseKey: reCaptchaResponseCode,
-                }
-                const response = await fetch('/api/user/validate-recaptcha', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({ payLoad }),
-                })
-                const data = await response.json()
-                processUpdatedVariables(data, entityResult, variables)
-              } catch (error) {
-                processUpdatedVariables(null, entityResult, variables)
+        if (typeof grecaptcha !== 'undefined' && grecaptcha.enterprise) {
+          grecaptcha.enterprise.ready(async () => {
+            try {
+              const reCaptchaResponseCode = await grecaptcha.enterprise.execute(siteKey, {
+                action: 'signup',
+              })
+              const payLoad = {
+                googleReCaptcha: googleReCaptcha,
+                responseKey: reCaptchaResponseCode,
               }
-            })
-          } else {
-            processUpdatedVariables(null, entityResult, variables)
-          }
-        } catch (error) {
+              const response = await fetch('/api/user/validate-recaptcha', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ payLoad }),
+              })
+              const data = await response.json()
+              processUpdatedVariables(data, entityResult, variables)
+            } catch (error) {
+              processUpdatedVariables(null, entityResult, variables)
+            }
+          })
+        } else {
           processUpdatedVariables(null, entityResult, variables)
         }
-      } else {
+      } catch (error) {
         processUpdatedVariables(null, entityResult, variables)
       }
+    } else {
+      processUpdatedVariables(null, entityResult, variables)
     }
   }
 
@@ -252,11 +235,7 @@ const LoginDialog = (props: any) => {
   }
 
   const handleLogin = (params: LoginData) => {
-    if (isCartCheckout) {
-      login(params, onLoginSuccess)
-    } else {
-      login(params, closeModal)
-    }
+    login(params, closeModal)
   }
 
   return (

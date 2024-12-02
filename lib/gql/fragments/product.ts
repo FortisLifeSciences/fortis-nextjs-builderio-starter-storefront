@@ -40,7 +40,6 @@ fragment productContent on Product {
       imageLabel
       mediaType
       altText
-      cmsId
     }
   }
 }

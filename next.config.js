@@ -34,8 +34,6 @@ module.exports = {
       'images.ctfassets.net',
       'cdn.builder.io',
       'cdn-sb.euw1.kibocommerce.com',
-      'https://www.fortislife.com/',
-      'fortislife.cloud.akeneo.com',
     ],
     deviceSizes: [
       100, 240, 340, 380, 400, 450, 500, 550, 600, 640, 750, 828, 1080, 1200, 1920, 2048, 3840,
@@ -67,10 +65,6 @@ module.exports = {
     occasionAttributeFQN: 'Tenant~occasion',
     colorAttributeFQN: 'Tenant~Color',
     sizeAttributeFQN: 'Tenant~Size',
-    validationTextAttrFQN: 'tenant~validation-text',
-    citationCountVariantAttrFQN: 'tenant~citation-count-variant',
-    mfgCertificationAttrFQN: 'tenant~mfgcertification',
-    mfgAvailabilityAttrFQN: 'tenant~mfgavailability',
     paymentTypes: [
       {
         id: 'PurchaseOrder',
@@ -203,30 +197,7 @@ module.exports = {
         cartBottomSection: 'cart-bottom-content-section',
         cartTopSection: 'cart-top-content-section',
         categoryTopSection: 'category-section',
-        cartEmptySection: 'cart-empty-content-section',
       },
-    },
-    inventorySettings: {
-      buffer: 2,
-      USShippingCutOffTime: '12:00+05:30',
-      USMonday: true,
-      USTuesday: false,
-      USWednesday: true,
-      USThursday: true,
-      USFriday: false,
-      USSaturday: false,
-      USSunday: false,
-      CAShippingCutOffTime: '19:50+06:00',
-      CAMonday: true,
-      CATuesday: false,
-      CAWednesday: true,
-      CAThursday: true,
-      CAFriday: true,
-      CASaturday: false,
-      CASunday: false,
-      nonShippingDates: '',
-      nonShippingDatesCanada: '',
-      discontinuedProduct: 'Product has been discontinued',
     },
   },
   serverRuntimeConfig: {
@@ -260,6 +231,10 @@ module.exports = {
   async rewrites() {
     //custom routes
     return [
+      {
+        source: '/products/:categoryCode', // Match category URLs of categories
+        destination: '/category/:categoryCode', // Destination of category handler
+      },
       {
         source: '/products/:categoryCode/:productSlug/:productCode', // Match product URLs under categories
         destination: '/product/:productCode', // Destination for the product page
