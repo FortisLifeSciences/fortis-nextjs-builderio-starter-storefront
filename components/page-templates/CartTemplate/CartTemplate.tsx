@@ -45,14 +45,13 @@ export interface CartTemplateProps {
   cart: CrCart
   cartTopContentSection?: any
   cartBottomContentSection?: any
-  cartEmptyContentSection?: any
 }
 
 const CartTemplate = (props: CartTemplateProps) => {
   const { isMultiShipEnabled } = props
   const { data: cart } = useGetCart(props?.cart)
   const { refetchCart } = useRefetchCart()
-  const { cartTopContentSection, cartBottomContentSection, cartEmptyContentSection } = props
+  const { cartTopContentSection, cartBottomContentSection } = props
   const { t } = useTranslation('common')
   const theme = useTheme()
   const isMobileViewport = useMediaQuery(theme.breakpoints.down('md'))
@@ -188,8 +187,7 @@ const CartTemplate = (props: CartTemplateProps) => {
       props: {
         onConfirm: handleDeleteCurrentCart,
         contentText: t('clear-cart-confirmation-text'),
-        primaryButtonText: t('clear-cart'),
-        title: t('clear-cart'),
+        primaryButtonText: t('delete'),
       },
     })
   }
@@ -376,10 +374,22 @@ const CartTemplate = (props: CartTemplateProps) => {
           </Grid>
         </>
       )}
-      {!cart?.items?.length && cartEmptyContentSection && (
-        <Grid item xs={12}>
-          {cartEmptyContentSection}
-        </Grid>
+      {!cart?.items?.length && (
+        <Box data-testid="empty-cart">
+          <Typography variant="subtitle2" fontWeight={'bold'}>
+            {t('empty-cart-message')}
+          </Typography>
+          <Box maxWidth="23.5rem">
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ width: '100%', marginTop: '3.063rem' }}
+              onClick={() => router.push('/')}
+            >
+              {t('shop-now')}
+            </Button>
+          </Box>
+        </Box>
       )}
       {cartBottomContentSection && (
         <Grid item xs={12}>
