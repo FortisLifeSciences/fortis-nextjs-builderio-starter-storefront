@@ -150,7 +150,7 @@ const ProductRecentDocuments = (props: any) => {
                 </TableCell>
                 <TableCell sx={{ ...tableCellStyles, textAlign: 'left', width: '15%' }}>
                   <Link
-                    href={`${hostUrl} ${'/cms/files/'} ${document.properties.salsifyname}`}
+                    href={`${hostUrl}${'/cms/files/'}${document.properties.salsifyname}`}
                     target="_blank"
                     style={{
                       ...tableCellLinkStyle,
