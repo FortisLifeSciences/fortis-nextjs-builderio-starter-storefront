@@ -79,7 +79,13 @@ const QuantitySelector = (props: QuantitySelectorProps) => {
   const { t } = useTranslation('common')
 
   return (
-    <Stack direction="row" justifyContent="flec-start" alignItems="center" spacing={1.2}>
+    <Stack
+      direction="row"
+      justifyContent="flec-start"
+      alignItems="center"
+      spacing={1.2}
+      width={'100%'}
+    >
       {label && (
         <Typography
           variant="body2"

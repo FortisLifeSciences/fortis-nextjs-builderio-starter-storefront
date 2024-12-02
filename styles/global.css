@@ -118,3 +118,15 @@ body {
   padding-top: 20px;
   padding-bottom: 20px;
 }
+
+.add-to-cart-button {
+  color: #fff;
+  padding: 12px 25px !important;
+  font-family: Poppins;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px; /* 150% */
+  border-radius: 0px 26px !important;
+  background: #30299a !important;
+}

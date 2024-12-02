@@ -1,5 +1,5 @@
 /* eslint-disable  jsx-a11y/no-autofocus */
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Box, FormControl, Button, Typography, Grid, Divider, Link } from '@mui/material'
@@ -35,7 +35,7 @@ const Content = (props: ContentProps) => {
 
   const { t } = useTranslation('common')
 
-  const { showModal } = useModalContext()
+  const { showModal, closeModal } = useModalContext()
   const { isAuthenticated } = useAuthContext()
 
   const useDetailsSchema = () => {
@@ -70,6 +70,17 @@ const Content = (props: ContentProps) => {
     }
   }
 
+  useEffect(() => {
+    const handleKeyPress = (event: { key: string; preventDefault: () => void }) => {
+      if (event.key === 'Enter') {
+        event.preventDefault() // Prevent default behavior
+        handleSubmit(handleResetPassword)() // Explicitly call the handler
+      }
+    }
+    document.addEventListener('keydown', handleKeyPress)
+    return () => document.removeEventListener('keydown', handleKeyPress)
+  }, [])
+
   return (
     <Box sx={{ ...styles.contentBox }}>
       <Box>
@@ -77,105 +88,158 @@ const Content = (props: ContentProps) => {
           {t('reset-password-paragraph')}
         </Typography>
       </Box>
-      <FormControl sx={{ width: '100%' }}>
-        <Controller
-          name="email"
-          control={control}
-          render={({ field }) => (
-            <KiboTextBox
+      <form onSubmit={!isResetPassword ? handleSubmit(handleResetPassword) : closeModal}>
+        <FormControl sx={{ width: '100%' }}>
+          {!isResetPassword && (
+            <Controller
               name="email"
-              value={field.value}
-              label={t('email')}
-              required
-              autoFocus={setAutoFocus}
-              sx={{ ...styles.formInput }}
-              onBlur={field.onBlur}
-              onChange={(_name, value) => field.onChange(value)}
-              error={!!errors?.email}
-              helperText={errors?.email?.message}
+              control={control}
+              render={({ field }) => (
+                <KiboTextBox
+                  name="email"
+                  value={field.value}
+                  label={t('email')}
+                  required
+                  autoFocus={setAutoFocus}
+                  sx={{ ...styles.formInput }}
+                  onBlur={field.onBlur}
+                  onChange={(_name, value) => field.onChange(value)}
+                  error={!!errors?.email}
+                  helperText={errors?.email?.message}
+                />
+              )}
             />
           )}
-        />
 
-        {isResetPassword && (
-          <Typography py={2} color="success.main">
-            {t('reset-password-message')}
-          </Typography>
-        )}
-
-        <Grid container columnSpacing={{ md: 5 }} sx={{ marginTop: '30px' }}>
-          <Grid item sm={12} xs={12}>
-            <Divider
+          {isResetPassword && (
+            <Typography
               sx={{
-                borderColor: 'grey.300',
-                margin: '20px 0px',
+                color: 'var(--Green, #348345)',
+                fontFamily: 'Poppins',
+                fontSize: '22px',
+                fontStyle: 'normal',
+                fontWeight: 500,
+                lineHeight: '35px',
               }}
-            />
-          </Grid>
+            >
+              {t('reset-password-message')}
+            </Typography>
+          )}
 
-          <Grid
-            item
-            sm={12}
-            xs={12}
-            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-          >
-            <Box
+          <Grid container columnSpacing={{ md: 5 }} sx={{ marginTop: '30px' }}>
+            <Grid item sm={12} xs={12}>
+              <Divider
+                sx={{
+                  borderColor: 'grey.300',
+                  margin: '20px 0px',
+                }}
+              />
+            </Grid>
+
+            <Grid
+              item
+              sm={12}
+              xs={12}
               sx={{
                 display: 'flex',
-                alignItems: 'flex-start',
-                justifyContent: { md: 'flex-start', xs: 'center' },
+                justifyContent: isResetPassword ? 'flex-end' : 'space-between',
+                alignItems: 'center',
               }}
             >
-              <Typography variant="body2" sx={{ color: 'grey.900' }}>
-                {t('already-have-an-account')}
-              </Typography>
-              <Link
-                component="button"
-                variant="body1"
-                sx={{
-                  fontFamily: 'Poppins',
-                  fontSize: '16px',
-                  fontWeight: '300',
-                  lineHeight: '25px',
-                  textAlign: 'left',
-                  color: '#30299A',
-                  textDecoration: 'underline',
-                  cursor: 'pointer',
-                }}
-                onClick={handleAccountIconClick}
-              >
-                {t('log-in')}
-              </Link>
-            </Box>
-            <Button
-              variant="contained"
-              sx={{
-                width: 'auto',
-                backgroundColor: !isValid ? 'grey.600' : 'primary.main',
-                color: 'secondary.light',
-                textAlign: 'center',
-                fontFamily: 'Poppins',
-                fontSize: '16px',
-                fontStyle: 'normal',
-                fontWeight: '500',
-                lineHeight: '24px',
-                borderRadius: '0px 26px',
-                border: !isValid ? '1px solid grey.600' : '1px solid primary.main',
-                padding: '12px 30px',
-                '&:hover': {
-                  backgroundColor: !isValid ? 'grey.600' : 'primary.light',
-                  border: !isValid ? '1px solid grey.600' : '1px solid primary.light',
-                },
-                marginLeft: '20px',
-              }}
-              onClick={() => handleSubmit(handleResetPassword)()}
-              disabled={!isValid}
-            >
-              {t('reset-password')}
-            </Button>
+              {!isResetPassword && (
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    justifyContent: { md: 'flex-start', xs: 'center' },
+                  }}
+                >
+                  <Typography variant="body2" sx={{ color: 'grey.900' }}>
+                    {t('already-have-an-account')}
+                  </Typography>
+                  <Link
+                    component="button"
+                    type="button"
+                    variant="body1"
+                    sx={{
+                      fontFamily: 'Poppins',
+                      fontSize: '16px',
+                      fontWeight: '300',
+                      lineHeight: '25px',
+                      textAlign: 'left',
+                      color: '#30299A',
+                      textDecoration: 'underline',
+                      cursor: 'pointer',
+                    }}
+                    onClick={handleAccountIconClick}
+                  >
+                    {t('log-in')}
+                  </Link>
+                </Box>
+              )}
+
+              {!isResetPassword && (
+                <Button
+                  variant="contained"
+                  type="submit"
+                  sx={{
+                    width: 'auto',
+                    backgroundColor: !isValid ? 'grey.600' : 'primary.main',
+                    color: 'secondary.light',
+                    textAlign: 'center',
+                    fontFamily: 'Poppins',
+                    fontSize: '16px',
+                    fontStyle: 'normal',
+                    fontWeight: '500',
+                    lineHeight: '24px',
+                    borderRadius: '0px 26px',
+                    border: !isValid ? '1px solid grey.600' : '1px solid primary.main',
+                    padding: '12px 30px',
+                    '&:hover': {
+                      backgroundColor: !isValid ? 'grey.600' : 'primary.light',
+                      border: !isValid ? '1px solid grey.600' : '1px solid primary.light',
+                    },
+                    marginLeft: '20px',
+                  }}
+                  onClick={() => handleSubmit(handleResetPassword)()}
+                  disabled={!isValid}
+                >
+                  {t('reset-password')}
+                </Button>
+              )}
+
+              {isResetPassword && (
+                <Button
+                  variant="contained"
+                  sx={{
+                    width: 'auto',
+                    backgroundColor: !isValid ? 'grey.600' : 'primary.main',
+                    color: 'secondary.light',
+                    textAlign: 'center',
+                    fontFamily: 'Poppins',
+                    fontSize: '16px',
+                    fontStyle: 'normal',
+                    fontWeight: '500',
+                    lineHeight: '24px',
+                    borderRadius: '0px 26px',
+                    border: !isValid ? '1px solid grey.600' : '1px solid primary.main',
+                    padding: '12px 30px',
+                    '&:hover': {
+                      backgroundColor: !isValid ? 'grey.600' : 'primary.light',
+                      border: !isValid ? '1px solid grey.600' : '1px solid primary.light',
+                    },
+                    marginLeft: '20px',
+                  }}
+                  onClick={closeModal}
+                  disabled={!isValid}
+                >
+                  {t('close-window')}
+                </Button>
+              )}
+            </Grid>
           </Grid>
-        </Grid>
-      </FormControl>
+        </FormControl>
+      </form>
     </Box>
   )
 }

@@ -92,9 +92,11 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const response = await getCart(req as NextApiRequest, res as NextApiResponse)
   const { serverRuntimeConfig } = getConfig()
   const isMultiShipEnabled = serverRuntimeConfig.isMultiShipEnabled
-  const { cartTopSection, cartBottomSection } = publicRuntimeConfig?.builderIO?.modelKeys || {}
+  const { cartTopSection, cartBottomSection, cartEmptySection } =
+    publicRuntimeConfig?.builderIO?.modelKeys || {}
   const cartTopContentSection = await builder.get(cartBottomSection).promise()
   const cartBottomContentSection = await builder.get(cartTopSection).promise()
+  const cartEmptyContentSection = await builder.get(cartEmptySection).promise()
 
   return {
     props: {
@@ -102,6 +104,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       cart: response?.currentCart || null,
       cartTopContentSection: cartTopContentSection || null,
       cartBottomContentSection: cartBottomContentSection || null,
+      cartEmptyContentSection: cartEmptyContentSection || null,
       metaData: getMetaData(),
       ...(await serverSideTranslations(locale as string, ['common'])),
     },
@@ -109,8 +112,9 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 }
 
 const CartPage: NextPage<CartPageType> = (props: any) => {
-  const { cartTopContentSection, cartBottomContentSection } = props
-  const { cartTopSection, cartBottomSection } = publicRuntimeConfig?.builderIO?.modelKeys || {}
+  const { cartTopContentSection, cartBottomContentSection, cartEmptyContentSection } = props
+  const { cartTopSection, cartBottomSection, cartEmptySection } =
+    publicRuntimeConfig?.builderIO?.modelKeys || {}
   return (
     <>
       <CartTemplate
@@ -123,6 +127,11 @@ const CartPage: NextPage<CartPageType> = (props: any) => {
         cartBottomContentSection={
           cartBottomContentSection && (
             <BuilderComponent model={cartBottomSection} content={cartBottomContentSection} />
+          )
+        }
+        cartEmptyContentSection={
+          cartEmptyContentSection && (
+            <BuilderComponent model={cartEmptySection} content={cartEmptyContentSection} />
           )
         }
       />
