@@ -38,6 +38,7 @@ const tableCellLinkStyle = {
 
 const ProductRecentDocuments = (props: any) => {
   const { code, properties, documents } = props
+  const hostUrl = `https://${process.env.NEXT_PUBLIC_KIBO_HOST}`
 
   const [filteredDocuments, setFilteredDocuments] = useState([])
   const [showAllChecked, setShowAllChecked] = useState(false)
@@ -120,7 +121,7 @@ const ProductRecentDocuments = (props: any) => {
               <TableRow key={document.id}>
                 <TableCell sx={{ ...tableCellStyles, width: '60%' }}>
                   <Link
-                    href={document.properties.sourceurl}
+                    href={`${hostUrl}${'/cms/files/'}${document.properties.salsifyname}`}
                     target="_blank"
                     style={{
                       ...tableCellLinkStyle,
@@ -149,7 +150,7 @@ const ProductRecentDocuments = (props: any) => {
                 </TableCell>
                 <TableCell sx={{ ...tableCellStyles, textAlign: 'left', width: '15%' }}>
                   <Link
-                    href={document.properties.sourceurl}
+                    href={`${hostUrl} ${'/cms/files/'} ${document.properties.salsifyname}`}
                     target="_blank"
                     style={{
                       ...tableCellLinkStyle,
