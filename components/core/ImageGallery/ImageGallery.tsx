@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 
 import ArrowBackIos from '@mui/icons-material/ArrowBackIos'
 import ArrowForwardIos from '@mui/icons-material/ArrowForwardIos'
@@ -14,8 +14,6 @@ import { useTranslation } from 'next-i18next'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 
 import { KiboImage } from '@/components/common'
-import { PdpImageGalleryDialog } from '@/components/dialogs'
-import { useModalContext } from '@/context/ModalContext'
 import { productGetters } from '@/lib/getters'
 import { swipeDetect } from '@/lib/helpers'
 import DefaultImage from '@/public/noImage.png'
@@ -23,9 +21,7 @@ import DefaultImage from '@/public/noImage.png'
 import type { ProductImage } from '@/lib/gql/types'
 
 interface ImageGalleryProps {
-  digitalAssets: any
-  kiboImages: ProductImage[]
-  brandImage: any
+  images: ProductImage[]
   title: string
   isZoomed?: boolean
   thumbnailDisplayCount?: number
@@ -33,7 +29,7 @@ interface ImageGalleryProps {
 }
 
 const NumberOfPxToScroll = 136
-const ThumbnailDimensionInPx = 120
+const ThumbnailDimensionInPx = 119
 
 const styles = {
   dots: {
@@ -49,72 +45,12 @@ const styles = {
 
 const ImageGallery = (props: ImageGalleryProps) => {
   const {
-    digitalAssets,
-    kiboImages,
-    brandImage,
+    images,
     title,
     isZoomed = false,
-    thumbnailDisplayCount = 3,
+    thumbnailDisplayCount = 4,
     placeholderImageUrl = DefaultImage,
   } = props
-  const [isLoading, setIsLoading] = useState(true)
-
-  const { showModal, closeModal } = useModalContext()
-
-  const imageAssets = digitalAssets
-    .filter(
-      (asset: { properties: { assettype: string } }) =>
-        asset.properties.assettype === 'ProductImage'
-    )
-    .map((asset: { properties: any }) => asset.properties)
-    .sort((a: { sortorder: number }, b: { sortorder: number }) => a.sortorder - b.sortorder)
-
-  function mergeAndSortArrays(array1: any[], array2: ProductImage[]) {
-    // Create a map to efficiently find objects in array2 by cmsid
-    const map = new Map(array2.map((obj) => [obj.cmsId, obj]))
-
-    // Loop through array1 and merge data based on cmsid
-    return (
-      array1
-        .map((obj1) => {
-          const obj2 = map.get(obj1.cmsid)
-          return {
-            ...obj1,
-            // Add properties from array2 if a match is found
-            ...(obj2 ? { imageUrl: obj2.imageUrl, altText: obj2.altText } : {}),
-          }
-        })
-        // Sort the merged array by sortorder (assuming it's a number)
-        .sort((a, b) => a.sortorder - b.sortorder)
-    )
-  }
-
-  const images = mergeAndSortArrays(imageAssets, kiboImages)
-
-  const [showArrow, setArrowVisibility] = useState({
-    up: false,
-    down: false,
-  })
-
-  // Set isLoading to false when images are loaded or processed
-  useEffect(() => {
-    if (images && images.length > 0) {
-      setIsLoading((prev) => {
-        if (!prev) return false // Avoid unnecessary state updates
-        return false
-      })
-    }
-
-    if (images && images.length > 2) {
-      setArrowVisibility((prevState) => {
-        if (prevState.down) return prevState // Avoid unnecessary state updates
-        return {
-          ...prevState,
-          down: true,
-        }
-      })
-    }
-  }, [images])
 
   const { t } = useTranslation('common')
 
@@ -123,18 +59,22 @@ const ImageGallery = (props: ImageGalleryProps) => {
   })
 
   // handle if vertical slider arrow should be visible or not
+  const [showArrow, setArrowVisibility] = useState({
+    up: false,
+    down: images?.length > thumbnailDisplayCount,
+  })
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
 
-  // // Mobile: handle touch swipe
+  // Mobile: handle touch swipe
   const handleSwipe = () => {
     const gestureZone = document.getElementById('gestureZone')
     if (gestureZone) {
       swipeDetect(gestureZone, (dir: string) => {
         if (dir === 'left' && selectedImage.selectedIndex !== images?.length - 1) {
-          setSelectedImage({ ...selectedImage, selectedIndex: selectedImage.selectedIndex + 1 })
+          setSelectedImage({ selectedIndex: selectedImage.selectedIndex + 1 })
         } else if (dir === 'right' && selectedImage.selectedIndex > 0) {
-          setSelectedImage({ ...selectedImage, selectedIndex: selectedImage.selectedIndex - 1 })
+          setSelectedImage({ selectedIndex: selectedImage.selectedIndex - 1 })
         }
       })
     }
@@ -169,82 +109,7 @@ const ImageGallery = (props: ImageGalleryProps) => {
     )
   }
 
-  const openImageGalary = (images: any, selectedImage: any) => {
-    showModal({
-      Component: PdpImageGalleryDialog,
-      props: {
-        images: images,
-        SelectedImage: selectedImage,
-      },
-    })
-  }
-
   const maxHeight = thumbnailDisplayCount * ThumbnailDimensionInPx + thumbnailDisplayCount * 12 + 60
-
-  if (isLoading) {
-    return (
-      <Box
-        id="gestureZone"
-        component={'div'}
-        onTouchStartCapture={handleSwipe}
-        data-testid="gestureZone"
-      >
-        {/* Gallary Section start */}
-        <Stack
-          direction="row"
-          spacing={{ xs: 0, md: images?.length ? 2 : 0 }}
-          maxHeight={maxHeight}
-        >
-          <Box
-            position="relative"
-            sx={{
-              border: { xs: 'none', md: '1px solid #ccc' },
-              width: { xs: '100%', md: '90%' },
-              height: { xs: '40vh', md: 596 },
-              maxWidth: '464px',
-              maxHeight: '464px',
-            }}
-            display="flex"
-            flexDirection={'column'}
-            alignItems={'center'}
-            justifyContent="flex-start"
-          >
-            <TransformWrapper>
-              <>
-                <TransformComponent
-                  wrapperStyle={{
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}
-                  contentStyle={{ width: '100%', height: '100%' }}
-                >
-                  <Box
-                    width="100%"
-                    display="flex"
-                    flexDirection="row"
-                    flexWrap="wrap"
-                    alignContent="center"
-                    justifyContent="space-between"
-                    position="relative"
-                  >
-                    <KiboImage
-                      src={brandImage || placeholderImageUrl}
-                      alt={t('product-image-alt')}
-                      fill
-                      sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      style={{ objectFit: 'contain' }}
-                    />
-                  </Box>
-                </TransformComponent>
-              </>
-            </TransformWrapper>
-          </Box>
-        </Stack>
-      </Box>
-    )
-  }
 
   return (
     <Box
@@ -311,19 +176,19 @@ const ImageGallery = (props: ImageGalleryProps) => {
                     sx={{
                       borderWidth: i === selectedImage.selectedIndex ? 3 : 1,
                       borderStyle: 'solid',
-                      borderColor: 'primary.main',
+                      borderColor: 'grey.600',
                       cursor: 'pointer',
                     }}
-                    aria-label={(image?.imagealt as string) || t('product-image-alt')}
+                    aria-label={image?.altText || ''}
                     aria-selected={i === selectedImage.selectedIndex}
-                    onClick={() => setSelectedImage({ ...selectedImage, selectedIndex: i })}
+                    onClick={() => setSelectedImage({ selectedIndex: i })}
                   >
                     <KiboImage
                       src={
                         productGetters.handleProtocolRelativeUrl(image?.imageUrl as string) ||
                         placeholderImageUrl
                       }
-                      alt={(image?.imagealt as string) || t('product-image-alt')}
+                      alt={(image?.altText as string) || t('product-image-alt')}
                       fill
                       sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       style={{ objectFit: 'contain' }}
@@ -354,12 +219,7 @@ const ImageGallery = (props: ImageGalleryProps) => {
             <IconButton
               aria-label="previous"
               disabled={selectedImage.selectedIndex < 1}
-              onClick={() =>
-                setSelectedImage({
-                  ...selectedImage,
-                  selectedIndex: selectedImage.selectedIndex - 1,
-                })
-              }
+              onClick={() => setSelectedImage({ selectedIndex: selectedImage.selectedIndex - 1 })}
             >
               <ArrowBackIos />
             </IconButton>
@@ -371,8 +231,6 @@ const ImageGallery = (props: ImageGalleryProps) => {
             border: { xs: 'none', md: '1px solid #ccc' },
             width: { xs: '100%', md: '90%' },
             height: { xs: '40vh', md: 596 },
-            maxWidth: '464px',
-            maxHeight: '464px',
           }}
           display="flex"
           flexDirection={'column'}
@@ -402,44 +260,6 @@ const ImageGallery = (props: ImageGalleryProps) => {
                     <Replay />
                   </IconButton>
                 </Box>
-                <Box
-                  justifyContent="flex-end"
-                  width="100%"
-                  sx={{
-                    display: 'flex',
-                  }}
-                >
-                  {images[selectedImage.selectedIndex]?.imagetitle ? (
-                    <IconButton
-                      sx={{
-                        position: 'absolute', // Position the button relative to the parent
-                        top: '10px', // Adjust the vertical positioning
-                        right: '10px', // Adjust the horizontal positioning
-                        display: 'flex',
-                        margin: 0,
-                        alignItems: 'center',
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '3px',
-                        backgroundColor: 'primary.main',
-                        zIndex: 10, // Ensure it appears above the image
-                        '& span': {
-                          color: 'secondary.light',
-                          fontSize: '32px',
-                        },
-                        '&:hover': {
-                          backgroundColor: 'primary.light',
-                        },
-                      }}
-                      aria-label="zoom in"
-                      onClick={() => openImageGalary(images, selectedImage)}
-                    >
-                      <span className="material-symbols-outlined">zoom_in</span>
-                    </IconButton>
-                  ) : (
-                    <></>
-                  )}
-                </Box>
                 <TransformComponent
                   wrapperStyle={{
                     width: '100%',
@@ -459,14 +279,11 @@ const ImageGallery = (props: ImageGalleryProps) => {
                     position="relative"
                   >
                     <KiboImage
-                      key={selectedImage.selectedIndex}
                       src={
                         images?.length
-                          ? images[selectedImage.selectedIndex]?.imageUrl
-                            ? productGetters.handleProtocolRelativeUrl(
-                                images[selectedImage.selectedIndex]?.imageUrl as string
-                              )
-                            : placeholderImageUrl
+                          ? productGetters.handleProtocolRelativeUrl(
+                              images[selectedImage.selectedIndex]?.imageUrl as string
+                            )
                           : placeholderImageUrl
                       }
                       alt={
@@ -490,12 +307,7 @@ const ImageGallery = (props: ImageGalleryProps) => {
             <IconButton
               aria-label="next"
               disabled={selectedImage.selectedIndex == images?.length - 1}
-              onClick={() =>
-                setSelectedImage({
-                  ...selectedImage,
-                  selectedIndex: selectedImage.selectedIndex + 1,
-                })
-              }
+              onClick={() => setSelectedImage({ selectedIndex: selectedImage.selectedIndex + 1 })}
             >
               <ArrowForwardIos />
             </IconButton>
@@ -516,14 +328,14 @@ const ImageGallery = (props: ImageGalleryProps) => {
           justifyContent: 'center',
         }}
       >
-        {images?.map((_: any, i: any) => (
+        {images?.map((_, i) => (
           <Box
             key={i}
             sx={{
               ...styles.dots,
               backgroundColor: i === selectedImage.selectedIndex ? 'text.primary' : 'grey.500',
             }}
-            onClick={() => setSelectedImage({ ...selectedImage, selectedIndex: i })}
+            onClick={() => setSelectedImage({ selectedIndex: i })}
           ></Box>
         ))}
       </Box>

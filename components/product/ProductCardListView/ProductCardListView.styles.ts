@@ -15,7 +15,6 @@ export const ProductCardStyles = {
     borderStyle: 'solid',
     boxShadow: 'none',
     cursor: 'pointer',
-    borderRadius: '0 0 25px 0',
     '&:hover': {
       boxShadow: '0 2px 16px 4px rgb(11 32 61 / 7%)',
       borderColor: 'primary.light',
@@ -36,6 +35,7 @@ export const ProductCardStyles = {
     },
     position: 'relative',
     zIndex: 1,
+    mt: 3,
   },
   shopNow: { width: '100%', marginTop: '3.063rem' },
   hoveredButtons: {
@@ -90,7 +90,7 @@ export const ProductCardStyles = {
     justifyContent: 'flexStart',
     padding: '0px 10px',
     alignItems: 'end',
-    margin: '10px 0',
+    marginBottom: '30px',
   },
   brandLable: {
     color: '#020027',
@@ -100,22 +100,17 @@ export const ProductCardStyles = {
     lineHeight: 'normal',
     fontFamily: 'Poppins',
   },
-  brandLogoContainer: {
+  brandLogoImage: {
     width: '127px',
     height: '45px',
     display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'end',
-    flexShrink: '0',
-  },
-  brandLogoImage: {
-    width: 'auto',
-    maxWidth: '100%',
-    maxHeight: '45px',
-    display: 'block',
+    top: '13px',
+    right: '13px',
+    position: 'absolute',
   },
   productTitle: {
-    flex: '1',
+    width: '85%',
+    height: 'auto',
     color: '#2B2B2B',
   },
 }

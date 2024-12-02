@@ -1,14 +1,19 @@
 import React from 'react'
 
 import { Box, Container, Typography } from '@mui/material'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
+import { KiboLogo } from '@/components/common'
+import { useGetCurrentOrder, useGetCurrentCheckout } from '@/hooks'
+
 const checkoutHeaderStyles = {
   container: {
-    height: '40px',
+    backgroundColor: 'common.black',
+    height: '55px',
     display: 'flex',
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     gap: 2,
   },
@@ -17,21 +22,32 @@ const checkoutHeaderStyles = {
 const CheckoutHeader = ({ isMultiShipEnabled }: { isMultiShipEnabled: boolean }) => {
   const { t } = useTranslation()
   const router = useRouter()
+  const { checkoutId } = router.query
+  const { data: multishipCheckout } = useGetCurrentCheckout({
+    checkoutId: checkoutId as string,
+    isMultiShip: isMultiShipEnabled,
+  })
 
-  const gotoCart = () => {
-    router.push('/cart')
-  }
+  const { data: order } = useGetCurrentOrder({
+    checkoutId: checkoutId as string,
+    isMultiship: isMultiShipEnabled,
+  })
+  const numberOfItems = multishipCheckout?.items?.length || order?.items?.length
 
   return (
     <>
       <Container maxWidth="xl" sx={checkoutHeaderStyles.container} data-testid="checkout-header">
-        <Typography
-          variant="h6"
-          sx={{ color: 'primary.main', cursor: 'pointer' }}
-          onClick={gotoCart}
-        >
-          RETURN TO CART
-        </Typography>
+        <Box position="relative">
+          <Link href="/" passHref>
+            <KiboLogo small />
+          </Link>
+        </Box>
+
+        <Box>
+          <Typography variant={'h2'} component="div">
+            {t('checkout', { count: numberOfItems })}
+          </Typography>
+        </Box>
       </Container>
     </>
   )

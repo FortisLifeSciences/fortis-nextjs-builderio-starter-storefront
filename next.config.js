@@ -34,8 +34,6 @@ module.exports = {
       'images.ctfassets.net',
       'cdn.builder.io',
       'cdn-sb.euw1.kibocommerce.com',
-      'https://www.fortislife.com/',
-      'fortislife.cloud.akeneo.com',
     ],
     deviceSizes: [
       100, 240, 340, 380, 400, 450, 500, 550, 600, 640, 750, 828, 1080, 1200, 1920, 2048, 3840,
@@ -67,10 +65,6 @@ module.exports = {
     occasionAttributeFQN: 'Tenant~occasion',
     colorAttributeFQN: 'Tenant~Color',
     sizeAttributeFQN: 'Tenant~Size',
-    validationTextAttrFQN: 'tenant~validation-text',
-    citationCountVariantAttrFQN: 'tenant~citation-count-variant',
-    mfgCertificationAttrFQN: 'tenant~mfgcertification',
-    mfgAvailabilityAttrFQN: 'tenant~mfgavailability',
     paymentTypes: [
       {
         id: 'PurchaseOrder',
@@ -237,6 +231,10 @@ module.exports = {
   async rewrites() {
     //custom routes
     return [
+      {
+        source: '/products/:categoryCode', // Match category URLs of categories
+        destination: '/category/:categoryCode', // Destination of category handler
+      },
       {
         source: '/products/:categoryCode/:productSlug/:productCode', // Match product URLs under categories
         destination: '/product/:productCode', // Destination for the product page

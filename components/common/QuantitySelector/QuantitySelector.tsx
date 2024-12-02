@@ -23,11 +23,10 @@ interface QuantityInputProps {
 // MUI
 const styles = {
   iconButton: {
-    border: 2,
-    borderColor: 'primary.main',
-    color: 'primary.main',
-    height: 20,
-    width: 20,
+    border: 1,
+    borderColor: 'text.primary',
+    height: 22,
+    width: 22,
   },
 }
 
@@ -58,17 +57,12 @@ const QuantityTextField = ({ quantity, handleCustomQuantity }: QuantityInputProp
         inputMode: 'numeric',
         pattern: '[0-9]*',
         style: {
-          padding: '2px 5px',
+          paddingTop: 5,
+          paddingBottom: 5,
           textAlign: 'center',
-          color: '#000',
-          fontFamily: 'Poppins',
-          fontSize: '16px',
-          fontStyle: 'normal',
-          fontWeight: '300',
-          lineHeight: '25px',
         },
       }}
-      sx={{ width: '35px', height: '24px', borderRadius: '3px', border: '1px solid gray.900' }}
+      sx={{ width: '46px', height: '37px' }}
     />
   )
 }
@@ -81,12 +75,7 @@ const QuantitySelector = (props: QuantitySelectorProps) => {
   return (
     <Stack direction="row" justifyContent="flec-start" alignItems="center" spacing={1.2}>
       {label && (
-        <Typography
-          variant="body2"
-          component="span"
-          sx={{ pr: '0.5rem', color: 'gray.900' }}
-          data-testid="label"
-        >
+        <Typography variant="body2" component="span" sx={{ pr: '0.5rem' }} data-testid="label">
           {label}:
         </Typography>
       )}

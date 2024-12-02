@@ -34,7 +34,7 @@ export function buildProductPathByCode(productCode: string, options?: BuildPathO
   return joinPathParts(pathInput)
 }
 
-const categoryRoutePath = 'products'
+const categoryRoutePath = 'category'
 export function buildCategoryPath(category: PrCategory, options?: BuildPathOptions) {
   const { categoryCode, content } = category
   const pathInput: string[] = []

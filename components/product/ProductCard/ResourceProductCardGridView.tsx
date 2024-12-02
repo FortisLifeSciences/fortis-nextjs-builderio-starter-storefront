@@ -59,7 +59,6 @@ export interface ProductCardProps {
   priceRange?: ProductPriceRange
   productCode?: string
   resourceTypeName?: string
-  resourceType?: any
   categoryCode?: string
   parentCategoryName?: string
   productType?: string
@@ -104,7 +103,6 @@ const ResourceProductCardGridView = (props: ProductCardProps) => {
     brand = '',
     newProduct,
     resourceTypeName,
-    resourceType,
     categoryCode,
     parentCategoryName,
     productType,
@@ -164,16 +162,17 @@ const ResourceProductCardGridView = (props: ProductCardProps) => {
               {isResourceType &&
                 resourceTypeName &&
                 resourceTypeArr.map((data) => {
-                  return data.resourceType === resourceType?.value ? (
+                  return data.resourceType === resourceTypeName ? (
                     <Box
                       sx={{
                         ...ProductCardStyles.resourceIcon,
+                        '&::before': {
+                          content: `'${data.value}'`,
+                          fontFamily: 'Material Icons',
+                          fontSize: '24px',
+                        },
                       }}
-                    >
-                      <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>
-                        {data.value}
-                      </span>
-                    </Box>
+                    ></Box>
                   ) : (
                     ''
                   )
@@ -238,20 +237,10 @@ const ResourceProductCardGridView = (props: ProductCardProps) => {
                 />
               </CardMedia>
               <Box flexDirection="column" m={1}>
-                <Typography
-                  variant="body2"
-                  gutterBottom
-                  color="text.primary"
-                  sx={ProductCardStyles.brandLabel}
-                >
+                <Typography variant="body1" gutterBottom color="text.primary">
                   {isResourceType ? parentCategoryName : brand}
                 </Typography>
-                <Typography
-                  variant="body2"
-                  gutterBottom
-                  fontWeight={500}
-                  sx={ProductCardStyles.productNameStyle}
-                >
+                <Typography variant="body1" gutterBottom color="text.primary">
                   {variationProductCode ? variantProductName : title}
                 </Typography>
                 {/* <Price

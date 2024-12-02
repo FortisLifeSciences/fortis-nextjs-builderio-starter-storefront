@@ -120,7 +120,7 @@ const StandardShippingStep = (props: ShippingProps) => {
     const address = {
       contact: {
         ...contact,
-        email: checkout?.email ?? (user?.emailAddress as string),
+        email: user?.emailAddress as string,
       },
     } as Address
 
@@ -191,7 +191,7 @@ const StandardShippingStep = (props: ShippingProps) => {
       await updateOrderShippingInfo.mutateAsync({
         checkout,
         contact: undefined,
-        email: checkout?.email ?? (user?.emailAddress as string),
+        email: undefined,
         shippingMethodCode,
         shippingMethodName,
       })

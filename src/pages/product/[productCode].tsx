@@ -5,13 +5,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
 import { ProductDetailTemplate, ProductDetailSkeleton } from '@/components/page-templates'
 import { ProductRecommendations } from '@/components/product'
-import { useGetProduct } from '@/hooks/queries/product/useGetProduct/useGetProduct'
-import {
-  getProduct,
-  getCategoryTree,
-  productSearch,
-  getProductSearchVariations,
-} from '@/lib/api/operations'
+import { getProduct, getCategoryTree, productSearch } from '@/lib/api/operations'
 import { productGetters } from '@/lib/getters'
 import { buildProductPath } from '@/lib/helpers'
 import type { CategorySearchParams, MetaData, PageWithMetaData, ProductCustom } from '@/lib/types'
@@ -29,7 +23,6 @@ const { serverRuntimeConfig } = getConfig()
 interface ProductPageType extends PageWithMetaData {
   categoriesTree?: PrCategory[]
   product?: Product
-  productVariations?: Product[]
   section?: any
 }
 
@@ -67,12 +60,8 @@ export async function getStaticProps(
   const { locale, params } = context
   const { productCode } = params as any
   const product = await getProduct(productCode)
-  const productVariations = await getProductSearchVariations(productCode)
   const categoriesTree = await getCategoryTree()
   if (!product) {
-    return { notFound: true }
-  }
-  if (!productVariations) {
     return { notFound: true }
   }
   const pdpBuilderSectionKey = publicRuntimeConfig?.builderIO?.modelKeys?.productDetailSection || ''
@@ -83,7 +72,6 @@ export async function getStaticProps(
   return {
     props: {
       product,
-      productVariations,
       categoriesTree,
       section: section || null,
       metaData: getMetaData(product),
@@ -105,38 +93,20 @@ export async function getStaticPaths(): Promise<GetStaticPathsResult> {
 }
 
 const ProductDetailPage: NextPage<ProductPageType> = (props) => {
-  const { product, productVariations } = props
+  const { product } = props
   const router = useRouter()
+  const { isFallback } = router
 
-  const { isFallback, query } = router
-
-  const {
-    data: productResponseData,
-    isLoading: isProductLoading,
-    queryParams: queryParams,
-  } = useGetProduct(query)
-
-  const { sliceValue } = queryParams
-
-  if (isFallback || isProductLoading) {
+  if (isFallback) {
     return <ProductDetailSkeleton />
   }
   const pdpBuilderSectionKey = publicRuntimeConfig?.builderIO?.modelKeys?.productDetailSection || ''
   const breadcrumbs = product ? productGetters.getBreadcrumbs(product) : []
   return (
     <>
-      {productResponseData ? (
-        <ProductDetailTemplate
-          product={{ ...product, ...productResponseData }}
-          productVariations={productVariations}
-          breadcrumbs={breadcrumbs}
-          sliceValue={sliceValue}
-        >
-          <BuilderComponent model={pdpBuilderSectionKey} content={props.section} />
-        </ProductDetailTemplate>
-      ) : (
-        <ProductDetailSkeleton />
-      )}
+      <ProductDetailTemplate product={product as ProductCustom} breadcrumbs={breadcrumbs}>
+        <BuilderComponent model={pdpBuilderSectionKey} content={props.section} />
+      </ProductDetailTemplate>
     </>
   )
 }

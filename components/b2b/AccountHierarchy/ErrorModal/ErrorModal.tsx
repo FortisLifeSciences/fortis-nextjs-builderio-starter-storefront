@@ -1,13 +1,9 @@
 import { useEffect, useState } from 'react'
 
 import { Button, FormControl, Stack, Grid, Box, Typography, Divider, Link } from '@mui/material'
-import router from 'next/router'
 import { useTranslation } from 'next-i18next'
 
 import { B2BAccountCreateFormStyles } from '../B2BAccountCreateForm/B2BAccountCreateForm.styles'
-import { KiboImage } from '@/components/common'
-import errorlogo from '@/public/icons/Frame.png'
-import DefaultImage from '@/public/noImage.png'
 
 interface AccountHierarchyFormProps {
   primaryButtonText: string
@@ -19,7 +15,7 @@ const ErrorModal = (props: AccountHierarchyFormProps) => {
   const { t } = useTranslation()
 
   const contactUs = async () => {
-    router.push('/contact-us')
+    alert('There was an error submitting your message.')
   }
 
   const primaryBtnCss = { ...B2BAccountCreateFormStyles.buttonPrimary }
@@ -41,11 +37,6 @@ const ErrorModal = (props: AccountHierarchyFormProps) => {
                   lineHeight: '25px',
                 }}
               >
-                <KiboImage
-                  src={errorlogo || DefaultImage}
-                  alt={'error image'}
-                  style={{ objectFit: 'contain', width: '28px', height: '28px' }}
-                />
                 {t('contact-us-ErrorMsg-part1')}
                 <Link
                   component="button"
