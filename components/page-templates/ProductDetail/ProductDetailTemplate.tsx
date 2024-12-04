@@ -630,7 +630,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     stockBehaviour?.toLowerCase() === 'denybackorder' &&
     stockAvailable >= minimumStock
       ? stockAvailable - minimumStock
-      : undefined
+      : null
   return (
     <Grid container>
       {!isQuickViewModal && (
@@ -907,7 +907,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                       <QuantitySelector
                         label="Quantity"
                         quantity={quantity}
-                        {...(maxQuantity !== undefined ? { maxQuantity } : {})}
+                        {...(maxQuantity ? { maxQuantity } : {})}
                         onIncrease={() => setQuantity((prevQuantity) => Number(prevQuantity) + 1)}
                         onDecrease={() => setQuantity((prevQuantity) => Number(prevQuantity) - 1)}
                       />
