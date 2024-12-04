@@ -326,7 +326,7 @@ const ProductInventoryMessages = ({
         } */
 
     // Default business week days
-    const businessWeekDays: any = [false, true, true, true, true, true, false]
+    const businessWeekDays: any = [false, true, true, true, true, false, false]
 
     // Initialize cutoff time
     const cutoffTime = new Date(shippingTime)
