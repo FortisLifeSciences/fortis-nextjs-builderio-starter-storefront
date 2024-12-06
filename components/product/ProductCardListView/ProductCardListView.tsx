@@ -3,7 +3,6 @@ import React, { MouseEvent } from 'react'
 import { ArrowForwardIos } from '@mui/icons-material'
 import FavoriteBorderRounded from '@mui/icons-material/FavoriteBorderRounded'
 import FavoriteRounded from '@mui/icons-material/FavoriteRounded'
-import StarRounded from '@mui/icons-material/StarRounded'
 import {
   Card,
   Typography,
@@ -15,7 +14,6 @@ import {
   Button,
   IconButton,
 } from '@mui/material'
-import { data } from 'cheerio/dist/commonjs/api/attributes'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 
@@ -33,7 +31,6 @@ import ipoc from '@/public/Brand_Logo/ipoc-logo.png'
 import nanocomposix from '@/public/Brand_Logo/nanocomposix-logo.png'
 import vector from '@/public/Brand_Logo/vector-logo.png'
 import DefaultImage from '@/public/noImage.png'
-import DefaultImage1 from '@/public/product_placeholder.svg'
 
 import type { ProductPriceRange } from '@/lib/gql/types'
 const brandImages: Record<string, string> = {
