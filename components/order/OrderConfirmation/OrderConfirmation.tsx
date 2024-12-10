@@ -15,12 +15,16 @@ const OrderConfirmation = ({ order }: { order: CrOrder }) => {
   const { t } = useTranslation('common')
   const componentRef = useRef(null)
 
+  console.log('This is order item ---> ', order)
+
   const orderTotal = orderGetters.getTotal(order)
   const orderNumber = orderGetters.getOrderNumber(order)
   const submittedDate = orderGetters.getSubmittedDate(order)
   const pickupItems = orderGetters.getPickupItems(order)
   const shipItems = orderGetters.getShipItems(order)
   const email = orderGetters.getEmail(order)
+  const shippingDetails = orderGetters.getShippingDetails(order)
+  const billingDetails = orderGetters.getBillingDetails(order)
 
   const options = [
     {

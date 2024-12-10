@@ -387,6 +387,8 @@ export const orderGetters = {
   getDiscountedSubtotal,
   getOrderDiscounts,
   getPickupItems,
+  getShippingDetails,
+  getBillingDetails,
   getShipItems,
   getCartItemId,
   getProductQuantity,
