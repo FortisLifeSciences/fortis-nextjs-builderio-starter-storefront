@@ -79,7 +79,7 @@ const ProductRecentDocuments = (props: any) => {
   }
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ width: '100%' }} id="document-section">
       <Typography variant="h3" pt={2} sx={{ mb: '10px', color: '#30299A', fontSize: '30px' }}>
         Recent Documents for {code}
       </Typography>
