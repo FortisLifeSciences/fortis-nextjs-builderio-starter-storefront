@@ -101,8 +101,7 @@ export const FortisRadio = (props: FortisRadioProps) => {
         >
           Catalog #
         </Typography>
-        {countryCode !== 'US' &&
-          ousShowPrices &&
+        {((countryCode !== 'US' && ousShowPrices) || countryCode === 'US') &&
           (skuStatusText === 'CustomCTA' ? showPrices : true) && (
             <Typography
               sx={{
@@ -208,8 +207,7 @@ export const FortisRadio = (props: FortisRadioProps) => {
               </Typography>
 
               {/* Price */}
-              {countryCode !== 'US' &&
-                ousShowPrices &&
+              {((countryCode !== 'US' && ousShowPrices) || countryCode === 'US') &&
                 (skuStatusText === 'CustomCTA' ? showPrices : true) && (
                   <Typography
                     sx={{
