@@ -194,7 +194,6 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
       priceRange: productGetters.getPriceRange(product),
       title: productGetters.getName(product),
       brand: productGetters.getBrandName(properties),
-      catalogNumber: productGetters.getCatalogNumber(properties),
       newProduct: productGetters.getNewProductAttrName(properties),
       variantProductName: productGetters.getVariantProductAttributeName(properties),
       rating: productGetters.getRating(product),

@@ -10,10 +10,12 @@ import {
   FormControlLabel,
   Checkbox,
   NoSsr,
+  Divider,
 } from '@mui/material'
 import getConfig from 'next/config'
 import { useTranslation } from 'next-i18next'
 
+import { StandardShippingStepStyle } from './standardShippingStep.style'
 import { ShippingMethod } from '@/components/checkout'
 import { AddressCard, AddressForm, KiboRadio } from '@/components/common'
 import { useCheckoutStepContext, STEP_STATUS, useAuthContext } from '@/context'
@@ -66,7 +68,7 @@ const StandardShippingStep = (props: ShippingProps) => {
   const pickupItems = orderGetters.getPickupItems(checkout)
   const digitalItems = orderGetters.getDigitalItems(checkout)
 
-  const [isAddressSavedToAccount, setIsAddressSavedToAccount] = useState<boolean>(false)
+  const [isAddressSavedToAccount, setIsAddressSavedToAccount] = useState<boolean>(true)
   const [validateForm, setValidateForm] = useState<boolean>(false)
   const [checkoutId, setCheckoutId] = useState<string | null | undefined>(undefined)
   const [isAddressFormValid, setIsAddressFormValid] = useState<boolean>(false)
@@ -86,6 +88,12 @@ const StandardShippingStep = (props: ShippingProps) => {
   const [shouldShowAddAddressButton, setShouldShowAddAddressButton] = useState<boolean>(
     Boolean(savedShippingAddresses?.length)
   )
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      setIsAddressSavedToAccount(true)
+    }
+  }, [isAuthenticated])
 
   const defaultShippingAddress = userGetters.getDefaultShippingAddress(
     savedShippingAddresses as CustomerContact[]
@@ -136,6 +144,15 @@ const StandardShippingStep = (props: ShippingProps) => {
 
   const handleSaveAddressToCheckout = async ({ contact }: { contact: CrContact }) => {
     try {
+      // Directly modify the properties of `contact`
+      contact.phoneNumbers = {
+        ...contact.phoneNumbers,
+        work: contact?.phoneNumbers?.home, // Add work with the value of home
+      }
+      contact.address = {
+        ...contact.address,
+        addressType: 'commercial', // Add addressType with value commercial
+      }
       if (!allowInvalidAddresses && contact?.address?.countryCode === CountryCode.US) {
         await validateCustomerAddress.mutateAsync({
           addressValidationRequestInput: { address: contact?.address as CuAddress },
@@ -335,8 +352,8 @@ const StandardShippingStep = (props: ShippingProps) => {
 
   return (
     <Stack data-testid="checkout-shipping" gap={2} ref={shippingAddressRef}>
-      <Typography variant="h2" component="h2" sx={{ fontWeight: 'bold' }}>
-        {t('shipping')}
+      <Typography variant="h2" component="h2" sx={{ color: 'primary.main', margin: '0px 8px' }}>
+        {t('shipping-address')}
       </Typography>
       {shouldShowAddAddressButton && (
         <>
@@ -430,6 +447,7 @@ const StandardShippingStep = (props: ShippingProps) => {
               selectedShippingMethodCode={checkoutShippingMethodCode}
               onShippingMethodChange={handleSaveShippingMethod}
               onStoreLocatorClick={handleStoreLocatorClick}
+              checkout={checkout}
             />
           )}
         </>
@@ -445,7 +463,7 @@ const StandardShippingStep = (props: ShippingProps) => {
             onFormStatusChange={handleFormStatusChange}
           />
 
-          {isAuthenticated && (
+          {/* {isAuthenticated && (
             <FormControlLabel
               label={t('save-address-to-account')}
               control={
@@ -458,26 +476,44 @@ const StandardShippingStep = (props: ShippingProps) => {
                 />
               }
             />
-          )}
+          )} */}
 
-          <Box m={1} maxWidth={'872px'} data-testid="address-form">
+          <Box m={1} maxWidth={'872px'} data-testid="address-form" sx={{ marginTop: '-24px' }}>
+            <Divider sx={{ marginBottom: '20px' }} />
             <Grid container>
-              <Grid item xs={6} gap={2} display={'flex'} direction={'column'}>
+              {/* <Grid item xs={6} gap={2} display={'flex'} direction={'column'}> */}
+              <Grid
+                item
+                xs={12}
+                gap={2}
+                display={'flex'}
+                direction={'row'}
+                sx={{ justifyContent: 'space-between' }}
+              >
                 <Button
-                  variant="contained"
-                  color="secondary"
+                  sx={{ ...StandardShippingStepStyle.secondaryButton }}
                   onClick={() => setShouldShowAddAddressButton(true)}
                 >
-                  {t('cancel')}
+                  <Typography sx={{ fontSize: '1rem', lineHeight: '1.5rem', fontWeight: '300' }}>
+                    {t('cancel')}
+                  </Typography>
                 </Button>
                 <Button
-                  variant="contained"
-                  color="inherit"
-                  style={{ textTransform: 'none' }}
+                  sx={{
+                    ...StandardShippingStepStyle.primaryButton,
+                    ':disabled': {
+                      backgroundColor: 'grey.600',
+                      borderColor: 'grey.600', // Change the background color when disabled
+                      color: 'white', // Change the text color when disabled
+                      cursor: 'not-allowed', // Optional: Indicate the button is not clickable
+                    },
+                  }}
                   onClick={handleAddressValidationAndSave}
                   {...(!isAddressFormValid && { disabled: true })}
                 >
-                  {t('save-shipping-address')}
+                  <Typography sx={{ fontSize: '1rem', lineHeight: '1.5rem', fontWeight: '300' }}>
+                    {t('save-shipping-address')}
+                  </Typography>
                 </Button>
               </Grid>
             </Grid>

@@ -175,6 +175,10 @@ export const baseCheckoutFragment = /* GraphQL */ `
         }
       }
     }
+    attributes {
+      fullyQualifiedName
+      values
+    }
   }
 `
 export const billingContactFragment = /* GraphQL */ `
@@ -224,6 +228,7 @@ export const fullfillmentInfoFragment = /* GraphQL */ `
       middleNameOrInitial
       phoneNumbers {
         home
+        work
       }
     }
   }

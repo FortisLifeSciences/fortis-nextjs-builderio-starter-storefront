@@ -144,27 +144,33 @@ const ProductInventoryMessages = ({
           '==buffer:' +
           buffer
       )
+      if (skuStatusArr && skuStatus?.toLowerCase() === 'customcta') {
+        inventoryMessage = availabilityMessage
+        cartDisplayStatus = false
+        scenario = 1009
+        return { inventoryMessage, cartDisplayStatus, scenario }
+      }
       if (skuStatusArr && skuStatus?.toLowerCase() === 'active') {
         //for scenarion 3 on Backorder Restock Unknown
         if (
           stockBehaviour?.toLowerCase() === 'acceptbackorder' &&
-          availabilityMessage === null &&
-          stockAvailable <= minimumStock &&
+          availabilityMessage !== null &&
+          stockAvailable < minimumStock &&
           restockDate === null
         ) {
-          inventoryMessage = inventoryMessagesObj?.onBackorderRestockUnknown
+          inventoryMessage = availabilityMessage
           cartDisplayStatus = true
-          scenario = 3
+          scenario = 1005
           return { inventoryMessage, cartDisplayStatus, scenario }
         }
         //for scenarion 6 no Inventory No Backorder
         if (
           stockBehaviour?.toLowerCase() === 'denybackorder' &&
-          availabilityMessage === null &&
-          stockAvailable <= minimumStock &&
+          availabilityMessage !== null &&
+          stockAvailable < minimumStock &&
           restockDate === null
         ) {
-          inventoryMessage = inventoryMessagesObj?.noInventoryNoBackorder
+          inventoryMessage = availabilityMessage
           cartDisplayStatus = false
           scenario = 6
           return { inventoryMessage, cartDisplayStatus, scenario }
@@ -173,73 +179,69 @@ const ProductInventoryMessages = ({
         if (
           stockBehaviour?.toLowerCase() === 'madetoorder' &&
           availabilityMessage !== null &&
-          stockAvailable <= minimumStock &&
           restockDate === null
         ) {
-          inventoryMessage = inventoryMessagesObj?.leadTimeRequired.replace(
-            '{StockLeadTime}',
-            availabilityMessage
-          )
+          inventoryMessage = availabilityMessage
           cartDisplayStatus = true
           scenario = 5
           return { inventoryMessage, cartDisplayStatus, scenario }
         }
         //for scenario 4b=43 on Backorder Restock Anticipated
-        if (
-          stockBehaviour?.toLowerCase() === 'denybackorder' &&
-          availabilityMessage !== null &&
-          stockAvailable <= minimumStock &&
-          restockDate === null
-        ) {
-          inventoryMessage = inventoryMessagesObj?.onBackorderRestockAnticipated.replace(
-            '{StockLeadTime}',
-            availabilityMessage
-          )
-          cartDisplayStatus = false
-          scenario = 43
-          return { inventoryMessage, cartDisplayStatus, scenario }
-        }
+        // if (
+        //   stockBehaviour?.toLowerCase() === 'denybackorder' &&
+        //   availabilityMessage !== null &&
+        //   stockAvailable <= minimumStock &&
+        //   restockDate === null
+        // ) {
+        //   inventoryMessage = inventoryMessagesObj?.onBackorderRestockAnticipated.replace(
+        //     '{StockLeadTime}',
+        //     availabilityMessage
+        //   )
+        //   cartDisplayStatus = false
+        //   scenario = 43
+        //   return { inventoryMessage, cartDisplayStatus, scenario }
+        // }
         //for scenarion 4a=42 on Backorder RestockDate Available
-        if (
-          stockBehaviour?.toLowerCase() === 'acceptbackorder' &&
-          availabilityMessage === null &&
-          stockAvailable <= minimumStock &&
-          restockDate !== null
-        ) {
-          //console.log("selectCountryCode inside inventory:"+selectCountryCode);
-          USShippingCutOffTime = inventorySettings?.USShippingCutOffTime
-          CAShippingCutOffTime = inventorySettings?.CAShippingCutOffTime
-          if (selectCountryCode === 'United States') {
-            nonShippingDates = inventorySettings?.nonShippingDates
-          } /*else if(selectCountryCode==='Canada'){
-                        nonShippingDates = Hypr.getThemeSetting("nonShippingDatesCanada");
-                    }*/
+        // if (
+        //   stockBehaviour?.toLowerCase() === 'acceptbackorder' &&
+        //   availabilityMessage !== null &&
+        //   stockAvailable < minimumStock &&
+        //   restockDate !== null
+        // ) {
+        //   //console.log("selectCountryCode inside inventory:"+selectCountryCode);
+        //   USShippingCutOffTime = inventorySettings?.USShippingCutOffTime
+        //   CAShippingCutOffTime = inventorySettings?.CAShippingCutOffTime
+        //   if (selectCountryCode === 'United States') {
+        //     nonShippingDates = inventorySettings?.nonShippingDates
+        //   } /*else if(selectCountryCode==='Canada'){
+        //                 nonShippingDates = Hypr.getThemeSetting("nonShippingDatesCanada");
+        //             }*/
 
-          const restockDateAfterBuffer = new Date(restockDate)
-          //restockDateAfterBuffer.setDate(restockDateAfterBuffer.getDate() + buffer);
-          deliveryDate = getDeliveryDate(
-            selectCountryCode,
-            USShippingCutOffTime,
-            CAShippingCutOffTime,
-            nonShippingDates,
-            restockDateAfterBuffer,
-            buffer
-          )
-          //console.log("buffer=="+buffer+"restockDate=="+restockDate+"deliveryDate=="+deliveryDate);
-          inventoryMessage = inventoryMessagesObj?.onBackorderRestockDateAvailable.replace(
-            '{DeliveryDate}',
-            deliveryDate
-          )
-          cartDisplayStatus = true
-          scenario = 42
-          return { inventoryMessage, cartDisplayStatus, scenario }
-        }
+        //   const restockDateAfterBuffer = new Date(restockDate)
+        //   //restockDateAfterBuffer.setDate(restockDateAfterBuffer.getDate() + buffer);
+        //   deliveryDate = getDeliveryDate(
+        //     selectCountryCode,
+        //     USShippingCutOffTime,
+        //     CAShippingCutOffTime,
+        //     nonShippingDates,
+        //     restockDateAfterBuffer,
+        //     buffer
+        //   )
+        //   //console.log("buffer=="+buffer+"restockDate=="+restockDate+"deliveryDate=="+deliveryDate);
+        //   inventoryMessage = inventoryMessagesObj?.onBackorderRestockDateAvailable.replace(
+        //     '{DeliveryDate}',
+        //     deliveryDate
+        //   )
+        //   cartDisplayStatus = true
+        //   scenario = 42
+        //   availabilityMessage = ''
+        //   return { inventoryMessage, cartDisplayStatus, scenario }
+        // }
         //for scenarion 1 normal availability
         if (
           (stockBehaviour?.toLowerCase() === 'acceptbackorder' ||
-            stockBehaviour?.toLowerCase() === 'madetoorder') &&
-          availabilityMessage === null &&
-          stockAvailable > minimumStock &&
+            stockBehaviour?.toLowerCase() === 'denybackorder') &&
+          stockAvailable >= minimumStock &&
           restockDate === null
         ) {
           //selectCountryCode = product.get('selectedCountry');
@@ -365,7 +367,7 @@ const ProductInventoryMessages = ({
         nextworkingday = findNextWorkingDay(nextworkingday)
         j++
       }
-      return moment(nextworkingday).format('dddd, MMMM D')
+      return moment(nextworkingday).format('MMM D, YYYY')
     }
   }
 
@@ -555,7 +557,7 @@ const ProductInventoryMessages = ({
       {inventoryResponse && inventoryResponse.inventoryMessage && (
         <MessageBox message={inventoryResponse.inventoryMessage} />
       )}
-      {availabilityMessageArr && <MessageBox message={availabilityMessageArr} />}
+      {/* {availabilityMessageArr && <MessageBox message={availabilityMessageArr} />} */}
     </div>
   )
 }

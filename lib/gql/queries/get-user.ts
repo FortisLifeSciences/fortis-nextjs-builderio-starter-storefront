@@ -11,6 +11,10 @@ const getCurrentUser = /* GraphQL */ `
       companyOrOrganization
       accountType
       companyOrOrganization
+      attributes {
+        fullyQualifiedName
+        values
+      }
     }
   }
 `

@@ -4,6 +4,10 @@ export const updateCustomerData = /* GraphQL */ `
       firstName
       lastName
       emailAddress
+      attributes {
+        fullyQualifiedName
+        values
+      }
     }
   }
 `

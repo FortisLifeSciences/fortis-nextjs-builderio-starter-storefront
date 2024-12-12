@@ -17,6 +17,7 @@ import type { Address, ContactForm } from '@/lib/types'
 interface AddressFormProps {
   contact?: ContactForm
   countries?: string[]
+  states?: any
   isUserLoggedIn: boolean
   saveAddressLabel?: string
   isAddressFormInDialog?: boolean
@@ -33,6 +34,7 @@ export const useFormSchema = () => {
   return yup.object().shape({
     firstName: yup.string().required(t('this-field-is-required')),
     lastNameOrSurname: yup.string().required(t('this-field-is-required')),
+    companyOrOrganization: yup.string().required(t('this-field-is-required')),
     address: yup.object().shape({
       address1: yup.string().required(t('this-field-is-required')),
       address2: yup.string().nullable(true).notRequired(),
@@ -56,10 +58,11 @@ export const useFormSchema = () => {
 // Component
 const AddressForm = (props: AddressFormProps) => {
   const { publicRuntimeConfig } = getConfig()
-
+  console.log(publicRuntimeConfig)
   const {
     contact,
     countries = publicRuntimeConfig.countries,
+    states = publicRuntimeConfig.states,
     isUserLoggedIn = false,
     saveAddressLabel,
     isAddressFormInDialog = false,
@@ -99,6 +102,16 @@ const AddressForm = (props: AddressFormProps) => {
       )
     })
 
+  const generateSelectStateOptions = () => {
+    return states?.map((state: any) => {
+      return (
+        <MenuItem key={state.id} value={state.name}>
+          {state.name}
+        </MenuItem>
+      )
+    })
+  }
+
   const onValid = async (formData: ContactForm) =>
     onSaveAddress({ contact: formData, isDataUpdated: true })
 
@@ -123,6 +136,7 @@ const AddressForm = (props: AddressFormProps) => {
       noValidate
       autoComplete="off"
       data-testid="address-form"
+      onSubmit={handleSubmit(onValid)}
     >
       <Grid container rowSpacing={1} columnSpacing={{ md: 4 }}>
         <Grid item xs={12} md={isAddressFormInDialog ? 12 : 6}>
@@ -170,6 +184,74 @@ const AddressForm = (props: AddressFormProps) => {
 
         <Grid item xs={12}>
           <Controller
+            name="companyOrOrganization"
+            control={control}
+            defaultValue={contact?.companyOrOrganization}
+            render={({ field }) => (
+              <KiboTextBox
+                {...field}
+                value={field.value || ''}
+                label={t('company-or-organization')}
+                ref={null}
+                error={!!errors?.companyOrOrganization}
+                helperText={errors?.companyOrOrganization?.message}
+                onChange={(_name: string, value: string) => field.onChange(value)}
+                onBlur={field.onBlur}
+                required={true}
+              />
+            )}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 6}>
+          <Controller
+            name="phoneNumbers.home"
+            control={control}
+            defaultValue={contact?.phoneNumbers?.home}
+            render={({ field }) => (
+              <KiboTextBox
+                {...field}
+                value={field.value || ''}
+                label={t('phone-number-home')}
+                ref={null}
+                error={!!errors?.phoneNumbers?.home}
+                helperText={errors?.phoneNumbers?.home?.message}
+                onChange={(_name: string, value: string) => field.onChange(value)}
+                onBlur={field.onBlur}
+                required={true}
+              />
+            )}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 6}>
+          <Controller
+            name="address.countryCode"
+            control={control}
+            defaultValue={
+              contact?.address?.countryCode || countries.length === 1 ? countries[0] : ''
+            }
+            render={({ field }) => (
+              <div>
+                <KiboSelect
+                  name="country-code"
+                  label={t('country-code')}
+                  value={field.value}
+                  error={!!errors?.address?.countryCode}
+                  helperText={errors?.address?.countryCode?.message}
+                  onChange={(_name, value) => field.onChange(value)}
+                  onBlur={field.onBlur}
+                  required={true}
+                >
+                  {generateSelectOptions()}
+                </KiboSelect>
+              </div>
+            )}
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <Controller
             name="address.address1"
             control={control}
             defaultValue={contact?.address?.address1}
@@ -209,7 +291,7 @@ const AddressForm = (props: AddressFormProps) => {
           />
         </Grid>
 
-        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 6}>
+        <Grid item xs={12}>
           <Controller
             name="address.cityOrTown"
             control={control}
@@ -236,17 +318,33 @@ const AddressForm = (props: AddressFormProps) => {
             control={control}
             defaultValue={contact?.address?.stateOrProvince}
             render={({ field }) => (
-              <KiboTextBox
-                {...field}
-                value={field.value || ''}
-                label={t('state-or-province')}
-                ref={null}
-                error={!!errors?.address?.stateOrProvince}
-                helperText={errors?.address?.stateOrProvince?.message}
-                onChange={(_name: string, value: string) => field.onChange(value)}
-                onBlur={field.onBlur}
-                required={true}
-              />
+              // <>
+              // <KiboTextBox
+              //   {...field}
+              //   value={field.value || ''}
+              //   label={t('state-or-province')}
+              //   ref={null}
+              //   error={!!errors?.address?.stateOrProvince}
+              //   helperText={errors?.address?.stateOrProvince?.message}
+              //   onChange={(_name: string, value: string) => field.onChange(value)}
+              //   onBlur={field.onBlur}
+              //   required={true}
+              // />
+              <div>
+                <KiboSelect
+                  name="state-or-province"
+                  label={t('state-or-province')}
+                  value={field.value}
+                  error={!!errors?.address?.stateOrProvince}
+                  helperText={errors?.address?.stateOrProvince?.message}
+                  onChange={(_name: string, value: string) => field.onChange(value)}
+                  onBlur={field.onBlur}
+                  required={true}
+                >
+                  {generateSelectStateOptions()}
+                </KiboSelect>
+              </div>
+              // </>
             )}
           />
         </Grid>
@@ -264,53 +362,6 @@ const AddressForm = (props: AddressFormProps) => {
                 ref={null}
                 error={!!errors?.address?.postalOrZipCode}
                 helperText={errors?.address?.postalOrZipCode?.message}
-                onChange={(_name: string, value: string) => field.onChange(value)}
-                onBlur={field.onBlur}
-                required={true}
-              />
-            )}
-          />
-        </Grid>
-
-        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 6}>
-          <Controller
-            name="address.countryCode"
-            control={control}
-            defaultValue={
-              contact?.address?.countryCode || countries.length === 1 ? countries[0] : ''
-            }
-            render={({ field }) => (
-              <div>
-                <KiboSelect
-                  name="country-code"
-                  label={t('country-code')}
-                  value={field.value}
-                  error={!!errors?.address?.countryCode}
-                  helperText={errors?.address?.countryCode?.message}
-                  onChange={(_name, value) => field.onChange(value)}
-                  onBlur={field.onBlur}
-                  required={true}
-                >
-                  {generateSelectOptions()}
-                </KiboSelect>
-              </div>
-            )}
-          />
-        </Grid>
-
-        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 6}>
-          <Controller
-            name="phoneNumbers.home"
-            control={control}
-            defaultValue={contact?.phoneNumbers?.home}
-            render={({ field }) => (
-              <KiboTextBox
-                {...field}
-                value={field.value || ''}
-                label={t('phone-number-home')}
-                ref={null}
-                error={!!errors?.phoneNumbers?.home}
-                helperText={errors?.phoneNumbers?.home?.message}
                 onChange={(_name: string, value: string) => field.onChange(value)}
                 onBlur={field.onBlur}
                 required={true}

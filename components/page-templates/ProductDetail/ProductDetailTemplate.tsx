@@ -197,6 +197,8 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
   const [showPrices, setShowPrices] = useState<boolean | null>()
   const [customCTALabel, setcustomCTALabel] = useState<string | null>('')
   const [customCTATarget, setcustomTarget] = useState<string | null>('')
+  const [stockBehaviour, setStockBehaviourArr] = useState<string | null>('')
+  const [minimumStock, setMinimumStock] = useState<number>(0)
   // const [radioProductOptions, setRadioProductOptions] = useState<any>()
 
   const isSubscriptionModeAvailable = subscriptionGetters.isSubscriptionModeAvailable(product)
@@ -600,6 +602,15 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
         (data: any) => data?.attributeFQN === 'tenant~custom-cta-target'
       )?.values?.[0]?.stringValue || null
 
+    const stockBehaviourAttr =
+      updatedProduct?.properties?.find(
+        (data: any) => data?.attributeFQN === 'tenant~stock-behavior-option'
+      )?.values?.[0]?.stringValue || null
+
+    const minimumStockArr =
+      updatedProduct?.properties?.find((data: any) => data?.attributeFQN === 'tenant~minimum-stock')
+        ?.values?.[0]?.value || null
+
     setSkuStatusText(
       skuStatusTextProperty ? String(skuStatusTextProperty?.values?.[0]?.value) : null
     )
@@ -607,6 +618,8 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     setShowPrices(showPricesProperty ? Boolean(showPricesProperty?.values?.[0]?.value) : null)
     setcustomCTALabel(customCTALabelAttr ? String(customCTALabelAttr) : null)
     setcustomTarget(customCTATargetAttr ? String(customCTATargetAttr) : null)
+    setStockBehaviourArr(stockBehaviourAttr ? String(stockBehaviourAttr) : null)
+    setMinimumStock(minimumStockArr ? Number(minimumStockArr) : 0)
   }, [updatedProduct])
 
   const availabilityMessageArr =
@@ -618,10 +631,19 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     router.push(targetPath)
   }
 
+
   const handleLinkTarget = () => {
     const targetPath = ousShowDistributorBtn ? '/distributors' : '/'
     router.push(targetPath)
   }
+
+  const maxQuantity =
+    skuStatusText?.toLowerCase() === 'active' &&
+    stockBehaviour?.toLowerCase() === 'denybackorder' &&
+    stockAvailable >= minimumStock
+      ? stockAvailable - minimumStock
+      : undefined
+
   return (
     <Grid container>
       {!isQuickViewModal && (
@@ -890,7 +912,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                     {customCTALabel}
                   </LoadingButton>
                 )}
-                {skuStatusText && skuStatusText !== 'CustomCTA' && (
+                {skuStatusText && skuStatusText === 'Active' && (
                   <Box display="flex" flexDirection="column" justifyContent="flex-start">
                     {/* Align items in a column */}
                     <Box
@@ -899,6 +921,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                       <QuantitySelector
                         label="Quantity"
                         quantity={quantity}
+                        {...(maxQuantity !== undefined ? { maxQuantity } : {})}
                         onIncrease={() => setQuantity((prevQuantity) => Number(prevQuantity) + 1)}
                         onDecrease={() => setQuantity((prevQuantity) => Number(prevQuantity) - 1)}
                       />

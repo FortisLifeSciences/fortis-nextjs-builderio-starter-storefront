@@ -19,6 +19,10 @@ import { data } from 'cheerio/dist/commonjs/api/attributes'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 
+import PlpIconAttributes from './PlpIconAttributes'
+
+import PlpTextAttributes from './PlpTextAttributes'
+
 import { ProductCardStyles } from './ProductCardListView.styles'
 import { KiboImage, Price } from '@/components/common'
 import { usePriceRangeFormatter } from '@/hooks'
@@ -287,6 +291,20 @@ const ProductCardListView = (props: ProductCardListViewProps) => {
                     </Typography>
                   )}
                 </Box>
+                <Box>
+                  <PlpIconAttributes
+                    productProperties={productProperties}
+                    sliceValue={sliceValue}
+                  />
+                </Box>
+
+                <Box>
+                  <PlpTextAttributes
+                    productProperties={productProperties}
+                    sliceValue={sliceValue}
+                  />
+                </Box>
+
                 {/* <Rating
                   name="read-only"
                   value={rating}

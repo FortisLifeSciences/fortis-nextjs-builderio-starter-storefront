@@ -47,12 +47,14 @@ export const KiboRadio = (props: KiboRadioProps) => {
 
   return (
     <FormControl>
-      <FormLabel
-        id="kibo-radio-buttons-group-label"
-        sx={{ fontSize: 'body2', color: 'text.primary', pb: 1 }}
-      >
-        {title}
-      </FormLabel>
+      {title && (
+        <FormLabel
+          id="kibo-radio-buttons-group-label"
+          sx={{ fontSize: 'body2', color: 'text.primary', pb: 1 }}
+        >
+          {title}
+        </FormLabel>
+      )}
       <RadioGroup
         aria-label={name ?? 'kibo-radio'}
         name="radio-buttons-group"

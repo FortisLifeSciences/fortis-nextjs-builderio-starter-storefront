@@ -30,6 +30,8 @@ export { default as deleteOrderCouponMutation } from './coupon/deleteOrderCoupon
 export { default as createReturnItemMutation } from './order-return-items/createReturnItemMutation'
 export { default as createCheckoutPaymentActionMutation } from './checkout/create-checkout-payment-action'
 export { default as updateCheckoutPaymentActionMutation } from './checkout/update-checkout-payment-action'
+export { default as createCheckoutAttributeMutation } from './checkout/create-checkout-attribute'
+export { default as updateCheckoutAttributesMutation } from './checkout/update-checkout-attributes'
 
 export { default as createCheckoutActionMutation } from './checkout/create-checkout-action-mutation'
 export { default as createCheckoutDestination } from './checkout/create-checkout-destination'

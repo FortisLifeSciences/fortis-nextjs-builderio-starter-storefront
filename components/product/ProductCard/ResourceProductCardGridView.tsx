@@ -180,7 +180,7 @@ const ResourceProductCardGridView = (props: ProductCardProps) => {
                 })}
 
               <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} pb={1}>
-                {newProduct && (
+                {newProduct === 'true' && (
                   <Box
                     sx={{ ...ProductCardStyles.newTag }}
                     style={{
