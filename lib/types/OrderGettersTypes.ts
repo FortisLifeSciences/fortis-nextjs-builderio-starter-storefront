@@ -6,17 +6,23 @@ interface ContactDetails {
 }
 
 export interface ShippingDetails extends ContactDetails {
+  detailType?: string
   shippingPhoneHome: string
   shippingPhoneMobile: string
   shippingPhoneWork: string
   shippingAddress: CrAddress
+  shippingMethod?: any
+  companyOrOrganization?: string
 }
 
 export interface BillingDetails extends ContactDetails {
+  detailType?: string
   billingPhoneHome?: string
   billingPhoneMobile?: string
   billingPhoneWork?: string
   billingAddress: CrAddress
+  payment?: any
+  companyOrOrganization?: string
 }
 
 export interface OrderSummary {

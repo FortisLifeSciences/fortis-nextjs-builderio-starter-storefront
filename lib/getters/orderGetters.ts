@@ -44,6 +44,12 @@ const getShippingDiscounts = (order: CrOrder) =>
       impact: (discount?.discount?.impact as number) * -1,
     }
   })
+const getShippingMethod = (order: CrOrder) => {
+  return {
+    shippingMethodName: order?.fulfillmentInfo?.shippingMethodName,
+    shippingMethodCode: order?.fulfillmentInfo?.shippingMethodCode,
+  }
+}
 
 const getHandlingTotal = (order: CrOrder | CrCart | Checkout) => order?.handlingTotal || 0
 
@@ -110,6 +116,12 @@ const getTotalCollected = (order: CrOrder): number => order.totalCollected || 0
 
 const getShippingContact = (order: CrOrder): CrContact =>
   order?.fulfillmentInfo?.fulfillmentContact as CrContact
+
+const getShippingContactCompany = (order: CrOrder): string =>
+  order?.fulfillmentInfo?.fulfillmentContact?.companyOrOrganization as any
+
+const getBillingContactCompany = (order: CrOrder): string =>
+  order?.billingInfo?.billingContact?.companyOrOrganization as any
 
 const getShippingFirstName = (order: CrOrder): string =>
   addressGetters.getFirstName(order.fulfillmentInfo?.fulfillmentContact as CrContact)
@@ -183,12 +195,15 @@ const getPersonalDetails = (order: CrOrder): CrContact => {
 
 const getShippingDetails = (order: CrOrder): ShippingDetails => {
   return {
+    detailType: 'shipping',
     firstName: getShippingFirstName(order),
     lastNameOrSurname: getShippingLastNameOrSurname(order),
+    companyOrOrganization: getShippingContactCompany(order),
     shippingPhoneHome: getShippingPhoneHome(order),
     shippingPhoneMobile: getShippingPhoneMobile(order),
     shippingPhoneWork: getShippingPhoneWork(order),
     shippingAddress: getShippingAddress(order),
+    shippingMethod: getShippingMethod(order),
   }
 }
 
@@ -197,9 +212,12 @@ const getBillingDetails = (order: CrOrder): BillingDetails => {
   const contact =
     order?.billingInfo?.billingContact || (activePayment?.billingInfo?.billingContact as CrContact)
   return {
+    detailType: 'billing',
     firstName: addressGetters.getFirstName(contact),
     lastNameOrSurname: addressGetters.getLastNameOrSurname(contact),
+    companyOrOrganization: getBillingContactCompany(order),
     billingAddress: addressGetters.getAddress(contact?.address as CrAddress),
+    payment: getFinalOrderPayment(order),
   }
 }
 

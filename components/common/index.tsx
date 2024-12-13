@@ -35,3 +35,4 @@ export { default as PaymentBillingCard } from './PaymentBillingCard/PaymentBilli
 export { default as Address } from './PaymentBillingCard/PaymentBillingCard'
 export { default as KeyValueDisplay } from './KeyValueDisplay/KeyValueDisplay'
 export { default as MetadataComponent } from '../MetaDataComponent/metaDataComponent'
+export { default as ConfirmationDetails } from './ConfirmationDetails/ConfirmationDetails'
