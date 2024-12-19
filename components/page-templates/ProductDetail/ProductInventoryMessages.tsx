@@ -66,6 +66,7 @@ const ProductInventoryMessages = ({
   const availabilityMessage: string | null = availabilityMessageArr ? availabilityMessageArr : null
   let minimumStock = 0
   let restockDate: Date | null = null
+  let showToday = false
   // Use the helper function to extract the necessary properties
   const skuStatusArr = findProperty(product, 'tenant~sku-status-text')
   const stockBehaviourArr = findProperty(product, 'tenant~stock-behavior-option')
@@ -100,7 +101,7 @@ const ProductInventoryMessages = ({
         minimumStock = minimumStockArr?.values?.[0]?.value
       }
       if (restockDateArr) {
-        restockDate = restockDateArr?.values?.[0]?.value
+        restockDate = null
       }
       // Handle restock date logic
       const today = new Date()
@@ -123,7 +124,7 @@ const ProductInventoryMessages = ({
       }
 
       let USShippingCutOffTime, CAShippingCutOffTime, nonShippingDates, deliveryDate
-      const buffer = inventorySettings?.buffer !== '' ? inventorySettings?.buffer : 0
+      const buffer = 0
 
       console.log(
         'stockBehaviour:' +
@@ -359,7 +360,7 @@ const ProductInventoryMessages = ({
 
     if (buffer === 0) {
       nextworkingday = findNextWorkingDay(nextworkingday)
-      return moment(nextworkingday).format('dddd, MMMM D')
+      return showToday ? 'today' : moment(nextworkingday).format('dddd, MMMM D')
     } else {
       let j = 0
       while (j < buffer) {
@@ -393,7 +394,9 @@ const ProductInventoryMessages = ({
         //console.log('shipping nextworkingday:'+nextworkingday.toDate()+'=nextDayStatus:'+nextDayStatus+'=nextDayHolidayStatus:'+nextDayHolidayStatus);
         if (nextDayStatus && !nextDayHolidayStatus) {
           shippingdate = moment(nextworkingday).toDate()
+          showToday = true
         } else {
+          showToday = false
           for (i = 1; true; i++) {
             nextworkingday = moment(nextworkingday).add(1, 'days')
             nextDayStatus = getWeekDayStatus(usWeekDays, nextworkingday.toDate())
@@ -417,7 +420,9 @@ const ProductInventoryMessages = ({
         //console.log('shipping nextworkingday:'+nextworkingday.toDate()+'=nextDayStatus:'+nextDayStatus+'=nextDayHolidayStatus:'+nextDayHolidayStatus);
         if (nextDayStatus && !nextDayHolidayStatus) {
           shippingdate = moment(nextworkingday).toDate()
+          showToday = true
         } else {
+          showToday = false
           for (i = 1; true; i++) {
             nextworkingday = moment(nextworkingday).add(1, 'days')
             nextDayStatus = getWeekDayStatus(usWeekDays, nextworkingday.toDate())
@@ -531,12 +536,14 @@ const ProductInventoryMessages = ({
   //console.log('inevntory message final', inventoryResponse)
   const MessageBox = ({ message }: { message: string }) => (
     <StyledBox>
-      <span
-        className="material-symbols-outlined responsiveShippingSpanIcon"
-        style={{ fontSize: '28px', fontWeight: 500, lineHeight: '20px' }}
-      >
-        local_shipping
-      </span>
+      {skuStatus && skuStatus === 'Active' && (
+        <span
+          className="material-symbols-outlined responsiveShippingSpanIcon"
+          style={{ fontSize: '28px', fontWeight: 500, lineHeight: '20px' }}
+        >
+          local_shipping
+        </span>
+      )}
       <Typography
         variant="body1"
         sx={{

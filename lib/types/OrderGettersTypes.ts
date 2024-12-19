@@ -9,6 +9,7 @@ export interface ShippingDetails extends ContactDetails {
   shippingPhoneHome: string
   shippingPhoneMobile: string
   shippingPhoneWork: string
+  companyOrOrganization?: string
   shippingAddress: CrAddress
 }
 
@@ -16,6 +17,7 @@ export interface BillingDetails extends ContactDetails {
   billingPhoneHome?: string
   billingPhoneMobile?: string
   billingPhoneWork?: string
+  billingCompanyOrOrganization?: string
   billingAddress: CrAddress
 }
 
@@ -42,4 +44,5 @@ export interface CheckoutDetails {
   billingDetails: BillingDetails
   paymentMethods: PaymentMethod[]
   purchaseOrderPaymentMethods?: any[]
+  shippingMethod: string
 }

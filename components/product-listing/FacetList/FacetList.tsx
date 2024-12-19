@@ -24,7 +24,7 @@ interface FacetListProps {
 const styles = {
   filterBy: {
     padding: { xs: '0 1rem', md: '0' },
-    margin: '12px 0',
+    margin: '11.5px 0 13.5px 0',
     typography: 'body2',
     fontWeight: 'bold',
     display: { xs: 'flex' },
@@ -61,9 +61,15 @@ const FacetList = (props: FacetListProps) => {
     <>
       <Box sx={{ ...styles.filterBy }}>
         <Typography
-          variant={mdScreen ? 'h3' : 'h2'}
-          color="GrayText.primary"
-          sx={{ fontWeight: 'bold' }}
+          variant="h4"
+          color="grey.900"
+          sx={{
+            fontSize: '20.6px',
+            fontFamily: 'Roboto',
+            fontWeight: '700',
+            lineHeight: '24px',
+            fontStyle: 'normal',
+          }}
         >
           {t('filter-by')}
         </Typography>

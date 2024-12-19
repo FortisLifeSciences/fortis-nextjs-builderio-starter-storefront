@@ -465,8 +465,8 @@ const B2BAccountCreateForm = (props: AccountHierarchyFormProps) => {
                     {t('already-have-an-account')}
                   </Typography>
                   <Link
-                    component="button"
                     variant="body1"
+                    type="button"
                     sx={{
                       fontFamily: 'Poppins',
                       fontSize: '16px',
@@ -476,6 +476,10 @@ const B2BAccountCreateForm = (props: AccountHierarchyFormProps) => {
                       color: '#30299A',
                       textDecoration: 'underline',
                       cursor: 'pointer',
+                      '&:hover': {
+                        textDecoration: 'none',
+                        color: 'primary.light',
+                      },
                     }}
                     onClick={handleAccountIconClick}
                   >

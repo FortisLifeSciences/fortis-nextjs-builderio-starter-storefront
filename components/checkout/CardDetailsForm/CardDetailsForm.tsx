@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
 import { yupResolver } from '@hookform/resolvers/yup'
-import Help from '@mui/icons-material/Help'
-import { styled, FormControl, Box, Tooltip } from '@mui/material'
+import { styled, FormControl, Box, Grid } from '@mui/material'
 import creditCardType from 'credit-card-type'
 import { useTranslation } from 'next-i18next'
 import { useForm, Controller, ControllerRenderProps } from 'react-hook-form'
@@ -103,85 +102,97 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
   }, [isValid, validateForm])
 
   return (
-    <StyledCardDiv data-testid="card-details">
+    <StyledCardDiv data-testid="card-details" sx={{ ml: 0, pl: 0 }}>
       <FormControl sx={{ width: '100%' }}>
-        <Controller
-          name="cardNumber"
-          control={control}
-          defaultValue={cardValue?.cardNumber}
-          render={({ field }) => (
-            <KiboTextBox
-              value={field.value || ''}
-              label={t('card-number')}
-              required={true}
-              onChange={(_name, value) => {
-                handleCardType(field, value)
-              }}
-              onBlur={field.onBlur}
-              error={!!errors?.cardNumber}
-              helperText={errors?.cardNumber?.message as unknown as string}
-              icon={
-                <Box pr={1}>
-                  <KiboImage
-                    src={cardTypeLogo}
-                    alt={'cardType'}
-                    style={{ width: '24px', height: '24px' }}
-                  />
-                </Box>
-              }
-              {...(cardValue && { disabled: true })}
-            />
-          )}
-        />
-        <Controller
-          name="expiryDate"
-          control={control}
-          defaultValue={cardValue?.expiryDate}
-          render={({ field }) => (
-            <KiboTextBox
-              value={field.value || ''}
-              label={t('expiry-date')}
-              placeholder={t('expiry-date-placeholder')}
-              required={true}
-              onChange={(_name, value) => field.onChange(value)}
-              onBlur={field.onBlur}
-              error={!!errors?.expiryDate}
-              helperText={errors?.expiryDate?.message as unknown as string}
-            />
-          )}
-        />
-        {showCvv && (
-          <Controller
-            name="cvv"
-            control={control}
-            defaultValue={cardValue?.cvv}
-            render={({ field }) => {
-              return !cardValue ? (
+        <Grid container columnGap={4}>
+          <Grid item xs={12}>
+            <Controller
+              name="cardNumber"
+              control={control}
+              defaultValue={cardValue?.cardNumber}
+              render={({ field }) => (
                 <KiboTextBox
-                  type="password"
                   value={field.value || ''}
-                  label={t('security-code')}
-                  placeholder={t('security-code-placeholder')}
+                  label={t('card-number')}
                   required={true}
-                  onChange={(_name, value) => field.onChange(value)}
+                  onChange={(_name, value) => {
+                    const sanitizedValue = value.replace(/\s/g, '')
+                    handleCardType(field, sanitizedValue)
+                  }}
                   onBlur={field.onBlur}
-                  error={!!errors?.cvv}
-                  helperText={errors?.cvv?.message as unknown as string}
+                  error={!!errors?.cardNumber}
+                  helperText={errors?.cardNumber?.message as unknown as string}
                   icon={
-                    <Box pr={1} pt={0.5} sx={{ cursor: 'pointer' }}>
-                      <Tooltip title={t('cvv-tooltip-text')} placement="top">
-                        <Help color="disabled" />
-                      </Tooltip>
+                    <Box pr={1} mt={1}>
+                      <KiboImage src={cardTypeLogo} alt={'cardType'} width={45} height={24} />
                     </Box>
                   }
-                  // {...(cardValue && { disabled: true })}
+                  {...(cardValue && { disabled: true })}
+                  inputProps={{ maxLength: 16 }}
                 />
-              ) : (
-                <></>
-              )
-            }}
-          />
-        )}
+              )}
+            />
+          </Grid>
+          <Grid item xs={12} md={8}>
+            <Controller
+              name="expiryDate"
+              control={control}
+              defaultValue={cardValue?.expiryDate}
+              render={({ field }) => (
+                <KiboTextBox
+                  value={field.value || ''}
+                  label={t('expires-mm-yyyy')}
+                  required={true}
+                  onChange={(_name, value) => {
+                    if (value?.length > 1 && value?.length < 3) {
+                      field.onChange(`${value}/`)
+                    } else {
+                      field.onChange(value)
+                    }
+                  }}
+                  onBlur={field.onBlur}
+                  error={!!errors?.expiryDate}
+                  helperText={errors?.expiryDate?.message as unknown as string}
+                />
+              )}
+            />
+          </Grid>
+          {showCvv && (
+            <>
+              <Grid item xs={8} md={3}>
+                <Controller
+                  name="cvv"
+                  control={control}
+                  defaultValue={cardValue?.cvv}
+                  render={({ field }) => {
+                    return !cardValue ? (
+                      <KiboTextBox
+                        type="password"
+                        value={field.value || ''}
+                        label={t('cvv-code')}
+                        required={true}
+                        onChange={(_name, value) => field.onChange(value)}
+                        onBlur={field.onBlur}
+                        error={!!errors?.cvv}
+                        helperText={errors?.cvv?.message as unknown as string}
+                        // icon={
+                        //   <Box pr={1} pt={0} sx={{ cursor: 'pointer' }}>
+                        //     <Tooltip title={t('cvv-tooltip-text')} placement="top" sx={{ width: '0.75rem', height: '0.75rem' }}>
+                        //       <Help color="disabled" />
+                        //     </Tooltip>
+                        //   </Box>
+                        // }
+                        // {...(cardValue && { disabled: true })}
+                      />
+                    ) : (
+                      <></>
+                    )
+                  }}
+                />
+              </Grid>
+            </>
+          )}
+        </Grid>
       </FormControl>
     </StyledCardDiv>
   )

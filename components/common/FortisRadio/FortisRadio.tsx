@@ -11,7 +11,7 @@ import {
   Typography,
   Box,
 } from '@mui/material'
-
+import * as cookieNext from 'cookies-next'
 interface FortisRadioProps {
   name?: string
   title?: string | React.ReactNode
@@ -20,6 +20,7 @@ interface FortisRadioProps {
   row?: boolean
   skuStatusText?: string | null
   showPrices?: boolean | null
+  ousShowPrices?: boolean | null
   radioOptions: {
     variationProductCode?: string
     price?: any
@@ -40,6 +41,7 @@ export const FortisRadio = (props: FortisRadioProps) => {
     radioOptions,
     skuStatusText,
     showPrices,
+    ousShowPrices,
     selected = '',
     sx,
     align = 'center',
@@ -50,7 +52,7 @@ export const FortisRadio = (props: FortisRadioProps) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onChange(event.target.value)
   }
-
+  const countryCode = cookieNext.getCookie('ipBasedCountryCode') || ''
   return (
     <FormControl sx={{ width: '100%' }}>
       {/* <FormLabel
@@ -99,23 +101,24 @@ export const FortisRadio = (props: FortisRadioProps) => {
         >
           Catalog #
         </Typography>
-        {(skuStatusText === 'CustomCTA' ? showPrices : true) && (
-          <Typography
-            sx={{
-              flex: { md: '0 0 120px', sm: '0 0 100px', xs: '0 0 80px' },
-              flexShrink: '0',
-              textAlign: 'right',
-              color: '#020027',
-              fontFamily: 'Poppins',
-              fontSize: { md: '16px', sm: '14px', xs: '14px' },
-              fontStyle: 'normal',
-              fontWeight: '400',
-              lineHeight: 'normal',
-            }}
-          >
-            Price
-          </Typography>
-        )}
+        {((countryCode !== 'US' && ousShowPrices) || countryCode === 'US') &&
+          (skuStatusText === 'CustomCTA' ? showPrices : true) && (
+            <Typography
+              sx={{
+                flex: { md: '0 0 120px', sm: '0 0 100px', xs: '0 0 80px' },
+                flexShrink: '0',
+                textAlign: 'right',
+                color: '#020027',
+                fontFamily: 'Poppins',
+                fontSize: { md: '16px', sm: '14px', xs: '14px' },
+                fontStyle: 'normal',
+                fontWeight: '400',
+                lineHeight: 'normal',
+              }}
+            >
+              Price
+            </Typography>
+          )}
       </Box>
 
       <Box
@@ -204,23 +207,24 @@ export const FortisRadio = (props: FortisRadioProps) => {
               </Typography>
 
               {/* Price */}
-              {(skuStatusText === 'CustomCTA' ? showPrices : true) && (
-                <Typography
-                  sx={{
-                    flex: { md: '0 0 120px', sm: '0 0 100px', xs: '0 0 80px' },
-                    flexShrink: '0',
-                    textAlign: 'right',
-                    color: '#000',
-                    fontFamily: 'Poppins',
-                    fontSize: { md: '16px', sm: '14px', xs: '14px' },
-                    fontStyle: 'normal',
-                    fontWeight: '300',
-                    lineHeight: { md: '40px', sm: '20px' },
-                  }}
-                >
-                  ${radio.price?.price.toFixed(2)}
-                </Typography>
-              )}
+              {((countryCode !== 'US' && ousShowPrices) || countryCode === 'US') &&
+                (skuStatusText === 'CustomCTA' ? showPrices : true) && (
+                  <Typography
+                    sx={{
+                      flex: { md: '0 0 120px', sm: '0 0 100px', xs: '0 0 80px' },
+                      flexShrink: '0',
+                      textAlign: 'right',
+                      color: '#000',
+                      fontFamily: 'Poppins',
+                      fontSize: { md: '16px', sm: '14px', xs: '14px' },
+                      fontStyle: 'normal',
+                      fontWeight: '300',
+                      lineHeight: { md: '40px', sm: '20px' },
+                    }}
+                  >
+                    ${radio.price?.price.toFixed(2)}
+                  </Typography>
+                )}
             </Box>
           ))}
         </RadioGroup>

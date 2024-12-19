@@ -98,7 +98,7 @@ const Content = (props: ContentProps) => {
                 <KiboTextBox
                   name="email"
                   value={field.value}
-                  label={t('email')}
+                  label={t('email-address')}
                   required
                   autoFocus={setAutoFocus}
                   sx={{ ...styles.formInput }}
@@ -154,11 +154,11 @@ const Content = (props: ContentProps) => {
                     justifyContent: { md: 'flex-start', xs: 'center' },
                   }}
                 >
-                  <Typography variant="body2" sx={{ color: 'grey.900' }}>
+                  <Typography variant="body2" sx={{ color: 'grey.900', paddingRight: '10px' }}>
                     {t('already-have-an-account')}
                   </Typography>
                   <Link
-                    component="button"
+                    // component="button"
                     type="button"
                     variant="body1"
                     sx={{
@@ -167,9 +167,13 @@ const Content = (props: ContentProps) => {
                       fontWeight: '300',
                       lineHeight: '25px',
                       textAlign: 'left',
-                      color: '#30299A',
+                      color: 'primary.main',
                       textDecoration: 'underline',
                       cursor: 'pointer',
+                      '&:hover': {
+                        textDecoration: 'none',
+                        color: 'primary.light',
+                      },
                     }}
                     onClick={handleAccountIconClick}
                   >
@@ -184,7 +188,7 @@ const Content = (props: ContentProps) => {
                   type="submit"
                   sx={{
                     width: 'auto',
-                    backgroundColor: !isValid ? 'grey.600' : 'primary.main',
+                    backgroundColor: !isValid ? '#8D8D8D !important' : 'primary.main',
                     color: 'secondary.light',
                     textAlign: 'center',
                     fontFamily: 'Poppins',

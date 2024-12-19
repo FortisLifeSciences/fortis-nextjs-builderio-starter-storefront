@@ -1,3 +1,4 @@
+import { Margin, Padding } from '@mui/icons-material'
 import zIndex from '@mui/material/styles/zIndex'
 import { color } from 'framer-motion'
 
@@ -21,6 +22,7 @@ export const ProductCardStyles = {
     borderRadius: '0px 0px 25px 0px',
     border: '1px solid #E3E2FF',
     boxSizing: 'border-box',
+    overflow: 'hidden',
     // '&:hover .quick-actions': {
     //   opacity: 1,
     // },
@@ -50,8 +52,10 @@ export const ProductCardStyles = {
     opacity: 0,
     transition: 'opacity 0.3s ease-in-out',
     position: 'absolute',
-    bottom: '0px',
-    right: '0px',
+    bottom: '-2px',
+    right: '-2px',
+    Padding: 0,
+    Margin: 0,
     '&:hover': {
       opacity: 1,
       backgroundColor: 'primary.light',

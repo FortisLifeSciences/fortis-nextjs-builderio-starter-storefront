@@ -17,6 +17,7 @@ import {
   dividerStyle,
   subMenuSection,
   featuredText,
+  animatedUnderline,
 } from './MenuPopover.styles'
 import OpenInNewWindowIcon from '@/assets/icons/OpenInNewWindowIcon.svg'
 
@@ -78,15 +79,15 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
               xs={12}
               sx={{ height: '60px', display: 'flex', justifyContent: 'space-between' }}
             >
-              <Typography variant="h3" sx={{ color: 'primary.main' }}>
+              <Typography variant="h3" sx={{ color: 'primary.main', fontStyle: 'normal' }}>
                 {parentName}
               </Typography>
               {viewAllText && (
                 <Box sx={submenuItem}>
-                  <Link href={parentLink} passHref>
+                  <Link href={parentLink} passHref style={{ paddingLeft: '28px' }}>
                     <Typography
                       variant="body2"
-                      sx={{ paddingLeft: '28px', color: 'primary.main' }}
+                      sx={{ ...animatedUnderline, color: 'primary.main', fontStyle: 'normal' }}
                       onClick={handleLinkClick}
                     >
                       {viewAllText}
@@ -104,14 +105,17 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                     <Link
                       href={category.categoryLink}
                       passHref
+                      style={{ paddingLeft: '16px' }}
                       target={category.openLinkInNewWindow ? '_blank' : '_self'}
                       rel={category.openLinkInNewWindow ? 'noopener noreferrer' : undefined}
                     >
                       <Typography
                         variant="body2"
                         sx={{
-                          paddingLeft: '16px',
+                          ...animatedUnderline,
                           color: 'primary.main',
+                          fontStyle: 'normal',
+                          whiteSpace: 'normal',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '13.25px',
@@ -142,7 +146,7 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                       <>
                         <Typography
                           variant="body2"
-                          sx={{ paddingLeft: '10px', color: 'primary.main' }}
+                          sx={{ paddingLeft: '10px', color: 'primary.main', fontStyle: 'normal', whiteSpace: 'normal' }}
                         >
                           {category.categoryName}
                         </Typography>
@@ -154,7 +158,7 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                       <>
                         <Typography
                           variant="body2"
-                          sx={{ paddingLeft: '15px', color: 'primary.main' }}
+                          sx={{ paddingLeft: '15px', color: 'primary.main', fontStyle: 'normal', whiteSpace: 'normal' }}
                         >
                           {category.categoryName}
                         </Typography>
@@ -173,14 +177,17 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                   <Link
                     href={submenu.categoryLink}
                     passHref
+                    style={{ paddingLeft: '28px' }}
                     target={submenu.openLinkInNewWindow ? '_blank' : '_self'}
                     rel={submenu.openLinkInNewWindow ? 'noopener noreferrer' : undefined}
                   >
                     <Typography
                       variant="body2"
                       sx={{
-                        paddingLeft: '28px',
+                        ...animatedUnderline,
                         color: 'primary.main',
+                        fontStyle: 'normal',
+                        whiteSpace: 'normal',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '13.25px',
@@ -197,14 +204,17 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                 <Link
                   href={activeCategory.categoryLink}
                   passHref
+                  style={{ paddingLeft: '28px' }}
                   target={activeCategory.openLinkInNewWindow ? '_blank' : '_self'}
                   rel={activeCategory.openLinkInNewWindow ? 'noopener noreferrer' : undefined}
                 >
                   <Typography
                     variant="body2"
                     sx={{
-                      paddingLeft: '28px',
+                      ...animatedUnderline,
                       color: 'primary.main',
+                      fontStyle: 'normal',
+                      whiteSpace: 'normal',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '13.25px',
@@ -233,10 +243,11 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                     <Typography
                       variant="body2"
                       sx={{
-                        fontWeight: '600',
+                        fontWeight: '700',
                         color: 'primary.main',
                         height: 'auto',
                         whiteSpace: 'normal',
+                        fontStyle: 'normal',
                       }}
                     >
                       {content.title}
@@ -245,11 +256,10 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                       <Typography
                         variant="body2"
                         sx={{
+                          ...animatedUnderline,
                           color: 'primary.main',
-                          textDecoration: 'underline',
-                          textDecorationColor: '#30299A',
-                          textUnderlineOffset: '6px',
                           whiteSpace: 'normal',
+                          fontStyle: 'normal',
                         }}
                         onClick={handleLinkClick}
                       >
@@ -266,7 +276,7 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
         <Box sx={megaMenuContainer}>
           <Grid container spacing={1}>
             <Grid item xs={12} sx={{ height: '60px' }}>
-              <Typography variant="h3" sx={{ color: 'primary.main' }}>
+              <Typography variant="h3" sx={{ color: 'primary.main', fontStyle: 'normal' }}>
                 {parentName}
               </Typography>
             </Grid>
@@ -282,14 +292,17 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                   <Link
                     href={category.categoryLink}
                     passHref
+                    style={{ paddingLeft: '28px' }}
                     target={category.openLinkInNewWindow ? '_blank' : '_self'}
                     rel={category.openLinkInNewWindow ? 'noopener noreferrer' : undefined}
                   >
                     <Typography
                       variant="body2"
                       sx={{
-                        paddingLeft: '28px',
+                        ...animatedUnderline,
                         color: 'primary.main',
+                        fontStyle: 'normal',
+                        whiteSpace: 'normal',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '13.25px',
@@ -321,10 +334,11 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                     <Typography
                       variant="body2"
                       sx={{
-                        fontWeight: '600',
+                        fontWeight: '700',
                         color: 'primary.main',
                         height: 'auto',
                         whiteSpace: 'normal',
+                        fontStyle: 'normal',
                       }}
                     >
                       {content.title}
@@ -333,11 +347,10 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                       <Typography
                         variant="body2"
                         sx={{
+                          ...animatedUnderline,
                           color: 'primary.main',
-                          textDecoration: 'underline',
-                          textDecorationColor: '#30299A',
-                          textUnderlineOffset: '6px',
                           whiteSpace: 'normal',
+                          fontStyle: 'normal',
                         }}
                         onClick={handleLinkClick}
                       >

@@ -52,9 +52,12 @@ const App = (props: KiboAppProps) => {
   const { siteTitle, defaultTitle, defaultDescription } = publicRuntimeConfig?.metaData || {}
   const getLayout =
     Component.getLayout ?? ((page) => <DefaultLayout pageProps={pageProps}>{page}</DefaultLayout>)
-  const pageTitle = `${siteTitle} | ${pageProps?.metaData?.title || defaultTitle}`
+  // const pageTitle = `${siteTitle} | ${pageProps?.metaData?.title || defaultTitle}`
+  const pagePropsPageData = pageProps?.page?.data
+  const pageTitle = `${pageProps?.metaData?.title || pagePropsPageData?.title || defaultTitle}`
 
   const [googleReCaptcha, setGoogleReCaptcha] = useState()
+  const [gtmId, setGtmId] = useState()
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -63,6 +66,9 @@ const App = (props: KiboAppProps) => {
 
       if (settings?.data?.ipBasedCountryCode) {
         IpWhoIs(settings?.data?.ipBasedCountryCode)
+      }
+      if (settings?.data?.googleTagManagerId) {
+        setGtmId(settings?.data?.googleTagManagerId)
       }
     }
     fetchSettings()
@@ -78,8 +84,21 @@ const App = (props: KiboAppProps) => {
     <CacheProvider value={emotionCache}>
       <Head>
         <title>{pageTitle}</title>
-        <meta name="title" content={pageProps?.metaData?.title || defaultTitle} />
-        <meta name="description" content={pageProps?.metaData?.description || defaultDescription} />
+        <meta
+          name="title"
+          content={pageProps?.metaData?.title || pagePropsPageData?.title || defaultTitle}
+        />
+        <meta
+          name="description"
+          content={
+            pageProps?.metaData?.description || pagePropsPageData?.description || defaultDescription
+          }
+        />
+        <meta
+          name="image"
+          property="og:image"
+          content={pageProps?.metaData?.image || pagePropsPageData?.image}
+        />
         <meta name="keywords" content={pageProps?.metaData?.keywords} />
         {pageProps?.metaData?.robots && (
           <meta name="robots" content={pageProps?.metaData?.robots} />
@@ -97,6 +116,14 @@ const App = (props: KiboAppProps) => {
         />
         <script src={recapchaScript} async defer></script>
         <script src={recapchaEnterpriseScript} async defer></script>
+        <script>
+          {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','${gtmId}');
+          `}
+        </script>
       </Head>
       {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
       <RQNotificationContextProvider>

@@ -17,17 +17,15 @@ const StyledCheckCircle = styled(CheckCircle)(({ theme }: StyledThemeProps) => (
 }))
 
 const StyledTitle = styled(Typography)(({ theme }: StyledThemeProps) => ({
-  fontWeight: 'bold',
   display: 'block',
-  marginLeft: '1rem',
-  color: theme?.palette.text.primary,
+  color: theme?.palette.primary.main,
 }))
 
 const Title = () => {
   const { t } = useTranslation('common')
   return (
     <StyledTitleComponent data-testid="title-component">
-      <StyledCheckCircle />
+      {/* <StyledCheckCircle /> */}
       <StyledTitle variant="h3">{t('added-to-cart')}</StyledTitle>
     </StyledTitleComponent>
   )

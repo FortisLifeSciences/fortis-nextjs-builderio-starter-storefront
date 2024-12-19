@@ -1,6 +1,7 @@
 import { BuilderComponent, builder } from '@builder.io/react'
 import '@builder.io/widgets'
 import getConfig from 'next/config'
+import Head from 'next/head'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
 import getCategoryTree from '@/lib/api/operations/get-category-tree'
@@ -46,13 +47,17 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
 const Page = (props: any) => {
   const { page } = props
+  const noIndex = page?.data?.noIndex || false
   return (
-    <div>
-      <BuilderComponent
-        model={publicRuntimeConfig?.builderIO?.modelKeys?.defaultPage}
-        content={page}
-      />
-    </div>
+    <>
+      <Head>{noIndex && <meta name="robots" content="noindex,nofollow" />}</Head>
+      <div>
+        <BuilderComponent
+          model={publicRuntimeConfig?.builderIO?.modelKeys?.defaultPage}
+          content={page}
+        />
+      </div>
+    </>
   )
 }
 

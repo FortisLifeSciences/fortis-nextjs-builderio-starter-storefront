@@ -86,9 +86,9 @@ export const FortisMegaMenu: React.FC<MegaMenuProps> = ({ scrolled }) => {
           <AnimatePresence>
             {isDropdownOpen && hoveredMenu === menu && (
               <motion.div
-                initial={{ opacity: 0, transform: 'translateY(-10px) translateX(-50%)' }}
-                animate={{ opacity: 1, transform: 'translateY(0) translateX(-50%)' }}
-                exit={{ opacity: 0, transform: 'translateY(-10px) translateX(-50%)' }}
+                initial={{ opacity: 0, translateY: -10, translateX: '-50%' }}
+                animate={{ opacity: 1, translateY: 0, translateX: '-50%' }}
+                exit={{ opacity: 0, translateY: -10, translateX: '-50%' }}
                 transition={{ duration: 0.3 }}
                 style={{
                   position: 'absolute',

@@ -1,6 +1,6 @@
 import React, { ReactNode, Children } from 'react'
 
-import { Box, Stack, Step, Stepper, Typography, Slider, StepButton } from '@mui/material'
+import { Box, Stack, Step, Stepper, Typography, StepButton } from '@mui/material'
 
 import { useCheckoutStepContext } from '@/context'
 
@@ -25,13 +25,7 @@ const KiboStepper = (props: StepperProps) => {
 
   const { activeStep, steps, setActiveStep } = useCheckoutStepContext()
 
-  const totalSteps = () => {
-    return steps.length
-  }
-
-  const getProgessValue = () => {
-    return ((activeStep + 1) / totalSteps()) * 100 - 12.5
-  }
+  const totalSteps = () => steps.length
 
   const handleBack = (index: number) => {
     if (activeStep > index) setActiveStep(index)
@@ -41,26 +35,43 @@ const KiboStepper = (props: StepperProps) => {
     <Stack sx={{ maxWidth: '872px' }} gap={3}>
       <Box sx={isSticky ? stepperStyles.wrapperBox : {}}>
         <Stepper nonLinear activeStep={activeStep} connector={null} data-testid="kibo-stepper">
-          {steps.map((label: string, index: number) => (
-            <Step key={label} sx={{ flex: 1, padding: 0 }}>
-              <StepButton icon={<></>}>
-                <Typography
-                  variant="subtitle1"
-                  color={index + 1 <= activeStep ? 'primary' : 'inherit'}
-                  sx={{ cursor: 'pointer', textTransform: 'capitalize' }}
-                  onClick={() => handleBack(index)}
-                >
-                  {label}
-                </Typography>
-              </StepButton>
-            </Step>
-          ))}
+          {steps.map((label: string, index: number) => {
+            const isActive = index === activeStep
+            const isCompleted = index < activeStep
+            return (
+              <Step
+                key={label}
+                sx={{
+                  flex: 1,
+                  padding: 0,
+                  backgroundColor: isActive
+                    ? 'secondary.main' // Active step background
+                    : isCompleted
+                    ? 'primary.main' // Completed step background
+                    : 'grey.300', // Default background
+                  color: isActive || isCompleted ? 'common.white' : 'inherit',
+                  transition: 'background-color 0.3s ease',
+                }}
+              >
+                <StepButton icon={<></>}>
+                  <Typography
+                    variant="h6"
+                    color={isCompleted ? 'common.white' : 'text.primary'}
+                    sx={{
+                      cursor: 'pointer',
+                      textTransform: 'uppercase',
+                      textAlign: 'center',
+                    }}
+                    onClick={() => handleBack(index)}
+                  >
+                    {index + 1}. {label}
+                  </Typography>
+                </StepButton>
+              </Step>
+            )
+          })}
         </Stepper>
-        <Box pt={1}>
-          <Slider aria-label="checkout-steps" value={getProgessValue()} size="small" />
-        </Box>
       </Box>
-
       {Children.toArray(children)[activeStep]}
     </Stack>
   )

@@ -27,7 +27,7 @@ const FooterSection = () => {
           <BuilderComponent model="footer" content={footerContent} />
         )
       ) : (
-        <p>Loading footer...</p>
+        <p></p>
       )}
     </footer>
   )

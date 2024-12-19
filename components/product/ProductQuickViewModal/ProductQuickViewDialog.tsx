@@ -18,7 +18,7 @@ interface ProductQuickViewDialogProps {
   quoteDetails?: any
   listData?: any
   shouldFetchShippingMethods?: boolean
-  relatedProducts: any
+  relatedProducts?: []
   onUpdateListData: (param: CrWishlist, addToCartPayload: any) => void
 }
 

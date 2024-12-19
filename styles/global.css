@@ -136,3 +136,10 @@ body {
     line-height: '16px';
   }
 }
+
+@media (min-width: 1200px) {
+  .mui-style-1volm6e-MuiContainer-root {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}

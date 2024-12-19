@@ -8,6 +8,7 @@ const DEFAULT_WISHLIST_NAME = 'default-wishlist'
 module.exports = {
   reactStrictMode: false,
   // This config ensures that when you import an SVG file, it will be treated as a React component.
+  // Commented the below code, it was causing issues to display the svg on checkout page.
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
@@ -30,6 +31,7 @@ module.exports = {
       'cdn-tp3.mozu.com',
       'cdn-tp4.mozu.com',
       'cdn-sb.mozu.com',
+      'cdn-stg1.mozu.com',
       'encrypted-tbn0.gstatic.com',
       'images.ctfassets.net',
       'cdn.builder.io',
@@ -82,69 +84,271 @@ module.exports = {
         name: 'Credit / Debit Card',
       },
     ],
-    // countries: ['US', 'AT', 'DE', 'NL', 'CA'],
-    countries: ['US'],
-    states: [
-      { id: 'AL', name: 'Alabama' },
-      { id: 'AK', name: 'Alaska' },
-      { id: 'AZ', name: 'Arizona' },
-      { id: 'AR', name: 'Arkansas' },
-      { id: 'CA', name: 'California' },
-      { id: 'CO', name: 'Colorado' },
-      { id: 'CT', name: 'Connecticut' },
-      { id: 'DE', name: 'Delaware' },
-      { id: 'DC', name: 'District Of Columbia' },
-      { id: 'FL', name: 'Florida' },
-      { id: 'GA', name: 'Georgia' },
-      { id: 'HI', name: 'Hawaii' },
-      { id: 'ID', name: 'Idaho' },
-      { id: 'IL', name: 'Illinois' },
-      { id: 'IN', name: 'Indiana' },
-      { id: 'IA', name: 'Iowa' },
-      { id: 'KS', name: 'Kansas' },
-      { id: 'KY', name: 'Kentucky' },
-      { id: 'LA', name: 'Louisiana' },
-      { id: 'ME', name: 'Maine' },
-      { id: 'MD', name: 'Maryland' },
-      { id: 'MA', name: 'Massachusetts' },
-      { id: 'MI', name: 'Michigan' },
-      { id: 'MN', name: 'Minnesota' },
-      { id: 'MS', name: 'Mississippi' },
-      { id: 'MO', name: 'Missouri' },
-      { id: 'MT', name: 'Montana' },
-      { id: 'NE', name: 'Nebraska' },
-      { id: 'NV', name: 'Nevada' },
-      { id: 'NH', name: 'New Hampshire' },
-      { id: 'NJ', name: 'New Jersey' },
-      { id: 'NM', name: 'New Mexico' },
-      { id: 'NY', name: 'New York' },
-      { id: 'NC', name: 'North Carolina' },
-      { id: 'ND', name: 'North Dakota' },
-      { id: 'OH', name: 'Ohio' },
-      { id: 'OK', name: 'Oklahoma' },
-      { id: 'OR', name: 'Oregon' },
-      { id: 'PA', name: 'Pennsylvania' },
-      { id: 'RI', name: 'Rhode Island' },
-      { id: 'SC', name: 'South Carolina' },
-      { id: 'SD', name: 'South Dakota' },
-      { id: 'TN', name: 'Tennessee' },
-      { id: 'TX', name: 'Texas' },
-      { id: 'UT', name: 'Utah' },
-      { id: 'VT', name: 'Vermont' },
-      { id: 'VA', name: 'Virginia' },
-      { id: 'WA', name: 'Washington' },
-      { id: 'WV', name: 'West Virginia' },
-      { id: 'WI', name: 'Wisconsin' },
-      { id: 'WY', name: 'Wyoming' },
+    countries: [
+      {
+        name: 'United States',
+        code: 'US',
+      },
+    ],
+    provinces: [
+      {
+        code: 'AL',
+        name: 'Alabama',
+      },
+      {
+        code: 'AK',
+        name: 'Alaska',
+      },
+      {
+        code: 'AS',
+        name: 'American Samoa',
+      },
+      {
+        code: 'AZ',
+        name: 'Arizona',
+      },
+      {
+        code: 'AR',
+        name: 'Arkansas',
+      },
+      {
+        code: 'AA',
+        name: 'Armed Forces Americas',
+      },
+      {
+        code: 'AE',
+        name: 'Armed Forces Europe',
+      },
+      {
+        code: 'AP',
+        name: 'Armed Forces Pacific',
+      },
+      {
+        code: 'CA',
+        name: 'California',
+      },
+      {
+        code: 'CO',
+        name: 'Colorado',
+      },
+      {
+        code: 'CT',
+        name: 'Connecticut',
+      },
+      {
+        code: 'DE',
+        name: 'Delaware',
+      },
+      {
+        code: 'DC',
+        name: 'District Of Columbia',
+      },
+      {
+        code: 'FM',
+        name: 'Federated States Of Micronesia',
+      },
+      {
+        code: 'FL',
+        name: 'Florida',
+      },
+      {
+        code: 'GA',
+        name: 'Georgia',
+      },
+      {
+        code: 'GU',
+        name: 'Guam',
+      },
+      {
+        code: 'HI',
+        name: 'Hawaii',
+      },
+      {
+        code: 'ID',
+        name: 'Idaho',
+      },
+      {
+        code: 'IL',
+        name: 'Illinois',
+      },
+      {
+        code: 'IN',
+        name: 'Indiana',
+      },
+      {
+        code: 'IA',
+        name: 'Iowa',
+      },
+      {
+        code: 'KS',
+        name: 'Kansas',
+      },
+      {
+        code: 'KY',
+        name: 'Kentucky',
+      },
+      {
+        code: 'LA',
+        name: 'Louisiana',
+      },
+      {
+        code: 'ME',
+        name: 'Maine',
+      },
+      {
+        code: 'MH',
+        name: 'Marshall Islands',
+      },
+      {
+        code: 'MD',
+        name: 'Maryland',
+      },
+      {
+        code: 'MA',
+        name: 'Massachusetts',
+      },
+      {
+        code: 'MI',
+        name: 'Michigan',
+      },
+      {
+        code: 'MN',
+        name: 'Minnesota',
+      },
+      {
+        code: 'MS',
+        name: 'Mississippi',
+      },
+      {
+        code: 'MO',
+        name: 'Missouri',
+      },
+      {
+        code: 'MT',
+        name: 'Montana',
+      },
+      {
+        code: 'NE',
+        name: 'Nebraska',
+      },
+      {
+        code: 'NV',
+        name: 'Nevada',
+      },
+      {
+        code: 'NH',
+        name: 'New Hampshire',
+      },
+      {
+        code: 'NJ',
+        name: 'New Jersey',
+      },
+      {
+        code: 'NM',
+        name: 'New Mexico',
+      },
+      {
+        code: 'NY',
+        name: 'New York',
+      },
+      {
+        code: 'NC',
+        name: 'North Carolina',
+      },
+      {
+        code: 'ND',
+        name: 'North Dakota',
+      },
+      {
+        code: 'MP',
+        name: 'Northern Mariana Islands',
+      },
+      {
+        code: 'OH',
+        name: 'Ohio',
+      },
+      {
+        code: 'OK',
+        name: 'Oklahoma',
+      },
+      {
+        code: 'OR',
+        name: 'Oregon',
+      },
+      {
+        code: 'PW',
+        name: 'Palau',
+      },
+      {
+        code: 'PA',
+        name: 'Pennsylvania',
+      },
+      {
+        code: 'PR',
+        name: 'Puerto Rico',
+      },
+      {
+        code: 'RI',
+        name: 'Rhode Island',
+      },
+      {
+        code: 'SC',
+        name: 'South Carolina',
+      },
+      {
+        code: 'SD',
+        name: 'South Dakota',
+      },
+      {
+        code: 'TN',
+        name: 'Tennessee',
+      },
+      {
+        code: 'TX',
+        name: 'Texas',
+      },
+      {
+        code: 'UT',
+        name: 'Utah',
+      },
+      {
+        code: 'VT',
+        name: 'Vermont',
+      },
+      {
+        code: 'VI',
+        name: 'Virgin Islands',
+      },
+      {
+        code: 'VA',
+        name: 'Virginia',
+      },
+      {
+        code: 'WA',
+        name: 'Washington',
+      },
+      {
+        code: 'WV',
+        name: 'West Virginia',
+      },
+      {
+        code: 'WI',
+        name: 'Wisconsin',
+      },
+      {
+        code: 'WY',
+        name: 'Wyoming',
+      },
+
     ],
     debounceTimeout: '1000',
     productListing: {
       sortOptions: [
-        { value: 'Best Match', id: '' },
+        { value: 'Relevance', id: '' },
         { value: 'Price: Low to High', id: 'price asc' },
         { value: 'Price: High to Low', id: 'price desc' },
-        { value: 'Latest', id: 'createDate desc' },
-        { value: 'Oldest', id: 'createDate asc' },
+        { value: 'Date Added: Most Recent First', id: 'createDate desc' },
+        { value: 'Date Added: Most Recent Last', id: 'createDate asc' },
       ],
       // For Infinite Scroll use this.
       pageSize: 15,

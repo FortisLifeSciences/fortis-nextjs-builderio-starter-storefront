@@ -199,7 +199,9 @@ const CartItem = (props: CartItemProps) => {
                           />
                         </Box> */}
                         <Typography variant="body2" sx={{ color: 'gray.900' }}>
-                          {cartItem?.product?.productCode}
+                          {cartItem?.product?.variationProductCode
+                            ? cartItem?.product?.variationProductCode
+                            : cartItem?.product?.productCode}
                         </Typography>
 
                         {QuoteStatus[status as string] !== QuoteStatus.InReview &&

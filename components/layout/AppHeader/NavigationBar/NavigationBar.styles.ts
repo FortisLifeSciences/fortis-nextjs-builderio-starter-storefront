@@ -5,7 +5,7 @@ export const navbarStyles: SxProps = {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  padding: '20px',
+  padding: '20px 0px',
   backgroundColor: 'white',
   transition: 'height 0.3s ease-in-out',
   height: '90px',
