@@ -4,6 +4,7 @@ export const ProductCardStyles = {
     '& a': {
       textDecoration: 'none',
     },
+    marginLeft: '16px',
   },
   cardRoot: {
     position: 'relative',
@@ -16,6 +17,7 @@ export const ProductCardStyles = {
     boxShadow: 'none',
     cursor: 'pointer',
     borderRadius: '0 0 25px 0',
+    overflow: 'hidden',
     '&:hover': {
       boxShadow: '0 2px 16px 4px rgb(11 32 61 / 7%)',
       borderColor: 'primary.light',
@@ -67,8 +69,10 @@ export const ProductCardStyles = {
     opacity: 0,
     transition: 'opacity 0.3s ease-in-out',
     position: 'absolute',
-    bottom: '0px',
-    right: '0px',
+    bottom: '-2px',
+    right: '-2px',
+    Padding: 0,
+    Margin: 0,
     '&:hover': {
       opacity: 1,
       backgroundColor: 'primary.light',
@@ -99,6 +103,7 @@ export const ProductCardStyles = {
     fontWeight: '300',
     lineHeight: 'normal',
     fontFamily: 'Poppins',
+    margin: 0,
   },
   catalogNum: {
     color: 'text.primary',

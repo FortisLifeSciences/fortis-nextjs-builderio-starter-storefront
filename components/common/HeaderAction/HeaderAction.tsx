@@ -7,7 +7,7 @@ import { styled } from '@mui/material/styles'
 interface HeaderActionProps {
   title?: string
   subtitle?: string
-  icon: any
+  icon?: any
   mobileIconColor?: string
   onClick?: MouseEventHandler<HTMLDivElement>
   badgeContent?: string | number
@@ -88,15 +88,17 @@ const HeaderAction = (props: HeaderActionProps) => {
             color="primary"
             badgeContent={badgeContent}
           >
-            <Icon
-              fontSize={iconFontSize}
-              sx={(theme: Theme) => ({
-                color: 'grey.900',
-                [theme.breakpoints.down('md')]: {
-                  color: mobileIconColor,
-                },
-              })}
-            ></Icon>
+            {Icon && (
+              <Icon
+                fontSize={iconFontSize}
+                sx={(theme: Theme) => ({
+                  color: 'grey.900',
+                  [theme.breakpoints.down('md')]: {
+                    color: mobileIconColor,
+                  },
+                })}
+              ></Icon>
+            )}
           </StyledBadge>
         </Tooltip>
       ) : (
@@ -109,15 +111,17 @@ const HeaderAction = (props: HeaderActionProps) => {
             color="primary"
             badgeContent={badgeContent}
           >
-            <Icon
-              fontSize={iconFontSize}
-              sx={(theme: Theme) => ({
-                color: 'grey.900',
-                [theme.breakpoints.down('md')]: {
-                  color: mobileIconColor,
-                },
-              })}
-            ></Icon>
+            {Icon && (
+              <Icon
+                fontSize={iconFontSize}
+                sx={(theme: Theme) => ({
+                  color: 'grey.900',
+                  [theme.breakpoints.down('md')]: {
+                    color: mobileIconColor,
+                  },
+                })}
+              ></Icon>
+            )}
           </StyledBadge>
           <Box
             ml={1}

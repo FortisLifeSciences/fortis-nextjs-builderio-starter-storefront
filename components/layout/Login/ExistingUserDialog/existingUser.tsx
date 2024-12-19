@@ -86,11 +86,17 @@ const ExistingUserDialog = () => {
               <Typography variant="body2" sx={{ color: 'gray.900', marginBottom: '25px' }}>
                 {t('existingUser-paragraph-p1')}{' '}
                 <Link
-                  component="button"
                   variant="body1"
-                  aria-label={t('log-in-to-your-account')}
+                  type="button"
                   onClick={gotoLogin}
-                  sx={{ ...resetPasswordStyles.link }}
+                  sx={{
+                    ...resetPasswordStyles.link,
+                    '&:hover': {
+                      textDecoration: 'none',
+                      color: 'primary.light',
+                    },
+                    cursor: 'pointer',
+                  }}
                 >
                   {t('log-in-to-your-account')}
                 </Link>
@@ -100,21 +106,35 @@ const ExistingUserDialog = () => {
               <Typography variant="body2" sx={{ color: 'gray.900', marginBottom: '15px' }}>
                 {t('existingUser-paragraph-p2')}{' '}
                 <Link
-                  component="button"
+                  type="button"
                   variant="body1"
-                  aria-label={t('reset-your-password')}
                   onClick={onForgotPassword}
-                  sx={{ ...resetPasswordStyles.link, textTransform: 'lowercase' }}
+                  sx={{
+                    ...resetPasswordStyles.link,
+                    textTransform: 'lowercase',
+                    '&:hover': {
+                      textDecoration: 'none',
+                      color: 'primary.light',
+                    },
+                    cursor: 'pointer',
+                  }}
                 >
                   {t('reset-your-password')}
                 </Link>
                 , {t('or')}{' '}
                 <Link
-                  component="button"
                   variant="body1"
-                  aria-label={t('contact-us')}
+                  type="button"
                   onClick={contactUs}
-                  sx={{ ...resetPasswordStyles.link, textTransform: 'lowercase' }}
+                  sx={{
+                    ...resetPasswordStyles.link,
+                    textTransform: 'lowercase',
+                    '&:hover': {
+                      textDecoration: 'none',
+                      color: 'primary.light',
+                    },
+                    cursor: 'pointer',
+                  }}
                 >
                   {t('contact-us')}
                 </Link>{' '}

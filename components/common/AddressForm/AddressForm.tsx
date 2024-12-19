@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 
 import { yupResolver } from '@hookform/resolvers/yup'
-import { Box, Grid, FormControlLabel, Checkbox } from '@mui/material'
+import { Box, Grid, FormControlLabel, Checkbox, Typography } from '@mui/material'
 import MenuItem from '@mui/material/MenuItem'
 import getConfig from 'next/config'
 import { useTranslation } from 'next-i18next'
@@ -28,11 +28,22 @@ interface AddressFormProps {
   onDefaultPaymentChange?: (value: boolean) => void
 }
 
+interface Country {
+  name: string
+  code: string
+}
+
+interface Province {
+  name: string
+  code: string
+}
+
 export const useFormSchema = () => {
   const { t } = useTranslation('common')
   return yup.object().shape({
     firstName: yup.string().required(t('this-field-is-required')),
     lastNameOrSurname: yup.string().required(t('this-field-is-required')),
+    companyOrOrganization: yup.string().required(t('this-field-is-required')),
     address: yup.object().shape({
       address1: yup.string().required(t('this-field-is-required')),
       address2: yup.string().nullable(true).notRequired(),
@@ -71,6 +82,8 @@ const AddressForm = (props: AddressFormProps) => {
     onDefaultPaymentChange,
   } = props
 
+  const provinces = publicRuntimeConfig.provinces
+
   const addressSchema = useFormSchema()
   // Define Variables and States
   const {
@@ -90,11 +103,21 @@ const AddressForm = (props: AddressFormProps) => {
 
   const { t } = useTranslation('common')
 
-  const generateSelectOptions = () =>
-    countries?.map((country: string) => {
+  const generateSelectOptions = () => {
+    return countries?.map((country: Country) => {
       return (
-        <MenuItem key={country} value={country}>
-          {country}
+        <MenuItem key={country?.name} value={country?.code}>
+          {country?.name}
+        </MenuItem>
+      )
+    })
+  }
+
+  const generateProvincesOptions = () =>
+    provinces?.map((province: Province) => {
+      return (
+        <MenuItem key={province.name} value={province.code}>
+          {province.name}
         </MenuItem>
       )
     })
@@ -117,15 +140,16 @@ const AddressForm = (props: AddressFormProps) => {
     <Box
       component="form"
       sx={{
-        m: 1,
+        my: 1,
+        mx: 0,
         maxWidth: '872px',
       }}
       noValidate
       autoComplete="off"
       data-testid="address-form"
     >
-      <Grid container rowSpacing={1} columnSpacing={{ md: 4 }}>
-        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 6}>
+      <Grid container rowSpacing={0} columnGap={2.5}>
+        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 5.82}>
           <Controller
             name="firstName"
             control={control}
@@ -147,7 +171,7 @@ const AddressForm = (props: AddressFormProps) => {
           />
         </Grid>
 
-        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 6}>
+        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 5.82}>
           <Controller
             name="lastNameOrSurname"
             control={control}
@@ -164,6 +188,77 @@ const AddressForm = (props: AddressFormProps) => {
                 onBlur={field.onBlur}
                 required={true}
               />
+            )}
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <Controller
+            name="companyOrOrganization"
+            control={control}
+            defaultValue={contact?.companyOrOrganization}
+            render={({ field }) => (
+              <KiboTextBox
+                {...field}
+                value={field.value || ''}
+                label={t('company-or-organization')}
+                ref={null}
+                error={!!errors?.companyOrOrganization}
+                helperText={errors?.companyOrOrganization?.message}
+                onChange={(_name: string, value: string) => field.onChange(value)}
+                onBlur={field.onBlur}
+                required={true}
+              />
+            )}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 5.82}>
+          <Controller
+            name="phoneNumbers.home"
+            control={control}
+            defaultValue={contact?.phoneNumbers?.home}
+            render={({ field }) => (
+              <KiboTextBox
+                {...field}
+                value={field.value || ''}
+                label={t('phone-number-home')}
+                ref={null}
+                error={!!errors?.phoneNumbers?.home}
+                helperText={errors?.phoneNumbers?.home?.message}
+                onChange={(_name: string, value: string) => field.onChange(value)}
+                onBlur={field.onBlur}
+                required={true}
+              />
+            )}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 5.82}>
+          <Controller
+            name="address.countryCode"
+            control={control}
+            defaultValue={contact?.address?.countryCode || countries[0]?.code}
+            render={({ field }) => (
+              <Box>
+                <KiboSelect
+                  sx={{
+                    color: '#020027',
+                    fontSize: '1rem',
+                    '> fieldSet': { borderColor: '#020027' },
+                  }}
+                  name="country-code"
+                  label={t('country-code')}
+                  value={field.value}
+                  error={!!errors?.address?.countryCode}
+                  helperText={errors?.address?.countryCode?.message}
+                  onChange={(_name: string, value: string) => field.onChange(value)}
+                  onBlur={field.onBlur}
+                  required={true}
+                >
+                  {generateSelectOptions()}
+                </KiboSelect>
+              </Box>
             )}
           />
         </Grid>
@@ -209,7 +304,7 @@ const AddressForm = (props: AddressFormProps) => {
           />
         </Grid>
 
-        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 6}>
+        <Grid item xs={12}>
           <Controller
             name="address.cityOrTown"
             control={control}
@@ -230,28 +325,36 @@ const AddressForm = (props: AddressFormProps) => {
           />
         </Grid>
 
-        <Grid item xs={12} md={isAddressFormInDialog ? 8 : 6}>
+        <Grid item xs={12} md={isAddressFormInDialog ? 8 : 5.82}>
           <Controller
             name="address.stateOrProvince"
             control={control}
             defaultValue={contact?.address?.stateOrProvince}
             render={({ field }) => (
-              <KiboTextBox
-                {...field}
-                value={field.value || ''}
-                label={t('state-or-province')}
-                ref={null}
-                error={!!errors?.address?.stateOrProvince}
-                helperText={errors?.address?.stateOrProvince?.message}
-                onChange={(_name: string, value: string) => field.onChange(value)}
-                onBlur={field.onBlur}
-                required={true}
-              />
+              <Box>
+                <KiboSelect
+                  sx={{
+                    color: '#020027',
+                    fontSize: '1rem',
+                    '> fieldSet': { borderColor: '#020027' },
+                  }}
+                  name="state-or-province"
+                  label={t('state-or-province')}
+                  value={field.value}
+                  error={!!errors?.address?.stateOrProvince}
+                  helperText={errors?.address?.stateOrProvince?.message}
+                  onChange={(_name: string, value: string) => field.onChange(value)}
+                  onBlur={field.onBlur}
+                  required={true}
+                >
+                  {generateProvincesOptions()}
+                </KiboSelect>
+              </Box>
             )}
           />
         </Grid>
 
-        <Grid item xs={12} md={isAddressFormInDialog ? 4 : 6}>
+        <Grid item xs={12} md={isAddressFormInDialog ? 3 : 5.82}>
           <Controller
             name="address.postalOrZipCode"
             control={control}
@@ -272,58 +375,11 @@ const AddressForm = (props: AddressFormProps) => {
           />
         </Grid>
 
-        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 6}>
-          <Controller
-            name="address.countryCode"
-            control={control}
-            defaultValue={
-              contact?.address?.countryCode || countries.length === 1 ? countries[0] : ''
-            }
-            render={({ field }) => (
-              <div>
-                <KiboSelect
-                  name="country-code"
-                  label={t('country-code')}
-                  value={field.value}
-                  error={!!errors?.address?.countryCode}
-                  helperText={errors?.address?.countryCode?.message}
-                  onChange={(_name, value) => field.onChange(value)}
-                  onBlur={field.onBlur}
-                  required={true}
-                >
-                  {generateSelectOptions()}
-                </KiboSelect>
-              </div>
-            )}
-          />
-        </Grid>
-
-        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 6}>
-          <Controller
-            name="phoneNumbers.home"
-            control={control}
-            defaultValue={contact?.phoneNumbers?.home}
-            render={({ field }) => (
-              <KiboTextBox
-                {...field}
-                value={field.value || ''}
-                label={t('phone-number-home')}
-                ref={null}
-                error={!!errors?.phoneNumbers?.home}
-                helperText={errors?.phoneNumbers?.home?.message}
-                onChange={(_name: string, value: string) => field.onChange(value)}
-                onBlur={field.onBlur}
-                required={true}
-              />
-            )}
-          />
-        </Grid>
-
         {isUserLoggedIn && saveAddressLabel && (
           <Grid item md={12}>
             <FormControlLabel
               control={<Checkbox onChange={() => setSaveAddress((prevState) => !prevState)} />}
-              label={saveAddressLabel}
+              label={<Typography variant="body2">{saveAddressLabel}</Typography>}
             />
           </Grid>
         )}

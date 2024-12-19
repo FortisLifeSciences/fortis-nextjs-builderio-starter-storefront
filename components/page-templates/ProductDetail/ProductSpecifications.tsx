@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 import {
   Box,
@@ -43,17 +43,32 @@ const ProdAttr = [
 ]
 
 const ProductSpecifications = ({ product }: { product: any }) => {
+  const [productData, setProductData] = useState(product)
+  useEffect(() => {
+    const hasContentsVariant = product?.properties?.some(
+      (prop: any) => prop?.attributeFQN === 'tenant~contents-variant'
+    )
+    const filteredProperties = product?.properties?.filter(
+      (prop: any) => !(prop?.attributeFQN === 'tenant~contents' && hasContentsVariant)
+    )
+    setProductData({
+      ...product,
+      properties: filteredProperties,
+    })
+  }, [product])
   // Render the table rows based on product properties and ProdAttr
   const renderRows = () => {
     return ProdAttr.map((attributeFQN) => {
       // Find the property data that matches the current attributeFQN
-      const property = product.properties.find((data: any) => data.attributeFQN === attributeFQN)
+      const property = productData?.properties?.find(
+        (data: any) => data?.attributeFQN === attributeFQN
+      )
       if (property) {
-        const name = property.attributeDetail.name || 'No Name Available'
+        const name = property?.attributeDetail?.name || 'No Name Available'
         const valueArray: string[] = []
         if (property?.values) {
-          property?.values.forEach((element: any) => {
-            valueArray.push(element.stringValue)
+          property?.values?.forEach((element: any) => {
+            valueArray?.push(element.stringValue)
           })
         }
         return (

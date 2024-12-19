@@ -23,7 +23,7 @@ import { useReCaptcha } from 'next-recaptcha-v3'
 
 import { B2BTemplateStyle } from './B2BTemplate.styles'
 import { MyAccountTemplateStyle } from '../../MyAccountTemplate/MyAccountTemplate.styles'
-import { MyProfile, PaymentMethod, AddressBook } from '@/components/my-account'
+import { MyProfile, PaymentMethod, AddressBook, ShippingPreferences } from '@/components/my-account'
 import { useAuthContext, useSnackbarContext } from '@/context'
 import { useCardContactActions } from '@/hooks'
 import { validateGoogleReCaptcha } from '@/lib/helpers'
@@ -54,7 +54,9 @@ export const B2BTemplateListItem = ({ heading, onClick }: B2BTemplateListItemPro
         }}
         onClick={onClick}
       >
-        <Typography variant="h3">{t(heading)}</Typography>
+        <Typography variant="h3" sx={{ color: 'primary.main' }}>
+          {t(heading)}
+        </Typography>
         <ChevronRightIcon />
       </Box>
     </>
@@ -119,30 +121,31 @@ const B2BTemplate = (props: B2BTemplateProps) => {
       component: <MyProfile user={user as CustomerAccount} isB2BTemplate />,
       path: null,
     },
-    {
-      id: 'account-hierarchy-accordion',
-      controls: 'account-hierarchy-content',
-      header: t('account-hierarchy'),
-      component: null,
-      path: '/my-account/b2b/account-hierarchy',
-    },
-    {
-      id: 'users-accordion',
-      controls: 'users-content',
-      header: t('users'),
-      component: null,
-      path: '/my-account/b2b/users',
-    },
+    // {
+    //   id: 'account-hierarchy-accordion',
+    //   controls: 'account-hierarchy-content',
+    //   header: t('account-hierarchy'),
+    //   component: null,
+    //   path: '/my-account/b2b/account-hierarchy',
+    // },
+    // {
+    //   id: 'users-accordion',
+    //   controls: 'users-content',
+    //   header: t('users'),
+    //   component: null,
+    //   path: '/my-account/b2b/users',
+    // },
     {
       id: 'address-book-accordion',
       controls: 'address-book-content',
       header: t('address-book'),
       component: <AddressBook user={user as CustomerAccount} contacts={contacts} />,
+      path: null,
     },
     {
       id: 'payment-information-accordion',
       controls: 'payment-information-content',
-      header: t('payment-information'),
+      header: t('wallet'),
       component: (
         <PaymentMethod
           user={user as CustomerAccount}
@@ -155,12 +158,13 @@ const B2BTemplate = (props: B2BTemplateProps) => {
           }
         />
       ),
+      path: null,
     },
     {
       id: 'custom-attributes-accordion',
       controls: 'custom-attributes-content',
-      header: t('custom-attributes'),
-      component: null,
+      header: t('shipping-preferences'),
+      component: <ShippingPreferences user={user as CustomerAccount} />,
       path: null,
     },
   ]
@@ -173,10 +177,10 @@ const B2BTemplate = (props: B2BTemplateProps) => {
           {t('back')}
         </Link>
         <Box sx={{ ...B2BTemplateStyle.accountCircleBox }}>
-          <AccountCircle sx={{ ...B2BTemplateStyle.accountCircle }} />
+          <AccountCircle sx={{ ...B2BTemplateStyle.accountCircle, color: 'primary.main' }} />
           <Typography
             variant={mdScreen ? 'h1' : 'h2'}
-            sx={{ paddingLeft: { md: '0.5rem', xs: 0 } }}
+            sx={{ paddingLeft: { md: '0.5rem', xs: 0 }, color: 'primary.main' }}
           >
             {user?.companyOrOrganization}
           </Typography>
@@ -190,7 +194,7 @@ const B2BTemplate = (props: B2BTemplateProps) => {
         >
           <Typography
             variant={mdScreen ? 'h1' : 'h2'}
-            sx={{ paddingLeft: { md: '0.5rem', xs: 0 } }}
+            sx={{ paddingLeft: { md: '0.5rem', xs: 0 }, color: 'primary.main' }}
           >
             {t('account')}
           </Typography>
@@ -212,7 +216,9 @@ const B2BTemplate = (props: B2BTemplateProps) => {
                   id={data.id}
                   sx={{ ...MyAccountTemplateStyle.accordionSummary }}
                 >
-                  <Typography variant="h3">{data.header}</Typography>
+                  <Typography variant="h3" sx={{ color: 'primary.main' }}>
+                    {data.header}
+                  </Typography>
                 </AccordionSummary>
                 {data.component && <AccordionDetails>{data.component}</AccordionDetails>}
               </Accordion>
@@ -222,13 +228,15 @@ const B2BTemplate = (props: B2BTemplateProps) => {
         })}
 
         <Box sx={{ ...MyAccountTemplateStyle.myAccountChildren }}>
-          <Typography variant={mdScreen ? 'h1' : 'h2'}>{t('orders')}</Typography>
+          <Typography variant={mdScreen ? 'h1' : 'h2'} sx={{ color: 'primary.main' }}>
+            {t('orders')}
+          </Typography>
         </Box>
 
-        <B2BTemplateListItem heading="quick-order" onClick={handleGoToQuickOrder} />
+        {/* <B2BTemplateListItem heading="quick-order" onClick={handleGoToQuickOrder} /> */}
         <B2BTemplateListItem heading="order-history" onClick={handleGoToOrderHistory} />
-        <B2BTemplateListItem heading="returns" />
-        <B2BTemplateListItem heading="quotes" onClick={handleGoToQuotes} />
+        {/* <B2BTemplateListItem heading="returns" /> */}
+        {/* <B2BTemplateListItem heading="quotes" onClick={handleGoToQuotes} />  */}
         <B2BTemplateListItem heading="lists" onClick={handleGoToLists} />
 
         <Divider sx={{ backgroundColor: 'grey.300', ...B2BTemplateStyle.divider }} />
@@ -236,7 +244,9 @@ const B2BTemplate = (props: B2BTemplateProps) => {
           sx={{ ...MyAccountTemplateStyle.myAccountChildren, cursor: 'pointer' }}
           onClick={logout}
         >
-          <Typography variant="h3">{t('logout')}</Typography>
+          <Typography variant="h3" sx={{ color: 'primary.main' }}>
+            {t('logout')}
+          </Typography>
         </Box>
         <Divider sx={{ borderColor: 'grey.500' }} />
       </Grid>

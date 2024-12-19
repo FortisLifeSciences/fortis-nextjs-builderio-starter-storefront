@@ -9,6 +9,7 @@ interface AddressProps extends CrAddress {
   firstName?: string
   middleNameOrInitial?: string
   lastNameOrSurname?: string
+  companyOrOrganization?: string
 }
 
 const AddressCard = (props: AddressProps) => {
@@ -16,6 +17,7 @@ const AddressCard = (props: AddressProps) => {
     firstName,
     middleNameOrInitial,
     lastNameOrSurname,
+    companyOrOrganization,
     title,
     address1,
     address2,
@@ -35,11 +37,11 @@ const AddressCard = (props: AddressProps) => {
         </Typography>
       )}
 
-      <Box pt={1} data-testid="address-card">
+      <Box data-testid="address-card">
         {isNameAvailable && (
           <Typography variant={variant}>{`${firstName} ${lastNameOrSurname}`}</Typography>
         )}
-
+        <Typography variant={variant}>{companyOrOrganization}</Typography>
         <Typography variant={variant}>{address1}</Typography>
         <Typography variant={variant}>{address2}</Typography>
         <Box display="flex">

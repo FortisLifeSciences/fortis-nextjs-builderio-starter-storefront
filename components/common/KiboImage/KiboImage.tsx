@@ -1,4 +1,4 @@
-import { SyntheticEvent, useState } from 'react'
+import { useState } from 'react'
 
 import { SvgIconComponent } from '@mui/icons-material'
 import Image, { ImageProps } from 'next/image'
@@ -15,15 +15,6 @@ interface KiboImageProps extends ImageProps {
 
 const errorImage = { image: DefaultImage }
 
-const onImageError = (
-  event: SyntheticEvent<HTMLImageElement, Event> & {
-    target: HTMLImageElement
-  }
-) => {
-  const { target } = event
-  target.src = errorImage.image
-}
-
 const KiboImage = (props: KiboImageProps) => {
   errorImage.image = props.errorimage
 
@@ -32,25 +23,23 @@ const KiboImage = (props: KiboImageProps) => {
     mobileRatio = props.mobileRatio
   }
 
-  const { src, ...rest } = props
-  const [imgSrc, setImgSrc] = useState(src)
+  const { src } = props
+  const [isErrorState, setIsErrorState] = useState(false)
 
   return (
     <Image
       {...props}
-      alt={props.alt}
-      src={imgSrc}
-      onError={() => {
-        setImgSrc(DefaultImage1)
-      }}
+      alt={props.alt || 'Fortis Image'}
+      src={isErrorState ? errorImage.image || DefaultImage1 : src}
+      onError={() => setIsErrorState(true)}
       style={{
         objectFit: props.objectFit ?? 'contain',
         ...(props.alt === 'kibo-logo' && { position: 'relative' }),
         ...(mobileRatio && { width: 'inherit', height: 'inherit' }),
-        ...(props.alt === 'cardType' && { width: '45px', height: '35px' }), // Apply only when mobile is true
+        ...(props.alt.includes('cardType') && mobileRatio && { width: '45px', height: '35px' }), // Apply only when mobile is true
       }}
-      // Only add the "fill" property if the alt is NOT "kibo-logo"
-      fill={props.alt !== 'kibo-logo' && props.alt !== 'cardType'}
+      // Only add the "fill" property if the alt is NOT "kibo-logo" or cardType
+      fill={props.alt !== 'kibo-logo' && !props.alt.includes('cardType')}
     />
   )
 }

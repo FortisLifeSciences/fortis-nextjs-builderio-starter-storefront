@@ -83,7 +83,7 @@ const StyledIconButton = styled(IconButton)(() => ({
 const StyledClose = styled(Close)(() => ({
   width: '1.25rem',
   height: '1.25rem',
-  color: theme?.palette.grey[500],
+  color: theme?.palette.grey[600],
 }))
 
 const KiboDialog = (props: KiboDialogProps) => {

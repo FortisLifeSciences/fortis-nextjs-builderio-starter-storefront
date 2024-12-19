@@ -191,12 +191,14 @@ const ResourceProductCardListView = (props: ProductCardListViewProps) => {
                 />
               </CardMedia>
               <Box flexDirection="column" m={1} width="75%" className="product-info">
-                <Box display="flex" alignItems="center" width="100%">
+                <Box display="flex" alignItems="center" width="100%" mb={'20px'}>
                   <Typography
                     variant="body2"
                     gutterBottom
                     color="text.primary"
                     fontWeight="500"
+                    m={0}
+                    mr={'40px'}
                     sx={{ ...ProductCardStyles.productTitle }}
                   >
                     {title}

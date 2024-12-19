@@ -119,22 +119,22 @@ export const LeftTextHeroStyle = {
     '@media (max-width: 600px)': {
       position: 'absolute',
       width: '100%',
-      height: '230px',
-      top: '70%',
+      height: '285px',
+      top: '73%',
       right: 0,
       zIndex: 2,
       marginTop: '20px',
       '@media (min-width: 384px) and (max-width: 427px)': {
-        top: '69%',
+        top: '72%',
       },
-      '@media (min-width: 428px) and (max-width: 459px)': {
-        top: '67%',
+      '@media (min-width: 428px) and (max-width: 500px)': {
+        top: '68%',
       },
-      '@media (min-width: 460px) and (max-width: 532px)': {
-        top: '63%',
+      '@media (min-width: 501px) and (max-width: 577px)': {
+        top: '66%',
       },
-      '@media (min-width: 533px) and (max-width: 599px)': {
-        top: '61%',
+      '@media (min-width: 578px) and (max-width: 599px)': {
+        top: '62%',
       },
     },
     '@media (min-width: 601px) and (max-width: 990px)': {

@@ -57,6 +57,7 @@ export interface ContactForm {
   lastNameOrSurname: string
   middleNameOrInitial?: string
   email?: string
+  companyOrOrganization?: string
   address: {
     address1: string
     address2: string

@@ -25,7 +25,7 @@ export const buildPurchaseOrderPaymentActionForCheckoutParams = (
         code: purchaseOrderData?.paymentTerm?.code,
         description: purchaseOrderData?.paymentTerm?.description,
       },
-      customFields: [],
+      customFields: purchaseOrderData?.customFields,
     },
   }
   return {

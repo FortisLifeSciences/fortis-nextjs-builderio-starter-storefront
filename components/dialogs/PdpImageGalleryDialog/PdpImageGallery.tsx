@@ -8,7 +8,7 @@ import { Box } from '@mui/system'
 import { useTranslation } from 'next-i18next'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 
-import { CustomDialog } from '@/components/common'
+import { ImageGalleryDialog } from '@/components/common'
 import { KiboImage } from '@/components/common'
 import { useModalContext } from '@/context/ModalContext'
 import { productGetters } from '@/lib/getters'
@@ -61,23 +61,23 @@ const B2BAccountFormDialog = (props: ImageCalleryDialogProps) => {
   }
 
   return (
-    <CustomDialog
+    <ImageGalleryDialog
       showCloseButton
       showContentTopDivider={false}
       showContentBottomDivider={false}
       Actions={''}
       Content={
         <>
-          <Grid container columnSpacing={{ md: 2 }} sx={{ maxHeight: '723px' }}>
+          <Grid container columnSpacing={{ md: 2 }} sx={{ maxHeight: '590px' }}>
             <Grid item sm={8}>
               {/* Gallary Section start */}
-              <Stack direction="row" spacing={images?.length ? 2 : 0} maxHeight="723px">
+              <Stack direction="row" spacing={images?.length ? 2 : 0} maxHeight="580px">
                 <Box
                   position="relative"
                   sx={{
                     border: '1px solid #ccc',
                     width: { xs: '40vh', md: '100%' },
-                    height: { xs: '40vh', md: 680 },
+                    height: { xs: '40vh', md: 580 },
                     maxWidth: '600px',
                   }}
                   display="flex"
@@ -163,7 +163,7 @@ const B2BAccountFormDialog = (props: ImageCalleryDialogProps) => {
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  maxHeight: '667px',
+                  maxHeight: '580px',
                   height: '100%',
                 }}
               >
@@ -224,7 +224,7 @@ const B2BAccountFormDialog = (props: ImageCalleryDialogProps) => {
         </>
       }
       customMaxWidth="1000px"
-      customMaxHeight="723px"
+      customMaxHeight="640px"
       onClose={closeModal}
     />
   )

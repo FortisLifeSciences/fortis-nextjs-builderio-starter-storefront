@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 
 import { Collapse, Box, AppBar, Backdrop, Container, useMediaQuery, useTheme } from '@mui/material'
 import getConfig from 'next/config'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
@@ -73,7 +74,9 @@ const HeaderActionArea = (props: HeaderActionAreaProps) => {
               fontSize: '14px',
             }}
           >
-            CONTACT
+            <Link href={'/contact-us'} style={{ textDecoration: 'none' }}>
+              CONTACT
+            </Link>
           </Box>
           <AccountIcon
             size={isHeaderSmall ? 'small' : 'medium'}

@@ -52,6 +52,9 @@ const getFirstName = (contact?: GenericContact): string => contact?.firstName ||
 
 const getLastNameOrSurname = (contact?: GenericContact): string => contact?.lastNameOrSurname || ''
 
+const getCompanyOrOrganization = (contact?: GenericContact): string =>
+  contact?.companyOrOrganization || ''
+
 const getPhoneNumbers = (contact?: GenericContact) => getContactNumbers(contact?.phoneNumbers)
 
 const getEmail = (contact?: GenericContact): string => contact?.email || ''
@@ -70,7 +73,7 @@ const getStorePickupAddress = (
 const getFormattedAddress = (contact?: GenericContact) => {
   return `${getAddress1(contact?.address)},${getAddress2(contact?.address)},${getCityOrTown(
     contact?.address
-  )},${getStateOrProvince(contact?.address)},${getPostalOrZipCode(contact?.address)}`
+  )},${getStateOrProvince(contact?.address)}, ${getPostalOrZipCode(contact?.address)}`
 }
 
 const getFullName = (contact?: GenericContact) =>
@@ -86,8 +89,10 @@ export const addressGetters = {
   getCityOrTown,
   getPostalOrZipCode,
   getStateOrProvince,
+  getCountryCode,
   getFirstName,
   getLastNameOrSurname,
+  getCompanyOrOrganization,
   getIsBillingShippingAddressSame,
   getStorePickupAddress,
   getPhoneNumbers,

@@ -30,6 +30,13 @@ export enum ReturnStatus {
   NONE = 'None',
 }
 
+export enum PageType {
+  CHECKOUT = 'Checkout',
+  MYACCOUNT = 'MyAccount',
+  ORDERCONFIRMATION = 'OrderConfirmation',
+  ORDERDETAIL = 'OrderDetail',
+}
+
 const currentYear = new Date().getFullYear()
 export const FacetListForHistory = [
   { label: 'last-30-days', filterValue: 'M-1', isApplied: false, isDisplayed: true, count: 0 },

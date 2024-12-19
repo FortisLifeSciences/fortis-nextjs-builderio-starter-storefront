@@ -98,8 +98,12 @@ export const PLPStyles = {
     margin: '1rem 0',
   },
   categoryFacetHeader: {
-    fontWeight: 'bold',
-    color: 'text.primary',
+    fontFamily: 'Roboto',
+    fontSize: '27.4px',
+    fontStyle: 'normal',
+    fontWeight: '700',
+    lineHeight: '32px',
+    color: '#2B2B2B',
     marginBottom: '0.5rem',
   },
   categoryFacetHeaderLoading: {

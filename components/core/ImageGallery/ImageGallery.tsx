@@ -59,6 +59,10 @@ const ImageGallery = (props: ImageGalleryProps) => {
   } = props
   const [isLoading, setIsLoading] = useState(true)
 
+  const [selectedImage, setSelectedImage] = useState({
+    selectedIndex: 0,
+  })
+
   const { showModal, closeModal } = useModalContext()
 
   const imageAssets = digitalAssets
@@ -73,9 +77,10 @@ const ImageGallery = (props: ImageGalleryProps) => {
     // Create a map to efficiently find objects in array2 by cmsid
     const map = new Map(array2.map((obj) => [obj.cmsId, obj]))
 
-    // Loop through array1 and merge data based on cmsid
+    // Filter array1 to include only items with a matching cmsid in array2
     return (
       array1
+        .filter((obj1) => map.has(obj1.cmsid)) // Retain only matching items
         .map((obj1) => {
           const obj2 = map.get(obj1.cmsid)
           return {
@@ -98,14 +103,11 @@ const ImageGallery = (props: ImageGalleryProps) => {
 
   // Set isLoading to false when images are loaded or processed
   useEffect(() => {
-    if (images && images.length > 0) {
-      setIsLoading((prev) => {
-        if (!prev) return false // Avoid unnecessary state updates
-        return false
-      })
+    if (images) {
+      setIsLoading(() => images.length === 0)
     }
 
-    if (images && images.length > 2) {
+    if (images && images.length > 3) {
       setArrowVisibility((prevState) => {
         if (prevState.down) return prevState // Avoid unnecessary state updates
         return {
@@ -114,13 +116,16 @@ const ImageGallery = (props: ImageGalleryProps) => {
         }
       })
     }
+
+    if (images && images.length === 1) {
+      // Update selected image index if it differs
+      if (selectedImage.selectedIndex !== 0) {
+        setSelectedImage((prev) => ({ ...prev, selectedIndex: 0 }))
+      }
+    }
   }, [images])
 
   const { t } = useTranslation('common')
-
-  const [selectedImage, setSelectedImage] = useState({
-    selectedIndex: 0,
-  })
 
   // handle if vertical slider arrow should be visible or not
 

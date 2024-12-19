@@ -129,7 +129,15 @@ const Facet = (props: FacetProps) => {
             },
           }}
         >
-          <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+          <Typography
+            variant="body2"
+            color={'grey.900'}
+            sx={{
+              fontFamily: 'Roboto',
+              fontStyle: 'normal',
+              fontWeight: '700',
+            }}
+          >
             {label}
           </Typography>
         </AccordionSummary>

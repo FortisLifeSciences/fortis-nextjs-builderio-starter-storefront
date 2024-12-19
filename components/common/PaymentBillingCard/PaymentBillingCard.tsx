@@ -2,11 +2,13 @@ import { Box } from '@mui/material'
 import { useTranslation } from 'next-i18next'
 
 import { AddressCard, KeyValueDisplay, PaymentCard } from '@/components/common'
-import { PaymentType } from '@/lib/constants'
+import { PageType, PaymentType } from '@/lib/constants'
 
-import { CrPurchaseOrderPaymentTerm } from '@/lib/gql/types'
+import { CrPurchaseOrderCustomField, CrPurchaseOrderPaymentTerm, Maybe } from '@/lib/gql/types'
 
 interface PaymentBillingCardProps {
+  showAddress?: boolean
+  pageType?: string
   cardNumberPart?: string
   expireMonth?: number
   expireYear?: number
@@ -18,13 +20,17 @@ interface PaymentBillingCardProps {
   stateOrProvince?: string
   firstName?: string
   lastNameOrSurname?: string
+  companyOrOrganization?: string
   purchaseOrderNumber?: string
   paymentTerm?: CrPurchaseOrderPaymentTerm
   paymentType?: string
+  poCustomFields?: Maybe<CrPurchaseOrderCustomField[]>
 }
 
 const PaymentBillingCard = (props: PaymentBillingCardProps) => {
   const {
+    showAddress,
+    pageType,
     cardNumberPart,
     expireMonth,
     expireYear,
@@ -36,9 +42,10 @@ const PaymentBillingCard = (props: PaymentBillingCardProps) => {
     stateOrProvince,
     firstName,
     lastNameOrSurname,
+    companyOrOrganization,
     purchaseOrderNumber,
-    paymentTerm,
     paymentType,
+    poCustomFields,
   } = props
   const { t } = useTranslation('common')
 
@@ -48,48 +55,88 @@ const PaymentBillingCard = (props: PaymentBillingCardProps) => {
       maxWidth={873}
       display="flex"
       sx={{
-        flexDirection: 'column',
+        flexDirection: 'row',
         gap: 1,
       }}
     >
       {paymentType === PaymentType.CREDITCARD && (
-        <PaymentCard
-          cardNumberPart={cardNumberPart as string}
-          expireMonth={expireMonth as number}
-          expireYear={expireYear as number}
-          cardType={cardType}
-          // onPaymentCardSelection={() => null}
-        />
+        <>
+          <PaymentCard
+            pageType={pageType}
+            cardNumberPart={cardNumberPart as string}
+            expireMonth={expireMonth as number}
+            expireYear={expireYear as number}
+            cardType={cardType}
+            // onPaymentCardSelection={() => null}
+          />
+          {showAddress && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', pt: 1, ml: 5 }}>
+              <AddressCard
+                title={t('billing-address')}
+                variant={'body2'}
+                firstName={firstName}
+                lastNameOrSurname={lastNameOrSurname}
+                companyOrOrganization={companyOrOrganization}
+                address1={address1}
+                address2={address2}
+                cityOrTown={cityOrTown}
+                stateOrProvince={postalOrZipCode}
+                postalOrZipCode={stateOrProvince}
+              />
+            </Box>
+          )}
+        </>
       )}
 
       {paymentType === PaymentType.PURCHASEORDER && (
         <Box data-testid="purchase-order-card">
-          <KeyValueDisplay
-            option={{
-              name: t('po-number'),
-              value: purchaseOrderNumber,
-            }}
-            variant="body1"
-          />
-          <KeyValueDisplay
-            option={{
-              name: t('payment-terms'),
-              value: paymentTerm?.description,
-            }}
-            variant="body1"
-          />
+          <Box>
+            <KeyValueDisplay
+              variant={'body2'}
+              color="grey.900"
+              fontWeight={'normal'}
+              sx={{ fontSize: '1rem' }}
+              option={{
+                name: t('po-number') + ':',
+                value: purchaseOrderNumber,
+              }}
+            />
+            {poCustomFields?.map((customField) => {
+              return customField?.value ? (
+                <KeyValueDisplay
+                  variant={'body2'}
+                  color="grey.900"
+                  fontWeight={'normal'}
+                  sx={{ fontSize: '1rem' }}
+                  key={customField?.code}
+                  option={{
+                    name: customField?.label + ':',
+                    value: customField?.value,
+                  }}
+                />
+              ) : (
+                <></>
+              )
+            })}
+          </Box>
+          {showAddress && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', pt: 1, ml: 5 }}>
+              <AddressCard
+                title={t('billing-address')}
+                variant={'body2'}
+                firstName={firstName}
+                lastNameOrSurname={lastNameOrSurname}
+                companyOrOrganization={companyOrOrganization}
+                address1={address1}
+                address2={address2}
+                cityOrTown={cityOrTown}
+                stateOrProvince={postalOrZipCode}
+                postalOrZipCode={stateOrProvince}
+              />
+            </Box>
+          )}
         </Box>
       )}
-
-      <AddressCard
-        firstName={firstName}
-        lastNameOrSurname={lastNameOrSurname}
-        address1={address1}
-        address2={address2}
-        cityOrTown={cityOrTown}
-        stateOrProvince={postalOrZipCode}
-        postalOrZipCode={stateOrProvince}
-      />
     </Box>
   )
 }
