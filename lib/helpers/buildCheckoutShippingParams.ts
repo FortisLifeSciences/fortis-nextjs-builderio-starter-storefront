@@ -22,7 +22,7 @@ export const buildCheckoutShippingParams = (params: CheckoutShippingParams): Shi
     fulfillmentInfoInput: {
       fulfillmentContact: {
         ...(contact ? contact : checkout.fulfillmentInfo?.fulfillmentContact),
-        email: email ? email : checkout.email,
+        email: email && email !== '' ? email : checkout.email,
       },
 
       shippingMethodCode: shippingMethodCode ? shippingMethodCode : null,

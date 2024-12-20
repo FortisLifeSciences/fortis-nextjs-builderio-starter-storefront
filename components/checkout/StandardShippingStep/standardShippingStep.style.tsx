@@ -21,11 +21,11 @@ export const StandardShippingStepStyle = {
     borderRadius: '0px 26px',
     border: '1px solid',
     display: 'inline-flex',
-    padding: '12px 38px',
+    // padding: '12px 38px',  //This is defined directly in the inline sx because diference in paddings of 2 secondary buttons in use
     justifyContent: 'center',
     alignItems: 'center',
     gap: '10px',
-    width: 'auto',
+    width: 'fitContent !important',
     height: { md: '49px' },
     '&:hover': {
       backgroundColor: 'secondary.main',

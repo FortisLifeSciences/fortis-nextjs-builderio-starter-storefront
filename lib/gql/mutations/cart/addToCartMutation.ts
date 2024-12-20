@@ -9,6 +9,7 @@ const addToCartMutation = /* GraphQL */ `
       fulfillmentMethod
       product {
         productCode
+        variationProductCode
         name
         description
         imageUrl

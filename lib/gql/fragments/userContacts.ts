@@ -10,6 +10,7 @@ export const userContactFields = /* GraphQL */ `
     firstName
     middleNameOrInitial
     lastNameOrSurname
+    companyOrOrganization
     phoneNumbers {
       home
       mobile

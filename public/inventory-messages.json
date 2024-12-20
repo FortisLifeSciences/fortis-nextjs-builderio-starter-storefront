@@ -1,5 +1,5 @@
 {
-  "normalAvailability": "Order by {CountDown} for shipment by {DeliveryDate}",
+  "normalAvailability": "Order within {CountDown} for shipment by {DeliveryDate}",
   "limitedInventoryNoBackorder": "Only {QtyOnHand} remaining",
   "onBackorderRestockUnknown": "Item on backorder. Please call 800.338.9579 for availablility",
   "onBackorderRestockDateAvailable": "In production. Order now for expected delivery by {DeliveryDate}",

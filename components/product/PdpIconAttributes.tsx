@@ -1,30 +1,17 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
-import { Box, Grid } from '@mui/material'
+import { Box } from '@mui/material'
 import getConfig from 'next/config'
-import Link from 'next/link'
 
 import PdpValidationAttributes from './PDPValidationModal'
-import { ProductCustom } from '@/lib/types'
 
 const { publicRuntimeConfig } = getConfig()
 
 const styles = {
-  flexDirectionRow: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  spaceBetween: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginTop: '10px',
-  },
   iconCss: {
     display: 'flex',
     alignItems: 'center',
     fontSize: '24px',
-    marginRight: '10px',
     color: 'primary.main',
   },
   iconText: {
@@ -32,15 +19,10 @@ const styles = {
     color: 'primary.main',
     fontFamily: 'Poppins',
     fontSize: '16px',
-    fontStyle: 'normal',
     fontWeight: '400',
     lineHeight: '25px',
+    marginLeft: '8px',
     textDecorationLine: 'underline',
-    textDecorationStyle: 'solid',
-    textDecorationSkipInk: 'none',
-    textDecorationThickness: 'auto',
-    textUnderlineOffset: 'auto',
-    textUnderlinePosition: 'from-font',
     '&:hover': {
       textDecorationLine: 'none',
     },
@@ -49,118 +31,134 @@ const styles = {
 
 const PdpIconAttributes = (props: any) => {
   const { product } = props
-  const properties = product?.properties
+
   const [isModalOpen, setModalOpen] = useState(false)
+  const [properties, setProperties] = useState(product?.properties)
 
   const handleOpenModal = () => setModalOpen(true)
   const handleCloseModal = () => setModalOpen(false)
+
+  const handleScroll = (id: string) => {
+    const element = document.getElementById(id)
+    if (element) {
+      const yOffset = -125
+      const yPosition = element.getBoundingClientRect().top + window.scrollY + yOffset
+      window.scrollTo({ top: yPosition, behavior: 'smooth' })
+    }
+  }
+
+  useEffect(() => {
+    setProperties(product?.properties)
+  }, [props])
+
   return (
-    <Grid container spacing={2} mb={2}>
-      {properties?.map((data: any) => {
-        return data?.attributeFQN === 'tenant~validation-text' ? (
-          <Grid
-            item
-            xs={6}
-            md={3}
-            sm={3}
-            sx={styles.flexDirectionRow}
-            onClick={handleOpenModal}
-            style={{ cursor: 'pointer' }}
+    <Box
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)', // 4 equal columns
+        // gap: '10px', // Spacing between items
+        marginTop: '10px',
+        marginLeft: '10px',
+        '@media (max-width: 1200px)': {
+          gridTemplateColumns: 'repeat(3, 1fr)', // 2 columns for medium screens
+        },
+        '@media (max-width: 600px)': {
+          gridTemplateColumns: 'repeat(2, 1fr)', // 1 column for small screens
+        },
+      }}
+    >
+      {/* Validation Text */}
+      {properties?.map((data: any) =>
+        data?.attributeFQN === publicRuntimeConfig?.validationTextAttrFQN ? (
+          <Box
+            sx={{ ...styles.iconCss, cursor: 'pointer', color: '#348345' }}
             key={data.attributeFQN}
+            onClick={handleOpenModal}
           >
-            <Box sx={{ ...styles.iconCss, color: '#348345' }}>
-              <span className="material-symbols-outlined">verified</span>
-            </Box>
-            <Box
-              sx={{
-                ...styles.iconText,
-                color: '#348345',
-              }}
-            >
-              Validated
-            </Box>
-          </Grid>
-        ) : null
-      })}
-
-      {isModalOpen && <PdpValidationAttributes product={product} onClose={handleCloseModal} />}
-      <Grid item xs={6} md={3} sm={3}>
-        <Link href="#">
-          <Box sx={styles.flexDirectionRow}>
-            <Box sx={styles.iconCss}>
-              <span className="material-symbols-outlined">draft</span>
-            </Box>
-            <Box sx={styles.iconText}>Documents</Box>
+            <span className="material-symbols-outlined">verified</span>
+            <Box sx={{ ...styles.iconText, color: '#348345' }}>Validated</Box>
           </Box>
-        </Link>
-      </Grid>
+        ) : null
+      )}
 
-      {properties?.map((data: any) => {
-        return data?.attributeFQN === publicRuntimeConfig?.citationCountVariantAttrFQN ? (
+      {/* Documents Link */}
+      <Box
+        sx={{ ...styles.iconCss, cursor: 'pointer' }}
+        onClick={() => handleScroll('document-section')}
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+          draft
+        </span>
+        <Box sx={styles.iconText}>Documents</Box>
+      </Box>
+
+      {/* Citations */}
+      {properties?.map((data: any) =>
+        data?.attributeFQN === publicRuntimeConfig?.citationCountVariantAttrFQN ? (
           data?.values[0]?.value > 0 ? (
-            <Grid item xs={6} md={3} sm={3}>
-              <Link href="#" style={{ textDecoration: 'none' }}>
-                <Box sx={styles.flexDirectionRow}>
-                  <Box sx={styles.iconCss}>
-                    <span className="material-symbols-outlined">note_stack</span>
-                  </Box>
-                  <Box sx={styles.iconText}>Citations({data?.values[0]?.value})</Box>
-                </Box>
-              </Link>
-            </Grid>
+            <Box
+              sx={{ ...styles.iconCss, cursor: 'pointer' }}
+              onClick={() => handleScroll('citation-document-section')}
+              key="citations"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+                note_stack
+              </span>
+              <Box sx={{ ...styles.iconText, marginLeft: '4px' }}>
+                Citations ({data?.values[0]?.value})
+              </Box>
+            </Box>
           ) : null
         ) : null
-      })}
+      )}
 
-      {properties?.map((data: any) => {
-        return data?.attributeFQN === publicRuntimeConfig?.mfgCertificationAttrFQN ? (
+      {/* Manufacturing Certification */}
+      {properties?.map((data: any) =>
+        data?.attributeFQN === publicRuntimeConfig?.mfgCertificationAttrFQN ? (
           data?.values[0]?.value === 'ISO13485' ? (
-            <Grid item xs={6} md={3} sm={3}>
-              <Box sx={styles.flexDirectionRow}>
-                <Box sx={styles.iconCss}>
-                  <span className="material-symbols-outlined">task_alt</span>
-                </Box>
-                <Box sx={styles.iconText}>{data?.values[0]?.value}</Box>
+            <Box sx={{ ...styles.iconCss, color: '#348345' }} key="iso-certification">
+              <span className="material-symbols-outlined">task_alt</span>
+              <Box sx={{ ...styles.iconText, color: '#348345', textDecoration: 'none' }}>
+                {data?.values[0]?.stringValue}
               </Box>
-            </Grid>
+            </Box>
           ) : null
         ) : null
-      })}
+      )}
 
-      {properties?.map((data: any) => {
-        return data?.attributeFQN === publicRuntimeConfig?.mfgAvailabilityAttrFQN ? (
+      {/* Manufacturing Availability (GMP Ready) */}
+      {properties?.map((data: any) =>
+        data?.attributeFQN === publicRuntimeConfig?.mfgAvailabilityAttrFQN ? (
           data?.values[0]?.value === 'gmp_ready' ? (
-            <Grid item xs={6} md={3} sm={3}>
-              <Box sx={styles.flexDirectionRow}>
-                <Box sx={styles.flexDirectionRow}>
-                  <Box sx={styles.iconCss}>
-                    <span className="material-symbols-outlined">manufacturing</span>
-                  </Box>
-                  <Box sx={styles.iconText}>{data?.values[0]?.stringValue}</Box>
-                </Box>
+            <Box sx={{ ...styles.iconCss, color: '#1468C8' }} key="gmp-ready">
+              <span className="material-symbols-outlined">manufacturing</span>
+              <Box sx={{ ...styles.iconText, color: '#1468C8', textDecoration: 'none' }}>
+                {data?.values[0]?.stringValue}
               </Box>
-            </Grid>
+            </Box>
           ) : null
         ) : null
-      })}
+      )}
 
-      {properties?.map((data: any) => {
-        return data?.attributeFQN === publicRuntimeConfig?.mfgAvailabilityAttrFQN ? (
-          data?.values[0]?.value === 'Lyo-Ready' ? (
-            <Grid item xs={6} md={3} sm={3}>
-              <Box sx={styles.flexDirectionRow}>
-                <Box sx={styles.flexDirectionRow}>
-                  <Box sx={styles.iconCss}>
-                    <span className="material-symbols-outlined">grain</span>
-                  </Box>
-                  <Box sx={styles.iconText}>{data?.values[0]?.stringValue}</Box>
-                </Box>
+      {/* Manufacturing Availability (Lyo-Ready) */}
+      {properties?.map((data: any) =>
+        data?.attributeFQN === publicRuntimeConfig?.mfgAvailabilityAttrFQN ? (
+          data?.values[0]?.value === 'lyo_ready' ? (
+            <Box sx={{ ...styles.iconCss, color: '#CD461D' }} key="lyo-ready">
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
+                grain
+              </span>
+              <Box sx={{ ...styles.iconText, color: '#CD461D', textDecoration: 'none' }}>
+                {data?.values[0]?.stringValue}
               </Box>
-            </Grid>
+            </Box>
           ) : null
         ) : null
-      })}
-    </Grid>
+      )}
+
+      {/* Modal Popup */}
+      {isModalOpen && <PdpValidationAttributes product={product} onClose={handleCloseModal} />}
+    </Box>
   )
 }
 

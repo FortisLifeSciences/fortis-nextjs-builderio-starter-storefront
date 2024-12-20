@@ -1,9 +1,9 @@
 import React from 'react'
 
-import { Box, Divider } from '@mui/material'
+import { Box, Divider, Typography } from '@mui/material'
 import { useTranslation } from 'next-i18next'
 
-import { OrderPrice, ProductItem } from '@/components/common'
+import { OrderPrice, Price, ProductItem } from '@/components/common'
 import type { OrderPriceProps } from '@/components/common/OrderPrice/OrderPrice'
 import { cartGetters } from '@/lib/getters'
 
@@ -32,7 +32,7 @@ const Content = (props: CartContentProps) => {
   return (
     <Box sx={{ width: '100%' }} data-testid="content-component">
       <Box>
-        <ProductItem
+        {/* <ProductItem
           image={cartItem?.product?.imageUrl || ''}
           name={cartItem?.product?.name || ''}
           options={cartItem?.product?.options as Array<CrProductOption>}
@@ -44,10 +44,49 @@ const Content = (props: CartContentProps) => {
           }
           subscriptionFrequency={subscriptionDetails as string}
           discounts={cartItem?.productDiscounts}
-        />
+          pageType={pageType}
+        /> */}
+        <Typography variant="body1" data-testid="productName" pb={0.375}>
+          {cartItem?.product?.name || ''}
+        </Typography>
+        {cartItem?.product?.options?.map((option, index) => (
+          <Box
+            key={index}
+            data-testid="keyValueOptions"
+            pt={0.5}
+            display="flex"
+            flexDirection={'row'}
+            flexWrap="wrap"
+            justifyContent={'space-between'}
+            gap={1}
+            //sx={{ ...sx }}
+          >
+            {typeof option?.value === 'string' ? (
+              <Typography
+                variant="body2"
+                fontWeight={'normal'}
+                component="span"
+                //color={color}
+              >
+                {option?.value}
+              </Typography>
+            ) : (
+              option?.value
+            )}
+            <Typography variant="body2" pb={0.375} fontWeight={'normal'} component="span">
+              {cartItem?.product?.variationProductCode}
+            </Typography>
+          </Box>
+        ))}
       </Box>
-      <Divider />
-      <OrderPrice {...orderPriceProps} />
+      <Divider sx={{ marginTop: '10px', border: '2px solid #EDEDED' }} />
+      <Box display="flex" flexDirection={'row'} justifyContent={'flex-end'}>
+        <Typography color="grey.900" fontWeight={500} sx={{ pr: 1 }} component="span">
+          {cartItem?.quantity} @
+        </Typography>
+        <Price variant="body1" fontWeight={'500'} price={t('currency', { val: subtotal })} />
+        {/* <OrderPrice {...orderPriceProps} /> */}
+      </Box>
     </Box>
   )
 }

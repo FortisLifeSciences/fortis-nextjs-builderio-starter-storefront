@@ -93,7 +93,13 @@ const StandardShippingStep = (props: ShippingProps) => {
     if (isAuthenticated) {
       setIsAddressSavedToAccount(true)
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated, savedShippingAddresses?.length])
+
+  useEffect(() => {
+    if (savedShippingAddresses?.length) {
+      setShouldShowAddAddressButton(true)
+    }
+  }, [savedShippingAddresses?.length])
 
   const defaultShippingAddress = userGetters.getDefaultShippingAddress(
     savedShippingAddresses as CustomerContact[]
@@ -151,8 +157,9 @@ const StandardShippingStep = (props: ShippingProps) => {
       }
       contact.address = {
         ...contact.address,
-        addressType: 'commercial', // Add addressType with value commercial
+        addressType: 'Commercial', // Add addressType with value commercial
       }
+      contact.email = checkout?.email || user?.emailAddress
       if (!allowInvalidAddresses && contact?.address?.countryCode === CountryCode.US) {
         await validateCustomerAddress.mutateAsync({
           addressValidationRequestInput: { address: contact?.address as CuAddress },
@@ -238,7 +245,7 @@ const StandardShippingStep = (props: ShippingProps) => {
         firstName: selectedAddress?.firstName || '',
         lastNameOrSurname: selectedAddress?.lastNameOrSurname || '',
         middleNameOrInitial: selectedAddress?.middleNameOrInitial || '',
-        email: selectedAddress?.email || '',
+        email: selectedAddress?.email || checkout?.email || user?.emailAddress,
         address: {
           ...(selectedAddress?.address as any),
         },
@@ -311,6 +318,7 @@ const StandardShippingStep = (props: ShippingProps) => {
         address,
         firstName: '',
         lastNameOrSurname: '',
+        email: '',
         phoneNumbers: { home: '' },
       },
     })
@@ -352,7 +360,7 @@ const StandardShippingStep = (props: ShippingProps) => {
 
   return (
     <Stack data-testid="checkout-shipping" gap={2} ref={shippingAddressRef}>
-      <Typography variant="h2" component="h2" sx={{ color: 'primary.main', margin: '0px 8px' }}>
+      <Typography variant="h2" component="h2" sx={{ color: 'primary.main' }}>
         {t('shipping-address')}
       </Typography>
       {shouldShowAddAddressButton && (
@@ -398,9 +406,6 @@ const StandardShippingStep = (props: ShippingProps) => {
 
             {previouslySavedShippingAddress?.length > 0 && (
               <>
-                <Typography variant="subtitle2" fontWeight={'bold'}>
-                  {t('previously-saved-shipping-addresses')}
-                </Typography>
                 <KiboRadio
                   radioOptions={previouslySavedShippingAddress?.map((address, index) => {
                     return {
@@ -416,26 +421,30 @@ const StandardShippingStep = (props: ShippingProps) => {
                           cityOrTown={address?.address?.cityOrTown as string}
                           stateOrProvince={address?.address?.stateOrProvince as string}
                           postalOrZipCode={address?.address?.postalOrZipCode as string}
+                          variant="body2"
                         />
                       ),
                     }
                   })}
                   selected={selectedShippingAddressId?.toString()}
                   align="flex-start"
+                  addressCheckout={true}
                   onChange={handleAddressSelect}
                 />
               </>
             )}
             <NoSsr>
               {hasPermission(actions.CREATE_CONTACTS) && (
-                <Button
-                  variant="contained"
-                  color="inherit"
-                  sx={{ width: { xs: '100%', sm: '50%' } }}
-                  onClick={handleAddNewAddress}
-                >
-                  {t('add-new-address')}
-                </Button>
+                <Box>
+                  <Button
+                    sx={{ padding: '12px 19px', ...StandardShippingStepStyle.secondaryButton }}
+                    onClick={handleAddNewAddress}
+                  >
+                    <Typography sx={{ fontSize: '1rem', lineHeight: '1.5rem', fontWeight: '400' }}>
+                      {t('add-new-address')}
+                    </Typography>
+                  </Button>
+                </Box>
               )}
             </NoSsr>
           </Stack>
@@ -447,6 +456,7 @@ const StandardShippingStep = (props: ShippingProps) => {
               selectedShippingMethodCode={checkoutShippingMethodCode}
               onShippingMethodChange={handleSaveShippingMethod}
               onStoreLocatorClick={handleStoreLocatorClick}
+              checkout={checkout}
             />
           )}
         </>
@@ -477,23 +487,20 @@ const StandardShippingStep = (props: ShippingProps) => {
             />
           )} */}
 
-          <Box m={1} maxWidth={'872px'} data-testid="address-form" sx={{ marginTop: '-24px' }}>
+          <Box maxWidth={'872px'} data-testid="address-form" sx={{ marginTop: '-24px' }}>
             <Divider sx={{ marginBottom: '20px' }} />
             <Grid container>
-              {/* <Grid item xs={6} gap={2} display={'flex'} direction={'column'}> */}
               <Grid
                 item
                 xs={12}
                 gap={2}
-                display={'flex'}
-                direction={'row'}
-                sx={{ justifyContent: 'space-between' }}
+                sx={{ justifyContent: 'space-between', display: 'flex', direction: 'row' }}
               >
                 <Button
-                  sx={{ ...StandardShippingStepStyle.secondaryButton }}
+                  sx={{ padding: '12px 38px', ...StandardShippingStepStyle.secondaryButton }}
                   onClick={() => setShouldShowAddAddressButton(true)}
                 >
-                  <Typography sx={{ fontSize: '1rem', lineHeight: '1.5rem', fontWeight: '300' }}>
+                  <Typography sx={{ fontSize: '1rem', lineHeight: '1.5rem', fontWeight: '400' }}>
                     {t('cancel')}
                   </Typography>
                 </Button>
@@ -510,7 +517,7 @@ const StandardShippingStep = (props: ShippingProps) => {
                   onClick={handleAddressValidationAndSave}
                   {...(!isAddressFormValid && { disabled: true })}
                 >
-                  <Typography sx={{ fontSize: '1rem', lineHeight: '1.5rem', fontWeight: '300' }}>
+                  <Typography sx={{ fontSize: '1rem', lineHeight: '1.5rem', fontWeight: '400' }}>
                     {t('save-shipping-address')}
                   </Typography>
                 </Button>

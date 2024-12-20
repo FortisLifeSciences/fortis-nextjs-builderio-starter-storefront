@@ -57,19 +57,34 @@ interface AccountAddressProps {
 
 const styles = {
   addNewAddressButtonStyle: {
-    maxWidth: '26.313rem',
-    '& > *:first-of-type': {
-      fontSize: 'inherit',
+    width: 'auto',
+    maxWidth: '300px',
+    backgroundColor: 'primary.main',
+    color: 'secondary.light',
+    textAlign: 'center',
+    fontFamily: 'Poppins',
+    fontSize: '16px',
+    fontStyle: 'normal',
+    fontWeight: '500',
+    lineHeight: '24px',
+    borderRadius: '0px 26px',
+    border: '1px solid primary.main',
+    padding: '12px 30px',
+    '&:hover': {
+      backgroundColor: 'primary.light',
+      border: '1px solid primary.light',
     },
+    marginLeft: '20px',
   },
 }
 const buildAddressProps = (customerContact: CustomerContact) => {
-  const { firstName, lastNameOrSurname, address } = customerContact
+  const { firstName, lastNameOrSurname, companyOrOrganization, address } = customerContact
   const { address1, address2, cityOrTown, stateOrProvince, postalOrZipCode } = address as CuAddress
   return {
     firstName: firstName as string,
     lastNameOrSurname: lastNameOrSurname as string,
     address1,
+    companyOrOrganization: companyOrOrganization as string,
     address2,
     cityOrTown,
     stateOrProvince,
@@ -226,8 +241,18 @@ const AddressBook = (props: AddressBookProps) => {
       contact: {
         ...address.contact,
         email: user.emailAddress as string,
+        phoneNumbers: {
+          ...address.contact.phoneNumbers,
+          work: address.contact.phoneNumbers.home, // Set work phone number to home phone number
+        },
+        companyOrOrganization: address.contact.companyOrOrganization || 'New Company Name', // Update company name if needed
+        address: {
+          ...address.contact.address,
+          addressType: 'commercial', // Change address type to Commercial
+        },
       },
     }
+
     const params = buildAddressParams({
       accountId: user?.id,
       address,

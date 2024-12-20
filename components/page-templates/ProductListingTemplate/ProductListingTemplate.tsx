@@ -159,6 +159,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
       categoryCode !== undefined && seoFriendlyUrl
         ? `/products/${categoryCode}/${seoFriendlyUrl}/${productCode}`
         : `/product/${productCode}`
+    listItemUrl = productType === 'Resources' ? `/product/${productCode}` : listItemUrl
     // Append query parameter if sliceValue is present
     if (product?.sliceValue) {
       const separator = listItemUrl.includes('?') ? '&' : '?' // Check if the URL already has query params
@@ -194,7 +195,6 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
       priceRange: productGetters.getPriceRange(product),
       title: productGetters.getName(product),
       brand: productGetters.getBrandName(properties),
-      catalogNumber: productGetters.getCatalogNumber(properties),
       newProduct: productGetters.getNewProductAttrName(properties),
       variantProductName: productGetters.getVariantProductAttributeName(properties),
       rating: productGetters.getRating(product),
@@ -441,43 +441,42 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
                   )
                 })}
               </Grid>
+            </Box>
+          </Box>
+          {!isLoading && (
+            <Box>
+              <Box sx={{ ...PLPStyles.productResults, color: 'grey.600', typography: 'body2' }}>
+                {t('products-to-show', {
+                  m: `${pageSize < totalResults ? pageSize : totalResults}`,
+                  n: `${totalResults}`,
+                })}
+              </Box>
+              {pageSize < totalResults && onInfiniteScroll && (
+                <Box sx={{ ...PLPStyles.productResults }}>
+                  <Button
+                    id="show-more-button"
+                    sx={{ ...PLPStyles.showMoreButton }}
+                    variant="contained"
+                    onClick={onInfiniteScroll}
+                    color="inherit"
+                  >
+                    {t('show-more')}
+                  </Button>
+                </Box>
+              )}
 
-              {!isLoading && (
-                <Box>
-                  <Box sx={{ ...PLPStyles.productResults, color: 'grey.600', typography: 'body2' }}>
-                    {t('products-to-show', {
-                      m: `${pageSize < totalResults ? pageSize : totalResults}`,
-                      n: `${totalResults}`,
-                    })}
-                  </Box>
-                  {pageSize < totalResults && onInfiniteScroll && (
-                    <Box sx={{ ...PLPStyles.productResults }}>
-                      <Button
-                        id="show-more-button"
-                        sx={{ ...PLPStyles.showMoreButton }}
-                        variant="contained"
-                        onClick={onInfiniteScroll}
-                        color="inherit"
-                      >
-                        {t('show-more')}
-                      </Button>
-                    </Box>
-                  )}
-
-                  {!isLoading && onPaginationChange && (
-                    <Box display={'flex'} justifyContent={'center'} width="100%" py={10}>
-                      <KiboPagination
-                        count={pageCount}
-                        startIndex={startIndex}
-                        pageSize={productPerPage}
-                        onPaginationChange={onPaginationChange}
-                      />
-                    </Box>
-                  )}
+              {!isLoading && onPaginationChange && (
+                <Box display={'flex'} justifyContent={'center'} width="100%" py={10}>
+                  <KiboPagination
+                    count={pageCount}
+                    startIndex={startIndex}
+                    pageSize={productPerPage}
+                    onPaginationChange={onPaginationChange}
+                  />
                 </Box>
               )}
             </Box>
-          </Box>
+          )}
         </Box>
       )}
 

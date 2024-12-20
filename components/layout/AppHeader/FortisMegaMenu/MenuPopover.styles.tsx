@@ -76,10 +76,6 @@ export const featuredText = {
 
 export const submenuItem = {
   padding: '8px 0',
-  textDecoration: 'underline',
-  textDecorationColor: '#30299A',
-  textUnderlineOffset: '6px',
-
   '&:hover': {
     cursor: 'pointer',
   },
@@ -97,4 +93,41 @@ export const hoveredArrowIcon = {
   marginLeft: '8px',
   paddingRight: '58px',
   display: 'flex',
+}
+
+export const animatedUnderline = {
+  display: 'inline-block',
+  position: 'relative',
+  color: 'primary.main',
+
+  '&:before': {
+    content: `""`,
+    position: 'absolute',
+    width: '100%',
+    height: '1px',
+    bottom: 0,
+    left: 0,
+    backgroundColor: 'primary.main',
+  },
+
+  '&:after': {
+    content: `""`,
+    position: 'absolute',
+    width: '100%',
+    transform: 'scaleX(0)',
+    height: '1px',
+    bottom: 0,
+    left: 0,
+    backgroundColor: 'primary.main',
+    transformOrigin: 'bottom left',
+    transition: 'transform 0.7s ease-in-out',
+  },
+  '&:hover::before': {
+    display: 'none',
+  },
+
+  '&:hover::after': {
+    transform: 'scaleX(1)',
+    transformOrigin: 'bottom left',
+  },
 }

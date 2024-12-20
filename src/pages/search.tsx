@@ -112,6 +112,23 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
   useEffect(() => {
     setSearchParams(router.query as unknown as CategorySearchParams)
   }, [router.query])
+
+  // When InfiniteScroll is needed, use this.
+  const handleInfiniteScroll = () => {
+    const pageSize = searchPageResults?.pageSize + publicRuntimeConfig.productListing.pageSize
+    router.push(
+      {
+        pathname: router?.pathname,
+        query: {
+          ...router.query,
+          pageSize,
+        },
+      },
+      undefined,
+      { scroll: false, shallow: true }
+    )
+  }
+
   return (
     <>
       <ProductListingTemplate
@@ -128,7 +145,8 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
         isLoading={isFetching}
         appliedFilters={appliedFilters as FacetValue[]}
         onSortItemSelection={changeSorting}
-        onPaginationChange={changePagination}
+        // onPaginationChange={changePagination}
+        onInfiniteScroll={handleInfiniteScroll}
       />
     </>
   )

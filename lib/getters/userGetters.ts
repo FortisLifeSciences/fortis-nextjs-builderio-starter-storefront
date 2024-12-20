@@ -122,6 +122,34 @@ const getAllShippingAddresses = (
   return userShippingAddress
 }
 
+const getAllBillingAddresses = (
+  checkoutBillingContact: CrContact,
+  userBillingAddress: CustomerContact[] = []
+) => {
+  if (!userBillingAddress.length && checkoutBillingContact === null) {
+    return []
+  }
+
+  // If checkout has fulfillmentInfo and it is one of the account saved addresses
+  const existingAddressId = checkoutBillingContact
+    ? userBillingAddress?.findIndex((address) => address?.id === checkoutBillingContact?.id)
+    : -1
+
+  if (existingAddressId < 0) {
+    if (checkoutBillingContact) {
+      // If no, add it to userShippingAddress
+      userBillingAddress?.unshift(checkoutBillingContact as CustomerContact)
+    }
+  } else {
+    // If yes, update the entry
+    userBillingAddress[existingAddressId] = {
+      ...userBillingAddress[existingAddressId],
+      ...(checkoutBillingContact as CustomerContact),
+    }
+  }
+  return userBillingAddress
+}
+
 const getDefaultShippingAddress = (addresses: CustomerContact[]) =>
   addresses?.find(
     (each) =>
@@ -136,6 +164,17 @@ const getOtherShippingAddress = (
   return (
     Array.from(new Set(addresses?.filter((each) => each?.id != defaultShippingAddressId))) || []
   )
+}
+
+const getDefaultBillingAddress = (addresses: CustomerContact[]) =>
+  addresses?.find(
+    (each) =>
+      each?.types &&
+      each?.types?.some((type) => type?.name === AddressType.BILLING && type?.isPrimary)
+  )
+
+const getOtherBillingAddress = (addresses: CustomerContact[], defaultBillingAddressId: number) => {
+  return Array.from(new Set(addresses?.filter((each) => each?.id != defaultBillingAddressId))) || []
 }
 
 const getCustomerAccountDetails = (user: CustomerAccount) => {
@@ -167,8 +206,11 @@ export const userGetters = {
   getEmailAddress,
   getUserId,
   getAllShippingAddresses,
+  getAllBillingAddresses,
   getDefaultShippingAddress,
+  getDefaultBillingAddress,
   getOtherShippingAddress,
+  getOtherBillingAddress,
   getCustomerB2BUsers,
   getRole,
   getStatus,

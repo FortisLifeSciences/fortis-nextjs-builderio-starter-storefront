@@ -13,6 +13,7 @@ interface OrderSummaryProps<T extends CrCart | CrOrder | Checkout> extends Order
   backLabel?: string
   checkoutLabel?: string
   shippingLabel?: string
+  taxLabel?: string
   children?: ReactNode
 }
 
@@ -36,6 +37,7 @@ const OrderSummary = <T extends CrCart | CrOrder | Checkout>(props: OrderSummary
     totalLabel,
     orderDetails,
     handlingLabel,
+    taxLabel,
 
     isShippingTaxIncluded,
     promoComponent,
@@ -46,24 +48,35 @@ const OrderSummary = <T extends CrCart | CrOrder | Checkout>(props: OrderSummary
     shippingTotalLabel,
     totalLabel,
     handlingLabel,
+    taxLabel,
 
     promoComponent,
     isShippingTaxIncluded,
     orderDetails,
   }
   return (
-    <Card sx={{ bgcolor: 'grey.100' }}>
-      <CardContent>
-        <Box sx={styles.headerStyle}>
-          <Typography variant="h3" color="text.primary" fontWeight="bold" pt={0.5}>
+    <Card
+      sx={{
+        bgcolor: '#EDEDED',
+        width: '100%',
+        maxWidth: {
+          md: '380px',
+          lg: '380px',
+        },
+      }}
+    >
+      <CardContent sx={{ padding: '12px 19px' }}>
+        <Box sx={{ ...styles.headerStyle }}>
+          <Typography variant="h3" color="text.primary">
             {nameLabel}
           </Typography>
         </Box>
       </CardContent>
-      <Divider />
-      <CardContent>
+      {/*<Divider />*/}
+      <CardContent sx={{ pl: '19px', pr: '19px', pb: '14px', pt: '0' }}>
         <OrderPrice {...orderPriceProps} />
       </CardContent>
+
       <CardContent>
         <Box textAlign="center">{props.children}</Box>
       </CardContent>

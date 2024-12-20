@@ -1,5 +1,23 @@
-import { InputLabel, MenuItem, OutlinedInput, SxProps, Theme } from '@mui/material'
+import { InputLabel, MenuItem, OutlinedInput, SxProps, Theme, alpha } from '@mui/material'
 import { FormControl, FormHelperText, Select } from '@mui/material'
+import { styled } from '@mui/material/styles'
+
+// Define a styled OutlinedInput to incorporate KiboInput's styling
+const StyledOutlinedInput = styled(OutlinedInput)(({ theme, error }) => ({
+  padding: '4.5px 12px',
+  '& .MuiOutlinedInput-notchedOutline': {
+    borderWidth: '1px', // Ensure consistent border width
+  },
+  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+    borderWidth: '1px', // Keep border width consistent on focus
+    borderColor: error ? theme.palette.error.main : theme.palette.primary.main,
+    boxShadow: `${alpha(
+      error ? theme.palette.error.main : theme.palette.primary.main,
+      0.25
+    )} 0 0 0 0.2rem`,
+  },
+}))
+
 export interface KiboSelectProps {
   name: string
   value?: string
@@ -44,7 +62,7 @@ const KiboSelect = (props: KiboSelectProps) => {
 
   return (
     <FormControl
-      sx={{ minWidth: 120, marginTop: label ? 3 : 0 }}
+      sx={{ minWidth: 120, marginTop: label ? 3 : 0, ...sx }}
       size="small"
       fullWidth
       variant="outlined"
@@ -52,7 +70,11 @@ const KiboSelect = (props: KiboSelectProps) => {
       required={required}
     >
       {label && (
-        <InputLabel shrink htmlFor={name} sx={{ top: -18, left: -13, color: 'black' }}>
+        <InputLabel
+          shrink
+          htmlFor={name}
+          sx={{ top: -18, left: -13, color: error ? 'error.main' : 'black', ...sx }}
+        >
           {label}
         </InputLabel>
       )}
@@ -66,24 +88,25 @@ const KiboSelect = (props: KiboSelectProps) => {
         sx={{
           height: '34px',
           ...sx,
-          color: 'black', // Text color
-          borderColor: 'black', // Border color
+          color: 'black',
           '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'black', // Outline border
+            borderColor: 'black',
           },
           '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'black', // Hover border color
+            borderColor: 'black',
           },
         }}
         inputProps={{ 'aria-hidden': false, 'aria-label': label || name }}
-        input={<OutlinedInput size="small" />}
+        input={<StyledOutlinedInput error={error} />}
         onChange={(event) => onChange(event.target.name, event.target.value)}
         onBlur={(event) => onBlur && onBlur(event.target.name, event.target.value)}
         {...rest}
       >
-        <MenuItem value={''} disabled sx={{ display: 'none' }}>
-          {placeholder}
-        </MenuItem>
+        {placeholder && (
+          <MenuItem value={''} disabled sx={{ display: 'none' }}>
+            {placeholder}
+          </MenuItem>
+        )}
         {children}
       </Select>
       {error && (
@@ -92,7 +115,7 @@ const KiboSelect = (props: KiboSelectProps) => {
           {...(error && { 'aria-errormessage': helperText })}
           sx={{ margin: '3px 0' }}
         >
-          {error ? helperText : ''}
+          {helperText}
         </FormHelperText>
       )}
     </FormControl>

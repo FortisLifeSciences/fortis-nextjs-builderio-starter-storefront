@@ -43,7 +43,7 @@ const brandImages: Record<string, string> = {
 }
 
 const RelatedProductsCarousel = (props: any) => {
-  const { product } = props
+  const { relatedProducts } = props
   const theme = useTheme()
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'))
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'lg'))
@@ -61,9 +61,9 @@ const RelatedProductsCarousel = (props: any) => {
   const swiperRef = useRef<any>(null)
 
   const shouldShowArrows =
-    (isDesktop && product.length > 4) ||
-    (isTablet && product.length > 3) ||
-    (isMobile && product.length > 1)
+    (isDesktop && relatedProducts?.length > 4) ||
+    (isTablet && relatedProducts?.length > 3) ||
+    (isMobile && relatedProducts?.length > 1)
   const handleSwiperInit = (swiper: any) => {
     swiperRef.current = swiper
     setIsBeginning(swiper.isBeginning)
@@ -75,13 +75,13 @@ const RelatedProductsCarousel = (props: any) => {
     setIsEnd(swiper.isEnd)
   }
 
-  if (product.length > 0)
+  if (relatedProducts?.length > 0)
     return (
       <Box
         sx={{
           width: '100%',
           maxWidth: '1200px',
-          margin: '30px auto',
+          margin: '0 auto 25px auto',
         }}
       >
         <Typography variant="h3" sx={{ marginBottom: '18px' }}>
@@ -103,8 +103,9 @@ const RelatedProductsCarousel = (props: any) => {
             }}
             onInit={handleSwiperInit}
             onSlideChange={handleSwiperSlideChange}
+            style={{ width: 'auto' }}
           >
-            {product.map((data: any, index: number) => {
+            {relatedProducts.map((data: any, index: number) => {
               const productName = data?.title
               const productCode = data?.productCode
               const brandImg = data?.brand?.value
@@ -122,7 +123,15 @@ const RelatedProductsCarousel = (props: any) => {
 
               return (
                 <SwiperSlide key={index} style={{ width: '260px' }}>
-                  <Link href={productUrl} passHref data-testid="product-card-link">
+                  <Link
+                    href={productUrl}
+                    passHref
+                    data-testid="product-card-link"
+                    style={{
+                      display: isTablet || isMobile ? 'flex' : 'block',
+                      justifyContent: isTablet || isMobile ? 'center' : 'start',
+                    }}
+                  >
                     <Box>
                       <Card
                         sx={{
@@ -196,9 +205,9 @@ const RelatedProductsCarousel = (props: any) => {
                   left: 0,
                   transform: 'translateY(-50%)',
                   zIndex: 10,
-                  backgroundColor: isBeginning ? 'grey.300' : '#fff',
                   pointerEvents: isBeginning ? 'none' : 'auto',
                   color: isBeginning ? 'grey.500' : 'grey.900',
+                  padding: 0,
                 }}
               >
                 <ArrowBackIos />
@@ -211,9 +220,9 @@ const RelatedProductsCarousel = (props: any) => {
                   right: 0,
                   transform: 'translateY(-50%)',
                   zIndex: 10,
-                  backgroundColor: isEnd ? 'grey.300' : '#fff',
                   pointerEvents: isEnd ? 'none' : 'auto',
                   color: isEnd ? 'grey.500' : 'grey.900',
+                  padding: 0,
                 }}
               >
                 <ArrowForwardIos />
