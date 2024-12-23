@@ -217,13 +217,12 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
       <Box sx={{ ...PLPStyles.breadcrumbsClass }}>
         <KiboBreadcrumbs breadcrumbs={breadCrumbsList} />
       </Box>
-
       {productListingHeader && !showFilterBy ? (
         <>
           <Typography variant="h1" sx={{ ...PLPStyles.categoryFacetHeader }}>
             {productListingHeader}
           </Typography>
-          <FullWidthDivider />
+          {/* <FullWidthDivider /> */}
         </>
       ) : null}
       {props.children}
@@ -250,7 +249,8 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
                   onSelectedTileRemoval={handleSelectedTileRemoval}
                 />
               )}
-              <Box pt={4} textAlign={'center'}>
+              {/* As per WEB-1117, this code is being commented out. */}
+              {/* <Box pt={4} textAlign={'center'}>
                 <Button
                   variant="contained"
                   color="secondary"
@@ -276,17 +276,17 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
                 >
                   {t('reset-filters')}
                 </Button>
-              </Box>
+              </Box> */}
             </Box>
 
             <Box sx={{ ...PLPStyles.plpGrid }}>
               <Box sx={{ ...PLPStyles.navBar }}>
                 <Box sx={{ ...PLPStyles.navBarMain }}>
                   <Box sx={{ ...PLPStyles.navBarView }}>
-                    <Box onClick={() => setIsListView(true)}>
+                    <Box onClick={() => setIsListView(true)} title="List View">
                       <ReorderRounded fontSize="medium" {...(isListView && { color: 'primary' })} />
                     </Box>
-                    <Box onClick={() => setIsListView(false)}>
+                    <Box onClick={() => setIsListView(false)} title="Grid View">
                       <Apps fontSize="medium" {...(!isListView && { color: 'primary' })} />
                     </Box>
                     {!isLoading && onPaginationChange && (

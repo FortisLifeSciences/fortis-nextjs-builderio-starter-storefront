@@ -224,7 +224,7 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
   return (
     <>
       <ProductListingTemplate
-        productListingHeader={categoryPageHeading as string}
+        // productListingHeader={categoryPageHeading as string}
         categoryFacet={categoryFacet}
         facetList={facetList}
         sortingValues={sortingValues}
