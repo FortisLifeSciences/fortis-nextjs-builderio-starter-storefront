@@ -13,16 +13,24 @@ interface BreadcrumbsProps {
 
 export default function KiboBreadcrumbs({
   breadcrumbs,
-  separator = '|',
+  separator = '>',
   ...rest
 }: BreadcrumbsProps) {
   return (
     <div role="presentation">
-      <Breadcrumbs separator={separator} {...rest}>
+      <Breadcrumbs separator={separator} {...rest} sx={{ fontSize: '16px', fontWeight: '500' }}>
         {breadcrumbs?.map((item: BreadCrumbType, index) => {
           return (
             <Link href={item.link as string} key={index} passHref aria-label="breadcrumb-link">
-              <Typography variant="body2" color="text.primary">
+              <Typography
+                variant="body2"
+                color="primary.main"
+                sx={{
+                  textDecoration: index + 1 < breadcrumbs.length ? 'underline' : 'none',
+                  fontWeight: index + 1 < breadcrumbs.length ? '300' : '500',
+                  '&:hover': { textDecoration: 'none' },
+                }}
+              >
                 {item.text}
               </Typography>
             </Link>

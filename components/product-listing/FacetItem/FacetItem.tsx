@@ -18,10 +18,17 @@ interface FacetItemProps {
 
 // MUI
 const style = {
-  stack: { width: '100%' },
+  stack: {
+    width: '100%',
+  },
   formControlLabel: {
     width: '100%',
     fontSize: (theme: Theme) => theme.typography.body2,
+    '& .MuiFormControlLabel-label': {
+      fontSize: '16px',
+      fontWeight: '300',
+      lineHeight: 'normal',
+    },
   } as SxProps<Theme> | undefined,
   formLabel: {
     typography: 'body2',
