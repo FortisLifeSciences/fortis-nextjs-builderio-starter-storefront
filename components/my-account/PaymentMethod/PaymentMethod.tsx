@@ -463,6 +463,8 @@ const PaymentMethod = (props: PaymentMethodProps) => {
                           cityOrTown={address.address?.cityOrTown as string}
                           stateOrProvince={address.address?.stateOrProvince as string}
                           postalOrZipCode={address.address?.postalOrZipCode as string}
+                          companyOrOrganization={address?.companyOrOrganization as string}
+                          countryCode={address.address?.countryCode as string}
                         />
                       ),
                     }

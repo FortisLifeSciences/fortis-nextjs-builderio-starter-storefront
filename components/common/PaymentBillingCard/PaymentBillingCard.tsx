@@ -21,6 +21,7 @@ interface PaymentBillingCardProps {
   firstName?: string
   lastNameOrSurname?: string
   companyOrOrganization?: string
+  countryCode?: string
   purchaseOrderNumber?: string
   paymentTerm?: CrPurchaseOrderPaymentTerm
   paymentType?: string
@@ -43,6 +44,7 @@ const PaymentBillingCard = (props: PaymentBillingCardProps) => {
     firstName,
     lastNameOrSurname,
     companyOrOrganization,
+    countryCode,
     purchaseOrderNumber,
     paymentType,
     poCustomFields,
@@ -82,6 +84,7 @@ const PaymentBillingCard = (props: PaymentBillingCardProps) => {
                 cityOrTown={cityOrTown}
                 stateOrProvince={postalOrZipCode}
                 postalOrZipCode={stateOrProvince}
+                countryCode={countryCode}
               />
             </Box>
           )}
@@ -132,6 +135,7 @@ const PaymentBillingCard = (props: PaymentBillingCardProps) => {
                 cityOrTown={cityOrTown}
                 stateOrProvince={postalOrZipCode}
                 postalOrZipCode={stateOrProvince}
+                countryCode={countryCode}
               />
             </Box>
           )}

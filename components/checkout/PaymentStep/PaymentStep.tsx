@@ -1109,6 +1109,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                                         cityOrTown={addressGetters.getCityOrTown(address)}
                                         postalOrZipCode={addressGetters.getPostalOrZipCode(address)}
                                         stateOrProvince={addressGetters.getStateOrProvince(address)}
+                                        countryCode={addressGetters.getCountryCode(address)}
                                       />
                                       {selectedCardRadio === card?.cardInfo?.id &&
                                         !isCVVAddedForNewPayment && (
@@ -1207,6 +1208,10 @@ const PaymentStep = (props: PaymentStepProps) => {
                                   ?.contact.address as CrAddress
                               )}
                               stateOrProvince={addressGetters.getStateOrProvince(
+                                savedPaymentBillingDetailsForPurchaseOrder?.billingAddressInfo
+                                  ?.contact.address as CrAddress
+                              )}
+                              countryCode={addressGetters.getCountryCode(
                                 savedPaymentBillingDetailsForPurchaseOrder?.billingAddressInfo
                                   ?.contact.address as CrAddress
                               )}
@@ -1350,6 +1355,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                                           postalOrZipCode={
                                             address?.address?.postalOrZipCode as string
                                           }
+                                          countryCode={address?.address?.countryCode as string}
                                           variant="body2"
                                         />
                                       ),
