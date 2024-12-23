@@ -384,7 +384,7 @@ const ReviewStep = (props: ReviewStepProps) => {
               <Box key={item?.id}>
                 <CheckoutProductItem
                   id={'1'}
-                  productCode={productGetters.getProductId(product)}
+                  productCode={productGetters.getVariationProductCode(product)}
                   name={productGetters.getName(product)}
                   options={productGetters.getOptions(product)}
                   price={productGetters.getPrice(product).regular?.toString()}
@@ -608,6 +608,11 @@ const ReviewStep = (props: ReviewStepProps) => {
             rows={1}
             variant="outlined"
             fullWidth
+            InputProps={{
+              sx: {
+                fontSize: '16px',
+              },
+            }}
             value={instructionsValue}
             onChange={handleInstChange}
           />
@@ -642,7 +647,7 @@ const ReviewStep = (props: ReviewStepProps) => {
           }
           label={
             <>
-              {t('I agree to Fortis')}{' '}
+              {t("I agree to Fortis'")}{' '}
               <Link
                 href={'/sales-terms'}
                 target="_blank"
@@ -650,6 +655,7 @@ const ReviewStep = (props: ReviewStepProps) => {
               >
                 {t('Sales Terms & Conditions.')}
               </Link>
+              *
             </>
           }
         />
