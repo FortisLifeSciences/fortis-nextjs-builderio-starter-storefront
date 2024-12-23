@@ -173,6 +173,9 @@ const variantProperties = [
   'tenant~buffer',
   'tenant~prodprocedures-1',
   'tenant~contents-variant',
+  'tenant~application-text-variant',
+  'tenant~application-dilution-range',
+  'tenant~citation-count-variant',
 ]
 
 const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
@@ -1218,7 +1221,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
       {relatedProducts && relatedProducts.length > 0 ? (
         <RelatedProductsCarousel relatedProducts={relatedProducts} />
       ) : null}
-      
+
       {/* Citations */}
       {citationCountVariant && product?.productType === 'Antibody-Configurable' ? (
         <Box
@@ -1235,7 +1238,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
             citationApiKey={citationApiKey}
           />
         </Box>
-       ) : null}
+      ) : null}
     </Grid>
   )
 }
