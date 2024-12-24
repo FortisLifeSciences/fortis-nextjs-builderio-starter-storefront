@@ -146,6 +146,7 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
           marginLeft: { lg: '1rem' },
           position: { md: 'sticky' },
           top: '80px',
+          marginTop: '82px',
         }}
       >
         <OrderSummary {...orderSummaryArgs}></OrderSummary>
