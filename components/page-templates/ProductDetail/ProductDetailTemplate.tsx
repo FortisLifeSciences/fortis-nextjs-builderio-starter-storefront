@@ -29,6 +29,7 @@ import { SortingValues } from '../../../lib/types/B2bTypes'
 import {
   FortisRadio,
   FulfillmentOptions,
+  FullWidthDivider,
   KiboRadio,
   KiboSelect,
   Price,
@@ -1206,6 +1207,10 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
       )}
       <ProductSpecifications product={updatedProduct} />
       <ProductApplications product={updatedProduct} currentProduct={currentProduct} />
+      <AdditionalProductInfo product={product} />
+      <Grid item xs={12} paddingY={3} pb={'20px'}>
+        <Divider />
+      </Grid>
       {digitalDocumentData && digitalDocumentData.length > 0 ? (
         <ProductRecentDocuments
           code={variationProductCode || productCode}
@@ -1213,11 +1218,10 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
           documents={digitalDocumentData}
         />
       ) : null}
+      <Grid item xs={12} paddingY={3}>
+        <Divider />
+      </Grid>
       {!isQuickViewModal && children}
-      <AdditionalProductInfo product={product} />
-      {relatedProducts && relatedProducts.length > 0 ? (
-        <RelatedProductsCarousel relatedProducts={relatedProducts} />
-      ) : null}
       
       {/* Citations */}
       {citationCountVariant && product?.productType === 'Antibody-Configurable' ? (
@@ -1227,7 +1231,6 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
           display={'flex'}
           flexDirection={'row'}
           key={keyVal}
-          marginBottom={'1.25rem'}
         >
           <CitationWidget
             citeabProductCode={citeabProductCode}
@@ -1236,6 +1239,12 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
           />
         </Box>
        ) : null}
+      <Grid item xs={12} paddingY={3} pb={'30px'}>
+        <Divider />
+      </Grid>
+      {relatedProducts && relatedProducts.length > 0 ? (
+        <RelatedProductsCarousel relatedProducts={relatedProducts} />
+      ) : null}
     </Grid>
   )
 }
