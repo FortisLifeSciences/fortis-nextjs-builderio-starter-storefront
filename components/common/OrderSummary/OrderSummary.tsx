@@ -76,10 +76,11 @@ const OrderSummary = <T extends CrCart | CrOrder | Checkout>(props: OrderSummary
       <CardContent sx={{ pl: '19px', pr: '19px', pb: '14px', pt: '0' }}>
         <OrderPrice {...orderPriceProps} />
       </CardContent>
-
-      <CardContent>
-        <Box textAlign="center">{props.children}</Box>
-      </CardContent>
+      {props.children && (
+        <CardContent>
+          <Box textAlign="center">{props.children}</Box>
+        </CardContent>
+      )}
     </Card>
   )
 }
