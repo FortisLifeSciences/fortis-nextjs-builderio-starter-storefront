@@ -20,6 +20,7 @@ import {
 } from '@mui/material'
 import { grey } from '@mui/material/colors'
 import { styled } from '@mui/material/styles'
+import getConfig from 'next/config'
 import { useTranslation } from 'next-i18next'
 import { useForm, Controller } from 'react-hook-form'
 import * as yup from 'yup'
@@ -173,6 +174,7 @@ const ReviewStep = (props: ReviewStepProps) => {
   const { updateUserOrder } = useUpdateUserOrder()
   const { updateOrder } = useUpdateOrder()
   const [isAgreeWithTermsAndConditions, setAgreeWithTermsAndConditions] = useState<boolean>(false)
+  const { publicRuntimeConfig } = getConfig()
 
   const { setStepNext, setStepBack, setStepStatusComplete, steps, setActiveStep } =
     useCheckoutStepContext()
@@ -187,6 +189,16 @@ const ReviewStep = (props: ReviewStepProps) => {
   const { shippingPhoneHome, shippingAddress, companyOrOrganization } = shippingDetails
   const { billingAddress, billingCompanyOrOrganization } = billingDetails
 
+  const countries = publicRuntimeConfig.countries
+  const shippingCountryName =
+    countries.find(
+      (country: { code: Maybe<string> }) => country.code === shippingAddress?.countryCode
+    )?.name || 'Not found'
+
+  const billingCountryName =
+    countries.find(
+      (country: { code: Maybe<string> }) => country.code === billingAddress?.countryCode
+    )?.name || 'Not found'
   const shippingPersonalDetails = {
     firstName: shippingDetails?.firstName,
     lastNameOrSurname: shippingDetails?.lastNameOrSurname,
@@ -384,7 +396,7 @@ const ReviewStep = (props: ReviewStepProps) => {
               <Box key={item?.id}>
                 <CheckoutProductItem
                   id={'1'}
-                  productCode={productGetters.getProductId(product)}
+                  productCode={productGetters.getVariationProductCode(product)}
                   name={productGetters.getName(product)}
                   options={productGetters.getOptions(product)}
                   price={productGetters.getPrice(product).regular?.toString()}
@@ -492,6 +504,9 @@ const ReviewStep = (props: ReviewStepProps) => {
                     {t(shippingAddress.postalOrZipCode)}
                   </Typography>
                 )}
+              {shippingAddress.countryCode && (
+                <Typography variant="body2">{t(shippingCountryName)}</Typography>
+              )}
             </Grid>
           </Grid>
         </Box>
@@ -591,6 +606,9 @@ const ReviewStep = (props: ReviewStepProps) => {
                     {t(billingAddress.postalOrZipCode)}
                   </Typography>
                 )}
+              {billingAddress.countryCode && (
+                <Typography variant="body2">{t(billingCountryName)}</Typography>
+              )}
             </Grid>
           </Grid>
         </Box>
@@ -608,6 +626,11 @@ const ReviewStep = (props: ReviewStepProps) => {
             rows={1}
             variant="outlined"
             fullWidth
+            InputProps={{
+              sx: {
+                fontSize: '16px',
+              },
+            }}
             value={instructionsValue}
             onChange={handleInstChange}
           />
@@ -642,7 +665,7 @@ const ReviewStep = (props: ReviewStepProps) => {
           }
           label={
             <>
-              {t('I agree to Fortis')}{' '}
+              {t("I agree to Fortis'")}{' '}
               <Link
                 href={'/sales-terms'}
                 target="_blank"
@@ -650,6 +673,7 @@ const ReviewStep = (props: ReviewStepProps) => {
               >
                 {t('Sales Terms & Conditions.')}
               </Link>
+              *
             </>
           }
         />
