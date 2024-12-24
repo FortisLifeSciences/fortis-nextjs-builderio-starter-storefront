@@ -174,6 +174,9 @@ const variantProperties = [
   'tenant~buffer',
   'tenant~prodprocedures-1',
   'tenant~contents-variant',
+  'tenant~application-text-variant',
+  'tenant~application-dilution-range',
+  'tenant~citation-count-variant',
 ]
 
 const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
@@ -961,6 +964,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                       marginTop: 1,
                       bgcolor: theme?.palette.primary.main,
                       fontSize: '16px !important',
+                      fontWeight: 500,
                       width: '100%',
                     }} // Add margin top for spacing between QuantitySelector and LoadingButton
                   >
@@ -996,6 +1000,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                           marginTop: '20px',
                           bgcolor: theme?.palette.primary.main,
                           fontSize: '16px !important',
+                          fontWeight: 500,
                           transition: 'none',
                           boxShadow: 'none',
                           '&:hover': {
@@ -1222,7 +1227,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
         <Divider />
       </Grid>
       {!isQuickViewModal && children}
-      
+  
       {/* Citations */}
       {citationCountVariant && product?.productType === 'Antibody-Configurable' ? (
         <Box

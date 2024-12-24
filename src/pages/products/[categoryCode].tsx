@@ -99,8 +99,12 @@ export async function getStaticProps(
 
   const categoryTopSection = publicRuntimeConfig?.builderIO?.modelKeys?.categoryTopSection || ''
   const builderSection = await builder
-    .get(categoryTopSection, { userAttributes: { slug: `category-${categoryCode}` } })
+    .get(categoryTopSection, {
+      userAttributes: { slug: `category-${categoryCode}`, urlPath: `/products/${categoryCode}` },
+    })
     .promise()
+
+  // .get(categoryTopSection, { userAttributes: { slug: `category-${categoryCode}` } })
 
   return {
     props: {
@@ -220,7 +224,7 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
   return (
     <>
       <ProductListingTemplate
-        productListingHeader={categoryPageHeading as string}
+        // productListingHeader={categoryPageHeading as string}
         categoryFacet={categoryFacet}
         facetList={facetList}
         sortingValues={sortingValues}

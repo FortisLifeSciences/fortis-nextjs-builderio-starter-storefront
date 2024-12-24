@@ -24,6 +24,7 @@ export const checkoutItemProductFragment = /* GraphQL */ `
     categories {
       id
     }
+    variationProductCode
   }
 `
 export const checkoutLineItemFragment = /* GraphQL */ `

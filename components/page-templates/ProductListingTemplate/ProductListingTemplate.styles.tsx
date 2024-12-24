@@ -61,16 +61,17 @@ export const PLPStyles = {
   },
   mainSection: {
     display: 'flex',
+    justifyContent: 'space-between',
   },
   sideBar: {
     display: {
       md: 'block',
       xs: 'none',
     },
-    borderRightWidth: '1px',
-    borderRightStyle: 'solid',
-    borderRightColor: 'grey.500',
-    padding: '0 1.5625rem 0 0',
+    // borderRightWidth: '1px',
+    // borderRightStyle: 'solid',
+    // borderRightColor: 'grey.500',
+    // padding: '0 1.5625rem 0 0',
     maxWidth: {
       md: '17%',
       xs: 'auto',
@@ -98,12 +99,8 @@ export const PLPStyles = {
     margin: '1rem 0',
   },
   categoryFacetHeader: {
-    fontFamily: 'Roboto',
-    fontSize: '27.4px',
-    fontStyle: 'normal',
-    fontWeight: '700',
-    lineHeight: '32px',
-    color: '#2B2B2B',
+    // fontWeight: 'bold',
+    color: 'primary.main',
     marginBottom: '0.5rem',
   },
   categoryFacetHeaderLoading: {

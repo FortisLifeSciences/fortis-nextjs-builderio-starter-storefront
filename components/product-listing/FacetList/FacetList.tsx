@@ -59,7 +59,9 @@ const FacetList = (props: FacetListProps) => {
 
   return (
     <>
-      <Box sx={{ ...styles.filterBy }}>
+      {/* As per WEB-1117, this code is being commented out. */}
+
+      {/* <Box sx={{ ...styles.filterBy }}>
         <Typography
           variant="h4"
           color="grey.900"
@@ -81,7 +83,7 @@ const FacetList = (props: FacetListProps) => {
           onSelectedTileRemoval={onSelectedTileRemoval}
         />
       </Box>
-      {mdScreen ? <Divider sx={{ borderColor: 'grey.500' }} /> : <FullWidthDivider />}
+      {mdScreen ? <Divider sx={{ borderColor: 'grey.500' }} /> : <FullWidthDivider />} */}
       <Stack>
         {facetList
           .filter((facet) => facet?.facetType === 'Value' || facet?.facetType === 'RangeQuery')

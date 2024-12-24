@@ -90,7 +90,7 @@ const Actions = (props: ActionsProps) => {
       <StyledGoToCartButton
         variant="contained"
         onClick={handleGoToCart}
-        sx={{ padding: '0 3.25rem', '&:hover': { bgcolor: '#4C47C4' } }}
+        sx={{ padding: '0 3.25rem', '&:hover': { bgcolor: '#4C47C4' }, fontWeight: 500 }}
       >
         {t('go-to-cart')}
       </StyledGoToCartButton>

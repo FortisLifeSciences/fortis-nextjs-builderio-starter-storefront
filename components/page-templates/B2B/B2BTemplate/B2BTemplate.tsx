@@ -172,7 +172,7 @@ const B2BTemplate = (props: B2BTemplateProps) => {
   return (
     <Grid container>
       <Grid item md={8} xs={12}>
-        <Link aria-label={t('back')} sx={{ ...B2BTemplateStyle.backButton }} href="/">
+        <Link sx={{ ...B2BTemplateStyle.backButton }} href="/">
           <ChevronLeft />
           {t('back')}
         </Link>

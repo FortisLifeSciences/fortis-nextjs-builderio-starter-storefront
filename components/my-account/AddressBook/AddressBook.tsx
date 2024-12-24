@@ -79,7 +79,8 @@ const styles = {
 }
 const buildAddressProps = (customerContact: CustomerContact) => {
   const { firstName, lastNameOrSurname, companyOrOrganization, address } = customerContact
-  const { address1, address2, cityOrTown, stateOrProvince, postalOrZipCode } = address as CuAddress
+  const { address1, address2, cityOrTown, stateOrProvince, postalOrZipCode, countryCode } =
+    address as CuAddress
   return {
     firstName: firstName as string,
     lastNameOrSurname: lastNameOrSurname as string,
@@ -89,11 +90,13 @@ const buildAddressProps = (customerContact: CustomerContact) => {
     cityOrTown,
     stateOrProvince,
     postalOrZipCode,
+    countryCode,
   }
 }
 
 const AccountAddress = (props: AccountAddressProps) => {
   const { customerContact, isPrimaryAddress, addressType, editAddress, deleteAddress } = props
+  console.log('customerContact', customerContact)
   const { t } = useTranslation('common')
   return (
     <Box>
