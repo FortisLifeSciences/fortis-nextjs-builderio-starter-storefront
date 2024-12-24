@@ -116,9 +116,11 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                           color: 'primary.main',
                           fontStyle: 'normal',
                           whiteSpace: 'normal',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '13.25px',
+                          ...(category?.openLinkInNewWindow && {
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '13.25px',
+                          }),
                         }}
                         onClick={handleLinkClick}
                       >
@@ -146,7 +148,12 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                       <>
                         <Typography
                           variant="body2"
-                          sx={{ paddingLeft: '10px', color: 'primary.main', fontStyle: 'normal', whiteSpace: 'normal' }}
+                          sx={{
+                            paddingLeft: '10px',
+                            color: 'primary.main',
+                            fontStyle: 'normal',
+                            whiteSpace: 'normal',
+                          }}
                         >
                           {category.categoryName}
                         </Typography>
@@ -158,7 +165,12 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                       <>
                         <Typography
                           variant="body2"
-                          sx={{ paddingLeft: '15px', color: 'primary.main', fontStyle: 'normal', whiteSpace: 'normal' }}
+                          sx={{
+                            paddingLeft: '15px',
+                            color: 'primary.main',
+                            fontStyle: 'normal',
+                            whiteSpace: 'normal',
+                          }}
                         >
                           {category.categoryName}
                         </Typography>
@@ -188,9 +200,11 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                         color: 'primary.main',
                         fontStyle: 'normal',
                         whiteSpace: 'normal',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '13.25px',
+                        ...(submenu?.openLinkInNewWindow && {
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '13.25px',
+                        }),
                       }}
                       onClick={handleLinkClick}
                     >
@@ -215,9 +229,11 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                       color: 'primary.main',
                       fontStyle: 'normal',
                       whiteSpace: 'normal',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '13.25px',
+                      ...(activeCategory?.openLinkInNewWindow && {
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '13.25px',
+                      }),
                     }}
                     onClick={handleLinkClick}
                   >
@@ -303,9 +319,11 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                         color: 'primary.main',
                         fontStyle: 'normal',
                         whiteSpace: 'normal',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '13.25px',
+                        ...(category?.openLinkInNewWindow && {
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '13.25px',
+                        }),
                       }}
                       onClick={handleLinkClick}
                     >
