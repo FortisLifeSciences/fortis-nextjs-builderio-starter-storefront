@@ -168,11 +168,14 @@ const CheckoutProductItem = (props: ProductItemProps) => {
                     lg={4}
                     sx={{
                       display: 'flex',
-                      alignItems: 'flex-end',
+                      alignItems: 'center',
                       justifyContent: {
                         sm: 'flex-end',
                         md: 'flex-end',
                         lg: 'flex-end',
+                      },
+                      marginBottom: {
+                        xs: '8px',
                       },
                     }}
                   >

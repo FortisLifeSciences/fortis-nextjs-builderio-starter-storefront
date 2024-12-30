@@ -1,7 +1,8 @@
 import { Typography, Box } from '@mui/material'
 import { Variant } from '@mui/material/styles/createTypography'
+import getConfig from 'next/config'
 
-import type { CrAddress } from '@/lib/gql/types'
+import type { CrAddress, Maybe } from '@/lib/gql/types'
 
 interface AddressProps extends CrAddress {
   title?: string
@@ -13,6 +14,8 @@ interface AddressProps extends CrAddress {
 }
 
 const AddressCard = (props: AddressProps) => {
+  console.log('props- address', props)
+  const { publicRuntimeConfig } = getConfig()
   const {
     firstName,
     middleNameOrInitial,
@@ -25,8 +28,13 @@ const AddressCard = (props: AddressProps) => {
     stateOrProvince,
     postalOrZipCode,
     variant = 'body1',
+    countryCode,
   } = props
 
+  const countries = publicRuntimeConfig.countries
+  const countryName =
+    countries.find((country: { code: Maybe<string> }) => country.code === countryCode)?.name ||
+    'Not found'
   const isNameAvailable = firstName || middleNameOrInitial || lastNameOrSurname
 
   return (
@@ -57,6 +65,7 @@ const AddressCard = (props: AddressProps) => {
             </Typography>
           )}
         </Box>
+        <Typography variant={variant}>{countryName}</Typography>
       </Box>
     </>
   )
