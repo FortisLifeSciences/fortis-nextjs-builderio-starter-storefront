@@ -960,8 +960,17 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                       marginTop: 1,
                       bgcolor: theme?.palette.primary.main,
                       fontSize: '16px !important',
+                      fontWeight: 500,
+                      transition: 'none',
+                      boxShadow: 'none',
                       width: '100%',
-                    }} // Add margin top for spacing between QuantitySelector and LoadingButton
+                      '&:hover': {
+                        bgcolor: theme?.palette.primary.light,
+                      },
+                      '@media (max-width: 1023px)': {
+                        width: '52%',
+                      },
+                    }}
                   >
                     {customCTALabel}
                   </LoadingButton>
@@ -1218,7 +1227,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
       {relatedProducts && relatedProducts.length > 0 ? (
         <RelatedProductsCarousel relatedProducts={relatedProducts} />
       ) : null}
-      
+
       {/* Citations */}
       {citationCountVariant && product?.productType === 'Antibody-Configurable' ? (
         <Box
@@ -1235,7 +1244,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
             citationApiKey={citationApiKey}
           />
         </Box>
-       ) : null}
+      ) : null}
     </Grid>
   )
 }
