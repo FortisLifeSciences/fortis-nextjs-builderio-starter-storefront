@@ -19,6 +19,7 @@ import {
   featuredText,
   animatedUnderline,
 } from './MenuPopover.styles'
+import OpenInNewWindowIcon from '@/assets/icons/OpenInNewWindowIcon.svg'
 
 interface CustomDropdownProps {
   parentName: string
@@ -58,6 +59,8 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
   const handleLinkClick = () => {
     onClose() // Close the popover when a link is clicked
   }
+
+  console.log('This is child category ---> ', childCategory)
 
   return (
     <Paper
@@ -99,13 +102,30 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                 !category.childCategory || category.childCategory.length === 0 ? (
                   // If no child categories, render the link directly
                   <Box key={index} sx={submenuItem}>
-                    <Link href={category.categoryLink} passHref style={{ paddingLeft: '16px' }}>
+                    <Link
+                      href={category.categoryLink}
+                      passHref
+                      style={{ paddingLeft: '16px' }}
+                      target={category.openLinkInNewWindow ? '_blank' : '_self'}
+                      rel={category.openLinkInNewWindow ? 'noopener noreferrer' : undefined}
+                    >
                       <Typography
                         variant="body2"
-                        sx={{ ...animatedUnderline, color: 'primary.main', fontStyle: 'normal', whiteSpace: 'normal' }}
+                        sx={{
+                          ...animatedUnderline,
+                          color: 'primary.main',
+                          fontStyle: 'normal',
+                          whiteSpace: 'normal',
+                          ...(category?.openLinkInNewWindow && {
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '13.25px',
+                          }),
+                        }}
                         onClick={handleLinkClick}
                       >
                         {category.categoryName}
+                        {category.openLinkInNewWindow && <OpenInNewWindowIcon />}
                       </Typography>
                     </Link>
                   </Box>
@@ -128,7 +148,12 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                       <>
                         <Typography
                           variant="body2"
-                          sx={{ paddingLeft: '10px', color: 'primary.main', fontStyle: 'normal', whiteSpace: 'normal' }}
+                          sx={{
+                            paddingLeft: '10px',
+                            color: 'primary.main',
+                            fontStyle: 'normal',
+                            whiteSpace: 'normal',
+                          }}
                         >
                           {category.categoryName}
                         </Typography>
@@ -140,7 +165,12 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                       <>
                         <Typography
                           variant="body2"
-                          sx={{ paddingLeft: '15px', color: 'primary.main', fontStyle: 'normal', whiteSpace: 'normal' }}
+                          sx={{
+                            paddingLeft: '15px',
+                            color: 'primary.main',
+                            fontStyle: 'normal',
+                            whiteSpace: 'normal',
+                          }}
                         >
                           {category.categoryName}
                         </Typography>
@@ -156,25 +186,59 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
             <Grid item xs={4} sx={subMenuSection}>
               {activeCategory.childCategory?.map((submenu: any, index: any) => (
                 <Box key={index} sx={submenuItem}>
-                  <Link href={submenu.categoryLink} passHref style={{ paddingLeft: '28px' }}>
+                  <Link
+                    href={submenu.categoryLink}
+                    passHref
+                    style={{ paddingLeft: '28px' }}
+                    target={submenu.openLinkInNewWindow ? '_blank' : '_self'}
+                    rel={submenu.openLinkInNewWindow ? 'noopener noreferrer' : undefined}
+                  >
                     <Typography
                       variant="body2"
-                      sx={{ ...animatedUnderline, color: 'primary.main', fontStyle: 'normal', whiteSpace: 'normal' }}
+                      sx={{
+                        ...animatedUnderline,
+                        color: 'primary.main',
+                        fontStyle: 'normal',
+                        whiteSpace: 'normal',
+                        ...(submenu?.openLinkInNewWindow && {
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '13.25px',
+                        }),
+                      }}
                       onClick={handleLinkClick}
                     >
                       {submenu.categoryName}
+                      {submenu.openLinkInNewWindow && <OpenInNewWindowIcon />}
                     </Typography>
                   </Link>
                 </Box>
               ))}
               <Box sx={{ ...submenuItem, marginTop: '50px' }}>
-                <Link href={activeCategory.categoryLink} passHref style={{ paddingLeft: '28px' }}>
+                <Link
+                  href={activeCategory.categoryLink}
+                  passHref
+                  style={{ paddingLeft: '28px' }}
+                  target={activeCategory.openLinkInNewWindow ? '_blank' : '_self'}
+                  rel={activeCategory.openLinkInNewWindow ? 'noopener noreferrer' : undefined}
+                >
                   <Typography
                     variant="body2"
-                    sx={{ ...animatedUnderline, color: 'primary.main', fontStyle: 'normal', whiteSpace: 'normal' }}
+                    sx={{
+                      ...animatedUnderline,
+                      color: 'primary.main',
+                      fontStyle: 'normal',
+                      whiteSpace: 'normal',
+                      ...(activeCategory?.openLinkInNewWindow && {
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '13.25px',
+                      }),
+                    }}
                     onClick={handleLinkClick}
                   >
                     View All {activeCategory.categoryName}
+                    {activeCategory.openLinkInNewWindow && <OpenInNewWindowIcon />}
                   </Typography>
                 </Link>
               </Box>
@@ -241,13 +305,30 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
             >
               {childCategory.map((category, index) => (
                 <Grid item xs={6} key={index} sx={submenuItem}>
-                  <Link href={category.categoryLink} passHref style={{ paddingLeft: '28px' }}>
+                  <Link
+                    href={category.categoryLink}
+                    passHref
+                    style={{ paddingLeft: '28px' }}
+                    target={category.openLinkInNewWindow ? '_blank' : '_self'}
+                    rel={category.openLinkInNewWindow ? 'noopener noreferrer' : undefined}
+                  >
                     <Typography
                       variant="body2"
-                      sx={{ ...animatedUnderline, color: 'primary.main', fontStyle: 'normal' }}
+                      sx={{
+                        ...animatedUnderline,
+                        color: 'primary.main',
+                        fontStyle: 'normal',
+                        whiteSpace: 'normal',
+                        ...(category?.openLinkInNewWindow && {
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '13.25px',
+                        }),
+                      }}
                       onClick={handleLinkClick}
                     >
                       {category.categoryName}
+                      {category.openLinkInNewWindow && <OpenInNewWindowIcon />}
                     </Typography>
                   </Link>
                 </Grid>
