@@ -126,25 +126,25 @@ const ProductInventoryMessages = ({
       let USShippingCutOffTime, CAShippingCutOffTime, nonShippingDates, deliveryDate
       const buffer = 0
 
-      console.log(
-        'stockBehaviour:' +
-          stockBehaviour +
-          '==' +
-          'availabilityMessage:' +
-          availabilityMessage +
-          '==' +
-          'stockAvailable:' +
-          stockAvailable +
-          '==' +
-          'minimumStock:' +
-          minimumStock +
-          '==restockDate:' +
-          restockDate +
-          '==skuStatus:' +
-          skuStatus +
-          '==buffer:' +
-          buffer
-      )
+      // console.log(
+      //   'stockBehaviour:' +
+      //     stockBehaviour +
+      //     '==' +
+      //     'availabilityMessage:' +
+      //     availabilityMessage +
+      //     '==' +
+      //     'stockAvailable:' +
+      //     stockAvailable +
+      //     '==' +
+      //     'minimumStock:' +
+      //     minimumStock +
+      //     '==restockDate:' +
+      //     restockDate +
+      //     '==skuStatus:' +
+      //     skuStatus +
+      //     '==buffer:' +
+      //     buffer
+      // )
       if (skuStatusArr && skuStatus?.toLowerCase() === 'customcta') {
         inventoryMessage = availabilityMessage
         cartDisplayStatus = false
