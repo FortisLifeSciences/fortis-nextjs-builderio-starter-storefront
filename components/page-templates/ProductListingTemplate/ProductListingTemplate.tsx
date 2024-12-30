@@ -184,6 +184,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
         productGetters.getCoverImage(product) &&
         productGetters.handleProtocolRelativeUrl(productGetters.getCoverImage(product)),
       link: listItemUrl as string,
+      kiboImagesData: product?.content?.productImages,
       price: t<string>('currency', {
         val: productGetters.getPrice(product).regular,
       }),

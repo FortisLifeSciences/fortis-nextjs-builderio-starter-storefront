@@ -1,4 +1,4 @@
-import React, { MouseEvent, useState } from 'react'
+import React, { MouseEvent, useEffect, useState } from 'react'
 
 import ArrowForwardIos from '@mui/icons-material/ArrowForwardIos'
 import FavoriteBorderRounded from '@mui/icons-material/FavoriteBorderRounded'
@@ -24,6 +24,7 @@ import { ProductCardStyles } from './ProductCard.styles'
 import { KiboImage, Price } from '@/components/common'
 import { usePriceRangeFormatter } from '@/hooks'
 import { FulfillmentOptions as FulfillmentOptionsConstant } from '@/lib/constants'
+import { productGetters } from '@/lib/getters'
 import { ProductProperties } from '@/lib/types'
 import abcore from '@/public/Brand_Logo/abcore-logo.png'
 import arista from '@/public/Brand_Logo/arista-logo.png'
@@ -81,7 +82,32 @@ export interface ProductCardProps {
   onAddOrRemoveWishlistItem?: () => void
   onClickQuickViewModal?: () => void
   onClickAddToCart?: (payload: any) => void
+  kiboImagesData?: any
 }
+
+const getDocumentListDocuments = async (documentListName: string, filter: string) => {
+  try {
+    const response = await fetch('/api/custom-schema/get-documentlist-documents', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ documentListName, filter }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+
+    return data.response.items
+  } catch (error) {
+    console.error('Error fetching document list documents:', error)
+    throw error
+  }
+}
+
 const ProductCardSkeleton = () => {
   return (
     <Stack spacing={1} sx={ProductCardStyles.cardRoot} data-testid="product-card-skeleton">
@@ -110,6 +136,7 @@ const ProductCard = (props: ProductCardProps) => {
     productProperties,
     link,
     imageUrl,
+    kiboImagesData,
     placeholderImageUrl = DefaultImage,
     rating = 0,
     imageHeight = 180,
@@ -164,6 +191,58 @@ const ProductCard = (props: ProductCardProps) => {
     }
     onClickAddToCart?.(payload)
   }
+
+  const [sortedImageUrl, setUpdateImageUrl] = useState<string>('')
+
+  useEffect(() => {
+    const fetchDocumentData = async () => {
+      const digitalDocRes = await getDocumentListDocuments(
+        'digitalassets@Fortis',
+        `name eq ${variationProductCode} or name eq ${productCode}`
+      )
+      const imageAssets = digitalDocRes
+        .filter(
+          (asset: { properties: { assettype: string } }) =>
+            asset.properties.assettype === 'ProductImage'
+        )
+        .map((asset: { properties: any }) => asset.properties)
+        .sort((a: { sortorder: number }, b: { sortorder: number }) => a.sortorder - b.sortorder)
+
+      const filterImgData = imageAssets.filter(
+        (item: { sortorder: string }) => item.sortorder === '1'
+      )
+
+      let updatedImageData: { imageUrl: string; cmsId: string }[] | undefined
+
+      if (filterImgData.length === 1) {
+        // If `filterImgData` has only one item, filter `kiboImagesData` using its `cmsid`
+        const imgCmsId = filterImgData[0].cmsid
+        updatedImageData = kiboImagesData?.filter(
+          (item: { cmsId: any } | null | undefined): item is { cmsId: string } =>
+            item !== null && item !== undefined && item.cmsId === imgCmsId
+        )
+      } else {
+        // If `filterImgData` has more than one item, iterate over all `cmsid` values
+        for (const { cmsid } of filterImgData) {
+          const matchedData = kiboImagesData?.filter(
+            (item: { cmsId: any } | null | undefined): item is { cmsId: string } =>
+              item !== null && item !== undefined && item.cmsId === cmsid
+          )
+
+          if (matchedData && matchedData.length > 0) {
+            updatedImageData = matchedData
+            break
+          }
+        }
+      }
+      const updateImageUrl = updatedImageData?.[0]?.imageUrl
+      setUpdateImageUrl(updateImageUrl ?? '')
+    }
+    if (kiboImagesData && kiboImagesData.length > 0) {
+      fetchDocumentData()
+    }
+  }, [variationProductCode, productCode, kiboImagesData])
+
   if (isLoading) return <ProductCardSkeleton />
   else
     return (
@@ -220,7 +299,11 @@ const ProductCard = (props: ProductCardProps) => {
                 }}
               >
                 <KiboImage
-                  src={imageUrl || brandImages[brand.toLowerCase()] || placeholderImageUrl}
+                  src={
+                    productGetters.handleProtocolRelativeUrl(sortedImageUrl) ||
+                    brandImages[brand.toLowerCase()] ||
+                    placeholderImageUrl
+                  }
                   alt={imageAltText}
                   fill
                   quality={100}

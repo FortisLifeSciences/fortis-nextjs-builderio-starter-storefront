@@ -135,6 +135,11 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
       onSuccess: (account: any) => {
         handleOnSuccess(account, onSuccessCallBack)
       },
+      onError: (error: any) => {
+        const errorMessage =
+          'You have entered an invalid username or password. If you forgot your password, please click “Forgot Password?” below to securely reset your password.'
+        showSnackbar(errorMessage, 'error')
+      },
     })
   }
 

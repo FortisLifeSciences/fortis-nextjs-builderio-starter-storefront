@@ -1,4 +1,4 @@
-import React, { MouseEvent } from 'react'
+import React, { MouseEvent, useEffect, useState } from 'react'
 
 import { ArrowForwardIos } from '@mui/icons-material'
 import FavoriteBorderRounded from '@mui/icons-material/FavoriteBorderRounded'
@@ -25,6 +25,7 @@ import { ProductCardStyles } from './ProductCardListView.styles'
 import { KiboImage, Price } from '@/components/common'
 import { usePriceRangeFormatter } from '@/hooks'
 import { FulfillmentOptions as FulfillmentOptionsConstant } from '@/lib/constants'
+import { productGetters } from '@/lib/getters'
 import { ProductProperties } from '@/lib/types'
 import abcore from '@/public/Brand_Logo/abcore-logo.png'
 import arista from '@/public/Brand_Logo/arista-logo.png'
@@ -37,7 +38,8 @@ import vector from '@/public/Brand_Logo/vector-logo.png'
 import DefaultImage from '@/public/noImage.png'
 import DefaultImage1 from '@/public/product_placeholder.svg'
 
-import type { ProductPriceRange } from '@/lib/gql/types'
+import type { ProductImage, ProductPriceRange } from '@/lib/gql/types'
+
 const brandImages: Record<string, string> = {
   arista: arista.src,
   bethyl: bethyl.src,
@@ -90,6 +92,7 @@ export interface ProductCardListViewProps {
   onAddOrRemoveWishlistItem?: () => Promise<void>
   onClickQuickViewModal?: () => void
   onClickAddToCart?: (payload: any) => Promise<void>
+  kiboImagesData: any
 }
 
 const ProductCardSkeleton = () => {
@@ -101,6 +104,29 @@ const ProductCardSkeleton = () => {
       <Skeleton variant="rectangular" width={95} height={20} />
     </Stack>
   )
+}
+
+const getDocumentListDocuments = async (documentListName: string, filter: string) => {
+  try {
+    const response = await fetch('/api/custom-schema/get-documentlist-documents', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ documentListName, filter }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+
+    return data.response.items
+  } catch (error) {
+    console.error('Error fetching document list documents:', error)
+    throw error
+  }
 }
 
 const ProductCardListView = (props: ProductCardListViewProps) => {
@@ -119,6 +145,7 @@ const ProductCardListView = (props: ProductCardListViewProps) => {
     parentCategoryName,
     link,
     imageUrl,
+    kiboImagesData,
     placeholderImageUrl = DefaultImage,
     rating = 4,
     productDescription = '',
@@ -183,6 +210,56 @@ const ProductCardListView = (props: ProductCardListViewProps) => {
     }
     onClickAddToCart?.(payload)
   }
+  const [sortedImageUrl, setUpdateImageUrl] = useState<string>('')
+
+  useEffect(() => {
+    const fetchDocumentData = async () => {
+      const digitalDocRes = await getDocumentListDocuments(
+        'digitalassets@Fortis',
+        `name eq ${variationProductCode} or name eq ${productCode}`
+      )
+      const imageAssets = digitalDocRes
+        .filter(
+          (asset: { properties: { assettype: string } }) =>
+            asset.properties.assettype === 'ProductImage'
+        )
+        .map((asset: { properties: any }) => asset.properties)
+        .sort((a: { sortorder: number }, b: { sortorder: number }) => a.sortorder - b.sortorder)
+
+      const filterImgData = imageAssets.filter(
+        (item: { sortorder: string }) => item.sortorder === '1'
+      )
+
+      let updatedImageData: { imageUrl: string; cmsId: string }[] | undefined
+
+      if (filterImgData.length === 1) {
+        // If `filterImgData` has only one item, filter `kiboImagesData` using its `cmsid`
+        const imgCmsId = filterImgData[0].cmsid
+        updatedImageData = kiboImagesData?.filter(
+          (item: { cmsId: any } | null | undefined): item is { cmsId: string } =>
+            item !== null && item !== undefined && item.cmsId === imgCmsId
+        )
+      } else {
+        // If `filterImgData` has more than one item, iterate over all `cmsid` values
+        for (const { cmsid } of filterImgData) {
+          const matchedData = kiboImagesData?.filter(
+            (item: { cmsId: any } | null | undefined): item is { cmsId: string } =>
+              item !== null && item !== undefined && item.cmsId === cmsid
+          )
+
+          if (matchedData && matchedData.length > 0) {
+            updatedImageData = matchedData
+            break
+          }
+        }
+      }
+      const updateImageUrl = updatedImageData?.[0]?.imageUrl
+      setUpdateImageUrl(updateImageUrl ?? '')
+    }
+    if (kiboImagesData.length > 0) {
+      fetchDocumentData()
+    }
+  }, [variationProductCode, productCode, kiboImagesData])
 
   if (isLoading) return <ProductCardSkeleton />
   else
@@ -248,7 +325,11 @@ const ProductCardListView = (props: ProductCardListViewProps) => {
                 }}
               >
                 <KiboImage
-                  src={imageUrl || brandImages[brand.toLowerCase()] || placeholderImageUrl}
+                  src={
+                    productGetters.handleProtocolRelativeUrl(sortedImageUrl) ||
+                    brandImages[brand.toLowerCase()] ||
+                    placeholderImageUrl
+                  }
                   alt={imageUrl ? imageAltText : 'no-image-alt'}
                   objectFit={
                     imageUrl ? 'contain' : brandImages[brand.toLowerCase()] ? 'none' : 'contain'
