@@ -966,6 +966,14 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                       fontSize: '16px !important',
                       fontWeight: 500,
                       width: '100%',
+                      transition: 'none',
+                      boxShadow: 'none',
+                      '&:hover': {
+                        bgcolor: theme?.palette.primary.light,
+                      },
+                      '@media (max-width: 1023px)': {
+                        width: '52%',
+                      },
                     }} // Add margin top for spacing between QuantitySelector and LoadingButton
                   >
                     {customCTALabel}
