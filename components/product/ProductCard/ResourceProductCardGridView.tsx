@@ -254,50 +254,6 @@ const ResourceProductCardGridView = (props: ProductCardProps) => {
                 >
                   {variationProductCode ? variantProductName : title}
                 </Typography>
-                {/* <Price
-                  price={price}
-                  salePrice={salePrice}
-                  priceRange={productPriceRange}
-                  variant="body1"
-                /> */}
-                {/* <Rating
-                  name="read-only"
-                  value={rating}
-                  precision={0.5}
-                  readOnly
-                  size="small"
-                  icon={<StarRounded color="primary" data-testid="filled-rating" />}
-                  emptyIcon={<StarRounded data-testid="empty-rating" />}
-                  data-testid="product-rating"
-                /> */}
-                <Box
-                  pt={2}
-                  textAlign={'center'}
-                  sx={{ opacity: 0 }}
-                  className="quick-actions"
-                  data-testid="quick-actions"
-                >
-                  {/* {showQuickViewButton && (
-                    <Button
-                      sx={{ mr: 2 }}
-                      variant="contained"
-                      color="primary"
-                      onClick={handleOpenProductQuickViewModal}
-                    >
-                      {t('quick-view')}
-                    </Button>
-                  )} */}
-                  {isShowWishlistIcon && (
-                    <LoadingButton
-                      variant="contained"
-                      color="primary"
-                      onClick={handleAddToCart}
-                      // loading={isATCLoading}
-                    >
-                      {t('add-to-cart')}
-                    </LoadingButton>
-                  )}
-                </Box>
               </Box>
               <IconButton sx={ProductCardStyles.iconButton}>
                 <ArrowForwardIos sx={{ color: 'white' }} />
