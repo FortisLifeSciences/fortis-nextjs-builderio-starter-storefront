@@ -19,6 +19,7 @@ export type ProductItemListProps = {
   testId?: string
   showChangeStoreLink?: boolean
   onClickChangeStore?: () => void
+  isOrderConfirmation?: boolean
 }
 
 const ProductItemList = (props: ProductItemListProps) => {
@@ -32,6 +33,7 @@ const ProductItemList = (props: ProductItemListProps) => {
     testId = 'product-item-stack',
     showChangeStoreLink = true,
     onClickChangeStore,
+    isOrderConfirmation,
   } = props
 
   const storePickupAddress = (fulfillmentLocationCode: string): CrAddress => {
@@ -49,7 +51,11 @@ const ProductItemList = (props: ProductItemListProps) => {
   const { getProductLink } = uiHelpers()
 
   return (
-    <Stack direction="column" divider={<Divider orientation="horizontal" flexItem />} spacing={2}>
+    <Stack
+      direction="column"
+      divider={isOrderConfirmation ? null : <Divider orientation="horizontal" flexItem />}
+      spacing={isOrderConfirmation ? 0 : 2}
+    >
       {items?.map((item: Maybe<CrOrderItem>) => {
         const product = item?.product as CrProduct
         return (
@@ -72,6 +78,7 @@ const ProductItemList = (props: ProductItemListProps) => {
               data-testid="product-item"
               width={width}
               discounts={item?.productDiscounts}
+              isOrderConfirmation={isOrderConfirmation}
             ></ProductItem>
             {showAddress && item?.fulfillmentLocationCode && (
               <AddressCard {...storePickupAddress(item?.fulfillmentLocationCode)} />

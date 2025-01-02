@@ -2713,15 +2713,19 @@ export type CrOrderItem = {
   adjustedLineItemSubtotal?: Maybe<Scalars['Float']>
   auditInfo?: Maybe<CrAuditInfo>
   autoAddDiscountId?: Maybe<Scalars['Int']>
+  billingAddress?: any
   childItemIds?: Maybe<Array<Scalars['String']>>
+  companyOrOrganization?: string
   data?: Maybe<Scalars['Object']>
   destinationId?: Maybe<Scalars['String']>
+  detailType?: Maybe<Scalars['String']>
   discountTotal?: Maybe<Scalars['Float']>
   discountedTotal?: Maybe<Scalars['Float']>
   dutyAmount?: Maybe<Scalars['Float']>
   expectedDeliveryDate?: Maybe<Scalars['DateTime']>
   extendedTotal?: Maybe<Scalars['Float']>
   feeTotal?: Maybe<Scalars['Float']>
+  firstName?: string
   fulfillmentLocationCode?: Maybe<Scalars['String']>
   fulfillmentMethod?: Maybe<Scalars['String']>
   handlingAmount?: Maybe<Scalars['Float']>
@@ -2732,18 +2736,22 @@ export type CrOrderItem = {
   isReservationEnabled?: Maybe<Scalars['Boolean']>
   isTaxable?: Maybe<Scalars['Boolean']>
   itemTaxTotal?: Maybe<Scalars['Float']>
+  lastNameOrSurname?: string
   lineId?: Maybe<Scalars['Int']>
   lineItemAdjustment?: Maybe<Scalars['Float']>
   localeCode?: Maybe<Scalars['String']>
   originalCartItemId?: Maybe<Scalars['String']>
   parentItemId?: Maybe<Scalars['String']>
+  payment?: any
   product?: Maybe<CrProduct>
   productDiscount?: Maybe<CrAppliedLineItemProductDiscount>
   productDiscounts?: Maybe<Array<Maybe<CrAppliedLineItemProductDiscount>>>
   purchaseLocation?: Maybe<Scalars['String']>
   quantity: Scalars['Int']
+  shippingAddress?: any
   shippingAmountBeforeDiscountsAndAdjustments?: Maybe<Scalars['Float']>
   shippingDiscounts?: Maybe<Array<Maybe<CrAppliedLineItemShippingDiscount>>>
+  shippingMethod?: any
   shippingTaxTotal?: Maybe<Scalars['Float']>
   shippingTotal?: Maybe<Scalars['Float']>
   subscription?: Maybe<CrSubscriptionInfo>
