@@ -284,10 +284,18 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
               <Box sx={{ ...PLPStyles.navBar }}>
                 <Box sx={{ ...PLPStyles.navBarMain }}>
                   <Box sx={{ ...PLPStyles.navBarView }}>
-                    <Box onClick={() => setIsListView(true)} title="List View">
+                    <Box
+                      onClick={() => setIsListView(true)}
+                      title="List View"
+                      sx={{ cursor: 'pointer' }}
+                    >
                       <ReorderRounded fontSize="medium" {...(isListView && { color: 'primary' })} />
                     </Box>
-                    <Box onClick={() => setIsListView(false)} title="Grid View">
+                    <Box
+                      onClick={() => setIsListView(false)}
+                      title="Grid View"
+                      sx={{ cursor: 'pointer' }}
+                    >
                       <Apps fontSize="medium" {...(!isListView && { color: 'primary' })} />
                     </Box>
                     {!isLoading && onPaginationChange && (

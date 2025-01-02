@@ -18,7 +18,7 @@ export default function KiboBreadcrumbs({
 }: BreadcrumbsProps) {
   return (
     <div role="presentation">
-      <Breadcrumbs separator={separator} {...rest} sx={{ fontSize: '16px', fontWeight: '500' }}>
+      <Breadcrumbs separator={separator} {...rest} sx={{ fontSize: '14px', fontWeight: '500' }}>
         {breadcrumbs?.map((item: BreadCrumbType, index) => {
           return (
             <Link href={item.link as string} key={index} passHref aria-label="breadcrumb-link">
@@ -26,8 +26,10 @@ export default function KiboBreadcrumbs({
                 variant="body2"
                 color="primary.main"
                 sx={{
+                  fontSize: '14px',
+                  lineHeight: '20px',
                   textDecoration: index + 1 < breadcrumbs.length ? 'underline' : 'none',
-                  fontWeight: index + 1 < breadcrumbs.length ? '300' : '500',
+                  fontWeight: '500',
                   '&:hover': { textDecoration: 'none' },
                 }}
               >
