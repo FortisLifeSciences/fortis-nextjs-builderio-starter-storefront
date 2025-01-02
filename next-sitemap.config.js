@@ -7,7 +7,9 @@ module.exports = {
   priority: 0.8,
   robotsTxtOptions: {
     transformRobotsTxt: async (_, robotsTxt) =>
-      `#robots.txt for http://localhost:3000 updated ${new Date().toISOString()}  \n\n${robotsTxt}`,
+      `#robots.txt for ${
+        process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'
+      } updated ${new Date().toISOString()}  \n\n${robotsTxt}`,
     policies: [
       {
         userAgent: 'Googlebot',
