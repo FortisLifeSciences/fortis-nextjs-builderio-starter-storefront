@@ -11,7 +11,10 @@ import {
   useTheme,
   Link as MuiLink,
   Stack,
+  Grid,
+  Card,
 } from '@mui/material'
+import { grey } from '@mui/material/colors'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 
@@ -42,6 +45,7 @@ export interface ProductItemProps {
   isQuickOrder?: boolean
   discounts?: any
   onStoreLocatorClick?: () => void
+  isOrderConfirmation?: boolean
 }
 
 const styles = {
@@ -52,6 +56,61 @@ const styles = {
     position: 'relative',
     minWidth: '80px',
     aspectRatio: 1,
+  },
+  card: {
+    maxWidth: '100%',
+    marginBottom: {
+      xs: 0,
+      sm: 0,
+      md: '1.5rem',
+    },
+    border: {
+      xs: `2px solid ${grey[300]}`,
+      md: `2px solid ${grey[300]}`,
+    },
+    boxShadow: 'none',
+  },
+  productItemContainer: {
+    display: 'flex',
+    flexDirection: {
+      xs: 'column',
+      md: 'row',
+    },
+    padding: '1rem 0.5rem',
+    justifyContent: 'space-around',
+  },
+  subContainer: {
+    flex: 1,
+    padding: '0 0.5rem',
+    paddingTop: {
+      xs: 2,
+      md: 0,
+    },
+    paddingLeft: {
+      xs: 0,
+      md: 2,
+    },
+  },
+  icon: {
+    alignItems: 'flex-start',
+    margin: '0',
+    position: 'absolute',
+    padding: {
+      xs: '0.5rem 0',
+      sm: '0 0.5rem',
+    },
+    top: {
+      xs: 0,
+      sm: '2%',
+      md: '5%',
+      lg: '6%',
+    },
+    right: {
+      xs: 0,
+      sm: 0,
+      md: '1%',
+      lg: '1%',
+    },
   },
 }
 
@@ -75,11 +134,87 @@ const ProductItem = (props: ProductItemProps) => {
     showChangeStoreLink,
     discounts,
     onStoreLocatorClick,
+    isOrderConfirmation,
   } = props
   const { t } = useTranslation('common')
   const theme = useTheme()
   const mdScreen = useMediaQuery(theme.breakpoints.up('md'))
   const [expanded, setExpanded] = useState<boolean>(true)
+
+  if (isOrderConfirmation) {
+    return (
+      <Card sx={{ ...styles.card }} role="group" key={id}>
+        <Box sx={{ position: 'relative' }}>
+          <Box sx={{ ...styles.productItemContainer }}>
+            <Box sx={{ ...styles.subContainer }}>
+              <Grid container>
+                <Grid item sm={12}>
+                  <Grid container>
+                    <Grid item sm={8}>
+                      <Link href={link || ''}>
+                        <Typography variant="body1" data-testid="productName" pb={0.375}>
+                          {name}
+                        </Typography>
+                      </Link>
+                    </Grid>
+                    <Grid item sm={4}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'flex-end',
+                        }}
+                      >
+                        <Price
+                          variant="body1"
+                          fontWeight="500"
+                          color="gray.900"
+                          price={t('currency', { val: price })}
+                          salePrice={salePrice && t('currency', { val: salePrice })}
+                        />
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Grid>
+                <Grid item sm={12}>
+                  <Grid container>
+                    <Grid item sm={12} md={4} sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Typography variant="body2" sx={{ color: 'gray.900' }}>
+                        {options && options[0]?.value}
+                      </Typography>
+                    </Grid>
+                    <Grid
+                      item
+                      sm={12}
+                      md={4}
+                      sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Typography variant="body2" sx={{ color: 'gray.900' }}>
+                          {productCode}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid
+                      item
+                      sm={12}
+                      md={4}
+                      sx={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end' }}
+                    >
+                      <Box sx={{ py: '0.5rem' }}>
+                        <Typography variant="body2" sx={{ color: 'gray.900' }}>
+                          {t('quantity')}: {qty}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Box>
+          </Box>
+        </Box>
+      </Card>
+    )
+  }
 
   return (
     <Box key={id}>
