@@ -450,42 +450,43 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
                   )
                 })}
               </Grid>
+              {!isLoading && (
+                <Box>
+                  <Box
+                    sx={{ ...PLPStyles.productResults, color: 'grey.900', margin: '56px 0 12px 0' }}
+                  >
+                    {t('products-to-show', {
+                      m: `${pageSize < totalResults ? pageSize : totalResults}`,
+                      n: `${totalResults}`,
+                    })}
+                  </Box>
+                  {pageSize < totalResults && onInfiniteScroll && (
+                    <Box sx={{ ...PLPStyles.productResults }}>
+                      <Button
+                        id="show-more-button"
+                        sx={{ ...PLPStyles.showMoreButton }}
+                        variant="outlined"
+                        onClick={onInfiniteScroll}
+                      >
+                        {t('show-more')}
+                      </Button>
+                    </Box>
+                  )}
+
+                  {!isLoading && onPaginationChange && (
+                    <Box display={'flex'} justifyContent={'center'} width="100%" py={10}>
+                      <KiboPagination
+                        count={pageCount}
+                        startIndex={startIndex}
+                        pageSize={productPerPage}
+                        onPaginationChange={onPaginationChange}
+                      />
+                    </Box>
+                  )}
+                </Box>
+              )}
             </Box>
           </Box>
-          {!isLoading && (
-            <Box>
-              <Box sx={{ ...PLPStyles.productResults, color: 'grey.600', typography: 'body2' }}>
-                {t('products-to-show', {
-                  m: `${pageSize < totalResults ? pageSize : totalResults}`,
-                  n: `${totalResults}`,
-                })}
-              </Box>
-              {pageSize < totalResults && onInfiniteScroll && (
-                <Box sx={{ ...PLPStyles.productResults }}>
-                  <Button
-                    id="show-more-button"
-                    sx={{ ...PLPStyles.showMoreButton }}
-                    variant="contained"
-                    onClick={onInfiniteScroll}
-                    color="inherit"
-                  >
-                    {t('show-more')}
-                  </Button>
-                </Box>
-              )}
-
-              {!isLoading && onPaginationChange && (
-                <Box display={'flex'} justifyContent={'center'} width="100%" py={10}>
-                  <KiboPagination
-                    count={pageCount}
-                    startIndex={startIndex}
-                    pageSize={productPerPage}
-                    onPaginationChange={onPaginationChange}
-                  />
-                </Box>
-              )}
-            </Box>
-          )}
         </Box>
       )}
 
