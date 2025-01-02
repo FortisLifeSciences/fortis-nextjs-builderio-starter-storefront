@@ -339,16 +339,30 @@ const CartTemplate = (props: CartTemplateProps) => {
                   <Stack direction="column" gap={2} sx={{ alignItems: 'center' }}>
                     <LoadingButton
                       variant="contained"
-                      color="primary"
                       name="goToCart"
                       fullWidth
                       onClick={handleForceLogin}
                       loading={showLoadingButton}
                       disabled={!cartItemCount || showLoadingButton}
                       sx={{
+                        width: 'auto',
+                        backgroundColor: 'primary.main',
+                        color: 'secondary.light',
+                        textAlign: 'center',
+                        fontFamily: 'Poppins',
+                        fontSize: '16px',
+                        fontStyle: 'normal',
+                        fontWeight: '500',
+                        lineHeight: '24px',
                         borderRadius: '0px 26px',
+                        border: '1px solid primary.main',
                         padding: '12px 30px',
-                        width: 'fit-content',
+                        '&:hover': {
+                          backgroundColor: 'primary.light',
+                          border: '1px solid primary.light',
+                        },
+                        marginLeft: '20px',
+                        boxShadow: 'none',
                       }}
                     >
                       {t('checkout')}
