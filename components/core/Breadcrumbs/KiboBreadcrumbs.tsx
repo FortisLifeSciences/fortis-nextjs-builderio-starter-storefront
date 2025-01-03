@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Typography } from '@mui/material'
+import { Icon, Typography } from '@mui/material'
 import Breadcrumbs from '@mui/material/Breadcrumbs'
 import Link from 'next/link'
 
@@ -8,12 +8,16 @@ import { BreadCrumb as BreadCrumbType } from '@/lib/types'
 
 interface BreadcrumbsProps {
   breadcrumbs: BreadCrumbType[]
-  separator?: string
+  separator?: React.ReactNode
 }
 
 export default function KiboBreadcrumbs({
   breadcrumbs,
-  separator = '>',
+  separator = (
+    <Icon className="material-icons-outlined" sx={{ fontSize: '16px', color: 'primary.main' }}>
+      chevron_right
+    </Icon>
+  ),
   ...rest
 }: BreadcrumbsProps) {
   return (

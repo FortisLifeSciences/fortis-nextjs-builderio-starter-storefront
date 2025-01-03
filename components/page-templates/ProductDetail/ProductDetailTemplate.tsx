@@ -699,7 +699,12 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
   return (
     <Grid container>
       {!isQuickViewModal && (
-        <Grid item xs={12} alignItems="center" sx={{ paddingBlock: 4 }}>
+        <Grid
+          item
+          xs={12}
+          alignItems="center"
+          sx={{ paddingTop: { lg: '4px' }, paddingBottom: { lg: '16px' } }}
+        >
           <KiboBreadcrumbs breadcrumbs={breadcrumbs} />
         </Grid>
       )}
@@ -1218,7 +1223,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
       {relatedProducts && relatedProducts.length > 0 ? (
         <RelatedProductsCarousel relatedProducts={relatedProducts} />
       ) : null}
-      
+
       {/* Citations */}
       {citationCountVariant && product?.productType === 'Antibody-Configurable' ? (
         <Box
@@ -1235,7 +1240,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
             citationApiKey={citationApiKey}
           />
         </Box>
-       ) : null}
+      ) : null}
     </Grid>
   )
 }
