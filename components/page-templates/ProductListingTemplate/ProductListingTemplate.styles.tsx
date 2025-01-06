@@ -3,11 +3,13 @@ import { SxProps } from '@mui/material'
 
 export const PLPStyles = {
   breadcrumbsClass: {
-    margin: '1.5rem 0',
+    // margin: '1.5rem 0',
     padding: {
       md: '0',
       xs: '0 1rem',
     },
+    paddingBottom: { lg: '16px' },
+    paddingTop: { lg: '4px' },
   },
   navBar: {
     display: 'flex',

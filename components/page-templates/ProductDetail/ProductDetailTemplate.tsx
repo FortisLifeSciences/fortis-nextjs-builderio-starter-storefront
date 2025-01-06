@@ -703,7 +703,12 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
   return (
     <Grid container>
       {!isQuickViewModal && (
-        <Grid item xs={12} alignItems="center" sx={{ paddingBlock: 4 }}>
+        <Grid
+          item
+          xs={12}
+          alignItems="center"
+          sx={{ paddingTop: { lg: '4px' }, paddingBottom: { lg: '16px' } }}
+        >
           <KiboBreadcrumbs breadcrumbs={breadcrumbs} />
         </Grid>
       )}
@@ -1253,6 +1258,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
           />
         </Box>
       ) : null}
+
       <Grid item xs={12} paddingY={3} pb={'30px'}>
         <Divider />
       </Grid>
