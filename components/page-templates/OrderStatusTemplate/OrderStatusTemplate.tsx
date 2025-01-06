@@ -12,8 +12,8 @@ import type { CrOrder } from '@/lib/gql/types'
 
 const styles = {
   breadcrumbsClass: {
-    margin: '1.5rem 0',
-    padding: 0,
+    // margin: '1.5rem 0',
+    padding: { lg: '4px 0 16px 0' },
   },
 }
 
