@@ -6,12 +6,16 @@ const getErrorMessage = (code: string, message: string) => {
     UNAUTHENTICATED: 'Invalid Credentials',
   }
 
-  return message || messages[code] || 'Unable to connect server'
+  return message || messages[code]
 }
 
 const queryClientHandler = (error: any, showSnackbar: any) => {
   const status = 'error'
-  showSnackbar(getErrorMessage(error?.response?.code, error?.response?.message), status)
+  if (error instanceof SyntaxError && error.message.includes('Unexpected token')) {
+    //do nothing here for now
+  } else {
+    showSnackbar(getErrorMessage(error?.response?.code, error?.response?.message), status)
+  }
 }
 
 export const generateQueryClient = (showSnackbar?: any): QueryClient => {

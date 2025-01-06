@@ -154,7 +154,7 @@ const PlpIconAttributes = (props: any) => {
                     </span>
                   </Box>
                   <Box sx={{ ...plpIconStyles.plpIconText, color: 'primary.main' }}>
-                    Citations({data?.values[0]?.value})
+                    Citations ({data?.values[0]?.value})
                   </Box>
                 </Box>
               </Link>
