@@ -1072,6 +1072,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                     sx={{
                       bgcolor: theme?.palette.primary.main,
                       fontSize: '16px !important',
+                      fontWeight: '500',
                       transition: 'none',
                       boxShadow: 'none',
                       '&:hover': {
@@ -1235,7 +1236,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
         <Divider />
       </Grid>
       {!isQuickViewModal && children}
-  
+
       {/* Citations */}
       {citationCountVariant && product?.productType === 'Antibody-Configurable' ? (
         <Box
@@ -1251,7 +1252,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
             citationApiKey={citationApiKey}
           />
         </Box>
-       ) : null}
+      ) : null}
       <Grid item xs={12} paddingY={3} pb={'30px'}>
         <Divider />
       </Grid>
