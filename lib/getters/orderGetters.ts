@@ -44,6 +44,12 @@ const getShippingDiscounts = (order: CrOrder) =>
       impact: (discount?.discount?.impact as number) * -1,
     }
   })
+const getShippingMethod = (order: CrOrder) => {
+  return {
+    shippingMethodName: order?.fulfillmentInfo?.shippingMethodName,
+    shippingMethodCode: order?.fulfillmentInfo?.shippingMethodCode,
+  }
+}
 
 const getHandlingTotal = (order: CrOrder | CrCart | Checkout) => order?.handlingTotal || 0
 
@@ -110,6 +116,12 @@ const getTotalCollected = (order: CrOrder): number => order.totalCollected || 0
 
 const getShippingContact = (order: CrOrder): CrContact =>
   order?.fulfillmentInfo?.fulfillmentContact as CrContact
+
+const getShippingContactCompany = (order: CrOrder): string =>
+  order?.fulfillmentInfo?.fulfillmentContact?.companyOrOrganization as any
+
+const getBillingContactCompany = (order: CrOrder): string =>
+  order?.billingInfo?.billingContact?.companyOrOrganization as any
 
 const getBillingContact = (order: CrOrder): CrContact =>
   order?.billingInfo?.billingContact as CrContact
@@ -191,6 +203,7 @@ const getPersonalDetails = (order: CrOrder): CrContact => {
 
 const getShippingDetails = (order: CrOrder): ShippingDetails => {
   return {
+    detailType: 'shipping',
     firstName: getShippingFirstName(order),
     lastNameOrSurname: getShippingLastNameOrSurname(order),
     shippingPhoneHome: getShippingPhoneHome(order),
@@ -198,6 +211,7 @@ const getShippingDetails = (order: CrOrder): ShippingDetails => {
     shippingPhoneWork: getShippingPhoneWork(order),
     companyOrOrganization: getCompanyOrOrganization(order),
     shippingAddress: getShippingAddress(order),
+    shippingMethod: getShippingMethod(order),
   }
 }
 
@@ -206,10 +220,13 @@ const getBillingDetails = (order: CrOrder): BillingDetails => {
   const contact =
     order?.billingInfo?.billingContact || (activePayment?.billingInfo?.billingContact as CrContact)
   return {
+    detailType: 'billing',
     firstName: addressGetters.getFirstName(contact),
     lastNameOrSurname: addressGetters.getLastNameOrSurname(contact),
+    companyOrOrganization: getBillingContactCompany(order),
     billingAddress: addressGetters.getAddress(contact?.address as CrAddress),
     billingCompanyOrOrganization: contact?.companyOrOrganization || '',
+    payment: getFinalOrderPayment(order),
   }
 }
 
@@ -381,6 +398,7 @@ const getShippingMethodName = (checkout: CrOrder): string =>
 const getLocationCode = (order: CrOrder) => order?.locationCode
 
 export const orderGetters = {
+  getId,
   getCheckoutItemCount,
   getSubmittedDate,
   getProductNames,
@@ -402,6 +420,8 @@ export const orderGetters = {
   getDiscountedSubtotal,
   getOrderDiscounts,
   getPickupItems,
+  getShippingDetails,
+  getBillingDetails,
   getShipItems,
   getCartItemId,
   getProductQuantity,
