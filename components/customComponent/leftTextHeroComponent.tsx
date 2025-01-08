@@ -80,7 +80,13 @@ const LeftTextHero: React.FC<LeftTextHeroProps> = ({
           )}
         </Box>
         <Box sx={{ ...LeftTextHeroStyle.leftTxtImage }}>
-          <Image src={leftTextImage} alt={ImageAltText} fill />
+          <Image
+            src={leftTextImage}
+            alt={ImageAltText}
+            width={757}
+            height={551}
+            style={{ height: 'auto', maxWidth: '100%' }}
+          />
         </Box>
       </Box>
     </Box>

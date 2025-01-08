@@ -1,7 +1,7 @@
 export const LeftTextHeroStyle = {
   leftTxtHeroContainer: {
     display: 'flex',
-    justifyContent: 'center',
+    justifyContent: 'end',
     alignItems: 'center',
     textAlign: 'center',
     width: '100%',
@@ -12,8 +12,8 @@ export const LeftTextHeroStyle = {
     paddingTop: '27px',
   },
   leftTxtBox: {
-    width: '82.5%',
-    height: { md: '516px' },
+    width: '80%',
+    minHeight: { md: '508px' },
     position: 'absolute',
     top: '48%',
     transform: 'translateY(-50%)',
@@ -52,13 +52,16 @@ export const LeftTextHeroStyle = {
     width: { md: '589px', sm: '400px', xs: '100%' },
     height: { md: 'auto', xs: 'auto' },
     fontFamily: 'Poppins',
-    fontSize: { md: '40px', xs: '30px' },
+    fontSize: { md: '40px', sm: '30px', xs: '30px' },
     fontWeight: { md: 500, xs: 500 },
-    lineHeight: { md: '55px', xs: '42px' },
+    lineHeight: { md: '55px', sm: '40px', xs: '42px' },
     marginBottom: { md: '27px', xs: '10px' },
     padding: { sm: '0 10px' },
     '@media (min-width: 900px) and (max-width: 990px)': {
       width: '560px',
+    },
+    '@media (min-width: 991px) and (max-width: 1023px)': {
+      width: '540px',
     },
   },
   leftTxtParagraph: {
@@ -66,13 +69,16 @@ export const LeftTextHeroStyle = {
     width: { md: '589px', sm: '350px', xs: '100%' },
     height: 'auto',
     fontFamily: 'Poppins',
-    fontSize: { md: '22px', xs: '18px' },
+    fontSize: { md: '22px', sm: '16px', xs: '18px' },
     fontWeight: { md: 300, xs: 300 },
-    lineHeight: { md: '35px', xs: '28px' },
+    lineHeight: { md: '35px', sm: '30px', xs: '28px' },
     marginBottom: { md: '27px', xs: '15px' },
     padding: { sm: '0 10px' },
     '@media (min-width: 900px) and (max-width: 990px)': {
-      width: '560px',
+      width: '523px',
+    },
+    '@media (min-width: 991px) and (max-width: 1023px)': {
+      width: '523px',
     },
   },
   leftTxtPrimaryButton: {
@@ -109,32 +115,46 @@ export const LeftTextHeroStyle = {
     },
   },
   leftTxtImage: {
-    width: '48%',
-    height: { md: '551px', sm: '400px' },
-    position: 'absolute',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    right: 0,
-    zIndex: 2,
+    height: { md: '551px', sm: 'auto', xs: 'auto' },
+    minHeight: { xs: '285px' },
+    width: { md: '48%', sm: '48%', xs: '100%' },
+    position: 'relative',
+    zIndex: '2',
+    top: '10%',
     '@media (max-width: 600px)': {
-      position: 'absolute',
-      width: '100%',
-      height: '285px',
-      top: '73%',
-      right: 0,
-      zIndex: 2,
-      marginTop: '20px',
-      '@media (min-width: 384px) and (max-width: 427px)': {
-        top: '72%',
+      top: '1%',
+      '@media (min-width: 406px) and (max-width: 419px)': {
+        top: '2%',
       },
-      '@media (min-width: 428px) and (max-width: 500px)': {
-        top: '68%',
+      '@media (min-width: 420px) and (max-width: 427px)': {
+        top: '3%',
       },
-      '@media (min-width: 501px) and (max-width: 577px)': {
-        top: '66%',
+      '@media (min-width: 437px) and (max-width: 450px)': {
+        top: '2%',
       },
-      '@media (min-width: 578px) and (max-width: 599px)': {
-        top: '62%',
+      '@media (min-width: 451px) and (max-width: 460px)': {
+        top: '3%',
+      },
+      '@media (min-width: 461px) and (max-width: 477px)': {
+        top: '5%',
+      },
+      '@media (min-width: 478px) and (max-width: 490px)': {
+        top: '7%',
+      },
+      '@media (min-width: 491px) and (max-width: 520px)': {
+        top: '8%',
+      },
+      '@media (min-width: 521px) and (max-width: 530px)': {
+        top: '9%',
+      },
+      '@media (min-width: 531px) and (max-width: 540px)': {
+        top: '10%',
+      },
+      '@media (min-width: 541px) and (max-width: 560px)': {
+        top: '13%',
+      },
+      '@media (min-width: 561px) and (max-width: 600px)': {
+        top: '15%',
       },
     },
     '@media (min-width: 601px) and (max-width: 990px)': {
