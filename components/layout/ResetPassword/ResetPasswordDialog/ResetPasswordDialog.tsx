@@ -47,14 +47,22 @@ const ResetPasswordDialog = () => {
   const { showModal, closeModal } = useModalContext()
 
   const [isResetPassword, setIsResetPassword] = useState<boolean>(false)
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
   const handleResetPassword = async (params: ResetPasswordInputData) => {
-    const res = await resetPassword.mutateAsync({
-      emailAddress: params.email,
-      userName: params.email,
-      customerSetCode: '',
-    })
-    setIsResetPassword(res?.resetPassword)
+    if (isSubmitting) return // Prevent duplicate submissions
+    setIsSubmitting(true)
+    try {
+      const res = await resetPassword.mutateAsync({
+        emailAddress: params.email,
+        userName: params.email,
+        customerSetCode: '',
+      })
+      setIsResetPassword(res?.resetPassword)
+    } catch (error) {
+    } finally {
+      setIsSubmitting(false) // Reset loading state
+    }
   }
 
   const gotoLogin = () => {
