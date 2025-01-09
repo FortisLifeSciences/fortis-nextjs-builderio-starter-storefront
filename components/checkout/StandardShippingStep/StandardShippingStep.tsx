@@ -245,6 +245,7 @@ const StandardShippingStep = (props: ShippingProps) => {
         firstName: selectedAddress?.firstName || '',
         lastNameOrSurname: selectedAddress?.lastNameOrSurname || '',
         middleNameOrInitial: selectedAddress?.middleNameOrInitial || '',
+        companyOrOrganization: selectedAddress?.companyOrOrganization || '',
         email: selectedAddress?.email || checkout?.email || user?.emailAddress,
         address: {
           ...(selectedAddress?.address as any),
