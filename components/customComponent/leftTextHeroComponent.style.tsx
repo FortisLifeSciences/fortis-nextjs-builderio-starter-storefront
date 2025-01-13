@@ -86,6 +86,8 @@ export const LeftTextHeroStyle = {
     alignItems: 'center',
     width: 'auto',
     height: { md: '49px' },
+    fontSize: '16px',
+    fontWeight: 500,
     '&:hover': {
       backgroundColor: 'primary.light',
     },
@@ -102,6 +104,8 @@ export const LeftTextHeroStyle = {
     gap: '10px',
     width: 'auto',
     height: { md: '49px' },
+    fontSize: '16px',
+    fontWeight: 500,
     '&:hover': {
       backgroundColor: 'secondary.main',
       border: '1px solid secondary.main',
