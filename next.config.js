@@ -339,7 +339,6 @@ module.exports = {
         code: 'WY',
         name: 'Wyoming',
       },
-
     ],
     debounceTimeout: '1000',
     productListing: {
@@ -463,6 +462,7 @@ module.exports = {
         cartTopSection: 'cart-top-content-section',
         categoryTopSection: 'category-section',
         cartEmptySection: 'cart-empty-content-section',
+        PDPCustomAndBulkDisplaySection: 'pdp-custom-and-bulk-display-section',
       },
     },
     inventorySettings: {
