@@ -60,7 +60,6 @@ const LeftTextHero: React.FC<LeftTextHeroProps> = ({
                     sx={{ ...LeftTextHeroStyle.leftTxtPrimaryButton }}
                     component="a"
                     href={primaryButtonUrl}
-                    target="_blank"
                   >
                     {primaryButtonText}
                   </Button>
@@ -70,7 +69,6 @@ const LeftTextHero: React.FC<LeftTextHeroProps> = ({
                     sx={{ ...LeftTextHeroStyle.leftTxtSecondaryButton }}
                     component="a"
                     href={secondaryButtonUrl}
-                    target="_blank"
                   >
                     {secondaryButtonText}
                   </Button>
