@@ -16,6 +16,7 @@ export const topHeaderStyles = {
     display: 'flex',
     justifyContent: 'flex-end',
     alignItems: 'center',
+    height: '40px',
   },
 }
 
