@@ -141,7 +141,7 @@ let theme = createTheme({
     body1: {
       fontSize: '1.375rem', // 22px
       fontWeight: '300',
-      lineHeight: '2.5rem', // 40px
+      lineHeight: 'normal',
       '@media (max-width:910px)': {
         fontSize: '1.125rem', // 18px
         lineHeight: '1.75rem', // 28px
