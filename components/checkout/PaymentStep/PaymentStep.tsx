@@ -1018,6 +1018,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                 borderBottomLeftRadius: 0,
                 borderBottomRightRadius: 0,
                 transition: 'all 0ms linear',
+                paddingBottom: '10px',
               },
             }}
           >
@@ -1063,7 +1064,7 @@ const PaymentStep = (props: PaymentStepProps) => {
 
           {newPaymentTypes.map((paymentType: PaymentsType) => {
             return (
-              <Box key={paymentType.id}>
+              <Box key={paymentType.id} sx={{ marginTop: '10px' }}>
                 {paymentType.id === selectedPaymentTypeRadio ? (
                   <Box sx={{ maxWidth: '100%', mb: 1, pl: 0 }}>
                     {shouldShowPreviouslySavedCards ? (
@@ -1149,7 +1150,12 @@ const PaymentStep = (props: PaymentStepProps) => {
                                                     render={({ field }) => {
                                                       return (
                                                         <KiboTextBox
-                                                          sx={{ background: '#ffffff' }}
+                                                          sx={{
+                                                            background: '#ffffff',
+                                                            width: '100px',
+                                                            borderRadius: '5px',
+                                                            border: '1px solid #020027',
+                                                          }}
                                                           type="password"
                                                           value={field.value || ''}
                                                           label={t('cvv-code')}
