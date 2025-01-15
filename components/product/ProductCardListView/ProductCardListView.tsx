@@ -35,6 +35,12 @@ import fortis from '@/public/Brand_Logo/fortis-logo.png'
 import ipoc from '@/public/Brand_Logo/ipoc-logo.png'
 import nanocomposix from '@/public/Brand_Logo/nanocomposix-logo.png'
 import vector from '@/public/Brand_Logo/vector-logo.png'
+import abcoreLogo from '@/public/BrandLogos/abcore_logo.png'
+import aristaLogo from '@/public/BrandLogos/arista_logo.png'
+import bethylLogo from '@/public/BrandLogos/bethyl_logo.png'
+import empiricalLogo from '@/public/BrandLogos/empirical_logo.png'
+import nanocomposixLogo from '@/public/BrandLogos/nanocomposix_logo.png'
+import vectorLogo from '@/public/BrandLogos/vector_logo.png'
 import DefaultImage from '@/public/noImage.png'
 import DefaultImage1 from '@/public/product_placeholder.svg'
 
@@ -49,6 +55,14 @@ const brandImages: Record<string, string> = {
   vector: vector.src,
   ipoc: ipoc.src,
   fortis: fortis.src,
+}
+const pdpBrandLogos: Record<string, string> = {
+  arista: aristaLogo.src,
+  bethyl: bethylLogo.src,
+  abcore: abcoreLogo.src,
+  empirical: empiricalLogo.src,
+  nanocomposix: nanocomposixLogo.src,
+  vector: vectorLogo.src,
 }
 
 export interface ProductCardListViewProps {
@@ -327,13 +341,11 @@ const ProductCardListView = (props: ProductCardListViewProps) => {
                 <KiboImage
                   src={
                     productGetters.handleProtocolRelativeUrl(sortedImageUrl) ||
-                    brandImages[brand.toLowerCase()] ||
+                    pdpBrandLogos[brand.toLowerCase()] ||
                     placeholderImageUrl
                   }
                   alt={imageUrl ? imageAltText : 'no-image-alt'}
-                  objectFit={
-                    imageUrl ? 'contain' : brandImages[brand.toLowerCase()] ? 'none' : 'contain'
-                  }
+                  objectFit={imageUrl || pdpBrandLogos[brand.toLowerCase()] ? 'contain' : 'none'}
                   data-testid="product-image"
                 />
               </CardMedia>
