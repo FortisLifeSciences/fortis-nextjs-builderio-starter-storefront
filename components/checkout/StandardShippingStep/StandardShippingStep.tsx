@@ -29,6 +29,7 @@ import { DefaultId, AddressType, CountryCode, FulfillmentOptions } from '@/lib/c
 import { orderGetters, userGetters } from '@/lib/getters'
 import { actions, buildAddressParams, hasPermission } from '@/lib/helpers'
 import { Address } from '@/lib/types'
+import { addShipMethodGTM, addShippingInfoGTM } from '@/lib/utils/google-tag-manager'
 
 import type {
   CrOrder,
@@ -283,6 +284,8 @@ const StandardShippingStep = (props: ShippingProps) => {
 
   useEffect(() => {
     if (stepStatus === STEP_STATUS.SUBMIT) {
+      addShippingInfoGTM(checkout as CrOrder, user?.userId)
+      addShipMethodGTM(checkout as CrOrder, user?.userId)
       setStepStatusComplete()
       setStepNext()
     }

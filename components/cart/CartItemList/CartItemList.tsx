@@ -1,11 +1,16 @@
+import { useRef } from 'react'
+
 import { Box, Collapse } from '@mui/material'
 import { TransitionGroup } from 'react-transition-group'
 
 import { CartItem } from '@/components/cart'
 import { FullWidthDivider } from '@/components/common'
+import { useAuthContext } from '@/context/AuthContext'
 import { FulfillmentOptions } from '@/lib/constants'
+import { cartItemGetters } from '@/lib/getters'
 import { cartGetters } from '@/lib/getters/cartGetters'
 import { FulfillmentOption } from '@/lib/types'
+import { addToCartGTMPDP, removeFromCartGTM } from '@/lib/utils/google-tag-manager'
 
 import type { CrCartItem, CrOrderItem, Location, Maybe } from '@/lib/gql/types'
 
@@ -16,8 +21,8 @@ interface CartItemListProps {
   status?: string
   mode?: string
   isQuote?: boolean
-  onCartItemQuantityUpdate: (cartItemId: string, quantity: number) => void
-  onCartItemDelete: (cartItemId: string) => void
+  onCartItemQuantityUpdate: (cartItemId: string, quantity: number, cartItem: CrCartItem) => void
+  onCartItemDelete: (cartItemId: string, cartItem: CrCartItem) => void
   onCartItemActionSelection: () => void
   onFulfillmentOptionChange: (fulfillmentMethod: string, cartItemId: string) => void
   onProductPickupLocation: (cartItemId: string) => void
@@ -37,11 +42,36 @@ const CartItemList = (props: CartItemListProps) => {
     onFulfillmentOptionChange,
     onProductPickupLocation,
   } = props
+  const { isAuthenticated, user } = useAuthContext()
+  const previousQuantities = useRef<Record<string, number>>({})
+  const handleQuantityUpdate = (cartItemId: string, quantity: number, cartItem: CrCartItem) => {
+    const previousQuantity = previousQuantities.current[cartItemId] || cartItem.quantity
+    onCartItemQuantityUpdate(cartItemId, quantity, cartItem)
+    if (
+      quantity > previousQuantity &&
+      cartItem &&
+      cartItem?.product?.productCode &&
+      cartItem?.product?.name
+    ) {
+      addToCartGTMPDP(
+        cartItemGetters.getCartItemUnitPrice(cartItem),
+        user?.userId,
+        cartItem?.product?.productCode,
+        cartItem?.product?.name,
+        '',
+        cartItemGetters.getCartItemBrandName(cartItem),
+        cartItemGetters.getCartItemVariantCode(cartItem),
+        cartItemGetters.getCartItemUnitPrice(cartItem),
+        cartItemGetters.getCartItemQuantity(cartItem)
+      )
+    } else {
+      removeFromCartGTM(cartItem, user?.userId, '')
+      previousQuantities.current[cartItemId] = quantity
+    }
+  }
 
-  const handleQuantityUpdate = (cartItemId: string, quantity: number) =>
-    onCartItemQuantityUpdate(cartItemId, quantity)
-
-  const handleCartItemDelete = (cartItemId: string) => onCartItemDelete(cartItemId)
+  const handleCartItemDelete = (cartItemId: string, cartItem: CrCartItem) =>
+    onCartItemDelete(cartItemId, cartItem)
 
   const handleCartItemActionSelection = () => onCartItemActionSelection()
 

@@ -28,7 +28,7 @@ interface B2BProductDetailsTableProps {
   isQuote?: boolean
   onFulfillmentOptionChange: (value: string, id: string) => void
   onStoreSetOrUpdate: (id: string) => void
-  onQuantityUpdate: (cartItemId: string, quantity: number) => void
+  onQuantityUpdate: (cartItemId: string, quantity: number, cartItem: CrCartItem) => void
   onItemDelete: (cartItemId: string) => void
 }
 
@@ -155,9 +155,15 @@ export default function B2BProductDetailsTable(props: B2BProductDetailsTableProp
                   <QuantitySelector
                     quantity={item?.quantity || 1} // needs to be modified
                     maxQuantity={100} // needs to be modified
-                    onIncrease={() => onQuantityUpdate(item?.id as string, item?.quantity + 1)}
-                    onDecrease={() => onQuantityUpdate(item?.id as string, item?.quantity - 1)}
-                    onQuantityUpdate={(q) => onQuantityUpdate(item?.id as string, q)}
+                    onIncrease={() =>
+                      onQuantityUpdate(item?.id as string, item?.quantity + 1, item as CrCartItem)
+                    }
+                    onDecrease={() =>
+                      onQuantityUpdate(item?.id as string, item?.quantity - 1, item as CrCartItem)
+                    }
+                    onQuantityUpdate={(q) =>
+                      onQuantityUpdate(item?.id as string, q, item as CrCartItem)
+                    }
                   />
                 )}
               </TableCell>
