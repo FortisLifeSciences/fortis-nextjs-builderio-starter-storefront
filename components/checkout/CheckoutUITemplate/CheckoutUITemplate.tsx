@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react'
 
-import { Box, Stack, Button, SxProps, Typography } from '@mui/material'
+import { Box, Stack, Button, SxProps, Typography, Divider } from '@mui/material'
 import { Theme } from '@mui/material/styles'
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
@@ -110,7 +110,6 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
         <KiboStepper isSticky={true}>{children}</KiboStepper>
 
         {activeStep < buttonLabels.length && (
-          
           <Stack direction="column" gap={2} justifyContent={'end'} alignItems={'flex-end'}>
             <Divider orientation="horizontal" flexItem sx={{ mt: 2 }} />
             <Button
