@@ -221,6 +221,7 @@ const PaymentStep = (props: PaymentStepProps) => {
   const allowInvalidAddresses = publicRuntimeConfig.allowInvalidAddresses
 
   // getting the selected Payment type from checkout.payments
+
   const checkoutPayment = orderGetters.getSelectedPaymentType(checkout)
   const checkoutPaymentType = checkoutPayment?.paymentType?.toString() ?? ''
 
