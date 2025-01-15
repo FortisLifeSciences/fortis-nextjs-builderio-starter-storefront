@@ -60,7 +60,7 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
     onClose() // Close the popover when a link is clicked
   }
 
-  console.log('This is child category ---> ', childCategory)
+  // console.log('This is child category ---> ', childCategory)
 
   return (
     <Paper
@@ -105,7 +105,12 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                     <Link
                       href={category.categoryLink}
                       passHref
-                      style={{ paddingLeft: '16px' }}
+                      style={{
+                        paddingLeft: '16px',
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                      }}
                       target={category.openLinkInNewWindow ? '_blank' : '_self'}
                       rel={category.openLinkInNewWindow ? 'noopener noreferrer' : undefined}
                     >
@@ -121,12 +126,25 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                             alignItems: 'center',
                             gap: '13.25px',
                           }),
+                          display: 'inline-block',
+                          wordWrap: 'break-all',
                         }}
                         onClick={handleLinkClick}
                       >
                         {category.categoryName}
-                        {category.openLinkInNewWindow && <OpenInNewWindowIcon />}
                       </Typography>
+                      {category.openLinkInNewWindow && (
+                        <span
+                          style={{
+                            width: '16px',
+                            height: '16px',
+                            display: 'flex',
+                            marginLeft: '8px',
+                          }}
+                        >
+                          <OpenInNewWindowIcon />
+                        </span>
+                      )}
                     </Link>
                   </Box>
                 ) : (
@@ -183,13 +201,13 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                 )
               )}
             </Grid>
-            <Grid item xs={4} sx={subMenuSection}>
+            <Grid item xs={4} sx={{ ...subMenuSection, paddingLeft: '36px !important' }}>
               {activeCategory.childCategory?.map((submenu: any, index: any) => (
                 <Box key={index} sx={submenuItem}>
                   <Link
                     href={submenu.categoryLink}
                     passHref
-                    style={{ paddingLeft: '28px' }}
+                    style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}
                     target={submenu.openLinkInNewWindow ? '_blank' : '_self'}
                     rel={submenu.openLinkInNewWindow ? 'noopener noreferrer' : undefined}
                   >
@@ -205,12 +223,25 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                           alignItems: 'center',
                           gap: '13.25px',
                         }),
+                        display: 'inline-block',
+                        wordWrap: 'break-all',
                       }}
                       onClick={handleLinkClick}
                     >
                       {submenu.categoryName}
-                      {submenu.openLinkInNewWindow && <OpenInNewWindowIcon />}
                     </Typography>
+                    {submenu.openLinkInNewWindow && (
+                      <span
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          display: 'flex',
+                          marginLeft: '8px',
+                        }}
+                      >
+                        <OpenInNewWindowIcon />
+                      </span>
+                    )}
                   </Link>
                 </Box>
               ))}
@@ -218,7 +249,7 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                 <Link
                   href={activeCategory.categoryLink}
                   passHref
-                  style={{ paddingLeft: '28px' }}
+                  style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}
                   target={activeCategory.openLinkInNewWindow ? '_blank' : '_self'}
                   rel={activeCategory.openLinkInNewWindow ? 'noopener noreferrer' : undefined}
                 >
@@ -234,12 +265,20 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                         alignItems: 'center',
                         gap: '13.25px',
                       }),
+                      display: 'inline-block',
+                      wordWrap: 'break-all',
                     }}
                     onClick={handleLinkClick}
                   >
                     View All {activeCategory.categoryName}
-                    {activeCategory.openLinkInNewWindow && <OpenInNewWindowIcon />}
                   </Typography>
+                  {activeCategory.openLinkInNewWindow && (
+                    <span
+                      style={{ width: '16px', height: '16px', display: 'flex', marginLeft: '8px' }}
+                    >
+                      <OpenInNewWindowIcon />
+                    </span>
+                  )}
                 </Link>
               </Box>
             </Grid>
@@ -308,7 +347,12 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                   <Link
                     href={category.categoryLink}
                     passHref
-                    style={{ paddingLeft: '28px' }}
+                    style={{
+                      paddingLeft: '28px',
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                    }}
                     target={category.openLinkInNewWindow ? '_blank' : '_self'}
                     rel={category.openLinkInNewWindow ? 'noopener noreferrer' : undefined}
                   >
@@ -324,12 +368,25 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                           alignItems: 'center',
                           gap: '13.25px',
                         }),
+                        display: 'inline-block',
+                        wordWrap: 'break-all',
                       }}
                       onClick={handleLinkClick}
                     >
                       {category.categoryName}
-                      {category.openLinkInNewWindow && <OpenInNewWindowIcon />}
                     </Typography>
+                    {category.openLinkInNewWindow && (
+                      <span
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          display: 'flex',
+                          marginLeft: '8px',
+                        }}
+                      >
+                        <OpenInNewWindowIcon />
+                      </span>
+                    )}
                   </Link>
                 </Grid>
               ))}
