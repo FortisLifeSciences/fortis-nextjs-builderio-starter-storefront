@@ -24,20 +24,21 @@ interface CheckoutUITemplateProps<T> {
 }
 const buttonStyle = {
   height: '48px',
-  fontSize: (themeParam: Theme) => themeParam.typography.subtitle1,
   width: '188px',
   background: 'primary.main',
   color: '#ffffff',
   border: 0,
-  borderTopRightRadius: 26,
-  borderBottomLeftRadius: 26,
+  borderRadius: '0px 26px',
   padding: '12px 16px',
-  lineHeight: 1.4,
+  textAlign: 'center',
+  fontFamily: 'Poppins',
+  fontSize: '16px',
+  fontStyle: 'normal',
+  fontWeight: '500',
+  lineHeight: '24px',
+  cursor: 'pointer',
   '&:hover': {
-    padding: '12px 16px',
     background: '#4C47C4',
-    color: '#FFFFFF',
-    border: 0,
   },
   '&:disabled': {
     backgroundColor: '#8D8D8D !important',
@@ -109,7 +110,9 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
         <KiboStepper isSticky={true}>{children}</KiboStepper>
 
         {activeStep < buttonLabels.length && (
-          <Stack direction="row" gap={2} justifyContent={'end'}>
+          
+          <Stack direction="column" gap={2} justifyContent={'end'} alignItems={'flex-end'}>
+            <Divider orientation="horizontal" flexItem sx={{ mt: 2 }} />
             <Button
               variant="contained"
               color="primary"
