@@ -74,6 +74,12 @@ import fortis from '@/public/Brand_Logo/fortis-logo.png'
 import ipoc from '@/public/Brand_Logo/ipoc-logo.png'
 import nanocomposix from '@/public/Brand_Logo/nanocomposix-logo.png'
 import vector from '@/public/Brand_Logo/vector-logo.png'
+import abcoreLogo from '@/public/BrandLogos/abcore_logo.png'
+import aristaLogo from '@/public/BrandLogos/arista_logo.png'
+import bethylLogo from '@/public/BrandLogos/bethyl_logo.png'
+import empiricalLogo from '@/public/BrandLogos/empirical_logo.png'
+import nanocomposixLogo from '@/public/BrandLogos/nanocomposix_logo.png'
+import vectorLogo from '@/public/BrandLogos/vector_logo.png'
 import GetThemeSettings from '@/src/pages/api/getThemeSettings'
 import theme from '@/styles/theme'
 
@@ -96,6 +102,14 @@ const brandImages: Record<string, string> = {
   vector: vector.src,
   ipoc: ipoc.src,
   fortis: fortis.src,
+}
+const pdpBrandLogos: Record<string, string> = {
+  arista: aristaLogo.src,
+  bethyl: bethylLogo.src,
+  abcore: abcoreLogo.src,
+  empirical: empiricalLogo.src,
+  nanocomposix: nanocomposixLogo.src,
+  vector: vectorLogo.src,
 }
 interface ProductDetailTemplateProps {
   product: ProductCustom
@@ -803,7 +817,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
             kiboImages={productGallery as ProductImage[]}
             title={'HI Image'}
             brandImage={
-              brand && typeof brand === 'string' ? brandImages[brand.toLowerCase()] : null
+              brand && typeof brand === 'string' ? pdpBrandLogos[brand.toLowerCase()] : null
             }
           />
         </Box>
