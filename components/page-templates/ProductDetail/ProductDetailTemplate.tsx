@@ -84,6 +84,7 @@ import type {
   CrProduct,
   ProductPrice,
   Product,
+  FilteredProduct,
 } from '@/lib/gql/types'
 
 const brandImages: Record<string, string> = {
@@ -99,7 +100,7 @@ const brandImages: Record<string, string> = {
 interface ProductDetailTemplateProps {
   product: ProductCustom
   sliceValue?: string
-  productVariations?: Product[]
+  productVariations?: Product[] | FilteredProduct[]
   breadcrumbs?: BreadCrumb[]
   isQuickViewModal?: boolean
   children?: any
