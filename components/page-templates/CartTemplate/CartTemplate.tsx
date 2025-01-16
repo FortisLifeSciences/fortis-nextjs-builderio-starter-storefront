@@ -21,7 +21,7 @@ import { CartItemList } from '@/components/cart'
 import { PromoCodeBadge, OrderSummary, Price } from '@/components/common'
 import { ConfirmationDialog, StoreLocatorDialog } from '@/components/dialogs'
 import { LoginDialog } from '@/components/layout'
-import { useModalContext, useAuthContext } from '@/context'
+import { useModalContext, useAuthContext, useSnackbarContext } from '@/context'
 import {
   useGetCart,
   useInitiateOrder,
@@ -76,6 +76,7 @@ const CartTemplate = (props: CartTemplateProps) => {
   const [promoError, setPromoError] = useState<string>('')
   const [showLoadingButton, setShowLoadingButton] = useState<boolean>(false)
   const { handleDeleteCurrentCart } = useProductCardActions()
+  const { showSnackbar, hideSnackbar } = useSnackbarContext()
 
   const handleApplyPromoCode = async (couponCode: string) => {
     try {
@@ -149,7 +150,15 @@ const CartTemplate = (props: CartTemplateProps) => {
         router.push(`/checkout/${initiateOrderResponse.id}`)
       }
     } catch (err) {
-      console.error(err)
+      //console.error(err)
+      hideSnackbar() // Suppress any snackbar errors by hiding it before showing the modal
+      showModal({
+        Component: LoginDialog,
+        props: {
+          isCartCheckout: true,
+          onLoginSuccess: proceedWithCheckout,
+        },
+      })
       setShowLoadingButton(false)
     }
   }

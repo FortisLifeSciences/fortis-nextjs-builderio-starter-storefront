@@ -47,7 +47,9 @@ export function buildCategoryPath(category: PrCategory, options?: BuildPathOptio
 export function buildCategoryPathByCode(categoryCode: string, options?: BuildPathOptions) {
   const pathInput: string[] = []
   pathInput.push(getPathStart(options))
-  pathInput.push(categoryRoutePath)
+  if (categoryCode !== categoryRoutePath) {
+    pathInput.push(categoryRoutePath)
+  }
   /* add category content slugs here  */
   pathInput.push(categoryCode as string)
   return joinPathParts(pathInput)

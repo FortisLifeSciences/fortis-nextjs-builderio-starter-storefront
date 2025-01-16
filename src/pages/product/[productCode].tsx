@@ -32,6 +32,8 @@ interface ProductPageType extends PageWithMetaData {
   relatedProducts: any
   productVariations?: Product[]
   section?: any
+  PDPCustomAndBulkDisplayContentSection?: any
+  PDPCustomAndBulkDisplaySectionKey?: string
 }
 
 const { publicRuntimeConfig } = getConfig()
@@ -110,12 +112,20 @@ export async function getStaticProps(
     .get(pdpBuilderSectionKey, { userAttributes: { slug: `product-${productCode}` } })
     .promise()
 
+  const PDPCustomAndBulkDisplaySectionKey =
+    publicRuntimeConfig?.builderIO?.modelKeys?.PDPCustomAndBulkDisplaySection || ''
+  const PDPCustomAndBulkDisplayContentSection = await builder
+    .get(PDPCustomAndBulkDisplaySectionKey)
+    .promise()
+
   return {
     props: {
       product,
       productVariations,
       categoriesTree,
       section: section || null,
+      PDPCustomAndBulkDisplayContentSection: PDPCustomAndBulkDisplayContentSection || null,
+      PDPCustomAndBulkDisplaySectionKey: PDPCustomAndBulkDisplaySectionKey || '',
       relatedProducts,
       metaData: getMetaData(product),
       ...(await serverSideTranslations(locale as string, ['common'])),
@@ -136,7 +146,14 @@ export async function getStaticPaths(): Promise<GetStaticPathsResult> {
 }
 
 const ProductDetailPage: NextPage<ProductPageType> = (props) => {
-  const { product, productVariations, relatedProducts } = props
+  const {
+    product,
+    productVariations,
+    relatedProducts,
+    PDPCustomAndBulkDisplayContentSection,
+    PDPCustomAndBulkDisplaySectionKey,
+  } = props
+
   const router = useRouter()
 
   const { isFallback, query } = router
@@ -163,6 +180,8 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
           relatedProducts={relatedProducts}
           breadcrumbs={breadcrumbs}
           sliceValue={sliceValue}
+          PDPCustomAndBulkDisplayContentSection={PDPCustomAndBulkDisplayContentSection}
+          PDPCustomAndBulkDisplaySectionKey={PDPCustomAndBulkDisplaySectionKey}
         >
           <BuilderComponent model={pdpBuilderSectionKey} content={props.section} />
         </ProductDetailTemplate>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 
+import { BuilderComponent } from '@builder.io/react'
 import { RttOutlined, WidthFull } from '@mui/icons-material'
 import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded'
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded'
@@ -119,6 +120,8 @@ interface ProductDetailTemplateProps {
     isValidateAddToCart: boolean,
     isValidateAddToWishlist: boolean
   ) => void
+  PDPCustomAndBulkDisplayContentSection?: any
+  PDPCustomAndBulkDisplaySectionKey?: string
 }
 
 const styles = {
@@ -197,6 +200,8 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     quoteDetails,
     shouldFetchShippingMethods,
     relatedProducts,
+    PDPCustomAndBulkDisplayContentSection,
+    PDPCustomAndBulkDisplaySectionKey,
     getCurrentProduct,
   } = props
   const [updatedProduct, setUpdatedProduct] = useState(product)
@@ -1094,6 +1099,13 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                   </LoadingButton>
                 )}
               </Box>
+            )}
+            {PDPCustomAndBulkDisplayContentSection && PDPCustomAndBulkDisplaySectionKey && (
+              <BuilderComponent
+                model={PDPCustomAndBulkDisplaySectionKey}
+                content={PDPCustomAndBulkDisplayContentSection}
+                data={{ linkURL: `/bulk-request?Catalog_Num=${variationProductCode}` }}
+              />
             )}
             {/* <Box paddingY={1}>
               <QuantitySelector
