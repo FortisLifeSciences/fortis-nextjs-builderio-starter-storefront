@@ -234,7 +234,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            console.log('inoberver', entry.isIntersecting, entry.target)
+            //console.log('inoberver', entry.isIntersecting, entry.target)
             //console.log('inoberver',productId)
             const productId = entry.target.getAttribute('data-id')
             let productPosition: any = entry.target.getAttribute('data-position')
@@ -242,10 +242,10 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
               productPosition = parseInt(productPosition, 10) + parseInt(myParam, 10)
             }
             const product = products?.find((p) => p?.productCode === productId)
-            console.log('productId', productId)
-            console.log('position', productPosition)
+            //console.log('productId', productId)
+            //console.log('productPositionposition', productPosition)
             if (product?.productCode) {
-              console.log('inoberver product')
+              // console.log('inoberver product')
               const productCode = product?.productCode as string
               const categoryName = product?.categories?.[0]?.content?.name
                 ? product?.categories?.[0]?.content?.name
@@ -503,19 +503,48 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
                       {isListView ? (
                         product?.productType === 'Resources' ? (
                           isMobile ? (
-                            <ResourceProductCardGridView {...productCardProps(product)} />
+                            <ResourceProductCardGridView
+                              {...productCardProps(product)}
+                              data-id={product?.productCode}
+                              data-position={index}
+                            />
                           ) : (
-                            <ResourceProductCardListView {...productCardProps(product)} />
+                            <ResourceProductCardListView
+                              {...productCardProps(product)}
+                              data-id={product?.productCode}
+                              data-position={index}
+                              position={index}
+                            />
                           )
                         ) : isMobile ? (
-                          <ProductCard {...productCardProps(product)} />
+                          <ProductCard
+                            {...productCardProps(product)}
+                            ref={(el) => (productRefs.current[index] = el)}
+                            data-id={product?.productCode}
+                            data-position={index}
+                          />
                         ) : (
-                          <ProductCardListView {...productCardProps(product)} />
+                          <ProductCardListView
+                            {...productCardProps(product)}
+                            ref={(el) => (productRefs.current[index] = el)}
+                            data-id={product?.productCode}
+                            data-position={index}
+                            position={index}
+                          />
                         )
                       ) : product?.productType === 'Resources' ? (
-                        <ResourceProductCardGridView {...productCardProps(product)} />
+                        <ResourceProductCardGridView
+                          {...productCardProps(product)}
+                          data-id={product?.productCode}
+                          data-position={index}
+                        />
                       ) : (
-                        <ProductCard {...productCardProps(product)} />
+                        <ProductCard
+                          {...productCardProps(product)}
+                          ref={(el) => (productRefs.current[index] = el)}
+                          data-id={product?.productCode}
+                          data-position={index}
+                        />
                       )}
                     </Grid>
                   )

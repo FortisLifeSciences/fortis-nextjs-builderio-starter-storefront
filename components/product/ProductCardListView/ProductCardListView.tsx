@@ -93,6 +93,7 @@ export interface ProductCardListViewProps {
   isATCLoading?: boolean
   fulfillmentTypesSupported?: string[]
   categoryName?: string
+  position?: any
   onAddOrRemoveWishlistItem?: () => Promise<void>
   onClickQuickViewModal?: () => void
   onClickAddToCart?: (payload: any) => Promise<void>
@@ -138,6 +139,7 @@ const ProductCardListView = React.forwardRef<HTMLDivElement, ProductCardListView
     const {
       price,
       salePrice,
+      position,
       priceRange,
       title,
       brand = '',
@@ -273,7 +275,7 @@ const ProductCardListView = React.forwardRef<HTMLDivElement, ProductCardListView
     if (isLoading) return <ProductCardSkeleton />
     else
       return (
-        <Box sx={ProductCardStyles.main} ref={ref} data-id={productCode}>
+        <Box sx={ProductCardStyles.main} ref={ref} data-id={productCode} data-position={position}>
           <Link
             href={link}
             passHref
@@ -286,7 +288,7 @@ const ProductCardListView = React.forwardRef<HTMLDivElement, ProductCardListView
                 categoryName,
                 brand,
                 pageType,
-                null,
+                position,
                 link
               )
             }
