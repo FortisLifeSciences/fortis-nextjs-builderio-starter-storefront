@@ -13,7 +13,7 @@ import {
   getProductSearchVariations,
 } from '@/lib/api/operations'
 import { productGetters } from '@/lib/getters'
-import { buildProductPath } from '@/lib/helpers'
+import { buildProductPath, uiHelpers } from '@/lib/helpers'
 import type { CategorySearchParams, MetaData, PageWithMetaData, ProductCustom } from '@/lib/types'
 
 import { PrCategory, Product } from '@/lib/gql/types'
@@ -38,7 +38,7 @@ interface ProductPageType extends PageWithMetaData {
 
 const { publicRuntimeConfig } = getConfig()
 const apiKey = publicRuntimeConfig?.builderIO?.apiKey
-
+const { getProductLink, getProductSeoLink } = uiHelpers()
 builder.init(apiKey)
 
 Builder.registerComponent(ProductRecommendations, {

@@ -43,6 +43,7 @@ export const cartItemDetails = /* GraphQL */ `
         name
         values {
           value
+          stringValue
         }
       }
       sku

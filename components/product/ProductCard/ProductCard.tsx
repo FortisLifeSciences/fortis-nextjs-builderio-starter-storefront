@@ -18,14 +18,17 @@ import {
 } from '@mui/material'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
 import { ProductCardStyles } from './ProductCard.styles'
 import { KiboImage, Price } from '@/components/common'
+import { useAuthContext } from '@/context/AuthContext'
 import { usePriceRangeFormatter } from '@/hooks'
 import { FulfillmentOptions as FulfillmentOptionsConstant } from '@/lib/constants'
 import { productGetters } from '@/lib/getters'
 import { ProductProperties } from '@/lib/types'
+import { plpClick } from '@/lib/utils/google-tag-manager'
 import abcore from '@/public/Brand_Logo/abcore-logo.png'
 import arista from '@/public/Brand_Logo/arista-logo.png'
 import bethyl from '@/public/Brand_Logo/bethyl-logo.png'
@@ -35,6 +38,7 @@ import ipoc from '@/public/Brand_Logo/ipoc-logo.png'
 import nanocomposix from '@/public/Brand_Logo/nanocomposix-logo.png'
 import vector from '@/public/Brand_Logo/vector-logo.png'
 import DefaultImage from '@/public/noImage.png'
+
 const brandImages: Record<string, string> = {
   arista: arista.src,
   bethyl: bethyl.src,
@@ -61,6 +65,7 @@ export interface ProductCardProps {
   productCode?: string
   resourceTypeName?: string
   categoryCode?: string
+  categoryName?: string
   productType?: string
   variantProductName?: string
   variationProductCode?: string
@@ -118,7 +123,7 @@ const ProductCardSkeleton = () => {
     </Stack>
   )
 }
-const ProductCard = (props: ProductCardProps) => {
+const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>((props, ref) => {
   const {
     productCode,
     variationProductCode,
@@ -132,6 +137,7 @@ const ProductCard = (props: ProductCardProps) => {
     newProduct,
     resourceTypeName,
     categoryCode,
+    categoryName,
     productType,
     productProperties,
     link,
@@ -191,7 +197,9 @@ const ProductCard = (props: ProductCardProps) => {
     }
     onClickAddToCart?.(payload)
   }
-
+  const { isAuthenticated, user } = useAuthContext()
+  const router = useRouter()
+  const pageType = router.pathname.includes('/seach') ? 'Search Page' : 'Product List Page'
   const [sortedImageUrl, setUpdateImageUrl] = useState<string>('')
 
   useEffect(() => {
@@ -246,8 +254,24 @@ const ProductCard = (props: ProductCardProps) => {
   if (isLoading) return <ProductCardSkeleton />
   else
     return (
-      <Box sx={ProductCardStyles.main}>
-        <Link href={link} passHref data-testid="product-card-link">
+      <Box sx={ProductCardStyles.main} ref={ref} data-id={productCode}>
+        <Link
+          href={link}
+          passHref
+          data-testid="product-card-link"
+          onClick={() =>
+            plpClick(
+              user?.userId,
+              productCode ? productCode : '',
+              title ? title : '',
+              categoryName,
+              brand,
+              pageType,
+              null,
+              link
+            )
+          }
+        >
           <Box>
             <Card sx={{ ...ProductCardStyles.cardRoot, minHeight: 321 }} data-testid="product-card">
               <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} pb={1}>
@@ -385,5 +409,8 @@ const ProductCard = (props: ProductCardProps) => {
         </Link>
       </Box>
     )
-}
+})
+
+ProductCard.displayName = 'ProductCard'
+
 export default ProductCard

@@ -58,7 +58,6 @@ const App = (props: KiboAppProps) => {
 
   const [googleReCaptcha, setGoogleReCaptcha] = useState()
   const [gtmId, setGtmId] = useState()
-
   useEffect(() => {
     const fetchSettings = async () => {
       const settings = await GetThemeSettings()
@@ -73,6 +72,9 @@ const App = (props: KiboAppProps) => {
     }
     fetchSettings()
   }, [])
+  if (typeof window !== 'undefined' && gtmId !== undefined) {
+    window.isGtm = true // or false, depending on your state
+  }
   const recapchaScript = `https://www.google.com/recaptcha/api.js?render=${
     (googleReCaptcha as any)?.accountCreationSiteKey
   }`

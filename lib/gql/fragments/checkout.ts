@@ -14,6 +14,7 @@ export const checkoutItemProductFragment = /* GraphQL */ `
       name
       values {
         value
+        stringValue
       }
     }
     sku

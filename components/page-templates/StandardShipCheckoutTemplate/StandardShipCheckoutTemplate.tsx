@@ -22,10 +22,11 @@ import {
   useCreateCustomerCard,
   useCreateCustomerAddress,
 } from '@/hooks'
-import { AccountType, AddressType } from '@/lib/constants'
+import { AccountType, AddressType, PaymentType } from '@/lib/constants'
 import { orderGetters } from '@/lib/getters'
 import { buildCreateCustomerCardParam, buildAddressParams } from '@/lib/helpers'
 import type { PersonalDetails } from '@/lib/types'
+import { addPaymentInfoGTM, checkoutFailure, purchaseGTM } from '@/lib/utils/google-tag-manager'
 
 import type { CrOrder, CrOrderInput, PaymentActionInput } from '@/lib/gql/types'
 
@@ -131,6 +132,11 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
       orderId: id,
       billingInfoInput: { ...paymentAction.newBillingInfo },
     })
+    addPaymentInfoGTM(
+      order as CrOrder,
+      paymentAction?.newBillingInfo?.paymentType as PaymentType,
+      user?.userId
+    )
   }
 
   //Review Step
@@ -145,38 +151,44 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
   }
 
   const handleCreateOrder = async (order: CrOrder) => {
-    const orderPayments = orderGetters.getNewOrderPayments(order as CrOrder)
-    await createOrder.mutateAsync(order)
+    try {
+      const orderPayments = orderGetters.getNewOrderPayments(order as CrOrder)
+      await createOrder.mutateAsync(order)
 
-    if (orderPayments[0]?.billingInfo?.card?.isCardInfoSaved) {
-      const address = {
-        ...orderPayments[0].billingInfo.billingContact.address,
-        contact: {
-          ...orderPayments[0].billingInfo.billingContact,
-          email: user?.emailAddress as string,
-        },
+      if (orderPayments[0]?.billingInfo?.card?.isCardInfoSaved) {
+        const address = {
+          ...orderPayments[0].billingInfo.billingContact.address,
+          contact: {
+            ...orderPayments[0].billingInfo.billingContact,
+            email: user?.emailAddress as string,
+          },
+        }
+        const params = buildAddressParams({
+          accountId: user?.id as number,
+          address,
+          isDefaultAddress: false,
+          addressType: AddressType.BILLING,
+        })
+        const savedCustomerAddressRes = await createCustomerAddress.mutateAsync(params)
+
+        const cardParams = buildCreateCustomerCardParam(
+          orderPayments[0].billingInfo,
+          user?.id as number,
+          savedCustomerAddressRes.id
+        )
+        // code commented due to error
+        // await createCustomerCard.mutateAsync(cardParams)
       }
-      const params = buildAddressParams({
-        accountId: user?.id as number,
-        address,
-        isDefaultAddress: false,
-        addressType: AddressType.BILLING,
-      })
-      const savedCustomerAddressRes = await createCustomerAddress.mutateAsync(params)
+      const affiliation = process.env.NEXT_PUBLIC_KIBO_HOST
+      purchaseGTM(order as CrOrder, user?.userId, affiliation)
 
-      const cardParams = buildCreateCustomerCardParam(
-        orderPayments[0].billingInfo,
-        user?.id as number,
-        savedCustomerAddressRes.id
+      router.push(
+        { pathname: '/order-confirmation', query: { checkoutId: order.id } },
+        { pathname: '/order-confirmation' }
       )
-      // code commented due to error
-      // await createCustomerCard.mutateAsync(cardParams)
+    } catch (error) {
+      checkoutFailure(order as CrOrder, user?.userId, error as any, 'Website Error')
     }
-
-    router.push(
-      { pathname: '/order-confirmation', query: { checkoutId: order.id } },
-      { pathname: '/order-confirmation' }
-    )
   }
 
   const { shipItems, pickupItems, digitalItems } = orderGetters.getCheckoutDetails(order as CrOrder)

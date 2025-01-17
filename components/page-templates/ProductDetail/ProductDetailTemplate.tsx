@@ -52,7 +52,7 @@ import AdditionalProductInfo from '@/components/product/AdditionalProductInfo'
 import PdpIconAttributes from '@/components/product/PdpIconAttributes'
 import ProductApplications from '@/components/product/ProductApplication/ProductApplications'
 import RelatedProductsCarousel from '@/components/product/RelatedProductsCarousel'
-import { useModalContext } from '@/context'
+import { useAuthContext, useModalContext } from '@/context'
 import {
   useProductDetailTemplate,
   useGetPurchaseLocation,
@@ -66,6 +66,7 @@ import { FulfillmentOptions as FulfillmentOptionsConstant, PurchaseTypes } from 
 import { productGetters, subscriptionGetters, wishlistGetters } from '@/lib/getters'
 import { uiHelpers } from '@/lib/helpers'
 import type { ProductCustom, BreadCrumb, LocationCustom } from '@/lib/types'
+import { addToCartGTMPDP, viewItemGTM } from '@/lib/utils/google-tag-manager'
 import abcore from '@/public/Brand_Logo/abcore-logo.png'
 import arista from '@/public/Brand_Logo/arista-logo.png'
 import bethyl from '@/public/Brand_Logo/bethyl-logo.png'
@@ -304,6 +305,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
   const newProduct = (newProductData?.values?.[0]?.value as string) ?? null
   const brandValue = product?.properties?.find((data: any) => data?.attributeFQN === 'tenant~brand')
   const brand = (brandValue?.values?.[0]?.value as string) ?? null
+  const brandName = (brandValue?.values?.[0]?.stringValue as string) ?? null
   const variantProductName = productGetters.getVariantProductAttributeName(properties)
   const ousShowDistributorBtn =
     (product?.properties?.find(
@@ -316,7 +318,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     (variationProductCode || productCode) as string,
     selectedFulfillmentOption?.location?.code as string
   )
-
+  const { isAuthenticated, user } = useAuthContext()
   const getModifiedOptionData = (options: any) => {
     const variationMap = new Map()
     productVariations?.forEach((variation) => {
@@ -449,7 +451,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
   const handleAddToCart = async () => {
     try {
       const cartResponse = await addToCart.mutateAsync(addToCartPayload)
-
+      const productPrice = productGetters.getPrice(product)
       if (cartResponse.id && !isB2B) {
         showModal({
           Component: AddToCartDialog,
@@ -457,6 +459,19 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
             cartItem: cartResponse,
           },
         })
+      }
+      if (product?.productCode && cartResponse && product?.categories?.[0]?.content?.name) {
+        addToCartGTMPDP(
+          cartResponse?.total,
+          user?.userId,
+          product?.productCode,
+          productGetters.getName(product),
+          product?.categories?.[0]?.content?.name,
+          brandName,
+          variationProductCode,
+          cartResponse?.product?.price?.price,
+          quantity
+        )
       }
     } catch (err) {
       console.log(err)
@@ -718,6 +733,27 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
   const forceRender = () => {
     setKey((prevKey) => prevKey + 1) // Change state to trigger re-render
   }
+
+  useEffect(() => {
+    if (productCode !== variationProductCode) {
+      const productPrice = productGetters.getPrice(currentProduct)
+      const productPriceActual = productPrice?.special
+        ? productPrice?.special
+        : productPrice?.regular
+
+      if (productPrice && product?.categories?.[0]?.content?.name) {
+        const value = quantity * productPriceActual
+        viewItemGTM(
+          productCode,
+          user?.userId,
+          productGetters.getName(product) as string,
+          product?.categories?.[0]?.content?.name,
+          brandName,
+          value
+        )
+      }
+    }
+  }, [variationProductCode])
 
   return (
     <Grid container>
