@@ -70,6 +70,7 @@ export async function getStaticProps(
   const { locale, params } = context
   const { productCode } = params as any
   const product = await getProduct(productCode)
+  const variantCodes = product?.variations
   const relatedProducts = []
   const relatedProductData =
     product && product.properties
@@ -98,7 +99,7 @@ export async function getStaticProps(
     }
   }
 
-  const productVariations = await getProductSearchVariations(productCode)
+  const productVariations = await getProductSearchVariations(productCode, variantCodes)
   const categoriesTree = await getCategoryTree()
   if (!product) {
     return { notFound: true }
