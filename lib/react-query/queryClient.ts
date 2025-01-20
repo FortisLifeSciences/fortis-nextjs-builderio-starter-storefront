@@ -34,9 +34,7 @@ const parseGraphQLError = (errorString: any) => {
 const queryClientHandler = (error: any, showSnackbar: any) => {
   const status = 'error'
 
-  console.log('error', error)
   const parsedError = parseGraphQLError(error)
-  console.log('parsedError', parsedError)
 
   if (error instanceof SyntaxError && error.message.includes('Unexpected token')) {
     //do nothing here for now
