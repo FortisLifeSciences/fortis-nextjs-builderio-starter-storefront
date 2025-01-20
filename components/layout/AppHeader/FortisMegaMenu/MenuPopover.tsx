@@ -6,6 +6,7 @@ import { Box, Divider, Grid, Paper, Typography } from '@mui/material'
 import Image from 'next/image'
 import Link from 'next/link'
 
+import MegaMenuTextLink from './MegaMenuTextLink'
 import {
   megaMenuContainer,
   menuItem,
@@ -117,7 +118,7 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                       <Typography
                         variant="body2"
                         sx={{
-                          ...animatedUnderline,
+                          ...(category.categoryName.length <= 36 ? animatedUnderline : ''),
                           color: 'primary.main',
                           fontStyle: 'normal',
                           whiteSpace: 'normal',
@@ -131,7 +132,11 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                         }}
                         onClick={handleLinkClick}
                       >
-                        {category.categoryName}
+                        {category.categoryName.length > 36 ? (
+                          <MegaMenuTextLink text={category.categoryName} />
+                        ) : (
+                          category.categoryName
+                        )}
                       </Typography>
                       {category.openLinkInNewWindow && (
                         <span
@@ -201,7 +206,11 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                 )
               )}
             </Grid>
-            <Grid item xs={4} sx={{ ...subMenuSection, paddingLeft: '36px !important' }}>
+            <Grid
+              item
+              xs={4}
+              sx={{ ...subMenuSection, paddingLeft: '36px !important', paddingRight: '8px' }}
+            >
               {activeCategory.childCategory?.map((submenu: any, index: any) => (
                 <Box key={index} sx={submenuItem}>
                   <Link
@@ -214,7 +223,7 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                     <Typography
                       variant="body2"
                       sx={{
-                        ...animatedUnderline,
+                        ...(submenu.categoryName.length <= 36 ? animatedUnderline : ''),
                         color: 'primary.main',
                         fontStyle: 'normal',
                         whiteSpace: 'normal',
@@ -228,7 +237,11 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                       }}
                       onClick={handleLinkClick}
                     >
-                      {submenu.categoryName}
+                      {submenu.categoryName.length > 36 ? (
+                        <MegaMenuTextLink text={submenu.categoryName} />
+                      ) : (
+                        submenu.categoryName
+                      )}
                     </Typography>
                     {submenu.openLinkInNewWindow && (
                       <span
@@ -256,7 +269,7 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                   <Typography
                     variant="body2"
                     sx={{
-                      ...animatedUnderline,
+                      ...(activeCategory.categoryName.length <= 36 ? animatedUnderline : ''),
                       color: 'primary.main',
                       fontStyle: 'normal',
                       whiteSpace: 'normal',
@@ -270,7 +283,12 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                     }}
                     onClick={handleLinkClick}
                   >
-                    View All {activeCategory.categoryName}
+                    View All{' '}
+                    {activeCategory.categoryName.length > 36 ? (
+                      <MegaMenuTextLink text={activeCategory.categoryName} />
+                    ) : (
+                      activeCategory.categoryName
+                    )}
                   </Typography>
                   {activeCategory.openLinkInNewWindow && (
                     <span
@@ -311,14 +329,18 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                       <Typography
                         variant="body2"
                         sx={{
-                          ...animatedUnderline,
+                          ...(content.linkText.length <= 36 ? animatedUnderline : ''),
                           color: 'primary.main',
                           whiteSpace: 'normal',
                           fontStyle: 'normal',
                         }}
                         onClick={handleLinkClick}
                       >
-                        {content.linkText}
+                        {content.linkText.length > 36 ? (
+                          <MegaMenuTextLink text={content.linkText} />
+                        ) : (
+                          content.linkText
+                        )}
                       </Typography>
                     </Link>
                   </Box>
@@ -359,7 +381,7 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                     <Typography
                       variant="body2"
                       sx={{
-                        ...animatedUnderline,
+                        ...(category.categoryName.length <= 36 ? animatedUnderline : ''),
                         color: 'primary.main',
                         fontStyle: 'normal',
                         whiteSpace: 'normal',
@@ -373,7 +395,11 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                       }}
                       onClick={handleLinkClick}
                     >
-                      {category.categoryName}
+                      {category.categoryName.length > 36 ? (
+                        <MegaMenuTextLink text={category.categoryName} />
+                      ) : (
+                        category.categoryName
+                      )}
                     </Typography>
                     {category.openLinkInNewWindow && (
                       <span
@@ -422,14 +448,18 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                       <Typography
                         variant="body2"
                         sx={{
-                          ...animatedUnderline,
+                          ...(content.linkText.length <= 36 ? animatedUnderline : ''),
                           color: 'primary.main',
                           whiteSpace: 'normal',
                           fontStyle: 'normal',
                         }}
                         onClick={handleLinkClick}
                       >
-                        {content.linkText}
+                        {content.linkText.length > 36 ? (
+                          <MegaMenuTextLink text={content.linkText} />
+                        ) : (
+                          content.linkText
+                        )}
                       </Typography>
                     </Link>
                   </Box>

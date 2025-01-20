@@ -15,6 +15,7 @@ export const orderItemProductFragment = /* GraphQL */ `
       name
       values {
         value
+        stringValue
       }
     }
     sku

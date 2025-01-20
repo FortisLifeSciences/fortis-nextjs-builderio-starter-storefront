@@ -37,12 +37,14 @@ import {
   useRefetchCart,
 } from '@/hooks'
 import { orderGetters, cartGetters, checkoutGetters } from '@/lib/getters'
+import { beginCheckoutGTM, removeFromCartGTM } from '@/lib/utils/google-tag-manager'
 
 import type { CrCart, Location, CrCartItem, Checkout, CrOrder } from '@/lib/gql/types'
 
 export interface CartTemplateProps {
   isMultiShipEnabled: boolean
   cart: CrCart
+  updatedCart: CrCart
   cartTopContentSection?: any
   cartBottomContentSection?: any
   cartEmptyContentSection?: any
@@ -51,6 +53,7 @@ export interface CartTemplateProps {
 const CartTemplate = (props: CartTemplateProps) => {
   const { isMultiShipEnabled } = props
   const { data: cart } = useGetCart(props?.cart)
+  const updatedCart = props?.updatedCart
   const { refetchCart } = useRefetchCart()
   const { cartTopContentSection, cartBottomContentSection, cartEmptyContentSection } = props
   const { t } = useTranslation('common')
@@ -62,7 +65,7 @@ const CartTemplate = (props: CartTemplateProps) => {
   const { updateCartItemQuantity } = useUpdateCartItemQuantity()
   const { deleteCartItem } = useDeleteCartItem()
   const { showModal, closeModal } = useModalContext()
-  const { isAuthenticated } = useAuthContext()
+  const { isAuthenticated, user } = useAuthContext()
 
   const cartItemCount = cartGetters.getCartItemCount(cart)
   const cartItems = cartGetters.getCartItems(cart)
@@ -103,8 +106,9 @@ const CartTemplate = (props: CartTemplateProps) => {
     }
   }
 
-  const handleDeleteItem = async (cartItemId: string) => {
+  const handleDeleteItem = async (cartItemId: string, cartItem: CrCartItem) => {
     await deleteCartItem.mutateAsync({ cartItemId })
+    removeFromCartGTM(cartItem, user?.userId, cart)
   }
 
   const handleItemActions = () => {
@@ -145,6 +149,8 @@ const CartTemplate = (props: CartTemplateProps) => {
       const initiateOrderResponse = isMultiShipEnabled
         ? await initiateCheckout.mutateAsync(currentCart?.id)
         : await initiateOrder.mutateAsync({ cartId: currentCart?.id as string })
+
+      beginCheckoutGTM(cart, user?.userId)
 
       if (initiateOrderResponse?.id) {
         router.push(`/checkout/${initiateOrderResponse.id}`)
@@ -201,6 +207,7 @@ const CartTemplate = (props: CartTemplateProps) => {
         title: t('clear-cart'),
       },
     })
+    //emtpyCartGTM(cart,user?.userId)
   }
 
   const orderDetails = orderSummaryArgs?.orderDetails

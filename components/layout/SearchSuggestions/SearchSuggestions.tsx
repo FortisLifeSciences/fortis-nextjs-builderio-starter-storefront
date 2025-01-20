@@ -21,6 +21,7 @@ import { useTranslation } from 'next-i18next'
 
 import { SearchBar } from '@/components/common'
 import { useDebounce, useGetSearchSuggestion2 } from '@/hooks'
+import { searchGTM } from '@/lib/utils/google-tag-manager'
 
 const style = {
   paper: {
@@ -93,9 +94,13 @@ const SearchSuggestions = (props: SearchSuggestionsProps) => {
 
   const handleOpen = () => setIsOpen(true)
   const handleClose = () => setIsOpen(false)
-  const handleSearch = (userEnteredValue: string) => setSearchTerm(userEnteredValue)
+  const handleSearch = (userEnteredValue: string) => {
+    setSearchTerm(userEnteredValue)
+    searchGTM(userEnteredValue)
+  }
   const handleEnterSearch = (value: string) => {
     router.push({ pathname: '/search', query: { search: value } })
+    searchGTM(value)
     if (isViewSearchPortal) onEnterSearch?.()
     handleClose()
   }

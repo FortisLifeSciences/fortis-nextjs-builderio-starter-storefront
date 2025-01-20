@@ -397,6 +397,9 @@ const getShippingMethodName = (checkout: CrOrder): string =>
 
 const getLocationCode = (order: CrOrder) => order?.locationCode
 
+const getAllOrderItems = (order: CrOrder | CrCart): CrOrderItem[] =>
+  (order?.items as CrOrderItem[]) || []
+
 export const orderGetters = {
   getId,
   getCheckoutItemCount,
@@ -446,4 +449,5 @@ export const orderGetters = {
   getItemTaxTotal,
   getDigitalItems,
   getShippingMethodName,
+  getAllOrderItems,
 }

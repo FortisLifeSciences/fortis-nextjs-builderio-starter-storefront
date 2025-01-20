@@ -49,16 +49,19 @@ Router.events.on('routeChangeError', () => NProgress.done())
 const App = (props: KiboAppProps) => {
   const { publicRuntimeConfig } = getConfig()
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
+  const router = useRouter()
   const { siteTitle, defaultTitle, defaultDescription } = publicRuntimeConfig?.metaData || {}
   const getLayout =
     Component.getLayout ?? ((page) => <DefaultLayout pageProps={pageProps}>{page}</DefaultLayout>)
-  // const pageTitle = `${siteTitle} | ${pageProps?.metaData?.title || defaultTitle}`
-  const pagePropsPageData = pageProps?.page?.data
-  const pageTitle = `${pageProps?.metaData?.title || pagePropsPageData?.title || defaultTitle}`
+
+  const pageTitle =
+    pageProps?.metaData?.title || pageProps?.page?.data?.title || defaultTitle || siteTitle
+  const pageDescription =
+    pageProps?.metaData?.description || pageProps?.page?.data?.description || defaultDescription
+  const pageImage = pageProps?.metaData?.image || pageProps?.page?.data?.image
 
   const [googleReCaptcha, setGoogleReCaptcha] = useState()
   const [gtmId, setGtmId] = useState()
-
   useEffect(() => {
     const fetchSettings = async () => {
       const settings = await GetThemeSettings()
@@ -73,6 +76,9 @@ const App = (props: KiboAppProps) => {
     }
     fetchSettings()
   }, [])
+  if (typeof window !== 'undefined' && gtmId !== undefined) {
+    window.isGtm = true // or false, depending on your state
+  }
   const recapchaScript = `https://www.google.com/recaptcha/api.js?render=${
     (googleReCaptcha as any)?.accountCreationSiteKey
   }`
@@ -80,29 +86,50 @@ const App = (props: KiboAppProps) => {
     (googleReCaptcha as any)?.accountCreationSiteKey
   }`
 
+  useEffect(() => {
+    // Update metadata dynamically
+
+    const updateMetaTags = () => {
+      const head = document.head
+
+      // Helper function to update or create meta tags
+      const setMetaTag = (name: string, content: string | undefined) => {
+        if (!content) return
+
+        // Check if the tag already exists
+        let tag = head.querySelector(`meta[name="${name}"]`)
+        if (!tag) {
+          tag = document.createElement('meta')
+          tag.setAttribute('name', name)
+          tag.setAttribute('data-dynamic-meta', 'true')
+          head.appendChild(tag)
+        }
+        tag.setAttribute('content', content)
+      }
+
+      // Update or create the tags
+      setMetaTag('title', pageTitle)
+      setMetaTag('description', pageDescription)
+      setMetaTag('image', pageImage)
+      setMetaTag('keywords', pageProps?.metaData?.keywords || '')
+      if (pageProps?.metaData?.robots) {
+        setMetaTag('robots', pageProps?.metaData?.robots)
+      }
+
+      // Remove stale dynamic tags not updated
+      const staleTags = head.querySelectorAll('meta[data-dynamic-meta]')
+      staleTags.forEach((tag) => {
+        if (!tag.getAttribute('content')) tag.remove()
+      })
+    }
+
+    updateMetaTags()
+  }, [router.pathname, pageTitle, pageDescription, pageImage, pageProps?.metaData])
+
   return (
     <CacheProvider value={emotionCache}>
       <Head>
         <title>{pageTitle}</title>
-        <meta
-          name="title"
-          content={pageProps?.metaData?.title || pagePropsPageData?.title || defaultTitle}
-        />
-        <meta
-          name="description"
-          content={
-            pageProps?.metaData?.description || pagePropsPageData?.description || defaultDescription
-          }
-        />
-        <meta
-          name="image"
-          property="og:image"
-          content={pageProps?.metaData?.image || pagePropsPageData?.image}
-        />
-        <meta name="keywords" content={pageProps?.metaData?.keywords} />
-        {pageProps?.metaData?.robots && (
-          <meta name="robots" content={pageProps?.metaData?.robots} />
-        )}
         <style>
           @import
           url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');

@@ -90,6 +90,29 @@ module.exports = {
         code: 'US',
       },
     ],
+    creditCard:[
+      {
+        name:'Discover',
+        code:'DISCOVER',
+      },
+      {
+        name:'JCB',
+        code:'JCB',
+      },
+      {
+        name:'Visa',
+        code:'VISA',
+      },
+      {
+        name:'American Express',
+        code:'AMEX',
+      },
+      {
+        name:'MasterCard',
+        code:'MC',
+      },
+      
+    ],
     provinces: [
       {
         code: 'AL',

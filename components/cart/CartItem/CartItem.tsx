@@ -23,7 +23,13 @@ import { cartGetters, productGetters } from '@/lib/getters'
 import { uiHelpers } from '@/lib/helpers'
 import type { FulfillmentOption } from '@/lib/types'
 
-import type { CrCartItem as CartItemType, CrOrderItem, CrProduct, Maybe } from '@/lib/gql/types'
+import type {
+  CrCartItem as CartItemType,
+  CrCartItem,
+  CrOrderItem,
+  CrProduct,
+  Maybe,
+} from '@/lib/gql/types'
 
 interface CartItemProps {
   cartItem: Maybe<CartItemType> | Maybe<CrOrderItem>
@@ -33,8 +39,8 @@ interface CartItemProps {
   mode?: string
   isQuote?: boolean
   status?: string
-  onQuantityUpdate: (cartItemId: string, quantity: number) => void
-  onCartItemDelete: (cartItemId: string) => void
+  onQuantityUpdate: (cartItemId: string, quantity: number, cartItem: CrCartItem) => void
+  onCartItemDelete: (cartItemId: string, cartItem: CrCartItem) => void
   onCartItemActionSelection: () => void
   onFulfillmentOptionChange: (fulfillmentMethod: string, cartItemId: string) => void
   onProductPickupLocation: (cartItemId: string) => void
@@ -120,9 +126,11 @@ const CartItem = (props: CartItemProps) => {
   const cartItemQuantity = cartItem?.quantity || 1
   const { getProductLink } = uiHelpers()
 
-  const handleDelete = (cartItemId: string) => onCartItemDelete(cartItemId)
+  const handleDelete = (cartItemId: string, cartItem: CrCartItem) => {
+    onCartItemDelete(cartItemId, cartItem)
+  }
   const handleQuantityUpdate = (quantity: number) =>
-    onQuantityUpdate(cartItem?.id as string, quantity)
+    onQuantityUpdate(cartItem?.id as string, quantity, cartItem as CrCartItem)
   const handleActionSelection = () => onCartItemActionSelection()
   const handleFulfillmentOptionChange = (fulfillmentMethod: string, cartItemId: string) =>
     onFulfillmentOptionChange(fulfillmentMethod, cartItemId)
@@ -212,7 +220,9 @@ const CartItem = (props: CartItemProps) => {
                               sx={{ p: 0.5, color: 'primary.main' }}
                               aria-label="item-delete"
                               name="item-delete"
-                              onClick={() => handleDelete(cartItem?.id as string)}
+                              onClick={() =>
+                                handleDelete(cartItem?.id as string, cartItem as CrCartItem)
+                              }
                             >
                               <span className="material-symbols-outlined">delete</span>
                             </IconButton>

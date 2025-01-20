@@ -25,10 +25,7 @@ const KiboInput = styled(InputBase)(({ theme, error }) => ({
     marginTop: theme.spacing(3),
   },
   '&.MuiInputBase-root:focus-within': {
-    boxShadow: `${alpha(
-      error ? theme.palette.error.main : theme.palette.primary.main,
-      0.25
-    )} 0 0 0 0.2rem`,
+    boxShadow: `${alpha(error ? theme.palette.error.main : '#020027', 0.25)} 0 0 0 0.2rem`,
   },
   '& .MuiInputBase-input': {
     position: 'relative',

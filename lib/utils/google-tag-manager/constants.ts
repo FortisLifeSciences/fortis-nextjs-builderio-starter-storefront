@@ -1,0 +1,17 @@
+export const CURRENCY_CAD = 'USD'
+
+export const BEGIN_CHECKOUT = 'begin_checkout'
+export const ADD_SHIPPING_INFO = 'add_shipping_info'
+export const ADD_SHIP_METHOD = 'add_ship_method'
+export const ADD_PAYMENT_INFO = 'add_payment_info'
+export const PURCHASE = 'purchase'
+export const CHECKOUTFAILURE = 'checkoutFailure'
+
+export const ADD_TO_CART = 'add_to_cart'
+export const VIEW_ITEM = 'view_item'
+export const SELECT_ITEM = 'select_item'
+export const VIEW_ITEM_LIST = 'view_item_list'
+export const REMOVE_FROM_CART = 'remove_from_cart'
+export const VIEW_CART = 'view_cart'
+export const ADD_TO_WISHLIST = 'add_to_wishlist'
+export const SEARCH = 'search'
