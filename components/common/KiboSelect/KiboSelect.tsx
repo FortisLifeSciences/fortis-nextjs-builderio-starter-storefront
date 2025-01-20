@@ -73,7 +73,19 @@ const KiboSelect = (props: KiboSelectProps) => {
         <InputLabel
           shrink
           htmlFor={name}
-          sx={{ top: -18, left: -13, color: error ? 'error.main' : 'black', ...sx }}
+          sx={{
+            top: -23,
+            left: 0,
+            color: error ? 'error.main' : '#020027',
+            ...sx,
+            fontFamily: 'Poppins',
+            fontSize: '16px',
+            fontStyle: 'normal',
+            fontWeight: '300',
+            lineHeight: '25px',
+            transform: 'translate(0, -1.5px) scale(1)',
+            zIndex: '0',
+          }}
         >
           {label}
         </InputLabel>
@@ -86,15 +98,13 @@ const KiboSelect = (props: KiboSelectProps) => {
         value={value}
         MenuProps={MenuProps}
         sx={{
-          height: '34px',
+          borderColor: error ? 'error.main' : '#020027',
+          borderWidth: '1px',
+          borderStyle: 'solid',
+          borderRadius: '5px',
+          fontSize: { xs: '14px !important', md: '16px !important' },
           ...sx,
-          color: 'black',
-          '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'black',
-          },
-          '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'black',
-          },
+          height: '32px',
         }}
         inputProps={{ 'aria-hidden': false, 'aria-label': label || name }}
         input={<StyledOutlinedInput error={error} />}
