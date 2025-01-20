@@ -101,8 +101,7 @@ const MetadataComponent: React.FC<MetadataComponentProps> = ({
           },
         ]}
       >
-        <Typography
-          variant="h4"
+        <Box
           sx={[
             styleType === 'primary'
               ? buttonStyle.primaryHeadingText
@@ -112,7 +111,7 @@ const MetadataComponent: React.FC<MetadataComponentProps> = ({
           ]}
         >
           {resolvedTitle}
-        </Typography>
+        </Box>
 
         <Typography
           variant="body2"
