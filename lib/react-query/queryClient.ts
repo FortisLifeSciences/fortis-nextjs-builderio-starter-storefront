@@ -12,6 +12,9 @@ const getErrorMessage = (code: string, message: string) => {
 const parseGraphQLError = (errorString: any) => {
   try {
     // Find the position of the JSON object in the error string
+    if (typeof errorString !== 'string') {
+      errorString = JSON.stringify(errorString)
+    }
     const jsonStartIndex = errorString.indexOf('{"response":')
 
     // Extract and parse the JSON
