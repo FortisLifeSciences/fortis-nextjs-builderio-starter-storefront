@@ -405,7 +405,6 @@ const PaymentStep = (props: PaymentStepProps) => {
   const handleSameAsShippingAddressCheckbox = (value: boolean) => {
     let address = initialBillingAddressData
     if (value) {
-      console.log('code trigger-101')
       setSelectedBillingAddressId(-1)
       address = {
         contact: (checkout as CrOrder)?.fulfillmentInfo?.fulfillmentContact as ContactForm,
@@ -419,7 +418,6 @@ const PaymentStep = (props: PaymentStepProps) => {
     })
 
     if (!value && selectedBillingAddressId !== -1) {
-      console.log('code trigger-102')
       setSelectedBillingAddressId(
         (checkoutBillingContact?.id ?? defaultBillingAddress?.id) as number
       )
@@ -441,7 +439,6 @@ const PaymentStep = (props: PaymentStepProps) => {
   }
 
   const handleSaveNewPaymentMethod = async () => {
-    console.log('code trigger-103')
     setValidateForm(true)
   }
 
@@ -1400,33 +1397,6 @@ const PaymentStep = (props: PaymentStepProps) => {
                          * Show saved billing Address and add new address
                          */}
 
-                        {billingFormAddress?.isSameBillingShippingAddress && (
-                          <AddressCard
-                            firstName={billingFormAddress?.contact?.firstName as string}
-                            middleNameOrInitial={
-                              billingFormAddress?.contact?.middleNameOrInitial as string
-                            }
-                            lastNameOrSurname={
-                              billingFormAddress?.contact?.lastNameOrSurname as string
-                            }
-                            companyOrOrganization={
-                              billingFormAddress?.contact?.companyOrOrganization as string
-                            }
-                            address1={billingFormAddress?.contact?.address?.address1 as string}
-                            address2={billingFormAddress?.contact?.address?.address2 as string}
-                            cityOrTown={billingFormAddress?.contact?.address?.cityOrTown as string}
-                            stateOrProvince={
-                              billingFormAddress?.contact?.address?.stateOrProvince as string
-                            }
-                            postalOrZipCode={
-                              billingFormAddress?.contact?.address?.postalOrZipCode as string
-                            }
-                            countryCode={
-                              billingFormAddress?.contact?.address?.countryCode as string
-                            }
-                            variant="body2"
-                          />
-                        )}
                         {previouslySavedBillingAddress?.length &&
                           shouldShowAddBillingAddressButton &&
                           !billingFormAddress?.isSameBillingShippingAddress && (
@@ -1500,7 +1470,8 @@ const PaymentStep = (props: PaymentStepProps) => {
                             </>
                           )}
 
-                        {!shouldShowAddBillingAddressButton && (
+                        {(!shouldShowAddBillingAddressButton ||
+                          billingFormAddress?.isSameBillingShippingAddress) && (
                           <>
                             <AddressForm
                               key={selectedPaymentTypeRadio}
