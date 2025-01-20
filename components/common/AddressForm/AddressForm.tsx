@@ -242,11 +242,6 @@ const AddressForm = (props: AddressFormProps) => {
             render={({ field }) => (
               <Box>
                 <KiboSelect
-                  sx={{
-                    color: '#020027',
-                    fontSize: '1rem',
-                    '> fieldSet': { borderColor: '#020027' },
-                  }}
                   name="country-code"
                   label={t('country-code')}
                   value={field.value}
@@ -333,11 +328,6 @@ const AddressForm = (props: AddressFormProps) => {
             render={({ field }) => (
               <Box>
                 <KiboSelect
-                  sx={{
-                    color: '#020027',
-                    fontSize: '1rem',
-                    '> fieldSet': { borderColor: '#020027' },
-                  }}
                   name="state-or-province"
                   label={t('state-or-province')}
                   value={field.value}

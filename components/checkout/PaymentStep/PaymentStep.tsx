@@ -166,7 +166,7 @@ const initialBillingAddressData: Address = {
       home: '',
     },
   },
-  isSameBillingShippingAddress: true,
+  isSameBillingShippingAddress: false,
   isAddressValid: false,
   isDataUpdated: false,
 }
@@ -405,6 +405,7 @@ const PaymentStep = (props: PaymentStepProps) => {
   const handleSameAsShippingAddressCheckbox = (value: boolean) => {
     let address = initialBillingAddressData
     if (value) {
+      console.log('code trigger-101')
       setSelectedBillingAddressId(-1)
       address = {
         contact: (checkout as CrOrder)?.fulfillmentInfo?.fulfillmentContact as ContactForm,
@@ -418,6 +419,7 @@ const PaymentStep = (props: PaymentStepProps) => {
     })
 
     if (!value && selectedBillingAddressId !== -1) {
+      console.log('code trigger-102')
       setSelectedBillingAddressId(
         (checkoutBillingContact?.id ?? defaultBillingAddress?.id) as number
       )
@@ -439,6 +441,7 @@ const PaymentStep = (props: PaymentStepProps) => {
   }
 
   const handleSaveNewPaymentMethod = async () => {
+    console.log('code trigger-103')
     setValidateForm(true)
   }
 
@@ -1396,8 +1399,37 @@ const PaymentStep = (props: PaymentStepProps) => {
                         {/**
                          * Show saved billing Address and add new address
                          */}
+
+                        {billingFormAddress?.isSameBillingShippingAddress && (
+                          <AddressCard
+                            firstName={billingFormAddress?.contact?.firstName as string}
+                            middleNameOrInitial={
+                              billingFormAddress?.contact?.middleNameOrInitial as string
+                            }
+                            lastNameOrSurname={
+                              billingFormAddress?.contact?.lastNameOrSurname as string
+                            }
+                            companyOrOrganization={
+                              billingFormAddress?.contact?.companyOrOrganization as string
+                            }
+                            address1={billingFormAddress?.contact?.address?.address1 as string}
+                            address2={billingFormAddress?.contact?.address?.address2 as string}
+                            cityOrTown={billingFormAddress?.contact?.address?.cityOrTown as string}
+                            stateOrProvince={
+                              billingFormAddress?.contact?.address?.stateOrProvince as string
+                            }
+                            postalOrZipCode={
+                              billingFormAddress?.contact?.address?.postalOrZipCode as string
+                            }
+                            countryCode={
+                              billingFormAddress?.contact?.address?.countryCode as string
+                            }
+                            variant="body2"
+                          />
+                        )}
                         {previouslySavedBillingAddress?.length &&
-                          shouldShowAddBillingAddressButton && (
+                          shouldShowAddBillingAddressButton &&
+                          !billingFormAddress?.isSameBillingShippingAddress && (
                             <>
                               <KiboRadio
                                 radioOptions={previouslySavedBillingAddress
@@ -1473,12 +1505,12 @@ const PaymentStep = (props: PaymentStepProps) => {
                             <AddressForm
                               key={selectedPaymentTypeRadio}
                               contact={billingFormAddress.contact}
-                              saveAddressLabel={
-                                selectedBillingAddressId === 0 ||
-                                !billingFormAddress?.isSameBillingShippingAddress
-                                  ? t('save-billing-address')
-                                  : undefined
-                              }
+                              // saveAddressLabel={
+                              //   selectedBillingAddressId === 0 ||
+                              //   !billingFormAddress?.isSameBillingShippingAddress
+                              //     ? t('save-billing-address')
+                              //     : undefined
+                              // }
                               setAutoFocus={false}
                               isUserLoggedIn={isAuthenticated}
                               onSaveAddress={handleBillingFormAddress}
@@ -1486,7 +1518,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                               onFormStatusChange={handleBillingFormValidDetails}
                             />
 
-                            <Box m={1} maxWidth={'872px'} data-testid="address-form">
+                            {/*<Box m={1} maxWidth={'872px'} data-testid="address-form">
                               <Divider sx={{ marginBottom: '20px' }} flexItem />
                               <Grid container>
                                 <Grid
@@ -1520,7 +1552,8 @@ const PaymentStep = (props: PaymentStepProps) => {
                                       {t('cancel')}
                                     </Typography>
                                   </Button>
-                                  {/* <Button
+        
+                                   <Button
                                     sx={{
                                       ...StandardShippingStepStyle.primaryButton,
                                       ':disabled': {
@@ -1536,10 +1569,10 @@ const PaymentStep = (props: PaymentStepProps) => {
                                     <Typography sx={{ fontSize: '1rem', lineHeight: '1.5rem', fontWeight: '400' }}>
                                       {t('continue')}
                                     </Typography>
-                                  </Button> */}
+                                  </Button> 
                                 </Grid>
                               </Grid>
-                            </Box>
+                            </Box>*/}
                           </>
                         )}
 
@@ -1558,7 +1591,18 @@ const PaymentStep = (props: PaymentStepProps) => {
                           <Button
                             variant="contained"
                             color="secondary"
-                            onClick={cancelAddingNewPaymentMethod}
+                            // onClick={cancelAddingNewPaymentMethod}
+                            onClick={() => {
+                              if (!shouldShowAddBillingAddressButton) {
+                                setShouldShowAddBillingAddressButton(true)
+                                setSelectedBillingAddressId(
+                                  (checkoutBillingContact?.id ||
+                                    defaultBillingAddress?.id) as number
+                                )
+                              } else {
+                                cancelAddingNewPaymentMethod()
+                              }
+                            }}
                             sx={{
                               width: '180px',
                               background: 'transparent',
@@ -1578,6 +1622,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                           >
                             {t('cancel')}
                           </Button>
+
                           <Button
                             variant="contained"
                             color="primary"
@@ -1600,6 +1645,9 @@ const PaymentStep = (props: PaymentStepProps) => {
                                 background: '#4C47C4',
                                 color: '#FFFFFF',
                                 border: 0,
+                              },
+                              '&:disabled': {
+                                backgroundColor: '#8D8D8D !important',
                               },
                             }}
                           >
