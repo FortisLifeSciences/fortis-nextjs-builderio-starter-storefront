@@ -11,10 +11,10 @@ const getErrorMessage = (code: string, message: string) => {
 
 const queryClientHandler = (error: any, showSnackbar: any) => {
   const status = 'error'
-  console.log('error-souvik-queryClient.ts', error)
   if (error instanceof SyntaxError && error.message.includes('Unexpected token')) {
     //do nothing here for now
-  } else if (error?.response?.code === '405') {
+  } else if (error?.response?.status === '405' && error?.response?.error === '') {
+    //do nothing here for now
   } else {
     showSnackbar(getErrorMessage(error?.response?.code, error?.response?.message), status)
   }
