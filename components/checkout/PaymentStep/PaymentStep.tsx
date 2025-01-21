@@ -36,6 +36,7 @@ import {
   KiboRadio,
   PaymentBillingCard,
   AddressCard,
+  PaymentCard,
 } from '@/components/common'
 import { useCheckoutStepContext, STEP_STATUS, useAuthContext, useSnackbarContext } from '@/context'
 import {
@@ -220,6 +221,7 @@ const PaymentStep = (props: PaymentStepProps) => {
   const allowInvalidAddresses = publicRuntimeConfig.allowInvalidAddresses
 
   // getting the selected Payment type from checkout.payments
+
   const checkoutPayment = orderGetters.getSelectedPaymentType(checkout)
   const checkoutPaymentType = checkoutPayment?.paymentType?.toString() ?? ''
 
@@ -1015,6 +1017,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                 borderBottomLeftRadius: 0,
                 borderBottomRightRadius: 0,
                 transition: 'all 0ms linear',
+                paddingBottom: '10px',
               },
             }}
           >
@@ -1060,7 +1063,7 @@ const PaymentStep = (props: PaymentStepProps) => {
 
           {newPaymentTypes.map((paymentType: PaymentsType) => {
             return (
-              <Box key={paymentType.id}>
+              <Box key={paymentType.id} sx={{ marginTop: '10px' }}>
                 {paymentType.id === selectedPaymentTypeRadio ? (
                   <Box sx={{ maxWidth: '100%', mb: 1, pl: 0 }}>
                     {shouldShowPreviouslySavedCards ? (
@@ -1080,7 +1083,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                                   name: cardGetters.getCardId(card?.cardInfo),
                                   label: (
                                     <>
-                                      <PaymentBillingCard
+                                      {/* <PaymentBillingCard
                                         showAddress={selectedCardRadio === card?.cardInfo?.id}
                                         pageType={PageType.CHECKOUT}
                                         cardNumberPart={cardGetters.getCardNumberPart(
@@ -1109,54 +1112,125 @@ const PaymentStep = (props: PaymentStepProps) => {
                                         postalOrZipCode={addressGetters.getPostalOrZipCode(address)}
                                         stateOrProvince={addressGetters.getStateOrProvince(address)}
                                         countryCode={addressGetters.getCountryCode(address)}
-                                      />
-                                      {selectedCardRadio === card?.cardInfo?.id &&
-                                        !isCVVAddedForNewPayment && (
-                                          <Box pt={2} width={'50%'}>
-                                            <FormControl sx={{ width: '50%' }}>
-                                              <Controller
-                                                name="cvv"
-                                                control={control}
-                                                defaultValue={defaultCvv?.cvv}
-                                                render={({ field }) => {
-                                                  return (
-                                                    <KiboTextBox
-                                                      sx={{ background: '#ffffff' }}
-                                                      type="password"
-                                                      value={field.value || ''}
-                                                      label={t('cvv-code')}
-                                                      placeholder={t('security-code-placeholder')}
-                                                      required={true}
-                                                      onChange={(_, value) => {
-                                                        field.onChange(value)
-                                                        setCvv(value)
-                                                      }}
-                                                      onBlur={field.onBlur}
-                                                      error={!!errors?.cvv}
-                                                      helperText={
-                                                        errors?.cvv?.message as unknown as string
-                                                      }
-                                                      icon={
-                                                        <Box
-                                                          pr={1}
-                                                          pt={1}
-                                                          sx={{ cursor: 'pointer' }}
-                                                        >
-                                                          <Tooltip
-                                                            title={t('cvv-tooltip-text')}
-                                                            placement="top"
-                                                          >
-                                                            <Help color="disabled" />
-                                                          </Tooltip>
-                                                        </Box>
-                                                      }
-                                                    />
-                                                  )
-                                                }}
-                                              />
-                                            </FormControl>
+                                      /> */}
+
+                                      <Box
+                                        width={'100%'}
+                                        maxWidth={873}
+                                        display="flex"
+                                        sx={{
+                                          flexDirection: 'row',
+                                          gap: 1,
+                                        }}
+                                      >
+                                        <Box>
+                                          <PaymentCard
+                                            pageType={PageType.CHECKOUT}
+                                            cardNumberPart={
+                                              cardGetters.getCardNumberPart(
+                                                card?.cardInfo
+                                              ) as string
+                                            }
+                                            cardType={cardGetters
+                                              .getCardType(card?.cardInfo)
+                                              ?.toUpperCase()}
+                                            expireMonth={cardGetters.getExpireMonth(card?.cardInfo)}
+                                            expireYear={cardGetters.getExpireYear(card?.cardInfo)}
+                                            // onPaymentCardSelection={() => null}
+                                          />
+                                          {selectedCardRadio === card?.cardInfo?.id &&
+                                            !isCVVAddedForNewPayment && (
+                                              <Box pt={2} width={'100%'} sx={{ marginTop: '20px' }}>
+                                                <FormControl sx={{ width: '50%' }}>
+                                                  <Controller
+                                                    name="cvv"
+                                                    control={control}
+                                                    defaultValue={defaultCvv?.cvv}
+                                                    render={({ field }) => {
+                                                      return (
+                                                        <KiboTextBox
+                                                          sx={{
+                                                            background: '#ffffff',
+                                                            width: '100px',
+                                                            borderRadius: '5px',
+                                                            border: '1px solid #020027',
+                                                          }}
+                                                          type="password"
+                                                          value={field.value || ''}
+                                                          label={t('cvv-code')}
+                                                          placeholder={t('')}
+                                                          required={true}
+                                                          onChange={(_, value) => {
+                                                            field.onChange(value)
+                                                            setCvv(value)
+                                                          }}
+                                                          onBlur={field.onBlur}
+                                                          error={!!errors?.cvv}
+                                                          helperText={
+                                                            errors?.cvv
+                                                              ?.message as unknown as string
+                                                          }
+                                                          // commented due to bug tickets
+                                                          // icon={
+                                                          //   <Box
+                                                          //     pr={1}
+                                                          //     pt={1}
+                                                          //     sx={{ cursor: 'pointer' }}
+                                                          //   >
+                                                          //     <Tooltip
+                                                          //       title={t('cvv-tooltip-text')}
+                                                          //       placement="top"
+                                                          //     >
+                                                          //       <Help color="disabled" />
+                                                          //     </Tooltip>
+                                                          //   </Box>
+                                                          // }
+                                                        />
+                                                      )
+                                                    }}
+                                                  />
+                                                </FormControl>
+                                              </Box>
+                                            )}
+                                        </Box>
+                                        {selectedCardRadio === card?.cardInfo?.id && (
+                                          <Box
+                                            sx={{
+                                              display: 'flex',
+                                              flexDirection: 'column',
+                                              pt: 1,
+                                              ml: 5,
+                                            }}
+                                          >
+                                            <AddressCard
+                                              title={t('billing-address')}
+                                              variant={'body2'}
+                                              firstName={
+                                                card?.billingAddressInfo?.contact
+                                                  ?.firstName as string
+                                              }
+                                              lastNameOrSurname={
+                                                card?.billingAddressInfo?.contact
+                                                  ?.lastNameOrSurname as string
+                                              }
+                                              companyOrOrganization={
+                                                card?.billingAddressInfo?.contact
+                                                  ?.companyOrOrganization as string
+                                              }
+                                              address1={addressGetters.getAddress1(address)}
+                                              address2={addressGetters.getAddress2(address)}
+                                              cityOrTown={addressGetters.getCityOrTown(address)}
+                                              postalOrZipCode={addressGetters.getPostalOrZipCode(
+                                                address
+                                              )}
+                                              stateOrProvince={addressGetters.getStateOrProvince(
+                                                address
+                                              )}
+                                              countryCode={addressGetters.getCountryCode(address)}
+                                            />
                                           </Box>
                                         )}
+                                      </Box>
                                     </>
                                   ),
                                 }
@@ -1321,8 +1395,10 @@ const PaymentStep = (props: PaymentStepProps) => {
                         {/**
                          * Show saved billing Address and add new address
                          */}
+
                         {previouslySavedBillingAddress?.length &&
-                          shouldShowAddBillingAddressButton && (
+                          shouldShowAddBillingAddressButton &&
+                          !billingFormAddress?.isSameBillingShippingAddress && (
                             <>
                               <KiboRadio
                                 radioOptions={previouslySavedBillingAddress
@@ -1393,17 +1469,18 @@ const PaymentStep = (props: PaymentStepProps) => {
                             </>
                           )}
 
-                        {!shouldShowAddBillingAddressButton && (
+                        {(!shouldShowAddBillingAddressButton ||
+                          billingFormAddress?.isSameBillingShippingAddress) && (
                           <>
                             <AddressForm
                               key={selectedPaymentTypeRadio}
                               contact={billingFormAddress.contact}
-                              saveAddressLabel={
-                                selectedBillingAddressId === 0 ||
-                                !billingFormAddress?.isSameBillingShippingAddress
-                                  ? t('save-billing-address')
-                                  : undefined
-                              }
+                              // saveAddressLabel={
+                              //   selectedBillingAddressId === 0 ||
+                              //   !billingFormAddress?.isSameBillingShippingAddress
+                              //     ? t('save-billing-address')
+                              //     : undefined
+                              // }
                               setAutoFocus={false}
                               isUserLoggedIn={isAuthenticated}
                               onSaveAddress={handleBillingFormAddress}
@@ -1411,7 +1488,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                               onFormStatusChange={handleBillingFormValidDetails}
                             />
 
-                            <Box m={1} maxWidth={'872px'} data-testid="address-form">
+                            {/*<Box m={1} maxWidth={'872px'} data-testid="address-form">
                               <Divider sx={{ marginBottom: '20px' }} flexItem />
                               <Grid container>
                                 <Grid
@@ -1445,7 +1522,8 @@ const PaymentStep = (props: PaymentStepProps) => {
                                       {t('cancel')}
                                     </Typography>
                                   </Button>
-                                  {/* <Button
+        
+                                   <Button
                                     sx={{
                                       ...StandardShippingStepStyle.primaryButton,
                                       ':disabled': {
@@ -1461,10 +1539,10 @@ const PaymentStep = (props: PaymentStepProps) => {
                                     <Typography sx={{ fontSize: '1rem', lineHeight: '1.5rem', fontWeight: '400' }}>
                                       {t('continue')}
                                     </Typography>
-                                  </Button> */}
+                                  </Button> 
                                 </Grid>
                               </Grid>
-                            </Box>
+                            </Box>*/}
                           </>
                         )}
 
@@ -1483,7 +1561,18 @@ const PaymentStep = (props: PaymentStepProps) => {
                           <Button
                             variant="contained"
                             color="secondary"
-                            onClick={cancelAddingNewPaymentMethod}
+                            // onClick={cancelAddingNewPaymentMethod}
+                            onClick={() => {
+                              if (!shouldShowAddBillingAddressButton) {
+                                setShouldShowAddBillingAddressButton(true)
+                                setSelectedBillingAddressId(
+                                  (checkoutBillingContact?.id ||
+                                    defaultBillingAddress?.id) as number
+                                )
+                              } else {
+                                cancelAddingNewPaymentMethod()
+                              }
+                            }}
                             sx={{
                               width: '180px',
                               background: 'transparent',
@@ -1503,6 +1592,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                           >
                             {t('cancel')}
                           </Button>
+
                           <Button
                             variant="contained"
                             color="primary"
@@ -1513,17 +1603,21 @@ const PaymentStep = (props: PaymentStepProps) => {
                               background: 'primary.main',
                               color: '#ffffff',
                               border: 0,
-                              borderTopRightRadius: 26,
-                              borderBottomLeftRadius: 26,
-                              fontSize: '1rem',
-                              padding: '12px 16px',
-                              lineHeight: 1.4,
+                              padding: '12px 26px',
+                              textAlign: 'center',
+                              fontFamily: 'Poppins',
+                              fontSize: '16px',
+                              fontStyle: 'normal',
+                              fontWeight: '500',
+                              lineHeight: '24px',
+                              borderRadius: '0px 26px',
                               '&:hover': {
-                                fontSize: '1rem',
-                                padding: '12px 16px',
                                 background: '#4C47C4',
                                 color: '#FFFFFF',
                                 border: 0,
+                              },
+                              '&:disabled': {
+                                backgroundColor: '#8D8D8D !important',
                               },
                             }}
                           >
@@ -1542,11 +1636,14 @@ const PaymentStep = (props: PaymentStepProps) => {
                             background: 'transparent',
                             color: 'primary.main',
                             border: '1px solid primary.main',
-                            borderTopRightRadius: 26,
-                            borderBottomLeftRadius: 26,
-                            fontSize: '1rem',
                             padding: '12px 16px',
-                            lineHeight: 1.4,
+                            textAlign: 'center',
+                            fontFamily: 'Poppins',
+                            fontSize: '16px',
+                            fontStyle: 'normal',
+                            fontWeight: '500',
+                            lineHeight: '24px',
+                            borderRadius: '0px 26px',
                             '&:hover': {
                               background: '#E3E2FF',
                               color: '#4C47C4',

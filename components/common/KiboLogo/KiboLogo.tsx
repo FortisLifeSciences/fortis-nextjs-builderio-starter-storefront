@@ -38,7 +38,7 @@ const KiboLogo = ({ logo = Logo, alt = 'kibo-logo', small, mobileRatio }: KiboLo
       width={'100%'}
       sx={small ? styles.smallLogo : mobileRatio ? styles.mobileLogo : styles.logoContainer}
     >
-      <KiboImage src={logo} alt={alt} fill mobileRatio loading="eager" />
+      <KiboImage src={logo} fortisLogoImage={true} alt={alt} fill mobileRatio loading="eager" />
     </Box>
   )
 }
