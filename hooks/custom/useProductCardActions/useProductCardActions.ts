@@ -8,10 +8,11 @@ import {
   useUpdateWishlistItemMutation,
   useWishlist,
 } from '@/hooks'
-import { productGetters } from '@/lib/getters'
+import { cartItemGetters, productGetters } from '@/lib/getters'
 import { ProductCustom, WishlistProductInput } from '@/lib/types'
 
 import { CrProductOption, CrWishlist, CrWishlistInput, Product } from '@/lib/gql/types'
+import { addToCartGTMPDP, addToWishlistGTM } from '@/lib/utils'
 
 export const useProductCardActions = (shouldFetchShippingMethods?: boolean) => {
   const { showModal } = useModalContext()
@@ -32,6 +33,25 @@ export const useProductCardActions = (shouldFetchShippingMethods?: boolean) => {
             cartItem: cartResponse,
           },
         })
+      }
+      if (
+        cartItemGetters.getCartItemProductCode(cartResponse) &&
+        cartItemGetters.getCartItemUnitPrice(cartResponse)
+      ) {
+        const value =
+          cartItemGetters.getCartItemQuantity(cartResponse) *
+          cartItemGetters.getCartItemUnitPrice(cartResponse)
+        addToCartGTMPDP(
+          value,
+          '',
+          cartItemGetters.getCartItemProductCode(cartResponse),
+          cartItemGetters.getCartItemProductName(cartResponse),
+          '',
+          cartItemGetters.getCartItemBrand(cartResponse),
+          cartItemGetters.getCartItemVariantCode(cartResponse),
+          cartItemGetters.getCartItemUnitPrice(cartResponse),
+          cartItemGetters.getCartItemQuantity(cartResponse)
+        )
       }
     } catch (err) {
       console.error(err)
@@ -126,6 +146,11 @@ export const useProductCardActions = (shouldFetchShippingMethods?: boolean) => {
     }
     const response = await updateWishlist.mutateAsync(payload)
     onUpdateListData(response.updateWishlist)
+    if (listData?.items && listData?.items?.length > 0) {
+      const items = listData.items
+      //const valueOfCart = getValueOfItemList(items)
+      addToWishlistGTM(listData?.items, '')
+    }
   }
 
   const isATCLoading = addToCart.isPending

@@ -9936,6 +9936,24 @@ export type Product = {
   volumePriceRange?: Maybe<ProductPriceRange>
 }
 
+export type Value = {
+  value: string
+  stringValue: string
+  isSelected: boolean
+}
+
+export type Price = {
+  price: number
+}
+
+export type FilteredProduct = {
+  variationProductCode: string
+  option: Value[]
+  price: Price
+  childPriority: number | null
+  response?: any
+}
+
 export type Product_GetArgs = {
   allowUndefined?: InputMaybe<Scalars['Boolean']>
   defaultValue?: InputMaybe<Scalars['AnyScalar']>

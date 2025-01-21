@@ -10,7 +10,7 @@ import { ProductListingTemplate } from '@/components/page-templates'
 import { useGetSearchedProducts } from '@/hooks'
 import { getCategoryTree, productSearch } from '@/lib/api/operations'
 import { productSearchGetters, facetGetters } from '@/lib/getters'
-import { categoryTreeSearchByCode, buildCategoryPath } from '@/lib/helpers'
+import { categoryTreeSearchByCode, buildCategoryPath, uiHelpers } from '@/lib/helpers'
 import type { CategorySearchParams, MetaData, PageWithMetaData } from '@/lib/types'
 
 import type {
@@ -39,7 +39,7 @@ interface CategoryPageType extends PageWithMetaData {
 
 const { publicRuntimeConfig } = getConfig()
 const apiKey = publicRuntimeConfig?.builderIO?.apiKey
-
+const { getCategoryLink } = uiHelpers()
 builder.init(apiKey)
 
 function getMetaData(category: PrCategory): MetaData {
@@ -47,7 +47,7 @@ function getMetaData(category: PrCategory): MetaData {
     title: category?.content?.metaTagTitle || null,
     description: category?.content?.metaTagDescription || null,
     keywords: category?.content?.metaTagKeywords || null,
-    canonicalUrl: null,
+    canonicalUrl: getCategoryLink(category?.categoryCode || '') || null,
     robots: null,
   }
 }

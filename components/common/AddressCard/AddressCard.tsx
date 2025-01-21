@@ -14,7 +14,6 @@ interface AddressProps extends CrAddress {
 }
 
 const AddressCard = (props: AddressProps) => {
-  console.log('props- address', props)
   const { publicRuntimeConfig } = getConfig()
   const {
     firstName,

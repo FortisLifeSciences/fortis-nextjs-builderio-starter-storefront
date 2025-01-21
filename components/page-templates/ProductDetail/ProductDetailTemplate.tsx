@@ -52,7 +52,7 @@ import AdditionalProductInfo from '@/components/product/AdditionalProductInfo'
 import PdpIconAttributes from '@/components/product/PdpIconAttributes'
 import ProductApplications from '@/components/product/ProductApplication/ProductApplications'
 import RelatedProductsCarousel from '@/components/product/RelatedProductsCarousel'
-import { useModalContext } from '@/context'
+import { useAuthContext, useModalContext } from '@/context'
 import {
   useProductDetailTemplate,
   useGetPurchaseLocation,
@@ -66,6 +66,7 @@ import { FulfillmentOptions as FulfillmentOptionsConstant, PurchaseTypes } from 
 import { productGetters, subscriptionGetters, wishlistGetters } from '@/lib/getters'
 import { uiHelpers } from '@/lib/helpers'
 import type { ProductCustom, BreadCrumb, LocationCustom } from '@/lib/types'
+import { addToCartGTMPDP, viewItemGTM } from '@/lib/utils/google-tag-manager'
 import abcore from '@/public/Brand_Logo/abcore-logo.png'
 import arista from '@/public/Brand_Logo/arista-logo.png'
 import bethyl from '@/public/Brand_Logo/bethyl-logo.png'
@@ -74,6 +75,12 @@ import fortis from '@/public/Brand_Logo/fortis-logo.png'
 import ipoc from '@/public/Brand_Logo/ipoc-logo.png'
 import nanocomposix from '@/public/Brand_Logo/nanocomposix-logo.png'
 import vector from '@/public/Brand_Logo/vector-logo.png'
+import abcoreLogo from '@/public/BrandLogos/abcore_logo.png'
+import aristaLogo from '@/public/BrandLogos/arista_logo.png'
+import bethylLogo from '@/public/BrandLogos/bethyl_logo.png'
+import empiricalLogo from '@/public/BrandLogos/empirical_logo.png'
+import nanocomposixLogo from '@/public/BrandLogos/nanocomposix_logo.png'
+import vectorLogo from '@/public/BrandLogos/vector_logo.png'
 import GetThemeSettings from '@/src/pages/api/getThemeSettings'
 import theme from '@/styles/theme'
 
@@ -85,6 +92,7 @@ import type {
   CrProduct,
   ProductPrice,
   Product,
+  FilteredProduct,
 } from '@/lib/gql/types'
 
 const brandImages: Record<string, string> = {
@@ -97,10 +105,18 @@ const brandImages: Record<string, string> = {
   ipoc: ipoc.src,
   fortis: fortis.src,
 }
+const pdpBrandLogos: Record<string, string> = {
+  arista: aristaLogo.src,
+  bethyl: bethylLogo.src,
+  abcore: abcoreLogo.src,
+  empirical: empiricalLogo.src,
+  nanocomposix: nanocomposixLogo.src,
+  vector: vectorLogo.src,
+}
 interface ProductDetailTemplateProps {
   product: ProductCustom
   sliceValue?: string
-  productVariations?: Product[]
+  productVariations?: Product[] | FilteredProduct[]
   breadcrumbs?: BreadCrumb[]
   isQuickViewModal?: boolean
   children?: any
@@ -290,6 +306,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
   const newProduct = (newProductData?.values?.[0]?.value as string) ?? null
   const brandValue = product?.properties?.find((data: any) => data?.attributeFQN === 'tenant~brand')
   const brand = (brandValue?.values?.[0]?.value as string) ?? null
+  const brandName = (brandValue?.values?.[0]?.stringValue as string) ?? null
   const variantProductName = productGetters.getVariantProductAttributeName(properties)
   const ousShowDistributorBtn =
     (product?.properties?.find(
@@ -302,7 +319,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     (variationProductCode || productCode) as string,
     selectedFulfillmentOption?.location?.code as string
   )
-
+  const { isAuthenticated, user } = useAuthContext()
   const getModifiedOptionData = (options: any) => {
     const variationMap = new Map()
     productVariations?.forEach((variation) => {
@@ -435,7 +452,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
   const handleAddToCart = async () => {
     try {
       const cartResponse = await addToCart.mutateAsync(addToCartPayload)
-
+      const productPrice = productGetters.getPrice(product)
       if (cartResponse.id && !isB2B) {
         showModal({
           Component: AddToCartDialog,
@@ -443,6 +460,19 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
             cartItem: cartResponse,
           },
         })
+      }
+      if (product?.productCode && cartResponse && product?.categories?.[0]?.content?.name) {
+        addToCartGTMPDP(
+          cartResponse?.total,
+          user?.userId,
+          product?.productCode,
+          productGetters.getName(product),
+          product?.categories?.[0]?.content?.name,
+          brandName,
+          variationProductCode,
+          cartResponse?.product?.price?.price,
+          quantity
+        )
       }
     } catch (err) {
       console.log(err)
@@ -705,6 +735,27 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     setKey((prevKey) => prevKey + 1) // Change state to trigger re-render
   }
 
+  useEffect(() => {
+    if (productCode !== variationProductCode) {
+      const productPrice = productGetters.getPrice(currentProduct)
+      const productPriceActual = productPrice?.special
+        ? productPrice?.special
+        : productPrice?.regular
+
+      if (productPrice && product?.categories?.[0]?.content?.name) {
+        const value = quantity * productPriceActual
+        viewItemGTM(
+          productCode,
+          user?.userId,
+          productGetters.getName(product) as string,
+          product?.categories?.[0]?.content?.name,
+          brandName,
+          value
+        )
+      }
+    }
+  }, [variationProductCode])
+
   return (
     <Grid container>
       {!isQuickViewModal && (
@@ -803,7 +854,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
             kiboImages={productGallery as ProductImage[]}
             title={'HI Image'}
             brandImage={
-              brand && typeof brand === 'string' ? brandImages[brand.toLowerCase()] : null
+              brand && typeof brand === 'string' ? pdpBrandLogos[brand.toLowerCase()] : null
             }
           />
         </Box>

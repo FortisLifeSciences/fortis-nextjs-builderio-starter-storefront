@@ -3,7 +3,8 @@ import { renderHook, act } from '@testing-library/react-hooks'
 import { useCartActions } from './useCartActions'
 import { FulfillmentOptions } from '@/lib/constants'
 
-import { Location } from '@/lib/gql/types'
+import { CrCartItem, Location } from '@/lib/gql/types'
+import { cartItemMock } from '@/__mocks__/stories'
 
 const showModalMock = jest.fn()
 // Mock the necessary dependencies
@@ -106,7 +107,7 @@ describe('useCartActions', () => {
     const newQuantity = 5
 
     await act(async () => {
-      result.current.handleQuantityUpdate(cartItemId, newQuantity)
+      result.current.handleQuantityUpdate(cartItemId, newQuantity, cartItemMock)
     })
 
     expect(updateCartItemQuantityMutateAsync).toHaveBeenCalledWith({

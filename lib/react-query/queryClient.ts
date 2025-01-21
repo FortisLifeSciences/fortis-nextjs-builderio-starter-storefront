@@ -9,9 +9,36 @@ const getErrorMessage = (code: string, message: string) => {
   return message || messages[code]
 }
 
+const parseGraphQLError = (errorString: any) => {
+  try {
+    // Find the position of the JSON object in the error string
+    if (typeof errorString !== 'string') {
+      errorString = JSON.stringify(errorString)
+    }
+    const jsonStartIndex = errorString.indexOf('{"response":')
+
+    // Extract and parse the JSON
+    if (jsonStartIndex !== -1) {
+      const jsonPart = errorString.slice(jsonStartIndex)
+      const parsedJson = JSON.parse(jsonPart)
+      return parsedJson
+    } else {
+      return null
+    }
+  } catch (error) {
+    console.error('Error parsing GraphQL error:', error)
+    return null
+  }
+}
+
 const queryClientHandler = (error: any, showSnackbar: any) => {
   const status = 'error'
+
+  const parsedError = parseGraphQLError(error)
+
   if (error instanceof SyntaxError && error.message.includes('Unexpected token')) {
+    //do nothing here for now
+  } else if (parsedError?.response?.status === '405' || error?.response?.error === '') {
     //do nothing here for now
   } else {
     showSnackbar(getErrorMessage(error?.response?.code, error?.response?.message), status)

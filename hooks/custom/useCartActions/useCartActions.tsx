@@ -58,7 +58,11 @@ export const useCartActions = ({ cartItems, purchaseLocation }: UseCartActionsPr
     }
   }
 
-  const handleQuantityUpdate = async (cartItemId: string, quantity: number) => {
+  const handleQuantityUpdate = async (
+    cartItemId: string,
+    quantity: number,
+    cartItem: CrCartItem
+  ) => {
     try {
       await updateCartItemQuantity.mutateAsync({ cartItemId, quantity })
     } catch (err) {

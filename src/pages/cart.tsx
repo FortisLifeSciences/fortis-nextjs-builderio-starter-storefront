@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+
 import { BuilderComponent, builder, Builder } from '@builder.io/react'
 import getConfig from 'next/config'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
@@ -5,8 +7,11 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { SmallBanner } from '@/components/home'
 import { CartTemplate } from '@/components/page-templates'
 import { ProductRecommendations } from '@/components/product'
+import { useAuthContext } from '@/context/AuthContext'
+import { useGetProducts } from '@/hooks'
 import { getCart } from '@/lib/api/operations/'
 import { MetaData, PageWithMetaData } from '@/lib/types'
+import { viewCartGTM } from '@/lib/utils/google-tag-manager'
 
 import { CrCart } from '@/lib/gql/types'
 import type { NextPage, GetServerSidePropsContext, NextApiRequest, NextApiResponse } from 'next'
@@ -97,6 +102,13 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const cartTopContentSection = await builder.get(cartBottomSection).promise()
   const cartBottomContentSection = await builder.get(cartTopSection).promise()
   const cartEmptyContentSection = await builder.get(cartEmptySection).promise()
+  let productCodes: string[] = []
+
+  if (response?.currentCart?.items) {
+    productCodes = response.currentCart.items
+      .map((el: any) => el?.product?.productCode)
+      .filter(Boolean) as string[]
+  }
 
   return {
     props: {
@@ -105,6 +117,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       cartTopContentSection: cartTopContentSection || null,
       cartBottomContentSection: cartBottomContentSection || null,
       cartEmptyContentSection: cartEmptyContentSection || null,
+      productCodes,
       metaData: getMetaData(),
       ...(await serverSideTranslations(locale as string, ['common'])),
     },
@@ -112,13 +125,52 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 }
 
 const CartPage: NextPage<CartPageType> = (props: any) => {
-  const { cartTopContentSection, cartBottomContentSection, cartEmptyContentSection } = props
+  const {
+    cart,
+    productCodes,
+    cartTopContentSection,
+    cartBottomContentSection,
+    cartEmptyContentSection,
+  } = props
   const { cartTopSection, cartBottomSection, cartEmptySection } =
     publicRuntimeConfig?.builderIO?.modelKeys || {}
+  const {
+    data: productSearchResult,
+    isLoading,
+    isSuccess,
+    isFetching,
+  } = useGetProducts(productCodes)
+  const [updatedCart, setUpdatedCart] = useState(props.cart)
+
+  useEffect(() => {
+    if (productSearchResult?.items) {
+      const updatedItems = cart?.items?.map((cartItem: any) => {
+        if (productSearchResult?.items) {
+          const productFromApi = productSearchResult?.items.find(
+            (product: any) => product.productCode === cartItem?.product?.productCode
+          )
+
+          if (productFromApi) {
+            cartItem.product.categories = productFromApi.categories || []
+          }
+
+          return cartItem
+        }
+      })
+
+      setUpdatedCart({ ...cart, items: updatedItems })
+    }
+  }, [productSearchResult, cart])
+  const { isAuthenticated, user } = useAuthContext()
+  useEffect(() => {
+    if (updatedCart) viewCartGTM(updatedCart, user?.userId)
+  }, [updatedCart])
+
   return (
     <>
       <CartTemplate
         {...props}
+        cart={updatedCart}
         cartTopContentSection={
           cartTopContentSection && (
             <BuilderComponent model={cartTopSection} content={cartTopContentSection} />
