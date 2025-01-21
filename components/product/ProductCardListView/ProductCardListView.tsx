@@ -186,6 +186,13 @@ const ProductCardListView = (props: ProductCardListViewProps) => {
 
   const { t } = useTranslation('common')
 
+  let truncatedTitle =
+  title && title.length > 30
+    ? `${title.substring(0, 30)}`
+    : title
+  let uniqueVal = `${sliceValue ? variationProductCode : (ProductCatalogNumber!==undefined) ? ProductCatalogNumber : ""}`
+  truncatedTitle = truncatedTitle + `${uniqueVal}`
+
   const handleAddOrRemoveWishlistItem = (event: MouseEvent<HTMLElement>) => {
     event.preventDefault()
     onAddOrRemoveWishlistItem?.()
@@ -330,7 +337,7 @@ const ProductCardListView = (props: ProductCardListViewProps) => {
                     brandImages[brand.toLowerCase()] ||
                     placeholderImageUrl
                   }
-                  alt={imageUrl ? imageAltText : 'no-image-alt'}
+                  alt={imageUrl ? truncatedTitle || imageAltText : 'no-image-alt'}
                   objectFit={
                     imageUrl ? 'contain' : brandImages[brand.toLowerCase()] ? 'none' : 'contain'
                   }
@@ -429,7 +436,7 @@ const ProductCardListView = (props: ProductCardListViewProps) => {
                   )}
                 </Box>
               </Box>
-              <IconButton sx={ProductCardStyles.listIconButton}>
+              <IconButton sx={ProductCardStyles.listIconButton} title={"Product-Detail"}>
                 <ArrowForwardIos sx={{ color: 'white' }} />
               </IconButton>
             </Card>

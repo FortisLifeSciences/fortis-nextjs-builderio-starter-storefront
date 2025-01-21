@@ -1000,7 +1000,6 @@ const PaymentStep = (props: PaymentStepProps) => {
         <TabContext value={selectedPaymentTypeRadio}>
           <TabList
             onChange={(_, value: string) => handlePaymentTypeRadioChange(value)}
-            aria-labelledby="payment-types-tab"
             aria-label="payment-types"
             data-testid="payment-types"
             TabIndicatorProps={{
