@@ -302,7 +302,10 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   return (
     <Box data-testid="ship-items">
       <Box mt={2}>
-        <Box m={0} sx={{ display: 'grid', '&:hover': { backgroundColor: '#E3E2FF' } }}>
+        <Box
+          m={0}
+          sx={{ display: 'grid', marginBottom: '10px', '&:hover': { backgroundColor: '#E3E2FF' } }}
+        >
           <KiboRadio
             radioOptions={
               getFortisShippingMethods()?.map((item) => {
