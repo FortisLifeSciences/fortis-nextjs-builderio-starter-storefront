@@ -302,7 +302,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   return (
     <Box data-testid="ship-items">
       <Box mt={2}>
-        <Box m={0} sx={{ display: 'grid' }}>
+        <Box m={0} sx={{ display: 'grid', '&:hover': { backgroundColor: '#E3E2FF' } }}>
           <KiboRadio
             radioOptions={
               getFortisShippingMethods()?.map((item) => {
@@ -345,9 +345,6 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
               ml: 0,
               pl: 1.5,
               width: '100%',
-              backgroundColor:
-                selectedShippingMethodCode && !isFedExMethodSelected ? '#E3E2FF' : 'none',
-              '&:hover': { backgroundColor: '#E3E2FF' },
             }}
           />
         </Box>
@@ -377,11 +374,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                       '&:hover': { background: 'none' },
                     }}
                   >
-                    <Price
-                      variant="body2"
-                      fontWeight="normal"
-                      price={'Use Customer FedEx Account'}
-                    />
+                    <Price variant="body2" fontWeight="normal" price={'Customer FedEx Account'} />
                   </MenuItem>
                 ),
               },
@@ -435,9 +428,11 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                     error={!!errors?.fedExAccountNumber}
                     helperText={errors?.fedExAccountNumber?.message}
                     onChange={(_name: string, value: string) => {
-                      field.onChange(value)
+                      // Allow only digits and ensure the length doesn't exceed 9 characters
+                      const sanitizedValue = value.replace(/[^0-9]/g, '').slice(0, 9)
+                      field.onChange(sanitizedValue)
                       setIsFedExAccountUpdated(false)
-                      setFedExAccountNumber(value)
+                      setFedExAccountNumber(sanitizedValue)
                     }}
                     onBlur={field.onBlur}
                     required={true}
@@ -543,7 +538,7 @@ const ShippingMethod = (props: ShippingMethodProps) => {
   return (
     <Box data-testid="shipping-method" ref={shippingMethodRef}>
       {showTitle && (
-        <Typography variant="h2" component="h2" pt={2}>
+        <Typography variant="h2" component="h2" pt={2} color="primary.main">
           {t('shipping-method')}
         </Typography>
       )}
