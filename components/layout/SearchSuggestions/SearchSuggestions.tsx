@@ -65,7 +65,7 @@ const Title = ({ heading }: { heading: string }) => {
 
   return (
     <ListItem key="Suggestions" sx={{ ...style.listItem }}>
-      <Typography fontWeight={600} variant="subtitle1">
+      <Typography fontWeight={500} variant="body2" color="primary.main">
         {t(heading)}
       </Typography>
     </ListItem>
@@ -78,7 +78,15 @@ const Content = (props: ListItemProps) => {
   return (
     <Link href={`${path}${code}`} passHref>
       <ListItem button key={code} onClick={onSearchSuggestionClose}>
-        <ListItemText primary={name} sx={{ ...style.listItemText }} />
+        <ListItemText
+          primary={name}
+          sx={{
+            ...style.listItemText,
+            '& .MuiTypography-root': {
+              fontSize: '16px',
+            },
+          }}
+        />
       </ListItem>
     </Link>
   )
