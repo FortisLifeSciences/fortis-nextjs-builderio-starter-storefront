@@ -208,7 +208,7 @@ const ProductCardListView = React.forwardRef<HTMLDivElement, ProductCardListView
     title && title.length > 30
       ? `${title.substring(0, 30)}`
       : title
-    let uniqueVal = `${sliceValue ? variationProductCode : (ProductCatalogNumber!==undefined) ? ProductCatalogNumber : ""}`
+    const uniqueVal = `${sliceValue ? variationProductCode : (ProductCatalogNumber!==undefined) ? ProductCatalogNumber : ""}`
     truncatedTitle = truncatedTitle + `${uniqueVal}`
 
     const productPriceRange = usePriceRangeFormatter(priceRange as ProductPriceRange)
