@@ -620,16 +620,18 @@ const ReviewStep = (props: ReviewStepProps) => {
         </Typography>
         <Box>
           <TextField
-            id="mui-textarea"
+            id="specialInstruction"
             label=""
             multiline
             rows={1}
             variant="outlined"
             fullWidth
+            aria-label='Special Instruction'
             InputProps={{
               sx: {
                 fontSize: '16px',
               },
+              "aria-label":"Special Instruction"
             }}
             value={instructionsValue}
             onChange={handleInstChange}
