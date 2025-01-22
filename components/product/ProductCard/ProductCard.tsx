@@ -88,6 +88,7 @@ export interface ProductCardProps {
   onClickQuickViewModal?: () => void
   onClickAddToCart?: (payload: any) => void
   kiboImagesData?: any
+  setEnableIntObserver?: (payload: any) => void
 }
 
 const getDocumentListDocuments = async (documentListName: string, filter: string) => {
@@ -158,6 +159,7 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>((props, r
     fulfillmentTypesSupported,
     onClickQuickViewModal,
     onClickAddToCart,
+    setEnableIntObserver,
   } = props
 
   const brandProperties = productProperties?.find(
@@ -250,6 +252,15 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>((props, r
       fetchDocumentData()
     }
   }, [variationProductCode, productCode, kiboImagesData])
+
+  useEffect(
+    function () {
+      if (setEnableIntObserver && !isLoading) {
+        setEnableIntObserver(true)
+      }
+    },
+    [isLoading]
+  )
 
   if (isLoading) return <ProductCardSkeleton />
   else
