@@ -193,9 +193,9 @@ const ProductCardListView = React.forwardRef<HTMLDivElement, ProductCardListView
     const brandProperties = productProperties?.find(
       (prop) => prop.attributeFQN?.toLowerCase() === 'tenant~brand'
     )
-    const brandLabel = (
-      brandProperties?.values as { value: string; stringValue: string }[] | undefined
-    )?.[0]?.stringValue
+    const brandLabel =
+      (brandProperties?.values as { value: string; stringValue: string }[] | undefined)?.[0]
+        ?.stringValue || ''
 
     const catalogNumberProperties = productProperties?.find(
       (prop) => prop.attributeFQN?.toLowerCase() === 'tenant~plp-catalog-number'
@@ -300,7 +300,7 @@ const ProductCardListView = React.forwardRef<HTMLDivElement, ProductCardListView
                 id,
                 title ? title : '',
                 categoryName,
-                brand,
+                brandLabel,
                 pageType,
                 position,
                 link
