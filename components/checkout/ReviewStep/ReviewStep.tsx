@@ -1,4 +1,4 @@
-import React, { MouseEvent, useState } from 'react'
+import React, { MouseEvent, useEffect, useState } from 'react'
 
 import { yupResolver } from '@hookform/resolvers/yup'
 import { LoadingButton } from '@mui/lab'
@@ -299,6 +299,27 @@ const ReviewStep = (props: ReviewStepProps) => {
     orderDetails: checkout,
   }
 
+  const creditCard = publicRuntimeConfig?.creditCard || {}
+
+  const getCardName = (cardType: string) => {
+    const match = creditCard.find((card: any) => card.code === cardType.toUpperCase())
+    return match ? match.name : cardType // Default to cardType if no match found
+  }
+
+  const [customerFedexAccountNumberVal, setCustomerFedexAccountNumberVal] = useState<
+    string | undefined
+  >(undefined)
+
+  useEffect(() => {
+    if (checkout?.attributes) {
+      const customerFedexAccountNumber = checkout?.attributes.find(
+        (data: any) => data?.fullyQualifiedName === 'tenant~customerFedexAccountNumber'
+      )?.values?.[0]
+
+      setCustomerFedexAccountNumberVal(customerFedexAccountNumber)
+    }
+  }, [checkout])
+
   return (
     <Box data-testid={'review-step-component'}>
       <Typography
@@ -476,7 +497,19 @@ const ReviewStep = (props: ReviewStepProps) => {
               <Typography variant="body2" data-testid="shippingMethod" sx={{ fontWeight: 500 }}>
                 {t('Shipping Method')}
               </Typography>
-              <Typography variant="body2">{t(shippingMethod)}</Typography>
+              <Typography variant="body2">
+                {!shippingMethod?.includes('FedEx Account') ? (
+                  <>
+                    Fortis Shipping
+                    <br />({t(shippingMethod)})
+                  </>
+                ) : (
+                  <>Customer FedEx Account</>
+                )}
+              </Typography>
+              {customerFedexAccountNumberVal && shippingMethod?.includes('FedEx Account') && (
+                <Typography variant="body2">#{customerFedexAccountNumberVal}</Typography>
+              )}
             </Grid>
             <Grid item sm={6}>
               <Typography variant="body2" data-testid="shippingAddress" sx={{ fontWeight: 500 }}>
@@ -559,8 +592,8 @@ const ReviewStep = (props: ReviewStepProps) => {
               {paymentMethods?.map((method: any, index: number) => (
                 <Box display={'flex'} key={index}>
                   <Typography variant="body2">
-                    {method?.cardType} ending {method?.cardNumberPartOrMask.slice(-4)} ({'expires'}{' '}
-                    {method?.expiry})
+                    {getCardName(method?.cardType)} ending {method?.cardNumberPartOrMask.slice(-4)}{' '}
+                    ({'expires'} {method?.expiry})
                   </Typography>
                 </Box>
               ))}
@@ -671,7 +704,14 @@ const ReviewStep = (props: ReviewStepProps) => {
               <Link
                 href={'/sales-terms'}
                 target="_blank"
-                style={{ textDecoration: 'underline', color: '#30299A', fontWeight: 500 }}
+                sx={{
+                  textDecoration: 'underline',
+                  color: '#30299A',
+                  fontWeight: 500,
+                  '&:hover': {
+                    textDecoration: 'none',
+                  },
+                }}
               >
                 {t('Sales Terms & Conditions.')}
               </Link>

@@ -164,9 +164,9 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>((props, r
     (prop) => prop.attributeFQN?.toLowerCase() === 'tenant~brand'
   )
 
-  const brandLabel = (
-    brandProperties?.values as { value: string; stringValue: string }[] | undefined
-  )?.[0]?.stringValue
+  const brandLabel =
+    (brandProperties?.values as { value: string; stringValue: string }[] | undefined)?.[0]
+      ?.stringValue || ''
 
   const isResourceType = productType === 'Resources' ? true : false
 
@@ -265,7 +265,7 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>((props, r
               productCode ? productCode : '',
               title ? title : '',
               categoryName,
-              brand,
+              brandLabel,
               pageType,
               null,
               link
