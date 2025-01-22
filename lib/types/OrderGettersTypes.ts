@@ -13,6 +13,7 @@ export interface ShippingDetails extends ContactDetails {
   companyOrOrganization?: string
   shippingAddress: CrAddress
   shippingMethod?: any
+  customerFedexAccountNumber?: string
 }
 
 export interface BillingDetails extends ContactDetails {

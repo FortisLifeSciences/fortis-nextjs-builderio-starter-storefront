@@ -62,7 +62,7 @@ const OrderConfirmation = ({ order }: { order: CrOrder }) => {
     shippingTotalLabel: t('shipping'),
     taxLabel: t('estimated-tax'),
     totalLabel: t('total-price'),
-    handlingLabel: t('additional-handling'),
+    handlingLabel: t('handling'),
     orderDetails: order,
   }
 
