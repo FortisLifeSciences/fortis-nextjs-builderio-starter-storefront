@@ -136,14 +136,3 @@ body {
     line-height: '16px';
   }
 }
-
-@media (min-width: 1200px) {
-  .mui-style-1b3l6lk-MuiGrid-root {
-    max-width: 100% !important;
-  }
-}
-@media (min-width: 1536px) {
-  .mui-style-1b3l6lk-MuiGrid-root {
-    max-width: 100% !important;
-  }
-}

@@ -84,7 +84,7 @@ export const KiboRadio = (props: KiboRadioProps) => {
     )
 
     return addressCheckout ? (
-      <Grid item xs={12} sm={6} key={radio.value + index}>
+      <Grid item xs={12} sm={6} key={radio.value + index} sx={{ maxWidth: '100% !important' }}>
         {optionContent}
       </Grid>
     ) : (
@@ -110,11 +110,12 @@ export const KiboRadio = (props: KiboRadioProps) => {
         row={row}
       >
         {addressCheckout ? (
-          <Grid container spacing={2}>
+          <Grid container spacing={2} className="demo">
             {radioOptions?.map(renderRadioOption)}
           </Grid>
         ) : (
-          radioOptions?.map(renderRadioOption)
+          <></>
+          // radioOptions?.map(renderRadioOption)
         )}
       </RadioGroup>
     </FormControl>
