@@ -110,6 +110,7 @@ const ProductRecentDocuments = (props: any) => {
                     paddingTop: 0,
                     width: index === 0 ? '60%' : index === 1 ? '25%' : '15%',
                   }}
+                  aria-label={index===2 ? "Download document": header }
                 >
                   {header}
                 </TableCell>
