@@ -117,6 +117,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
 
   const [showFilterBy, setFilterBy] = useState<boolean>(false)
   const [isListView, setIsListView] = useState<boolean>(true)
+  const [enableIntObserver, setEnableIntObserver] = useState<boolean>(false)
   const { isAuthenticated, user } = useAuthContext()
   const { t } = useTranslation('common')
   // const { showModal } = useModalContext()
@@ -226,26 +227,20 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
   }, [])
 
   useEffect(() => {
-    if (products?.length === 0) return
-    //console.log('productsssssssssssss',products)
+    if (products?.length === 0 || !enableIntObserver) return
 
-    // Set up Intersection Observer to track products entering the viewport
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            //console.log('inoberver', entry.isIntersecting, entry.target)
-            //console.log('inoberver',productId)
             const productId = entry.target.getAttribute('data-id')
             let productPosition: any = entry.target.getAttribute('data-position')
             if (myParam !== null) {
               productPosition = parseInt(productPosition, 10) + parseInt(myParam, 10)
             }
             const product = products?.find((p) => p?.productCode === productId)
-            //console.log('productId', productId)
-            //console.log('productPositionposition', productPosition)
+
             if (product?.productCode) {
-              // console.log('inoberver product')
               const productCode = product?.productCode as string
               const categoryName = product?.categories?.[0]?.content?.name
                 ? product?.categories?.[0]?.content?.name
@@ -265,6 +260,9 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
                 productPosition
               )
             }
+
+            // Unobserve once it's viewed
+            observer.unobserve(entry.target)
           }
         })
       },
@@ -282,7 +280,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
         if (el) observer.unobserve(el)
       })
     }
-  }, [products])
+  }, [products, enableIntObserver])
 
   return (
     <>
@@ -522,6 +520,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
                             ref={(el) => (productRefs.current[index] = el)}
                             data-id={product?.productCode}
                             data-position={index}
+                            setEnableIntObserver={setEnableIntObserver}
                           />
                         ) : (
                           <ProductCardListView
@@ -530,6 +529,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
                             data-id={product?.productCode}
                             data-position={index}
                             position={index}
+                            setEnableIntObserver={setEnableIntObserver}
                           />
                         )
                       ) : product?.productType === 'Resources' ? (
@@ -544,6 +544,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
                           ref={(el) => (productRefs.current[index] = el)}
                           data-id={product?.productCode}
                           data-position={index}
+                          setEnableIntObserver={setEnableIntObserver}
                         />
                       )}
                     </Grid>

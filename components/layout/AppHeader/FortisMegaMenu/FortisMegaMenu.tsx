@@ -89,7 +89,7 @@ export const FortisMegaMenu: React.FC<MegaMenuProps> = ({ scrolled }) => {
                 initial={{ opacity: 0, translateY: -10, translateX: '-50%' }}
                 animate={{ opacity: 1, translateY: 0, translateX: '-50%' }}
                 exit={{ opacity: 0, translateY: -10, translateX: '-50%' }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.3, delay: 0.3 }}
                 style={{
                   position: 'absolute',
                   top: scrolled ? '66px' : '82px',

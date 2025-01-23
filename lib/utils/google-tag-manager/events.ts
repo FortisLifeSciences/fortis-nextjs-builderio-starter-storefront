@@ -41,6 +41,7 @@ const sendGTMEvent = (data: any) => {
     window.dataLayer &&
     process.env.NEXT_PUBLIC_ENVIRONMENT !== 'production'
   ) {
+    window.dataLayer.push({ ecommerce: null })
     window.dataLayer.push(data)
   }
   if (
@@ -276,7 +277,7 @@ export const removeFromCartGTM = (cartItem: any, userId: any, cart: any) => {
 
 export const viewCartGTM = async (cart: CrCart, userId: any) => {
   //eslint-disable-next-line
-  console.log('viewcart')
+  //console.log('viewcart')
   const data: viewCart = {
     event: gaEvents.VIEW_CART,
     userId: userId,
@@ -395,7 +396,7 @@ export const purchaseGTM = (order: CrOrder, userId: any, affiliation: any) => {
     event: gaEvents.PURCHASE,
     userId: userId,
     value: {
-      transaction_id: orderGetters.getId(order),
+      transaction_id: orderGetters.getOrderNumber(order),
       affiliation: affiliation,
       value: orderGetters.getTotal(order),
       tax: orderGetters.getTaxTotal(order).toString(),

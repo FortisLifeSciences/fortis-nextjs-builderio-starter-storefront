@@ -88,6 +88,7 @@ export interface ProductCardProps {
   onClickQuickViewModal?: () => void
   onClickAddToCart?: (payload: any) => void
   kiboImagesData?: any
+  setEnableIntObserver?: (payload: any) => void
 }
 
 const getDocumentListDocuments = async (documentListName: string, filter: string) => {
@@ -158,15 +159,16 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>((props, r
     fulfillmentTypesSupported,
     onClickQuickViewModal,
     onClickAddToCart,
+    setEnableIntObserver,
   } = props
 
   const brandProperties = productProperties?.find(
     (prop) => prop.attributeFQN?.toLowerCase() === 'tenant~brand'
   )
 
-  const brandLabel = (
-    brandProperties?.values as { value: string; stringValue: string }[] | undefined
-  )?.[0]?.stringValue
+  const brandLabel =
+    (brandProperties?.values as { value: string; stringValue: string }[] | undefined)?.[0]
+      ?.stringValue || ''
 
   const isResourceType = productType === 'Resources' ? true : false
 
@@ -251,6 +253,15 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>((props, r
     }
   }, [variationProductCode, productCode, kiboImagesData])
 
+  useEffect(
+    function () {
+      if (setEnableIntObserver && !isLoading) {
+        setEnableIntObserver(true)
+      }
+    },
+    [isLoading]
+  )
+
   if (isLoading) return <ProductCardSkeleton />
   else
     return (
@@ -265,7 +276,7 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>((props, r
               productCode ? productCode : '',
               title ? title : '',
               categoryName,
-              brand,
+              brandLabel,
               pageType,
               null,
               link

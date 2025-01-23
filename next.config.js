@@ -46,9 +46,9 @@ module.exports = {
   publicRuntimeConfig: {
     currentUrl: process.env.CURRENT_DOMAIN,
     metaData: {
-      siteTitle: 'Kibo Commerce',
-      defaultTitle: 'Storefront',
-      defaultDescription: 'Kibo Commerce Storefront',
+      siteTitle: 'Fortis Life Sciences',
+      defaultTitle: 'Fortis Life Sciences',
+      defaultDescription: 'Fortis Life Sciences',
     },
     recaptcha: {
       reCaptchaKey: process.env.RECAPTCHA_KEY,
@@ -90,28 +90,27 @@ module.exports = {
         code: 'US',
       },
     ],
-    creditCard:[
+    creditCard: [
       {
-        name:'Discover',
-        code:'DISCOVER',
+        name: 'Discover',
+        code: 'DISCOVER',
       },
       {
-        name:'JCB',
-        code:'JCB',
+        name: 'JCB',
+        code: 'JCB',
       },
       {
-        name:'Visa',
-        code:'VISA',
+        name: 'Visa',
+        code: 'VISA',
       },
       {
-        name:'American Express',
-        code:'AMEX',
+        name: 'American Express',
+        code: 'AMEX',
       },
       {
-        name:'MasterCard',
-        code:'MC',
+        name: 'MasterCard',
+        code: 'MC',
       },
-      
     ],
     provinces: [
       {

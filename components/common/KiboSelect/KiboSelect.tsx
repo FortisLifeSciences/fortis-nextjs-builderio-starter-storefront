@@ -94,6 +94,7 @@ const KiboSelect = (props: KiboSelectProps) => {
         size="small"
         displayEmpty
         name={name}
+        aria-label={name}
         error={error}
         value={value}
         MenuProps={MenuProps}
@@ -106,7 +107,7 @@ const KiboSelect = (props: KiboSelectProps) => {
           ...sx,
           height: '32px',
         }}
-        inputProps={{ 'aria-hidden': false, 'aria-label': label || name }}
+        inputProps={{ id:name, 'aria-hidden': false, 'aria-label': label || name, 'aria-labelledby':name }}
         input={<StyledOutlinedInput error={error} />}
         onChange={(event) => onChange(event.target.name, event.target.value)}
         onBlur={(event) => onBlur && onBlur(event.target.name, event.target.value)}
