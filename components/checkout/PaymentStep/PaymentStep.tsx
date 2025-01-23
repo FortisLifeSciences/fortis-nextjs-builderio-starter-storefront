@@ -153,6 +153,7 @@ const initialBillingAddressData: Address = {
   contact: {
     firstName: '',
     lastNameOrSurname: '',
+    companyOrOrganization: '',
     email: '',
     address: {
       address1: '',
@@ -874,6 +875,7 @@ const PaymentStep = (props: PaymentStepProps) => {
         id: selectedAddress?.id,
         firstName: selectedAddress?.firstName || '',
         lastNameOrSurname: selectedAddress?.lastNameOrSurname || '',
+        companyOrOrganization: selectedAddress?.companyOrOrganization || '',
         middleNameOrInitial: selectedAddress?.middleNameOrInitial || '',
         email: selectedAddress?.email || checkout?.email,
         address: {
