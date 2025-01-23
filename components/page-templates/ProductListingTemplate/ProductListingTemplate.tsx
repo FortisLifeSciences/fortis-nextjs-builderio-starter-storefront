@@ -229,6 +229,10 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
   useEffect(() => {
     if (products?.length === 0 || !enableIntObserver) return
 
+    const pageType = window.location.pathname.includes('search')
+      ? 'Search Page'
+      : 'Product List Page'
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -256,7 +260,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
                 productName,
                 categoryName,
                 brandName,
-                'PLP',
+                pageType,
                 productPosition
               )
             }
