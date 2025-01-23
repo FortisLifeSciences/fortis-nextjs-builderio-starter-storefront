@@ -34,7 +34,7 @@ const KiboImage = (props: KiboImageProps) => {
     <Image
       {...props}
       alt={props.alt || 'Fortis Image'}
-      src={isErrorState ? errorImage.image || DefaultImage1 : src}
+      src={isErrorState ? errorImage.image || DefaultImage1 : src || DefaultImage1}
       onError={() => setIsErrorState(true)}
       style={{
         objectFit: props.objectFit ?? 'contain',

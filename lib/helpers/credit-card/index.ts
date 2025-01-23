@@ -1,11 +1,11 @@
 import creditCardType from 'credit-card-type'
 
-import AMEX from '@/assets/american-express.svg'
-import DEFAULT from '@/assets/default-card.svg'
-import DISCOVER from '@/assets/discover.svg'
-import JCB from '@/assets/jcb.svg'
-import MASTERCARD from '@/assets/mastercard.svg'
-import VISA from '@/assets/visa.svg'
+import AMEX from '@/assets/american-express.png'
+import DEFAULT from '@/assets/default-card.png'
+import DISCOVER from '@/assets/discover.png'
+import JCB from '@/assets/jcb.png'
+import MASTERCARD from '@/assets/mastercard.png'
+import VISA from '@/assets/visa.png'
 import type { CardForm } from '@/lib/types'
 
 export const prepareCardDataParams = (props: CardForm) => {
