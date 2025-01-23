@@ -110,12 +110,11 @@ export const KiboRadio = (props: KiboRadioProps) => {
         row={row}
       >
         {addressCheckout ? (
-          <Grid container spacing={2} className="demo">
+          <Grid container spacing={2}>
             {radioOptions?.map(renderRadioOption)}
           </Grid>
         ) : (
-          <></>
-          // radioOptions?.map(renderRadioOption)
+          radioOptions?.map(renderRadioOption)
         )}
       </RadioGroup>
     </FormControl>
