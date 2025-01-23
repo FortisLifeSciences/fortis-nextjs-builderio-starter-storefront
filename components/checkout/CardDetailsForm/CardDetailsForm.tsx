@@ -124,7 +124,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                   helperText={errors?.cardNumber?.message as unknown as string}
                   icon={
                     <Box pr={1} mt={1}>
-                      <KiboImage src={cardTypeLogo} alt={'cardType'} width={45} height={24} />
+                      <KiboImage src={cardTypeLogo.src} alt={'cardType'} width={45} height={24} />
                     </Box>
                   }
                   {...(cardValue && { disabled: true })}

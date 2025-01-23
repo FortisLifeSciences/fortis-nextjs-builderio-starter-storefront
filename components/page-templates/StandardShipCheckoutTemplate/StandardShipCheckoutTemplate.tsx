@@ -177,7 +177,7 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
           savedCustomerAddressRes.id
         )
         // code commented due to error
-        // await createCustomerCard.mutateAsync(cardParams)
+        await createCustomerCard.mutateAsync(cardParams)
       }
       const affiliation = process.env.NEXT_PUBLIC_KIBO_HOST
       purchaseGTM(order as CrOrder, user?.userId, affiliation)
