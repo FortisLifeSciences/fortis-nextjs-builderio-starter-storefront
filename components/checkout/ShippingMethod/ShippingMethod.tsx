@@ -329,11 +329,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       <Box mt={2}>
         <Box
           m={0}
-          sx={{
-            display: 'grid',
-            borderRadius: '5px',
-            '&:hover': { borderRadius: '5px', backgroundColor: '#E3E2FF' },
-          }}
+          sx={{ display: 'grid', borderRadius: '5px', marginBottom: '10px', '&:hover': { borderRadius: '5px', backgroundColor: '#E3E2FF' } }}
         >
           <KiboRadio
             radioOptions={

@@ -28,6 +28,7 @@ import type { Maybe, CrProductOption } from '@/lib/gql/types'
 export interface ProductItemProps {
   id?: Maybe<string>
   productCode?: Maybe<string>
+  variantProductCode?: Maybe<string>
   image: string
   name: string
   options?: CrProductOption[]
@@ -118,6 +119,7 @@ const ProductItem = (props: ProductItemProps) => {
   const {
     id,
     productCode,
+    variantProductCode,
     image,
     name,
     options,
@@ -190,7 +192,7 @@ const ProductItem = (props: ProductItemProps) => {
                     >
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <Typography variant="body2" sx={{ color: 'gray.900' }}>
-                          {productCode}
+                          {variantProductCode}
                         </Typography>
                       </Box>
                     </Grid>

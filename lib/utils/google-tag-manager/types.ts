@@ -146,7 +146,7 @@ export interface Purchase {
   event: typeof gaConstants.PURCHASE
   userId: any
   value: {
-    transaction_id: string
+    transaction_id: any
     affiliation: any
     value: number
     tax?: string

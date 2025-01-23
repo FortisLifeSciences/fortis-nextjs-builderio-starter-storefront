@@ -60,12 +60,24 @@ const ConfirmationDetails = (props: ConfirmationDetailsProps) => {
                     <Typography variant="body2" sx={{ fontWeight: '500' }}>
                       {t('shipping-method')}
                     </Typography>
-                    <Typography variant="body2">
+                    {/* <Typography variant="body2">
                       {detailsData?.shippingMethod?.shippingMethodName}
+                    </Typography> */}
+                    <Typography variant="body2">
+                      {!detailsData?.shippingMethod?.shippingMethodName?.includes(
+                        'FedEx Account'
+                      ) ? (
+                        <>
+                          Fortis Shipping
+                          <br />({t(detailsData?.shippingMethod?.shippingMethodName)})
+                        </>
+                      ) : (
+                        <>Customer FedEx Account</>
+                      )}
                     </Typography>
-                    {detailsData?.shippingMethod?.shippingMethodCode && (
+                    {detailsData?.customerFedexAccountNumber && (
                       <Typography variant="body2">
-                        #{detailsData?.shippingMethod?.shippingMethodCode}
+                        #{detailsData?.customerFedexAccountNumber}
                       </Typography>
                     )}
                   </Grid>
@@ -133,14 +145,26 @@ const ConfirmationDetails = (props: ConfirmationDetailsProps) => {
                           )?.value
                         }
                       </Typography>
-                      <Typography variant="body2">
+                      {/* <Typography variant="body2">
                         {t('reference-number')}:{' '}
                         {
                           detailsData?.payment?.payment?.billingInfo?.purchaseOrder?.customFields.find(
                             (field: { code: string }) => field.code === 'reference-number'
                           )?.value
                         }
-                      </Typography>
+                      </Typography> */}
+                      {detailsData?.payment?.payment?.billingInfo?.purchaseOrder?.customFields.find(
+                        (field: { code: string }) => field.code === 'reference-number'
+                      )?.value && (
+                        <Typography variant="body2">
+                          {t('reference-number')}:{' '}
+                          {
+                            detailsData?.payment?.payment?.billingInfo?.purchaseOrder?.customFields.find(
+                              (field: { code: string }) => field.code === 'reference-number'
+                            )?.value
+                          }
+                        </Typography>
+                      )}
                     </Grid>
                   ) : (
                     <Grid item md={6} sm={12} sx={{ flexDirection: 'column' }}>

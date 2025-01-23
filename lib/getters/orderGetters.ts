@@ -50,6 +50,21 @@ const getShippingMethod = (order: CrOrder) => {
     shippingMethodCode: order?.fulfillmentInfo?.shippingMethodCode,
   }
 }
+const getCustomerFedexAccountNumber = (order: CrOrder) => {
+  if (!order || !order.attributes || !Array.isArray(order.attributes)) {
+    return null // Return null if the order object or attributes are invalid
+  }
+
+  // Find the attribute object with fullyQualifiedName as "tenant~customerFedexAccountNumber"
+  const fedexAccountAttribute = order.attributes.find(
+    (attribute) => attribute?.fullyQualifiedName === 'tenant~customerFedexAccountNumber'
+  )
+
+  // Return the first value from the values array if the attribute is found
+  return fedexAccountAttribute && Array.isArray(fedexAccountAttribute.values)
+    ? fedexAccountAttribute.values[0]
+    : null
+}
 
 const getHandlingTotal = (order: CrOrder | CrCart | Checkout) => order?.handlingTotal || 0
 
@@ -212,6 +227,7 @@ const getShippingDetails = (order: CrOrder): ShippingDetails => {
     companyOrOrganization: getCompanyOrOrganization(order),
     shippingAddress: getShippingAddress(order),
     shippingMethod: getShippingMethod(order),
+    customerFedexAccountNumber: getCustomerFedexAccountNumber(order),
   }
 }
 
