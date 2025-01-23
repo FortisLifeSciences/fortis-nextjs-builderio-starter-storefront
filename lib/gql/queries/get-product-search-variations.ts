@@ -1,6 +1,6 @@
 const getProductSearchVariationsQuery = /* GraphQL */ `
   query ProductSearch($filter: String) {
-    products: productSearch(filter: $filter) {
+    products: productSearch(filter: $filter, pageSize: 200) {
       items {
         variationProductCode
         options {

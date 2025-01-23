@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 
 import { Typography, Box } from '@mui/material'
+import getConfig from 'next/config'
 import { useTranslation } from 'next-i18next'
 
 import KiboImage from '../KiboImage/KiboImage'
@@ -19,6 +20,13 @@ interface PaymentCardProps {
 
 const PaymentCard = (props: PaymentCardProps) => {
   const { pageType, title, cardNumberPart, expireMonth, expireYear, cardType } = props
+  const { publicRuntimeConfig } = getConfig()
+  const creditCard = publicRuntimeConfig?.creditCard || {}
+
+  const match = creditCard.find(
+    (card: { code: string }) => card.code === (cardType as string).toUpperCase()
+  )
+  const cardName = match ? match.name : cardType
   const { t } = useTranslation('common')
   const cardTypeMemoized = useMemo(() => getCreditCardLogo(cardType as string), [cardType])
   const alt = `cardType-${cardType as string}`
@@ -54,7 +62,7 @@ const PaymentCard = (props: PaymentCardProps) => {
               }}
             >
               <Typography variant="body2" component="span">
-                {`${cardType} ${t('ending')
+                {`${cardName} ${t('ending')
                   ?.substring(0, 6)
                   ?.toLocaleLowerCase()} ${cardNumberPart.substring(
                   cardNumberPart.length - 4,

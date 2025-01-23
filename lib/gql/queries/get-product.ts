@@ -8,6 +8,9 @@ const getProductQuery = /* GraphQL */ `
   query product($productCode: String!) {
     product(productCode: $productCode) {
       ...productInfo
+      variations {
+        productCode
+      }
     }
   }
 `

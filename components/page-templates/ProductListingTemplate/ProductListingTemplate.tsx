@@ -1,4 +1,4 @@
-import React, { useState, PropsWithChildren } from 'react'
+import React, { useState, PropsWithChildren, useEffect, useRef } from 'react'
 
 import Add from '@mui/icons-material/Add'
 import Apps from '@mui/icons-material/Apps'
@@ -33,6 +33,7 @@ import {
   FacetSkeleton,
 } from '@/components/product-listing'
 import type { CategoryFacetData } from '@/components/product-listing/CategoryFacet/CategoryFacet'
+import { useAuthContext } from '@/context/AuthContext'
 import { useProductCardActions, useUpdateRoutes } from '@/hooks'
 import { productGetters } from '@/lib/getters'
 import { uiHelpers } from '@/lib/helpers'
@@ -42,6 +43,7 @@ import type {
   ProductCustom,
   ProductProperties,
 } from '@/lib/types'
+import { measureImpression } from '@/lib/utils/google-tag-manager'
 
 import type { Facet as FacetType, FacetValue, Product } from '@/lib/gql/types'
 
@@ -115,7 +117,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
 
   const [showFilterBy, setFilterBy] = useState<boolean>(false)
   const [isListView, setIsListView] = useState<boolean>(true)
-
+  const { isAuthenticated, user } = useAuthContext()
   const { t } = useTranslation('common')
   // const { showModal } = useModalContext()
 
@@ -153,6 +155,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
     const productType = product?.productType as string | undefined
     const variationProductCode = productGetters.getVariationProductCode(product)
     const categoryCode = product?.categories?.[0]?.categoryCode as string | undefined
+    const categoryName = product?.categories?.[0]?.content?.name as string | undefined
     const parentCategoryName = product?.categories?.[0]?.content?.name as string | undefined
     const seoFriendlyUrl = productGetters.getSeoFriendlyUrl(product)
     let listItemUrl =
@@ -171,6 +174,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
       resourceTypeName,
       resourceType,
       categoryCode,
+      categoryName,
       parentCategoryName,
       productType,
       variationProductCode,
@@ -212,6 +216,73 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
       onClickAddToCart: (payload: any) => handleAddToCart(payload),
     }
   }
+
+  const productRefs = useRef<(HTMLDivElement | null)[]>([])
+  const [myParam, setMyParam] = useState<string | null>(null)
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    setMyParam(urlParams.get('startIndex'))
+  }, [])
+
+  useEffect(() => {
+    if (products?.length === 0) return
+    //console.log('productsssssssssssss',products)
+
+    // Set up Intersection Observer to track products entering the viewport
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            //console.log('inoberver', entry.isIntersecting, entry.target)
+            //console.log('inoberver',productId)
+            const productId = entry.target.getAttribute('data-id')
+            let productPosition: any = entry.target.getAttribute('data-position')
+            if (myParam !== null) {
+              productPosition = parseInt(productPosition, 10) + parseInt(myParam, 10)
+            }
+            const product = products?.find((p) => p?.productCode === productId)
+            //console.log('productId', productId)
+            //console.log('productPositionposition', productPosition)
+            if (product?.productCode) {
+              // console.log('inoberver product')
+              const productCode = product?.productCode as string
+              const categoryName = product?.categories?.[0]?.content?.name
+                ? product?.categories?.[0]?.content?.name
+                : 'NA'
+              const productName = product?.content?.productName as string
+              const brandValue = product?.properties?.find(
+                (data: any) => data?.attributeFQN === 'tenant~brand'
+              )
+              const brandName = (brandValue?.values?.[0]?.stringValue as string) ?? null
+              measureImpression(
+                productCode,
+                user?.userId,
+                productName,
+                categoryName,
+                brandName,
+                'PLP',
+                productPosition
+              )
+            }
+          }
+        })
+      },
+      {
+        threshold: 0.1, // When at least 50% of the product is visible in the viewport
+      }
+    )
+
+    productRefs.current.forEach((el) => {
+      if (el) observer.observe(el)
+    })
+
+    return () => {
+      productRefs.current.forEach((el) => {
+        if (el) observer.unobserve(el)
+      })
+    }
+  }, [products])
 
   return (
     <>
@@ -432,19 +503,48 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
                       {isListView ? (
                         product?.productType === 'Resources' ? (
                           isMobile ? (
-                            <ResourceProductCardGridView {...productCardProps(product)} />
+                            <ResourceProductCardGridView
+                              {...productCardProps(product)}
+                              data-id={product?.productCode}
+                              data-position={index}
+                            />
                           ) : (
-                            <ResourceProductCardListView {...productCardProps(product)} />
+                            <ResourceProductCardListView
+                              {...productCardProps(product)}
+                              data-id={product?.productCode}
+                              data-position={index}
+                              position={index}
+                            />
                           )
                         ) : isMobile ? (
-                          <ProductCard {...productCardProps(product)} />
+                          <ProductCard
+                            {...productCardProps(product)}
+                            ref={(el) => (productRefs.current[index] = el)}
+                            data-id={product?.productCode}
+                            data-position={index}
+                          />
                         ) : (
-                          <ProductCardListView {...productCardProps(product)} />
+                          <ProductCardListView
+                            {...productCardProps(product)}
+                            ref={(el) => (productRefs.current[index] = el)}
+                            data-id={product?.productCode}
+                            data-position={index}
+                            position={index}
+                          />
                         )
                       ) : product?.productType === 'Resources' ? (
-                        <ResourceProductCardGridView {...productCardProps(product)} />
+                        <ResourceProductCardGridView
+                          {...productCardProps(product)}
+                          data-id={product?.productCode}
+                          data-position={index}
+                        />
                       ) : (
-                        <ProductCard {...productCardProps(product)} />
+                        <ProductCard
+                          {...productCardProps(product)}
+                          ref={(el) => (productRefs.current[index] = el)}
+                          data-id={product?.productCode}
+                          data-position={index}
+                        />
                       )}
                     </Grid>
                   )

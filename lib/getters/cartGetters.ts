@@ -17,6 +17,8 @@ const { publicRuntimeConfig } = getConfig()
 
 type GenericItem = CrCartItem | CrOrderItem
 
+const getCartTotal = (cart: CrCart): number => (cart.total ? cart.total : 0)
+
 const getCartItemCount = (cart: CrCart) => cart?.items?.length || 0
 
 const getCartItems = (cart: CrCart) => cart?.items || []
@@ -77,6 +79,7 @@ const getLineItemPrice = (item: GenericItem) => {
 }
 
 export const cartGetters = {
+  getCartTotal,
   getCartItemCount,
   getCartItems,
   getCartItemFulfillmentLocation,

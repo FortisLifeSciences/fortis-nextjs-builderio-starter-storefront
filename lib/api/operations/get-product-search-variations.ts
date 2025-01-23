@@ -2,7 +2,9 @@ import { NextApiRequest } from 'next'
 
 import { getAdditionalHeader } from '../util'
 import { fetcher } from '@/lib/api/util'
-import { getProductSearchVariationsQuery } from '@/lib/gql/queries'
+import { getProductSearchVariationsQuery, getProductVariationQuery } from '@/lib/gql/queries'
+
+import { FilteredProduct, Price, Value } from '@/lib/gql/types'
 
 interface Product {
   variationProductCode: string
@@ -15,16 +17,6 @@ interface Option {
   values: Value[]
 }
 
-interface Value {
-  value: string
-  stringValue: string
-  isSelected: boolean
-}
-
-interface Price {
-  price: number
-}
-
 interface Property {
   attributeFQN: string
   values: PropertyValue[]
@@ -34,15 +26,9 @@ interface PropertyValue {
   value: string | number
 }
 
-interface FilteredProduct {
-  variationProductCode: string
-  option: Value[]
-  price: Price
-  childPriority: number | null
-}
-
 export default async function getProductSearchVariations(
   productCode: string,
+  variantCodes?: any[],
   req?: NextApiRequest
 ) {
   const variables = {
@@ -56,29 +42,70 @@ export default async function getProductSearchVariations(
   const products: Product[] = response.data?.products?.items || []
 
   // Transform and filter the product items as required
-  const result: FilteredProduct[] = products.map((product) => {
-    // Flatten and filter options to only include values with isSelected: true
-    // const selectedValues = product.options
-    //   .flatMap((option) => option.values)
-    //   .filter((value) => value.isSelected)
+  let result: FilteredProduct[]
 
-    const selectedValues =
-      product.options
-        ?.flatMap((option) => option.values || [])
-        ?.filter((value) => value.isSelected) || []
+  if (variantCodes && products.length === variantCodes.length) {
+    // Existing flow
+    result = products.map((product) => {
+      const selectedValues =
+        product.options
+          ?.flatMap((option) => option.values || [])
+          ?.filter((value) => value.isSelected) || []
 
-    // Find the property where attributeFQN is tenant~child-priority
-    const childPriorityProperty = product.properties.find(
-      (prop) => prop.attributeFQN === 'tenant~child-priority'
-    )
+      // Find the property where attributeFQN is tenant~child-priority
+      const childPriorityProperty = product.properties.find(
+        (prop) => prop.attributeFQN === 'tenant~child-priority'
+      )
 
-    return {
-      variationProductCode: product.variationProductCode,
-      option: selectedValues,
-      price: product.price,
-      childPriority: childPriorityProperty ? Number(childPriorityProperty.values[0].value) : null,
+      return {
+        variationProductCode: product.variationProductCode,
+        option: selectedValues,
+        price: product.price,
+        childPriority: childPriorityProperty ? Number(childPriorityProperty.values[0].value) : null,
+      }
+    })
+  } else {
+    console.log('Entered else statement')
+    result = []
+
+    for (const variant of variantCodes || []) {
+      const variationVariables = {
+        productCode: productCode,
+        variationProductCode: variant.productCode,
+      }
+
+      console.log('This is variant level variant variable', variationVariables)
+
+      const variationResponse = await fetcher(
+        { query: getProductVariationQuery, variables: variationVariables },
+        { headers }
+      )
+      console.log('This is variant level response', variationResponse)
+
+      const variationProduct: Product = variationResponse.data?.product
+
+      if (variationProduct) {
+        const selectedValues =
+          variationProduct.options
+            ?.flatMap((option) => option.values || [])
+            ?.filter((value) => value.isSelected) || []
+
+        // Find the property where attributeFQN is tenant~child-priority
+        const childPriorityProperty = variationProduct.properties.find(
+          (prop) => prop.attributeFQN === 'tenant~child-priority'
+        )
+
+        result.push({
+          variationProductCode: variationProduct.variationProductCode,
+          option: selectedValues,
+          price: variationProduct.price,
+          childPriority: childPriorityProperty
+            ? Number(childPriorityProperty.values[0].value)
+            : null,
+        })
+      }
     }
-  })
+  }
 
   return result
 }

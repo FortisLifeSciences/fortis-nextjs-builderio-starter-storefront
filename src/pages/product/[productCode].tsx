@@ -13,7 +13,7 @@ import {
   getProductSearchVariations,
 } from '@/lib/api/operations'
 import { productGetters } from '@/lib/getters'
-import { buildProductPath } from '@/lib/helpers'
+import { buildProductPath, uiHelpers } from '@/lib/helpers'
 import type { CategorySearchParams, MetaData, PageWithMetaData, ProductCustom } from '@/lib/types'
 
 import { PrCategory, Product } from '@/lib/gql/types'
@@ -38,7 +38,7 @@ interface ProductPageType extends PageWithMetaData {
 
 const { publicRuntimeConfig } = getConfig()
 const apiKey = publicRuntimeConfig?.builderIO?.apiKey
-
+const { getProductLink, getProductSeoLink } = uiHelpers()
 builder.init(apiKey)
 
 Builder.registerComponent(ProductRecommendations, {
@@ -70,6 +70,7 @@ export async function getStaticProps(
   const { locale, params } = context
   const { productCode } = params as any
   const product = await getProduct(productCode)
+  const variantCodes = product?.variations
   const relatedProducts = []
   const relatedProductData =
     product && product.properties
@@ -98,7 +99,7 @@ export async function getStaticProps(
     }
   }
 
-  const productVariations = await getProductSearchVariations(productCode)
+  const productVariations = await getProductSearchVariations(productCode, variantCodes)
   const categoriesTree = await getCategoryTree()
   if (!product) {
     return { notFound: true }

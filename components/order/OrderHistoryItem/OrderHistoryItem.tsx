@@ -15,9 +15,14 @@ import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
 import { FullWidthDivider, Price } from '@/components/common'
-import { useSnackbarContext } from '@/context'
+import { useAuthContext, useSnackbarContext } from '@/context'
 import { useProductCardActions } from '@/hooks'
 import { useAddItemsToCurrentCart } from '@/hooks/mutations/cart/useAddItemsToCurrentCart/useAddItemsToCurrentCart'
+import {
+  addToCartGTM,
+  getValueOfItemList,
+  mapCartItemsToGAEvent,
+} from '@/lib/utils/google-tag-manager'
 
 import { CrOrderItem } from '@/lib/gql/types'
 
@@ -59,6 +64,7 @@ const OrderHistoryItem = (props: OrderHistoryItemProps) => {
 
   const { addItemsToCurrentCart } = useAddItemsToCurrentCart()
   const { handleDeleteCurrentCart } = useProductCardActions()
+  const { user } = useAuthContext()
 
   const handleHistoryItemClick = () => {
     onHistoryItemClick(id)
@@ -71,6 +77,10 @@ const OrderHistoryItem = (props: OrderHistoryItemProps) => {
       })
       if (response) {
         showSnackbar(t('list-added-to-cart'), 'success')
+        const mappedGTMProducts = mapCartItemsToGAEvent(items)
+        const valueOfCart = getValueOfItemList(mappedGTMProducts)
+
+        addToCartGTM(user?.userId, valueOfCart, mappedGTMProducts)
       }
     } catch (e) {
       console.error(e)

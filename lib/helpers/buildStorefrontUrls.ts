@@ -33,7 +33,19 @@ export function buildProductPathByCode(productCode: string, options?: BuildPathO
   pathInput.push(productCode as string)
   return joinPathParts(pathInput)
 }
-
+export function buildProductSeoPathByCode(product: Product, options?: BuildPathOptions) {
+  const { content, productCode } = product
+  const pathInput: string[] = []
+  pathInput.push(getPathStart(options))
+  pathInput.push('products')
+  /* add product content slugs here  */
+  if (product?.categories?.[0]?.categoryCode && content?.seoFriendlyUrl) {
+    pathInput.push(product?.categories?.[0]?.categoryCode)
+    pathInput.push(content?.seoFriendlyUrl)
+  }
+  pathInput.push(productCode as string)
+  return joinPathParts(pathInput)
+}
 const categoryRoutePath = 'products'
 export function buildCategoryPath(category: PrCategory, options?: BuildPathOptions) {
   const { categoryCode, content } = category

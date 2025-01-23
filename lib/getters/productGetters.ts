@@ -41,6 +41,9 @@ const getProductId = (product: GenericProduct): string => product?.productCode a
 const getVariationProductCode = (product: GenericProduct): string =>
   product?.variationProductCode as string
 
+const getCategoryName = (product: Product): string =>
+  product?.categories?.[0]?.content?.name as string
+
 const getRating = (product: Product | ProductCustom) => {
   const attr = product?.properties?.find(
     (property) => property?.attributeFQN === publicRuntimeConfig.ratingAttrFQN
@@ -437,4 +440,5 @@ export const productGetters = {
   getCatalogNumber,
   getNewProductAttrName,
   getVariantProductAttributeName,
+  getCategoryName,
 }
