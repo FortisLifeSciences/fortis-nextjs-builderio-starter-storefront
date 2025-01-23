@@ -47,7 +47,7 @@ const NavigationBar = (props: any) => {
           <KiboLogo logo={logo} small={scrolled} />
         </Link>
       </Box>
-      <Box component="ul" sx={navMenuStyles}>
+      <Box component="div" sx={navMenuStyles}>
         {!isCheckoutPage && <FortisMegaMenu scrolled={scrolled} />}
       </Box>
     </Box>

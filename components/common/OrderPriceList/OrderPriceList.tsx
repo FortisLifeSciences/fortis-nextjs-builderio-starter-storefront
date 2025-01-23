@@ -40,7 +40,7 @@ const OrderPriceList = (props: OrderPriceListProps) => {
 
   return (
     <Box>
-      <List component="div" disablePadding>
+      <List component="ul" disablePadding>
         <ListItem
           slotProps={{
             root: {
