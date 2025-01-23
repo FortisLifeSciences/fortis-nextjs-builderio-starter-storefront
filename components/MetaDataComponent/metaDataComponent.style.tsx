@@ -162,11 +162,4 @@ export const buttonStyle = {
   secondaryArrowIcon: {
     color: 'primary.main',
   },
-
-  /* Primary-specific hover with upward movement */
-  primaryHoverEffect: {
-    '&:hover': {
-      transform: 'translateY(-5%)',
-    },
-  },
 }
