@@ -2,6 +2,7 @@ import React from 'react'
 
 import { Box, Card, Grid, Typography } from '@mui/material'
 import { grey } from '@mui/material/colors'
+import getConfig from 'next/config'
 import { useTranslation } from 'next-i18next'
 
 export interface ConfirmationDetailsProps {
@@ -47,6 +48,21 @@ const styles = {
 const ConfirmationDetails = (props: ConfirmationDetailsProps) => {
   const { detailsData } = props
   const { t } = useTranslation('common')
+  const { publicRuntimeConfig } = getConfig()
+
+  const creditCard = publicRuntimeConfig?.creditCard || {}
+  const countries = publicRuntimeConfig.countries
+
+  const getCardName = (cardType: string) => {
+    const match = creditCard.find((card: any) => card.code === cardType.toUpperCase())
+    return match ? match.name : cardType // Default to cardType if no match found
+  }
+
+  const getCountryName = (countryCode: string) => {
+    const countryName = countries.find((country: any) => country.code === countryCode)
+    return countryName ? countryName.name : countryCode
+  }
+
   const detailType = detailsData?.detailType
   if (detailType === 'shipping') {
     return (
@@ -99,6 +115,9 @@ const ConfirmationDetails = (props: ConfirmationDetailsProps) => {
                       {detailsData?.shippingAddress?.cityOrTown},{' '}
                       {detailsData?.shippingAddress?.stateOrProvince}{' '}
                       {detailsData?.shippingAddress?.postalOrZipCode}
+                    </Typography>
+                    <Typography variant="body2">
+                      {getCountryName(detailsData?.shippingAddress?.countryCode)}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -171,16 +190,27 @@ const ConfirmationDetails = (props: ConfirmationDetailsProps) => {
                       <Typography variant="body2" sx={{ fontWeight: '500' }}>
                         {t('payment-method')}
                       </Typography>
-                      <Typography variant="body2">
+                      {/* <Typography variant="body2">
                         {detailsData?.payment?.payment?.paymentType}
-                      </Typography>
+                      </Typography> */}
                       {detailsData?.payment?.payment?.billingInfo?.card && (
                         <Typography variant="body2">
-                          {detailsData?.payment?.payment?.billingInfo?.card?.paymentOrCardType}{' '}
-                          {detailsData?.payment?.payment?.billingInfo?.card?.cardNumberPartOrMask}
+                          {/* {detailsData?.payment?.payment?.billingInfo?.card?.paymentOrCardType}{' '}
+                          {detailsData?.payment?.payment?.billingInfo?.card?.cardNumberPartOrMask} */}
+                          {getCardName(
+                            detailsData?.payment?.payment?.billingInfo?.card?.paymentOrCardType
+                          )}{' '}
+                          ending{' '}
+                          {detailsData?.payment?.payment?.billingInfo?.card?.cardNumberPartOrMask.slice(
+                            -4
+                          )}{' '}
+                          ({'expires'}{' '}
+                          {detailsData?.payment?.payment?.billingInfo?.card?.expireMonth}
+                          {'/'}
+                          {detailsData?.payment?.payment?.billingInfo?.card?.expireYear})
                         </Typography>
                       )}
-                      <Typography variant="body2">
+                      {/* <Typography variant="body2">
                         {t('cardholder-name')}: {detailsData?.firstName}{' '}
                         {detailsData?.lastNameOrSurname}
                       </Typography>
@@ -191,7 +221,7 @@ const ConfirmationDetails = (props: ConfirmationDetailsProps) => {
                           detailsData?.payment?.payment?.billingInfo?.billingContact?.phoneNumbers
                             ?.home ??
                           t('no-phone-available')}
-                      </Typography>
+                      </Typography> */}
                     </Grid>
                   )}
                   <Grid item md={6} sm={12} sx={{ flexDirection: 'column' }}>
@@ -208,6 +238,9 @@ const ConfirmationDetails = (props: ConfirmationDetailsProps) => {
                       {detailsData?.billingAddress?.cityOrTown},{' '}
                       {detailsData?.billingAddress?.stateOrProvince}{' '}
                       {detailsData?.billingAddress?.postalOrZipCode}
+                    </Typography>
+                    <Typography variant="body2">
+                      {getCountryName(detailsData?.billingAddress?.countryCode)}
                     </Typography>
                   </Grid>
                 </Grid>
