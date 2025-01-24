@@ -94,15 +94,14 @@ const MetadataComponent: React.FC<MetadataComponentProps> = ({
       <Box
         sx={[
           buttonStyle.featuredButtonContent,
-          styleType === 'primary' && buttonStyle.primaryHoverEffect,
+          styleType === 'primary',
           {
             marginTop: { xs: 0, sm: 0, md: 0 },
             paddingTop: { xs: '10px', sm: '10px', md: '0' },
           },
         ]}
       >
-        <Typography
-          variant="h4"
+        <Box
           sx={[
             styleType === 'primary'
               ? buttonStyle.primaryHeadingText
@@ -112,7 +111,7 @@ const MetadataComponent: React.FC<MetadataComponentProps> = ({
           ]}
         >
           {resolvedTitle}
-        </Typography>
+        </Box>
 
         <Typography
           variant="body2"

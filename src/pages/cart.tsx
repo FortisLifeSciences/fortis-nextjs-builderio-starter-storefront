@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { BuilderComponent, builder, Builder } from '@builder.io/react'
 import getConfig from 'next/config'
@@ -141,6 +141,9 @@ const CartPage: NextPage<CartPageType> = (props: any) => {
     isFetching,
   } = useGetProducts(productCodes)
   const [updatedCart, setUpdatedCart] = useState(props.cart)
+  const { isAuthenticated, user } = useAuthContext()
+
+  const hasGTMCalled = useRef(false)
 
   useEffect(() => {
     if (productSearchResult?.items) {
@@ -159,12 +162,14 @@ const CartPage: NextPage<CartPageType> = (props: any) => {
       })
 
       setUpdatedCart({ ...cart, items: updatedItems })
+      if (updatedCart && updatedCart.items && user?.userId) {
+        if (!hasGTMCalled.current) {
+          viewCartGTM(updatedCart, user?.userId)
+          hasGTMCalled.current = true
+        }
+      }
     }
   }, [productSearchResult, cart])
-  const { isAuthenticated, user } = useAuthContext()
-  useEffect(() => {
-    if (updatedCart) viewCartGTM(updatedCart, user?.userId)
-  }, [updatedCart])
 
   return (
     <>

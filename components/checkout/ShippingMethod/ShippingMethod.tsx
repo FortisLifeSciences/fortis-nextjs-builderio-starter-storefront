@@ -76,6 +76,8 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
     useState<string>()
   const [isFedExAccountUpdated, setIsFedExAccountUpdated] = useState<boolean>(false)
 
+  const [isFedexAccountMethodUpdated, setIsFedexAccountMethodUpdated] = useState<boolean>(false)
+
   const fedExSchema = useFedExSchema()
   // Define Variables and States
   const {
@@ -141,6 +143,24 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
     }
   }, [fedExAccountNumber, fedExAccountSelectedShippingMethodName])
 
+  const previousFedExAccountNumber = useRef('')
+
+  useEffect(() => {
+    if (
+      isFedExMethodSelected &&
+      fedExAccountNumber &&
+      ((previousFedExAccountNumber.current.length === 9 && fedExAccountNumber.length === 8) ||
+        fedExAccountNumber.length === 0) // Previous length was 9
+    ) {
+      if (isFedexAccountMethodUpdated) {
+        handleShippingMethodSelectChange('', '')
+      }
+    }
+
+    // Update the previous value
+    previousFedExAccountNumber.current = fedExAccountNumber || ''
+  }, [fedExAccountNumber, isFedExMethodSelected])
+
   useEffect(() => {
     if (selectedShippingMethodCode && !isFedExMethodSelected) {
       const fedExShippings = getFedExShippingMethods()
@@ -171,6 +191,11 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
     setFedExAccountShippingMethod(shippingMethod)
     setIsFedExAccountUpdated(false)
     onShippingMethodChange && onShippingMethodChange(value, name)
+    if (name !== '' && value !== '') {
+      setIsFedexAccountMethodUpdated(true)
+    } else {
+      setIsFedexAccountMethodUpdated(false)
+    }
   }
 
   const getFortisShippingMethods = () => {
@@ -302,7 +327,10 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   return (
     <Box data-testid="ship-items">
       <Box mt={2}>
-        <Box m={0} sx={{ display: 'grid' }}>
+        <Box
+          m={0}
+          sx={{ display: 'grid', borderRadius: '5px', marginBottom: '10px', '&:hover': { borderRadius: '5px', backgroundColor: '#E3E2FF' } }}
+        >
           <KiboRadio
             radioOptions={
               getFortisShippingMethods()?.map((item) => {
@@ -318,11 +346,9 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                       <Price
                         variant="body2"
                         fontWeight="normal"
-                        price={`${t('fortis-shipping')} (${item?.shippingMethodName} ${t(
-                          'currency',
-                          { val: item?.price }
-                        )})`}
+                        price={`${t('fortis-shipping')} (${item?.shippingMethodName})`}
                       />
+                      {/* removed price  ${t('currency',{ val: item?.price })} */}
                     </MenuItem>
                   ) : (
                     ''
@@ -345,9 +371,6 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
               ml: 0,
               pl: 1.5,
               width: '100%',
-              backgroundColor:
-                selectedShippingMethodCode && !isFedExMethodSelected ? '#E3E2FF' : 'none',
-              '&:hover': { backgroundColor: '#E3E2FF' },
             }}
           />
         </Box>
@@ -355,10 +378,10 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
           m={0}
           py={0.5}
           sx={{
-            borderRadius: 1,
             display: 'grid',
             backgroundColor: isFedExMethodSelected ? '#E3E2FF' : 'initial',
-            '&:hover': { backgroundColor: '#E3E2FF' },
+            '&:hover': { backgroundColor: '#E3E2FF', borderRadius: '5px' },
+            borderRadius: '5px',
           }}
         >
           <KiboRadio
@@ -377,11 +400,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                       '&:hover': { background: 'none' },
                     }}
                   >
-                    <Price
-                      variant="body2"
-                      fontWeight="normal"
-                      price={'Use Customer FedEx Account'}
-                    />
+                    <Price variant="body2" fontWeight="normal" price={'Customer FedEx Account'} />
                   </MenuItem>
                 ),
               },
@@ -403,10 +422,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                     shippingMethod?.shippingMethodCode as string
                   )
                 } else if (fedExAccountShippingMethod) {
-                  handleShippingMethodSelectChange(
-                    fedExAccountShippingMethod?.shippingMethodName as string,
-                    fedExAccountShippingMethod?.shippingMethodCode as string
-                  )
+                  handleShippingMethodSelectChange('', '')
                 }
               } else {
                 handleShippingMethodChange('')
@@ -435,9 +451,22 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                     error={!!errors?.fedExAccountNumber}
                     helperText={errors?.fedExAccountNumber?.message}
                     onChange={(_name: string, value: string) => {
-                      field.onChange(value)
+                      // Allow only digits and ensure the length doesn't exceed 9 characters
+                      const sanitizedValue = value.replace(/[^0-9]/g, '').slice(0, 9)
+                      field.onChange(sanitizedValue)
                       setIsFedExAccountUpdated(false)
-                      setFedExAccountNumber(value)
+                      setFedExAccountNumber(sanitizedValue)
+
+                      if (sanitizedValue.length === 9) {
+                        handleShippingMethodSelectChange(
+                          getFedExShippingMethods()?.[0]?.shippingMethodName as string,
+                          getFedExShippingMethods()?.[0]?.shippingMethodCode as string
+                        )
+                      } else if (sanitizedValue.length === 0 || sanitizedValue.length < 9) {
+                        if (isFedexAccountMethodUpdated) {
+                          handleShippingMethodSelectChange('', '')
+                        }
+                      }
                     }}
                     onBlur={field.onBlur}
                     required={true}
@@ -445,7 +474,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                   />
                 )}
               />
-              <KiboSelect
+              {/* <KiboSelect
                 name="shippingMethodCode"
                 label={'Method'}
                 onChange={handleShippingMethodSelectChange}
@@ -470,7 +499,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                     </MenuItem>
                   )
                 })}
-              </KiboSelect>
+              </KiboSelect> */}
             </Box>
           )}
         </Box>
@@ -543,7 +572,7 @@ const ShippingMethod = (props: ShippingMethodProps) => {
   return (
     <Box data-testid="shipping-method" ref={shippingMethodRef}>
       {showTitle && (
-        <Typography variant="h2" component="h2" pt={2}>
+        <Typography variant="h2" component="h2" pt={2} color="primary.main">
           {t('shipping-method')}
         </Typography>
       )}

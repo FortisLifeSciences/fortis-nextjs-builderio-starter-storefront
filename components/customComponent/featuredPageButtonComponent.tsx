@@ -93,15 +93,11 @@ const FeaturedPageButton: React.FC<FeaturedPageButtonProps> = ({
         </Box>
 
         <Box
-          sx={[
-            buttonStyle.featuredButtonContent,
-            selectedStyle === 'primary' && buttonStyle.primaryHoverEffect,
-          ]}
+          sx={[buttonStyle.featuredButtonContent, selectedStyle === 'primary']}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
-          <Typography
-            variant="h4"
+          <Box
             sx={[
               selectedStyle === 'primary'
                 ? buttonStyle.primaryHeadingText
@@ -110,7 +106,7 @@ const FeaturedPageButton: React.FC<FeaturedPageButtonProps> = ({
             ]}
           >
             {selectedStyle === 'primary' ? primaryHeadingText : secondaryHeadingText}
-          </Typography>
+          </Box>
 
           <Typography
             variant="body2"

@@ -149,7 +149,7 @@ const AddressForm = (props: AddressFormProps) => {
       data-testid="address-form"
     >
       <Grid container rowSpacing={0} columnGap={2.5}>
-        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 5.82}>
+        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 5.85}>
           <Controller
             name="firstName"
             control={control}
@@ -171,7 +171,7 @@ const AddressForm = (props: AddressFormProps) => {
           />
         </Grid>
 
-        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 5.82}>
+        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 5.85}>
           <Controller
             name="lastNameOrSurname"
             control={control}
@@ -213,7 +213,7 @@ const AddressForm = (props: AddressFormProps) => {
           />
         </Grid>
 
-        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 5.82}>
+        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 5.85}>
           <Controller
             name="phoneNumbers.home"
             control={control}
@@ -234,7 +234,7 @@ const AddressForm = (props: AddressFormProps) => {
           />
         </Grid>
 
-        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 5.82}>
+        <Grid item xs={12} md={isAddressFormInDialog ? 12 : 5.85}>
           <Controller
             name="address.countryCode"
             control={control}
@@ -320,7 +320,7 @@ const AddressForm = (props: AddressFormProps) => {
           />
         </Grid>
 
-        <Grid item xs={12} md={isAddressFormInDialog ? 8 : 5.82}>
+        <Grid item xs={12} md={isAddressFormInDialog ? 8 : 5.85}>
           <Controller
             name="address.stateOrProvince"
             control={control}
@@ -344,7 +344,7 @@ const AddressForm = (props: AddressFormProps) => {
           />
         </Grid>
 
-        <Grid item xs={12} md={isAddressFormInDialog ? 3 : 5.82}>
+        <Grid item xs={12} md={isAddressFormInDialog ? 3 : 5.85}>
           <Controller
             name="address.postalOrZipCode"
             control={control}

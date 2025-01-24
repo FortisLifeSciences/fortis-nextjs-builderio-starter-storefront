@@ -112,6 +112,7 @@ export interface ProductCardListViewProps {
   onClickQuickViewModal?: () => void
   onClickAddToCart?: (payload: any) => Promise<void>
   kiboImagesData: any
+  setEnableIntObserver?: (payload: any) => void
 }
 
 const ProductCardSkeleton = () => {
@@ -188,14 +189,15 @@ const ProductCardListView = React.forwardRef<HTMLDivElement, ProductCardListView
       onAddOrRemoveWishlistItem,
       onClickQuickViewModal,
       onClickAddToCart,
+      setEnableIntObserver,
     } = props
 
     const brandProperties = productProperties?.find(
       (prop) => prop.attributeFQN?.toLowerCase() === 'tenant~brand'
     )
-    const brandLabel = (
-      brandProperties?.values as { value: string; stringValue: string }[] | undefined
-    )?.[0]?.stringValue
+    const brandLabel =
+      (brandProperties?.values as { value: string; stringValue: string }[] | undefined)?.[0]
+        ?.stringValue || ''
 
     const catalogNumberProperties = productProperties?.find(
       (prop) => prop.attributeFQN?.toLowerCase() === 'tenant~plp-catalog-number'
@@ -203,6 +205,16 @@ const ProductCardListView = React.forwardRef<HTMLDivElement, ProductCardListView
     const ProductCatalogNumber = (
       catalogNumberProperties?.values as { value: string; stringValue: string }[] | undefined
     )?.[0]?.stringValue
+
+    let truncatedTitle = title && title.length > 30 ? `${title.substring(0, 30)}` : title
+    const uniqueVal = `${
+      sliceValue
+        ? variationProductCode
+        : ProductCatalogNumber !== undefined
+        ? ProductCatalogNumber
+        : ''
+    }`
+    truncatedTitle = truncatedTitle + `${uniqueVal}`
 
     const productPriceRange = usePriceRangeFormatter(priceRange as ProductPriceRange)
 
@@ -286,6 +298,16 @@ const ProductCardListView = React.forwardRef<HTMLDivElement, ProductCardListView
     const router = useRouter()
     const pageType = router.pathname.includes('/seach') ? 'Search Page' : 'Product List Page'
     const id = productCode ? productCode : ''
+
+    useEffect(
+      function () {
+        if (setEnableIntObserver && !isLoading) {
+          setEnableIntObserver(true)
+        }
+      },
+      [isLoading]
+    )
+
     if (isLoading) return <ProductCardSkeleton />
     else
       return (
@@ -300,7 +322,7 @@ const ProductCardListView = React.forwardRef<HTMLDivElement, ProductCardListView
                 id,
                 title ? title : '',
                 categoryName,
-                brand,
+                brandLabel,
                 pageType,
                 position,
                 link
@@ -371,7 +393,7 @@ const ProductCardListView = React.forwardRef<HTMLDivElement, ProductCardListView
                       pdpBrandLogos[brand.toLowerCase()] ||
                       placeholderImageUrl
                     }
-                    alt={imageUrl ? imageAltText : 'no-image-alt'}
+                    alt={imageUrl ? truncatedTitle : 'no-image-alt'}
                     objectFit={imageUrl || pdpBrandLogos[brand.toLowerCase()] ? 'contain' : 'none'}
                     data-testid="product-image"
                   />
@@ -468,7 +490,7 @@ const ProductCardListView = React.forwardRef<HTMLDivElement, ProductCardListView
                     )}
                   </Box>
                 </Box>
-                <IconButton sx={ProductCardStyles.listIconButton}>
+                <IconButton sx={ProductCardStyles.listIconButton} title={'Product-Detail'}>
                   <ArrowForwardIos sx={{ color: 'white' }} />
                 </IconButton>
               </Card>

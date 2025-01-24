@@ -153,6 +153,7 @@ const initialBillingAddressData: Address = {
   contact: {
     firstName: '',
     lastNameOrSurname: '',
+    companyOrOrganization: '',
     email: '',
     address: {
       address1: '',
@@ -874,6 +875,7 @@ const PaymentStep = (props: PaymentStepProps) => {
         id: selectedAddress?.id,
         firstName: selectedAddress?.firstName || '',
         lastNameOrSurname: selectedAddress?.lastNameOrSurname || '',
+        companyOrOrganization: selectedAddress?.companyOrOrganization || '',
         middleNameOrInitial: selectedAddress?.middleNameOrInitial || '',
         email: selectedAddress?.email || checkout?.email,
         address: {
@@ -1002,7 +1004,6 @@ const PaymentStep = (props: PaymentStepProps) => {
         <TabContext value={selectedPaymentTypeRadio}>
           <TabList
             onChange={(_, value: string) => handlePaymentTypeRadioChange(value)}
-            aria-labelledby="payment-types-tab"
             aria-label="payment-types"
             data-testid="payment-types"
             TabIndicatorProps={{
@@ -1397,7 +1398,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                          * Show saved billing Address and add new address
                          */}
 
-                        {previouslySavedBillingAddress?.length &&
+                        {previouslySavedBillingAddress?.length > 0 &&
                           shouldShowAddBillingAddressButton &&
                           !billingFormAddress?.isSameBillingShippingAddress && (
                             <>
@@ -1622,7 +1623,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                               },
                             }}
                           >
-                            {t('continue')}
+                            {t('save address')}
                           </Button>
                         </Stack>
                       </>

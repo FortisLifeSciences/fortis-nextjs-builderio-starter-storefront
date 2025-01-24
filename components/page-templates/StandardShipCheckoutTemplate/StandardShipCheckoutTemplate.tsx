@@ -153,8 +153,6 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
   const handleCreateOrder = async (order: CrOrder) => {
     try {
       const orderPayments = orderGetters.getNewOrderPayments(order as CrOrder)
-      await createOrder.mutateAsync(order)
-
       if (orderPayments[0]?.billingInfo?.card?.isCardInfoSaved) {
         const address = {
           ...orderPayments[0].billingInfo.billingContact.address,
@@ -176,9 +174,9 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
           user?.id as number,
           savedCustomerAddressRes.id
         )
-        // code commented due to error
-        // await createCustomerCard.mutateAsync(cardParams)
+        await createCustomerCard.mutateAsync(cardParams)
       }
+      await createOrder.mutateAsync(order)
       const affiliation = process.env.NEXT_PUBLIC_KIBO_HOST
       purchaseGTM(order as CrOrder, user?.userId, affiliation)
 

@@ -84,7 +84,7 @@ export const KiboRadio = (props: KiboRadioProps) => {
     )
 
     return addressCheckout ? (
-      <Grid item xs={12} sm={6} key={radio.value + index}>
+      <Grid item xs={12} sm={6} key={radio.value + index} sx={{ maxWidth: '100% !important' }}>
         {optionContent}
       </Grid>
     ) : (
