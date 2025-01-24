@@ -16,8 +16,8 @@ export interface CustomEvent {
 
 export interface AddToCart {
   event: typeof gaConstants.ADD_TO_CART
-  userId: any
-  value: {
+  userId?: any
+  ecommerce: {
     currency: typeof gaConstants.CURRENCY_CAD
     value: number
     items: Items
@@ -26,8 +26,8 @@ export interface AddToCart {
 
 export interface removeFromCart {
   event: typeof gaConstants.REMOVE_FROM_CART
-  userId: any
-  value: {
+  userId?: any
+  ecommerce: {
     currency: typeof gaConstants.CURRENCY_CAD
     value: number
     items: Items
@@ -36,8 +36,8 @@ export interface removeFromCart {
 
 export interface viewCart {
   event: typeof gaConstants.VIEW_CART
-  userId: any
-  value: {
+  userId?: any
+  ecommerce: {
     currency: typeof gaConstants.CURRENCY_CAD
     value: number
     items: Items
@@ -46,8 +46,8 @@ export interface viewCart {
 
 export interface addToWishlist {
   event: typeof gaConstants.ADD_TO_WISHLIST
-  userId: any
-  value: {
+  userId?: any
+  ecommerce: {
     currency: typeof gaConstants.CURRENCY_CAD
     value: number
     items: Items
@@ -56,8 +56,8 @@ export interface addToWishlist {
 
 export interface selectItem {
   event: typeof gaConstants.SELECT_ITEM
-  userId: any
-  value: {
+  userId?: any
+  ecommerce: {
     item_list_id: string
     item_list_name: string
     items: Items
@@ -66,8 +66,8 @@ export interface selectItem {
 
 export interface viewItemList {
   event: typeof gaConstants.VIEW_ITEM_LIST
-  userId: any
-  value: {
+  userId?: any
+  ecommerce: {
     item_list_id: string
     item_list_name: string
     items: Items
@@ -76,8 +76,8 @@ export interface viewItemList {
 
 export interface ViewItem {
   event: typeof gaConstants.VIEW_ITEM
-  userId: any
-  value: {
+  userId?: any
+  ecommerce: {
     currency: typeof gaConstants.CURRENCY_CAD
     value: number
     items: Items
@@ -91,8 +91,8 @@ export interface Search {
 
 export interface BeginCheckout {
   event: typeof gaConstants.BEGIN_CHECKOUT
-  userId: any
-  value: {
+  userId?: any
+  ecommerce: {
     currency: typeof gaConstants.CURRENCY_CAD
     value: number
     coupon?: string
@@ -102,8 +102,8 @@ export interface BeginCheckout {
 
 export interface AddShippingInfo {
   event: typeof gaConstants.ADD_SHIPPING_INFO
-  userId: any
-  value: {
+  userId?: any
+  ecommerce: {
     currency: typeof gaConstants.CURRENCY_CAD
     value: number
     ship_to: string
@@ -114,8 +114,8 @@ export interface AddShippingInfo {
 
 export interface AddShipMethod {
   event: typeof gaConstants.ADD_SHIP_METHOD
-  userId: any
-  value: {
+  userId?: any
+  ecommerce: {
     currency: typeof gaConstants.CURRENCY_CAD
     value: number
     ship_method: string
@@ -125,8 +125,8 @@ export interface AddShipMethod {
 
 export interface AddPaymentInfo {
   event: typeof gaConstants.ADD_PAYMENT_INFO
-  userId: any
-  value: {
+  userId?: any
+  ecommerce: {
     currency: typeof gaConstants.CURRENCY_CAD
     value: number
     payment_type?: string
@@ -136,7 +136,7 @@ export interface AddPaymentInfo {
 
 export interface CheckoutFailure {
   event: typeof gaConstants.CHECKOUTFAILURE
-  userId: any
+  userId?: any
   orderNumber: any
   errorDescription: string
   errorCategory: any
@@ -144,8 +144,8 @@ export interface CheckoutFailure {
 
 export interface Purchase {
   event: typeof gaConstants.PURCHASE
-  userId: any
-  value: {
+  userId?: any
+  ecommerce: {
     transaction_id: any
     affiliation: any
     value: number
