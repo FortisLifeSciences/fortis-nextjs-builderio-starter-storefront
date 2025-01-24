@@ -93,8 +93,8 @@ export const plpClick = (
   window.dataLayer.push({ ecommerce: null })
   const data: selectItem = {
     event: gaEvents.SELECT_ITEM,
-    userId: userId,
-    value: {
+    //userId: userId,
+    ecommerce: {
       item_list_id: 'PLP',
       item_list_name: list,
       items: [
@@ -130,8 +130,8 @@ export const measureImpression = (
   window.dataLayer.push({ ecommerce: null })
   const data: viewItemList = {
     event: gaEvents.VIEW_ITEM_LIST,
-    userId: userId,
-    value: {
+    //userId: userId,
+    ecommerce: {
       item_list_id: 'PLP',
       item_list_name: list,
       items: [
@@ -166,8 +166,8 @@ export const addToCartGTMPDP = (
   window.dataLayer.push({ ecommerce: null })
   const data: AddToCart = {
     event: gaEvents.ADD_TO_CART,
-    userId: userId,
-    value: {
+    //userId: userId,
+    ecommerce: {
       currency: gaEvents.CURRENCY_CAD,
       value: totalPrice,
       items: [
@@ -193,8 +193,8 @@ export const addToCartGTM = (userId: any, value: number, products: Items) => {
   window.dataLayer.push({ ecommerce: null })
   const data: AddToCart = {
     event: gaEvents.ADD_TO_CART,
-    userId: userId,
-    value: {
+    //userId: userId,
+    ecommerce: {
       currency: gaEvents.CURRENCY_CAD,
       value: value,
       items: products,
@@ -216,8 +216,8 @@ export const viewItemGTM = (
   window.dataLayer.push({ ecommerce: null })
   const data: ViewItem = {
     event: gaEvents.VIEW_ITEM,
-    userId: userId,
-    value: {
+    //userId: userId,
+    ecommerce: {
       currency: gaEvents.CURRENCY_CAD,
       value: price,
       items: [
@@ -253,8 +253,8 @@ export const emtpyCartGTM = async (cart: CrCart, userId: any) => {
   window.dataLayer.push({ ecommerce: null })
   const data: removeFromCart = {
     event: gaEvents.REMOVE_FROM_CART,
-    userId: userId,
-    value: {
+    //userId: userId,
+    ecommerce: {
       currency: gaEvents.CURRENCY_CAD,
       value: cartGetters.getCartTotal(cart),
       items: mapCartItemsToGAEvent(cartGetters.getCartItems(cart).filter((item) => item !== null)),
@@ -269,8 +269,8 @@ export const removeFromCartGTM = (cartItem: any, userId: any, cart: any) => {
   window.dataLayer.push({ ecommerce: null })
   const data: removeFromCart = {
     event: gaEvents.REMOVE_FROM_CART,
-    userId: userId,
-    value: {
+    //userId: userId,
+    ecommerce: {
       currency: gaEvents.CURRENCY_CAD,
       value: cartItemGetters.getCartItemUnitPrice(cartItem),
       items: [mapCartItemForGAEvent(cartItem)],
@@ -286,8 +286,8 @@ export const viewCartGTM = async (cart: CrCart, userId: any) => {
   window.dataLayer.push({ ecommerce: null })
   const data: viewCart = {
     event: gaEvents.VIEW_CART,
-    userId: userId,
-    value: {
+    //userId: userId,
+    ecommerce: {
       currency: gaEvents.CURRENCY_CAD,
       value: cart?.total || 0,
       items: mapCartItemsToGAEvent(cartGetters.getCartItems(cart).filter((item) => item !== null)),
@@ -302,8 +302,8 @@ export const addToWishlistGTM = (items: any, userId: any) => {
   window.dataLayer.push({ ecommerce: null })
   const data: addToWishlist = {
     event: gaEvents.ADD_TO_WISHLIST,
-    userId: userId,
-    value: {
+    //userId: userId,
+    ecommerce: {
       currency: gaEvents.CURRENCY_CAD,
       value: 0,
       items: [],
@@ -318,8 +318,8 @@ export const beginCheckoutGTM = (cart: CrCart, userId: any) => {
   window.dataLayer.push({ ecommerce: null })
   const data: BeginCheckout = {
     event: gaEvents.BEGIN_CHECKOUT,
-    userId: userId,
-    value: {
+    //userId: userId,
+    ecommerce: {
       currency: gaEvents.CURRENCY_CAD,
       value: cartGetters.getCartTotal(cart),
       items: mapCartItemsToGAEvent(cartGetters.getCartItems(cart).filter((item) => item !== null)),
@@ -334,8 +334,8 @@ export const addShippingInfoGTM = (order: CrOrder, userId: any) => {
   window.dataLayer.push({ ecommerce: null })
   const data: AddShippingInfo = {
     event: gaEvents.ADD_SHIPPING_INFO,
-    userId: userId,
-    value: {
+    //userId: userId,
+    ecommerce: {
       currency: gaEvents.CURRENCY_CAD,
       value: orderGetters.getTotal(order),
       ship_to: orderGetters.getShippingAddress(order).postalOrZipCode,
@@ -353,8 +353,8 @@ export const addShipMethodGTM = (order: CrOrder, userId: any) => {
   window.dataLayer.push({ ecommerce: null })
   const data: AddShipMethod = {
     event: gaEvents.ADD_SHIP_METHOD,
-    userId: userId,
-    value: {
+    //userId: userId,
+    ecommerce: {
       currency: gaEvents.CURRENCY_CAD,
       value: orderGetters.getTotal(order),
       ship_method: orderGetters.getShippingMethodName(order),
@@ -372,8 +372,8 @@ export const addPaymentInfoGTM = (order: CrOrder, paymentType: PaymentType, user
   window.dataLayer.push({ ecommerce: null })
   const data: AddPaymentInfo = {
     event: gaEvents.ADD_PAYMENT_INFO,
-    userId: userId,
-    value: {
+    //userId: userId,
+    ecommerce: {
       currency: gaEvents.CURRENCY_CAD,
       value: orderGetters.getTotal(order),
       payment_type: paymentType,
@@ -391,7 +391,7 @@ export const checkoutFailure = (order: CrOrder, userId: any, errMsg: string, err
   window.dataLayer.push({ ecommerce: null })
   const data: CheckoutFailure = {
     event: gaEvents.CHECKOUTFAILURE,
-    userId: userId,
+    //userId: userId,
     orderNumber: orderGetters.getOrderNumber(order),
     errorDescription: errMsg,
     errorCategory: errorCat,
@@ -405,8 +405,8 @@ export const purchaseGTM = (order: CrOrder, userId: any, affiliation: any) => {
   window.dataLayer.push({ ecommerce: null })
   const data: Purchase = {
     event: gaEvents.PURCHASE,
-    userId: userId,
-    value: {
+    //userId: userId,
+    ecommerce: {
       transaction_id: orderGetters.getOrderNumber(order),
       affiliation: affiliation,
       value: orderGetters.getTotal(order),
