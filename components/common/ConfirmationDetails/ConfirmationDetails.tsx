@@ -91,11 +91,14 @@ const ConfirmationDetails = (props: ConfirmationDetailsProps) => {
                         <>Customer FedEx Account</>
                       )}
                     </Typography>
-                    {detailsData?.customerFedexAccountNumber && (
-                      <Typography variant="body2">
-                        #{detailsData?.customerFedexAccountNumber}
-                      </Typography>
-                    )}
+                    {detailsData?.customerFedexAccountNumber &&
+                      detailsData?.shippingMethod?.shippingMethodName?.includes(
+                        'FedEx Account'
+                      ) && (
+                        <Typography variant="body2">
+                          #{detailsData?.customerFedexAccountNumber}
+                        </Typography>
+                      )}
                   </Grid>
                   <Grid item md={6} xs={12} sx={{ flexDirection: 'column' }}>
                     <Typography variant="body2" sx={{ fontWeight: '500' }}>
