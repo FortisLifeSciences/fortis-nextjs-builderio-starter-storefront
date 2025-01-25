@@ -37,7 +37,7 @@ export const buttonStyle = {
   },
   featuredButtonContent: {
     width: '100%', //
-    height: '374px',
+    minHeight: { md: '374px', sm: '374px' },
     borderRadius: '26px 0px',
     position: 'relative',
     top: { md: '0px', sm: '-15px', xs: '-15px' },
@@ -46,8 +46,8 @@ export const buttonStyle = {
     },
     zIndex: 1,
     backgroundColor: 'secondary.light',
-    boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
     transition: 'transform 0.3s ease, box-shadow 0.3s ease, color 0.3s ease',
+    border: '1px solid #E3E2FF',
     '&:hover': {
       boxShadow: '0px 8px 20px rgba(0, 0, 0, 0.2)',
     },
@@ -63,7 +63,7 @@ export const buttonStyle = {
     lineHeight: '25px',
     fontFamily: 'Poppins',
     display: 'flex',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     paddingRight: '20px',
     paddingLeft: '20px',
@@ -81,11 +81,12 @@ export const buttonStyle = {
     lineHeight: '25px',
     fontFamily: 'Poppins',
     display: 'flex',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     paddingTop: '24px',
     paddingRight: '20px',
     paddingLeft: '20px',
+    paddingBottom: '48px',
     transition: 'color 0.3s ease',
     '&:hover': {
       color: 'primary.light',
@@ -117,7 +118,7 @@ export const buttonStyle = {
     lineHeight: '25px',
     fontFamily: 'Poppins',
     display: 'flex',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     paddingTop: '95px',
     paddingRight: '20px',
@@ -136,11 +137,12 @@ export const buttonStyle = {
     lineHeight: '25px',
     fontFamily: 'Poppins',
     display: 'flex',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     paddingTop: '24px',
     paddingRight: '20px',
     paddingLeft: '20px',
+    paddingBottom: '48px',
     transition: 'color 0.3s ease',
     '&:hover': {
       color: 'primary.light',
@@ -159,12 +161,5 @@ export const buttonStyle = {
   },
   secondaryArrowIcon: {
     color: 'primary.main',
-  },
-
-  /* Primary-specific hover with upward movement */
-  primaryHoverEffect: {
-    '&:hover': {
-      transform: 'translateY(-5%)',
-    },
   },
 }

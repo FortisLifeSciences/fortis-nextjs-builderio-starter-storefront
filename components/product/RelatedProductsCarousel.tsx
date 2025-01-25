@@ -184,7 +184,7 @@ const RelatedProductsCarousel = (props: any) => {
                             {productName}
                           </Typography>
                         </Box>
-                        <IconButton sx={ProductCardStyles.iconButton}>
+                        <IconButton sx={ProductCardStyles.iconButton} aria-label="Product Detail">
                           <ArrowForwardIos sx={{ color: 'white' }} />
                         </IconButton>
                       </Card>

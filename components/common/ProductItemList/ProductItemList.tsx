@@ -66,6 +66,9 @@ const ProductItemList = (props: ProductItemListProps) => {
               purchaseLocation={getPurchaseLocation(item)}
               link={getProductLink(productGetters.getProductId(item?.product as CrProduct))}
               productCode={productGetters.getProductId(product)}
+              variantProductCode={productGetters.getVariationProductCodeOrProductCode(
+                product as any
+              )}
               image={productGetters.getProductImage(product)}
               name={productGetters.getName(product)}
               options={productGetters.getOptions(product)}

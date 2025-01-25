@@ -420,6 +420,7 @@ export const productGetters = {
   getOptions,
   getCoverImage,
   getProductId,
+  getVariationProductCodeOrProductCode,
   getVariationProductCode,
   handleProtocolRelativeUrl,
   getProductFulfillmentOptions,
