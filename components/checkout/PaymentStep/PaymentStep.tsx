@@ -312,7 +312,7 @@ const PaymentStep = (props: PaymentStepProps) => {
     selectedPaymentTypeRadio === PaymentType.CREDITCARD && cardOptions.length && !isAddingNewPayment
 
   // Form Data
-  const [cardFormDetails, setCardFormDetails] = useState<CardForm>({})
+  const [cardFormDetails, setCardFormDetails] = useState<CardForm>(initialCardFormData)
 
   const handleCardFormData = (cardData: CardForm) => {
     setCardFormDetails({
@@ -327,11 +327,21 @@ const PaymentStep = (props: PaymentStepProps) => {
     setCardFormDetails({ ...cardFormDetails, isCardDetailsValidated: isValid })
   }
 
-  const handleSavePaymentMethodCheckbox = () => {
+  // const handleSavePaymentMethodCheckbox = () => {
+  //   setCardFormDetails({
+  //     ...cardFormDetails,
+  //     isCardInfoSaved: cardFormDetails.isCardInfoSaved,
+  //   })
+  // }
+
+  const [checked, setChecked] = useState(!cardFormDetails.isCardInfoSaved)
+
+  const handleSavePaymentMethodCheckbox = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCardFormDetails({
       ...cardFormDetails,
-      isCardInfoSaved: !cardFormDetails.isCardInfoSaved,
+      isCardInfoSaved: !event.target.checked, // Use the checkbox's checked state
     })
+    setChecked(event.target.checked)
   }
 
   // purchase order form values
@@ -1325,6 +1335,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                               control={
                                 <Checkbox
                                   sx={{ pl: 0, ml: 0 }}
+                                  checked={checked}
                                   onChange={handleSavePaymentMethodCheckbox}
                                   data-testid="save-payment"
                                 />
