@@ -1398,7 +1398,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                          * Show saved billing Address and add new address
                          */}
 
-                        {previouslySavedBillingAddress?.length &&
+                        {previouslySavedBillingAddress?.length > 0 &&
                           shouldShowAddBillingAddressButton &&
                           !billingFormAddress?.isSameBillingShippingAddress && (
                             <>
@@ -1623,7 +1623,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                               },
                             }}
                           >
-                            {t('continue')}
+                            {t('save address')}
                           </Button>
                         </Stack>
                       </>

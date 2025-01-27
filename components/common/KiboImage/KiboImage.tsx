@@ -34,14 +34,14 @@ const KiboImage = (props: KiboImageProps) => {
     <Image
       {...props}
       alt={props.alt || 'Fortis Image'}
-      src={isErrorState ? errorImage.image || DefaultImage1 : src}
+      src={isErrorState ? errorImage.image || DefaultImage1 : src || DefaultImage1}
       onError={() => setIsErrorState(true)}
       style={{
         objectFit: props.objectFit ?? 'contain',
         ...(props.alt === 'kibo-logo' && { position: 'relative' }),
         ...(mobileRatio && {
           width: fortisLogoImage ? (isDesktop ? '164px' : '121px') : 'inherit',
-          height: fortisLogoImage ? (isDesktop ? '45px' : '31px') : 'inherit',
+          height: fortisLogoImage ? (isDesktop ? '44px' : '31px') : 'inherit',
           marginLeft: fortisLogoImage ? (isDesktop ? '5px' : 'opx') : '0px',
         }),
         ...(props.alt.includes('cardType') && mobileRatio && { width: '45px', height: '35px' }), // Apply only when mobile is true

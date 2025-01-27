@@ -93,10 +93,7 @@ const FeaturedPageButton: React.FC<FeaturedPageButtonProps> = ({
         </Box>
 
         <Box
-          sx={[
-            buttonStyle.featuredButtonContent,
-            selectedStyle === 'primary' && buttonStyle.primaryHoverEffect,
-          ]}
+          sx={[buttonStyle.featuredButtonContent, selectedStyle === 'primary']}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
