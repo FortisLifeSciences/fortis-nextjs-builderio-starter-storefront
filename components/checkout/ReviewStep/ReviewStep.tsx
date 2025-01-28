@@ -607,7 +607,9 @@ const ReviewStep = (props: ReviewStepProps) => {
                       <Typography
                         variant="body2"
                         key={'po_payment_summ_ custom_field_' + customField?.code}
-                      >{`${customField?.label} : ${customField?.value}`}</Typography>
+                      >
+                        {customField?.value ? `${customField?.label} : ${customField?.value}` : ''}
+                      </Typography>
                     )
                   })}
                 </Box>
@@ -659,12 +661,12 @@ const ReviewStep = (props: ReviewStepProps) => {
             rows={1}
             variant="outlined"
             fullWidth
-            aria-label='Special Instruction'
+            aria-label="Special Instruction"
             InputProps={{
               sx: {
                 fontSize: '16px',
               },
-              "aria-label":"Special Instruction"
+              'aria-label': 'Special Instruction',
             }}
             value={instructionsValue}
             onChange={handleInstChange}
