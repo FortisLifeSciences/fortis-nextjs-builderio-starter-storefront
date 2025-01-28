@@ -357,6 +357,7 @@ const PaymentStep = (props: PaymentStepProps) => {
   }
 
   const handlePurchaseOrderFormValidDetails = (isValid: boolean) => {
+    setIsValidPurchaseOrder(isValid)
     setPurchaseOrderFormDetails({
       ...purchaseOrderFormDetails,
       isPurchaseOrderFormValidated: isValid,
@@ -405,10 +406,12 @@ const PaymentStep = (props: PaymentStepProps) => {
       ...billingFormAddress,
       ...updatedAddress,
     })
+    setIsBillingDataUpdated(address?.isDataUpdated ? true : false)
     // handleSaveAddressToCheckout(updatedAddress)
   }
 
   const handleBillingFormValidDetails = (isValid: boolean) => {
+    setIsValidBillingAddress(isValid)
     setIsAddressFormValid(isValid)
     setBillingFormAddress({ ...billingFormAddress, isAddressValid: isValid })
   }
@@ -440,6 +443,8 @@ const PaymentStep = (props: PaymentStepProps) => {
         isAddressValid: true,
       })
     }
+
+    setIsValidBillingAddress(value)
   }
 
   const cancelAddingNewPaymentMethod = () => {
@@ -814,6 +819,9 @@ const PaymentStep = (props: PaymentStepProps) => {
     }
   }
 
+  const [isValidPurchaseOrder, setIsValidPurchaseOrder] = useState<boolean>(false)
+  const [isValidBillingAddress, setIsValidBillingAddress] = useState<boolean>(false)
+  const [isBillingDataUpdated, setIsBillingDataUpdated] = useState<boolean>(false)
   const [isAddressSavedToAccount, setIsAddressSavedToAccount] = useState<boolean>(true)
   const [isNewAddressAdded, setIsNewAddressAdded] = useState<boolean>(false)
   const [shouldShowAddBillingAddressButton, setShouldShowAddBillingAddressButton] =
@@ -945,17 +953,14 @@ const PaymentStep = (props: PaymentStepProps) => {
 
   // when payment card and billing address info is available, handleTokenization
   useEffect(() => {
-    if (
-      (cardFormDetails.isDataUpdated || purchaseOrderFormDetails.isPurchaseOrderFormValidated) &&
-      billingFormAddress.isDataUpdated
-    ) {
+    if ((cardFormDetails.isDataUpdated || isValidPurchaseOrder) && isBillingDataUpdated) {
       handleValidateBillingAddress({ ...billingFormAddress.contact.address })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     cardFormDetails.isDataUpdated,
-    billingFormAddress.isDataUpdated,
-    purchaseOrderFormDetails.isPurchaseOrderFormValidated,
+    isBillingDataUpdated,
+    isValidPurchaseOrder,
     isAddressFormValid,
     purchaseOrderFormDetails?.customFields?.length,
     validateForm,
@@ -991,9 +996,8 @@ const PaymentStep = (props: PaymentStepProps) => {
 
   const isAddPaymentMethodButtonDisabled = () => {
     return !(
-      billingFormAddress.isAddressValid &&
-      (cardFormDetails.isCardDetailsValidated ||
-        purchaseOrderFormDetails.isPurchaseOrderFormValidated)
+      isValidBillingAddress &&
+      (cardFormDetails.isCardDetailsValidated || isValidPurchaseOrder)
     )
   }
   const uniqueCards = cardOptions.filter(
