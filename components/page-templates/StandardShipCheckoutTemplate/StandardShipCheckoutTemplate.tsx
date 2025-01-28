@@ -153,7 +153,8 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
   const handleCreateOrder = async (order: CrOrder) => {
     try {
       const orderPayments = orderGetters.getNewOrderPayments(order as CrOrder)
-      if (orderPayments[0]?.billingInfo?.card?.isCardInfoSaved) {
+      await createOrder.mutateAsync(order)
+      if (orderPayments[0]?.billingInfo?.card?.isCardInfoSaved === false) {
         const address = {
           ...orderPayments[0].billingInfo.billingContact.address,
           contact: {
@@ -167,16 +168,28 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
           isDefaultAddress: false,
           addressType: AddressType.BILLING,
         })
-        const savedCustomerAddressRes = await createCustomerAddress.mutateAsync(params)
+        try{
+          const savedCustomerAddressRes = await createCustomerAddress.mutateAsync(params)
 
-        const cardParams = buildCreateCustomerCardParam(
-          orderPayments[0].billingInfo,
-          user?.id as number,
-          savedCustomerAddressRes.id
-        )
-        await createCustomerCard.mutateAsync(cardParams)
+          const cardParams = buildCreateCustomerCardParam(
+            orderPayments[0].billingInfo,
+            user?.id as number,
+            savedCustomerAddressRes.id
+          )
+          await createCustomerCard.mutateAsync(cardParams)
+        }catch (error) {
+          console.error("Customer card creation failed:", error);
+        } finally {
+          // Proceed to the next steps regardless of success or failure
+          const affiliation = process.env.NEXT_PUBLIC_KIBO_HOST
+          purchaseGTM(order as CrOrder, user?.userId, affiliation)
+
+          router.push(
+            { pathname: '/order-confirmation', query: { checkoutId: order.id } },
+            { pathname: '/order-confirmation' }
+          )
+        }
       }
-      await createOrder.mutateAsync(order)
       const affiliation = process.env.NEXT_PUBLIC_KIBO_HOST
       purchaseGTM(order as CrOrder, user?.userId, affiliation)
 
