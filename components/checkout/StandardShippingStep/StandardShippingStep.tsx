@@ -62,9 +62,6 @@ const StandardShippingStep = (props: ShippingProps) => {
   const userShippingAddress = isAuthenticated
     ? userGetters.getUserShippingAddress(addresses?.items as CustomerContact[])
     : []
-  if (checkoutShippingContact && checkoutShippingContact.id === null) {
-    checkoutShippingContact.id = DefaultId.ADDRESSID
-  }
   const shipItems = orderGetters.getShipItems(checkout)
   const pickupItems = orderGetters.getPickupItems(checkout)
   const digitalItems = orderGetters.getDigitalItems(checkout)
@@ -74,9 +71,7 @@ const StandardShippingStep = (props: ShippingProps) => {
   const [checkoutId, setCheckoutId] = useState<string | null | undefined>(undefined)
   const [isAddressFormValid, setIsAddressFormValid] = useState<boolean>(false)
   const [isNewAddressAdded, setIsNewAddressAdded] = useState<boolean>(false)
-  const [selectedShippingAddressId, setSelectedShippingAddressId] = useState<number>(
-    checkoutShippingContact?.id as number
-  )
+  const [fallbackShippingId, setFallbackShippingId] = useState<number>()
   const [savedShippingAddresses, setSavedShippingAddresses] = useState<
     CustomerContact[] | undefined
   >(
@@ -84,6 +79,41 @@ const StandardShippingStep = (props: ShippingProps) => {
       checkoutShippingContact,
       userShippingAddress as CustomerContact[]
     )
+  )
+  const defaultShippingAddress = userGetters.getDefaultShippingAddress(
+    savedShippingAddresses as CustomerContact[]
+  )
+  const previouslySavedShippingAddress = userGetters.getOtherShippingAddress(
+    savedShippingAddresses as CustomerContact[],
+    defaultShippingAddress?.id as number
+  )
+
+  useEffect(() => {
+    if (checkoutShippingContact && checkoutShippingContact.id === null) {
+      const selectedShippingId = defaultShippingAddress
+        ? defaultShippingAddress.id
+        : savedShippingAddresses?.[0]?.id
+
+      if (selectedShippingId) {
+        checkoutShippingContact.id = selectedShippingId
+      } else {
+        checkoutShippingContact.id = DefaultId.ADDRESSID
+      }
+    } else if (checkoutShippingContact === null) {
+      const selectedShippingId = defaultShippingAddress
+        ? defaultShippingAddress.id
+        : savedShippingAddresses?.[0]?.id
+
+      if (selectedShippingId) {
+        setFallbackShippingId(selectedShippingId)
+      } else {
+        setFallbackShippingId(DefaultId.ADDRESSID)
+      }
+    }
+  }, [savedShippingAddresses])
+
+  const [selectedShippingAddressId, setSelectedShippingAddressId] = useState<number>(
+    checkoutShippingContact?.id as number
   )
 
   const [shouldShowAddAddressButton, setShouldShowAddAddressButton] = useState<boolean>(
@@ -102,13 +132,11 @@ const StandardShippingStep = (props: ShippingProps) => {
     }
   }, [savedShippingAddresses?.length])
 
-  const defaultShippingAddress = userGetters.getDefaultShippingAddress(
-    savedShippingAddresses as CustomerContact[]
-  )
-  const previouslySavedShippingAddress = userGetters.getOtherShippingAddress(
-    savedShippingAddresses as CustomerContact[],
-    defaultShippingAddress?.id as number
-  )
+  useEffect(() => {
+    if (selectedShippingAddressId === undefined) {
+      setSelectedShippingAddressId(fallbackShippingId as number)
+    }
+  }, [selectedShippingAddressId, fallbackShippingId])
 
   const { t } = useTranslation('common')
   const shippingAddressRef = useRef<HTMLDivElement>(null)
@@ -121,11 +149,6 @@ const StandardShippingStep = (props: ShippingProps) => {
     setStepStatusIncomplete,
   } = useCheckoutStepContext()
   const { updateOrderShippingInfo } = useUpdateOrderShippingInfo()
-  const { data: shippingMethods } = useGetShippingMethods(
-    checkoutId,
-    isNewAddressAdded,
-    selectedShippingAddressId
-  )
   const { validateCustomerAddress } = useValidateCustomerAddress()
   const { createCustomerAddress } = useCreateCustomerAddress()
 
@@ -188,6 +211,43 @@ const StandardShippingStep = (props: ShippingProps) => {
     }
   }
 
+  const handleAddressSelect = (addressId: string) => {
+    const selectedAddress = savedShippingAddresses?.find(
+      (address) => address?.id === Number(addressId)
+    )
+    if (selectedAddress?.id) {
+      const contact: CrContact = {
+        id: selectedAddress?.id,
+        firstName: selectedAddress?.firstName || '',
+        lastNameOrSurname: selectedAddress?.lastNameOrSurname || '',
+        middleNameOrInitial: selectedAddress?.middleNameOrInitial || '',
+        companyOrOrganization: selectedAddress?.companyOrOrganization || '',
+        email: selectedAddress?.email || checkout?.email || user?.emailAddress,
+        address: {
+          ...(selectedAddress?.address as any),
+        },
+        phoneNumbers: {
+          ...(selectedAddress?.phoneNumbers as any),
+        },
+      }
+      handleSaveAddressToCheckout({ contact })
+    }
+  }
+
+  useEffect(() => {
+    if (fallbackShippingId) {
+      const shipID = String(fallbackShippingId)
+      handleAddressSelect(shipID)
+    }
+  }, [fallbackShippingId])
+
+  // Moved this below to avoid initial error of method conflict.
+  const { data: shippingMethods } = useGetShippingMethods(
+    checkoutId,
+    isNewAddressAdded,
+    fallbackShippingId ? fallbackShippingId : selectedShippingAddressId
+  )
+
   // Use this function to submit the form with reCaptcha: Don't delete this code
   // This code is commented out because we are not using reCaptcha for now
   // In order to use this you need to pass this function to AddressForm component as a onSaveAddress
@@ -235,29 +295,6 @@ const StandardShippingStep = (props: ShippingProps) => {
   }
 
   const handleFormStatusChange = (status: boolean) => setIsAddressFormValid(status)
-
-  const handleAddressSelect = (addressId: string) => {
-    const selectedAddress = savedShippingAddresses?.find(
-      (address) => address?.id === Number(addressId)
-    )
-    if (selectedAddress?.id) {
-      const contact: CrContact = {
-        id: selectedAddress?.id,
-        firstName: selectedAddress?.firstName || '',
-        lastNameOrSurname: selectedAddress?.lastNameOrSurname || '',
-        middleNameOrInitial: selectedAddress?.middleNameOrInitial || '',
-        companyOrOrganization: selectedAddress?.companyOrOrganization || '',
-        email: selectedAddress?.email || checkout?.email || user?.emailAddress,
-        address: {
-          ...(selectedAddress?.address as any),
-        },
-        phoneNumbers: {
-          ...(selectedAddress?.phoneNumbers as any),
-        },
-      }
-      handleSaveAddressToCheckout({ contact })
-    }
-  }
 
   const handleAddNewAddress = () => {
     setValidateForm(false)
@@ -370,7 +407,7 @@ const StandardShippingStep = (props: ShippingProps) => {
       {shouldShowAddAddressButton && (
         <>
           <Stack gap={2} width="100%">
-            {defaultShippingAddress && (
+            {/* {defaultShippingAddress && (
               <>
                 <Typography variant="subtitle2" fontWeight={'bold'}>
                   {t('your-default-shipping-address')}
@@ -410,12 +447,13 @@ const StandardShippingStep = (props: ShippingProps) => {
                   onChange={handleAddressSelect}
                 />
               </>
-            )}
+            )} */}
 
-            {previouslySavedShippingAddress?.length > 0 && (
+            {/* {previouslySavedShippingAddress?.length > 0 && ( */}
+            {savedShippingAddresses && savedShippingAddresses?.length > 0 && (
               <>
                 <KiboRadio
-                  radioOptions={previouslySavedShippingAddress?.map((address, index) => {
+                  radioOptions={savedShippingAddresses?.map((address, index) => {
                     return {
                       value: String(address.id),
                       name: String(address.id),
