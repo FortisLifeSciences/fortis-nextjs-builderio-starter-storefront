@@ -1,10 +1,11 @@
 module.exports = {
   siteUrl: process.env.NEXT_PUBLIC_URL || 'http://localhost:3000', // change to prod url when deploying
-  generateRobotsTxt: true, // (optional)
-  // ...other options
-  sitemapSize: 500,
   changefreq: 'daily',
   priority: 0.8,
+  sitemapSize: 7000,
+  generateIndexSitemap: true,
+  generateRobotsTxt: true, // (optional)
+  // ...other options
   robotsTxtOptions: {
     transformRobotsTxt: async (_, robotsTxt) =>
       `#robots.txt for ${
