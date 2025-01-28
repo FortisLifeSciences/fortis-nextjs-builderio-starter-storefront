@@ -57,10 +57,13 @@ export const useFedExSchema = () => {
   return yup.object().shape({
     fedExAccountNumber: yup
       .string()
-      .matches(/^[0-9]+$/, t('this-field-is-number'))
-      .required(t('this-field-is-required'))
-      .min(9, t('this-field-is-min-max-length'))
-      .max(9, t('this-field-is-min-max-length')),
+      .matches(/^[0-9]+$/, t('this-field-is-min-max-length')) // Ensure only digits
+      .required(t('this-field-is-min-max-length')) // Ensure it's not empty
+      .test(
+        'length-9',
+        t('this-field-is-min-max-length'), // Error message
+        (value) => value?.length === 9 // Allow only length 9
+      ),
   })
 }
 
@@ -71,12 +74,14 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
 
   const [isFedExMethodSelected, setIsFedExMethodSelected] = useState<boolean>(false)
   const [fedExAccountNumber, setFedExAccountNumber] = useState<string>()
+  const [fedExAccountNumberInput, setFedExAccountNumberInput] = useState<string>()
   const [fedExAccountShippingMethod, setFedExAccountShippingMethod] = useState<CrShippingRate>()
   const [fedExAccountSelectedShippingMethodName, setFedExAccountSelectedShippingMethodName] =
     useState<string>()
   const [isFedExAccountUpdated, setIsFedExAccountUpdated] = useState<boolean>(false)
 
   const [isFedexAccountMethodUpdated, setIsFedexAccountMethodUpdated] = useState<boolean>(false)
+  const [localError, setLocalError] = useState('')
 
   const fedExSchema = useFedExSchema()
   // Define Variables and States
@@ -100,6 +105,18 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         fullyQualifiedName: 'tenant~customer-fedex-account-number',
       })
       setFedExAccountNumber(attr?.values?.length ? attr.values[0] : '')
+    }
+  }, [])
+
+  useEffect(() => {
+    if (customerAccount?.attributes?.length) {
+      // Get FedEx account number
+      // const attr = find(customerAccount?.attributes, {
+      //   fullyQualifiedName: 'tenant~customer-fedex-account-number',
+      // })
+      if (fedExAccountNumberInput) {
+        setFedExAccountNumber(fedExAccountNumberInput)
+      }
 
       // Get FedEx account shipping method name
       const customerShippingMethodAttr = find(customerAccount?.attributes, {
@@ -130,7 +147,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       isFedExMethodSelected &&
       !isFedExAccountUpdated &&
       fedExAccountNumber &&
-      fedExAccountNumber.length === 9 &&
+      fedExAccountNumber?.length === 9 &&
       fedExAccountSelectedShippingMethodName &&
       customerAccount
     ) {
@@ -149,8 +166,8 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
     if (
       isFedExMethodSelected &&
       fedExAccountNumber &&
-      ((previousFedExAccountNumber.current.length === 9 && fedExAccountNumber.length === 8) ||
-        fedExAccountNumber.length === 0) // Previous length was 9
+      (previousFedExAccountNumber.current.length > fedExAccountNumber.length ||
+        fedExAccountNumber.length === 0)
     ) {
       if (isFedexAccountMethodUpdated) {
         handleShippingMethodSelectChange('', '')
@@ -258,7 +275,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       updateFortisOrderAttribute('tenant~b2bAccountName', customerAccount?.companyOrOrganization)
     }
 
-    if (fedExAccountNumber) {
+    if (fedExAccountNumber && fedExAccountNumber.length === 9) {
       updateFortisOrderAttribute('tenant~customerFedexAccountNumber', fedExAccountNumber)
     }
   }, [customerAccount?.companyOrOrganization, fedExAccountNumber])
@@ -294,7 +311,8 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         !find(updatedCustomerAccountAttributes, {
           fullyQualifiedName: 'tenant~customer-fedex-account-number',
         }) &&
-        fedExAccountNumber
+        fedExAccountNumber &&
+        fedExAccountNumber.length === 9
       ) {
         updatedCustomerAccountAttributes.push({
           fullyQualifiedName: 'tenant~customer-fedex-account-number',
@@ -329,7 +347,12 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       <Box mt={2}>
         <Box
           m={0}
-          sx={{ display: 'grid', borderRadius: '5px', marginBottom: '10px', '&:hover': { borderRadius: '5px', backgroundColor: '#E3E2FF' } }}
+          sx={{
+            display: 'grid',
+            borderRadius: '5px',
+            marginBottom: '10px',
+            '&:hover': { borderRadius: '5px', backgroundColor: '#E3E2FF' },
+          }}
         >
           <KiboRadio
             radioOptions={
@@ -422,7 +445,14 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                     shippingMethod?.shippingMethodCode as string
                   )
                 } else if (fedExAccountShippingMethod) {
-                  handleShippingMethodSelectChange('', '')
+                  if (fedExAccountNumber && fedExAccountNumber.length === 9) {
+                    handleShippingMethodSelectChange(
+                      getFedExShippingMethods()?.[0]?.shippingMethodName as string,
+                      getFedExShippingMethods()?.[0]?.shippingMethodCode as string
+                    )
+                  } else {
+                    handleShippingMethodSelectChange('', '')
+                  }
                 }
               } else {
                 handleShippingMethodChange('')
@@ -448,25 +478,32 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                     value={field.value ?? fedExAccountNumber}
                     label={'FedEx Account Number'}
                     ref={null}
-                    error={!!errors?.fedExAccountNumber}
-                    helperText={errors?.fedExAccountNumber?.message}
+                    error={!!localError}
+                    helperText={localError}
                     onChange={(_name: string, value: string) => {
                       // Allow only digits and ensure the length doesn't exceed 9 characters
                       const sanitizedValue = value.replace(/[^0-9]/g, '').slice(0, 9)
                       field.onChange(sanitizedValue)
-                      setIsFedExAccountUpdated(false)
+                      setFedExAccountNumberInput(sanitizedValue)
                       setFedExAccountNumber(sanitizedValue)
 
-                      if (sanitizedValue.length === 9) {
+                      if (
+                        sanitizedValue == '' ||
+                        sanitizedValue.length === 0 ||
+                        sanitizedValue.length < 9
+                      ) {
+                        setLocalError(t('this-field-is-min-max-length')) // error message
+                        if (isFedexAccountMethodUpdated) {
+                          handleShippingMethodSelectChange('', '')
+                        }
+                      } else {
+                        setLocalError('') // Clear error message if valid
                         handleShippingMethodSelectChange(
                           getFedExShippingMethods()?.[0]?.shippingMethodName as string,
                           getFedExShippingMethods()?.[0]?.shippingMethodCode as string
                         )
-                      } else if (sanitizedValue.length === 0 || sanitizedValue.length < 9) {
-                        if (isFedexAccountMethodUpdated) {
-                          handleShippingMethodSelectChange('', '')
-                        }
                       }
+                      setIsFedExAccountUpdated(false)
                     }}
                     onBlur={field.onBlur}
                     required={true}
