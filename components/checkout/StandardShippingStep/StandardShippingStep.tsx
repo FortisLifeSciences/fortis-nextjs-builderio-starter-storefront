@@ -57,8 +57,6 @@ const StandardShippingStep = (props: ShippingProps) => {
 
   const { user } = useAuthContext()
   const checkoutShippingContact = orderGetters.getShippingContact(checkout)
-  console.log('This is checkout item ---> ', checkout)
-  console.log('This is checkoutShippingContact ---> ', checkoutShippingContact)
   const checkoutShippingMethodCode = orderGetters.getShippingMethodCode(checkout)
   // getting shipping address from all addresses returned from server
   const userShippingAddress = isAuthenticated
@@ -114,14 +112,9 @@ const StandardShippingStep = (props: ShippingProps) => {
     }
   }, [savedShippingAddresses])
 
-  console.log('This is fallback ---> ', fallbackShippingId)
-  console.log('This is checkoutShippingContact?.id ---> ', checkoutShippingContact?.id)
-
   const [selectedShippingAddressId, setSelectedShippingAddressId] = useState<number>(
     checkoutShippingContact?.id as number
   )
-
-  console.log('This is saved shipping addresses ---> ', savedShippingAddresses)
 
   const [shouldShowAddAddressButton, setShouldShowAddAddressButton] = useState<boolean>(
     Boolean(savedShippingAddresses?.length)
@@ -143,11 +136,7 @@ const StandardShippingStep = (props: ShippingProps) => {
     if (selectedShippingAddressId === undefined) {
       setSelectedShippingAddressId(fallbackShippingId as number)
     }
-
-    console.log('This is selectedShippingAddressId within effect ---> ', selectedShippingAddressId)
   }, [selectedShippingAddressId, fallbackShippingId])
-
-  console.log('This is selectedShippingAddressId ---> ', selectedShippingAddressId)
 
   const { t } = useTranslation('common')
   const shippingAddressRef = useRef<HTMLDivElement>(null)
