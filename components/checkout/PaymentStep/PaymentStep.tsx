@@ -194,6 +194,12 @@ const PaymentStep = (props: PaymentStepProps) => {
   const paymentTypes = loadPaymentTypes()
   const { validateCustomerAddress } = useValidateCustomerAddress()
 
+  const [isValidPurchaseOrder, setIsValidPurchaseOrder] = useState<boolean>(false)
+  const [isValidBillingAddress, setIsValidBillingAddress] = useState<boolean>(false)
+  const [isBillingDataUpdated, setIsBillingDataUpdated] = useState<boolean>(false)
+  const [isAddressSavedToAccount, setIsAddressSavedToAccount] = useState<boolean>(true)
+  const [isNewAddressAdded, setIsNewAddressAdded] = useState<boolean>(false)
+
   const newPaymentTypes = paymentTypes
     .map((paymentType: PaymentsType) =>
       paymentType.id === PaymentType.CREDITCARD ||
@@ -819,11 +825,6 @@ const PaymentStep = (props: PaymentStepProps) => {
     }
   }
 
-  const [isValidPurchaseOrder, setIsValidPurchaseOrder] = useState<boolean>(false)
-  const [isValidBillingAddress, setIsValidBillingAddress] = useState<boolean>(false)
-  const [isBillingDataUpdated, setIsBillingDataUpdated] = useState<boolean>(false)
-  const [isAddressSavedToAccount, setIsAddressSavedToAccount] = useState<boolean>(true)
-  const [isNewAddressAdded, setIsNewAddressAdded] = useState<boolean>(false)
   const [shouldShowAddBillingAddressButton, setShouldShowAddBillingAddressButton] =
     useState<boolean>(Boolean(savedBillingAddresses?.length))
 
@@ -993,6 +994,15 @@ const PaymentStep = (props: PaymentStepProps) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stepStatus])
+
+  useEffect(() => {
+    if (cardFormDetails.isCardDetailsValidated) {
+      selectedBillingAddressId && setIsValidBillingAddress(true)
+      handleBilingAddressSelect(String(selectedBillingAddressId))
+    } else {
+      null
+    }
+  }, [cardFormDetails.isCardDetailsValidated])
 
   const isAddPaymentMethodButtonDisabled = () => {
     return !(
