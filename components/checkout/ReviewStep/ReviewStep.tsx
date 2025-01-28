@@ -607,7 +607,9 @@ const ReviewStep = (props: ReviewStepProps) => {
                       <Typography
                         variant="body2"
                         key={'po_payment_summ_ custom_field_' + customField?.code}
-                      >{`${customField?.label} : ${customField?.value}`}</Typography>
+                      >
+                        {customField?.value ? `${customField?.label} : ${customField?.value}` : ''}
+                      </Typography>
                     )
                   })}
                 </Box>
