@@ -103,27 +103,38 @@ const ShippingPreferences = (props: MyProfileProps) => {
   }, [fedexNumber, reset])
 
   const handleResetPassword = async (data: FedexNumberInputData) => {
-    const Payload = {
-      userId: user?.userId,
-      accountId: user?.id,
-      attributeDefinitionId: userAttribute[0]?.attributeDefinitionId,
-      attributeFqn: userAttribute[0]?.fullyQualifiedName,
+    const { userId, id: accountId } = user || {}
+    const attributePayload = userAttribute?.[0]
+
+    const payload = {
+      userId,
+      accountId,
+      attributeFqn: attributePayload?.fullyQualifiedName || 'tenant~customer-fedex-account-number',
+      attributeDefinitionId: attributePayload?.attributeDefinitionId,
       value: data?.fedexNumber,
     }
-    const attributeData = await fetch('/api/user/updateCustomerAttribute', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ Payload }),
-    })
 
-    const attributeDetails = await attributeData.json()
-    if (attributeDetails?.data?.values[0]) {
-      setFedexNumber(attributeDetails?.data?.values[0])
-    } else {
+    try {
+      const apiEndpoint = attributePayload
+        ? '/api/user/updateCustomerAttribute'
+        : '/api/addCustomerAttribute'
+      const response = await fetch(apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ Payload: payload }),
+      })
+
+      const attributeDetails = await response.json()
+      const fedexNumber = attributeDetails?.data?.values[0] || ''
+
+      setFedexNumber(fedexNumber)
+    } catch (error) {
+      console.error('Error updating FedEx number:', error)
       setFedexNumber('')
     }
+
     setEditForm(false)
   }
 
