@@ -38,7 +38,12 @@ const queryClientHandler = (error: any, showSnackbar: any) => {
 
   if (error instanceof SyntaxError && error.message.includes('Unexpected token')) {
     //do nothing here for now
-  } else if (parsedError?.response?.status === '405' || error?.response?.error === '') {
+  } else if (
+    parsedError?.response?.status === '405' ||
+    error?.response?.error === '' ||
+    parsedError?.response?.message ===
+      'Validation Error: The Shipping Info address information must be filled in before shipping rates can be determined.'
+  ) {
     //do nothing here for now
   } else {
     showSnackbar(getErrorMessage(error?.response?.code, error?.response?.message), status)
