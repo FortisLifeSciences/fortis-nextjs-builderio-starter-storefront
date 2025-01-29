@@ -319,6 +319,7 @@ const ImageGallery = (props: ImageGalleryProps) => {
                       borderColor: 'primary.main',
                       cursor: 'pointer',
                     }}
+                    role="tab"
                     aria-label={(image?.imagealt as string) || t('product-image-alt')}
                     aria-selected={i === selectedImage.selectedIndex}
                     onClick={() => setSelectedImage({ ...selectedImage, selectedIndex: i })}

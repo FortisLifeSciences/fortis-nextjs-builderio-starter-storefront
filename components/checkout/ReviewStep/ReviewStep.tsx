@@ -650,13 +650,17 @@ const ReviewStep = (props: ReviewStepProps) => {
       </Box>
 
       <Box sx={{ marginBottom: '10px' }}>
-        <Typography variant="body2" sx={{ marginBottom: '10px' }}>
+        <Typography
+          variant="body2"
+          component="label"
+          htmlFor="specialInstruction"
+          sx={{ marginBottom: '10px' }}
+        >
           {t('Special Instructions')}
         </Typography>
         <Box>
           <TextField
             id="specialInstruction"
-            label=""
             multiline
             rows={1}
             variant="outlined"

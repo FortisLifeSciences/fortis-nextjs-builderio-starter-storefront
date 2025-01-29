@@ -118,6 +118,7 @@ const OrderHistoryItem = (props: OrderHistoryItemProps) => {
           <IconButton
             onClick={handleHistoryItemClick}
             data-testid="order-history-details-navigator"
+            aria-label="View Order Details"
           >
             <ArrowForwardIos fontSize="inherit" />
           </IconButton>
