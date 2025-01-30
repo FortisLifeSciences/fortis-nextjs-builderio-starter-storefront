@@ -33,10 +33,11 @@ import type { CrOrder, CrOrderInput, PaymentActionInput } from '@/lib/gql/types'
 interface StandardShipCheckoutProps {
   checkout: CrOrder
   isMultiShipEnabled: boolean
+  builderContent?: any
 }
 
 const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
-  const { checkout: initialCheckout, isMultiShipEnabled } = props
+  const { checkout: initialCheckout, isMultiShipEnabled, builderContent } = props
   const router = useRouter()
   const [promoError, setPromoError] = useState<string>('')
   const { checkoutId } = router.query
@@ -168,7 +169,7 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
           isDefaultAddress: false,
           addressType: AddressType.BILLING,
         })
-        try{
+        try {
           const savedCustomerAddressRes = await createCustomerAddress.mutateAsync(params)
 
           const cardParams = buildCreateCustomerCardParam(
@@ -177,8 +178,8 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
             savedCustomerAddressRes.id
           )
           await createCustomerCard.mutateAsync(cardParams)
-        }catch (error) {
-          console.error("Customer card creation failed:", error);
+        } catch (error) {
+          console.warn('Customer card creation failed:', error)
         } finally {
           // Proceed to the next steps regardless of success or failure
           const affiliation = process.env.NEXT_PUBLIC_KIBO_HOST
@@ -215,6 +216,7 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
         handleApplyCouponCode={handleApplyCouponCode}
         handleRemoveCouponCode={handleRemoveCouponCode}
         promoError={promoError}
+        builderContent={builderContent}
       >
         {/* <DetailsStep
           checkout={order as CrOrder}
