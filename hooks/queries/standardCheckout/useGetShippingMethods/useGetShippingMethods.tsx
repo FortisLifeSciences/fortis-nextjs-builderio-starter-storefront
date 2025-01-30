@@ -50,6 +50,7 @@ export const useGetShippingMethods = (
   isNewAddressAdded?: boolean,
   selectedShippingAddressId?: number
 ): UseShippingMethodsResponse => {
+  const shouldFetch = !!(checkoutId && selectedShippingAddressId)
   const {
     data = [],
     isLoading,
@@ -60,7 +61,7 @@ export const useGetShippingMethods = (
       isNewAddressAdded?.toString(),
       selectedShippingAddressId
     ),
-    queryFn: () => loadShippingMethods(checkoutId as string),
+    queryFn: shouldFetch ? () => loadShippingMethods(checkoutId as string) : undefined,
     // cacheTime: 0,
     enabled: !!(checkoutId && (isNewAddressAdded?.toString() || selectedShippingAddressId)),
   })
