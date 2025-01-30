@@ -32,17 +32,38 @@ const parseGraphQLError = (errorString: any) => {
 }
 
 const queryClientHandler = (error: any, showSnackbar: any) => {
+  if (!showSnackbar) return
   const status = 'error'
 
   const parsedError = parseGraphQLError(error)
+  const statusCode = error?.response?.status
+    ? error?.response?.status
+    : parsedError?.response?.status
+
+  if (
+    statusCode !== 405 &&
+    statusCode !== 409 &&
+    statusCode !== 500 &&
+    statusCode !== 404 &&
+    statusCode !== 401 &&
+    !(error instanceof SyntaxError && error.message.includes('Unexpected token')) &&
+    !(error instanceof SyntaxError && error.message.includes('Item not found:'))
+  ) {
+    console.warn('API Error:', error) // Log only for other errors
+  }
 
   if (error instanceof SyntaxError && error.message.includes('Unexpected token')) {
     //do nothing here for now
+  } else if (error instanceof SyntaxError && error.message.includes('Item not found:')) {
+    //do nothing here for now
   } else if (
-    parsedError?.response?.status === '405' ||
+    parsedError?.response?.status === 405 ||
     error?.response?.error === '' ||
     parsedError?.response?.message ===
-      'Validation Error: The Shipping Info address information must be filled in before shipping rates can be determined.'
+      'Validation Error: The Shipping Info address information must be filled in before shipping rates can be determined.' ||
+    parsedError?.response?.message === 'Validation Error: update exception' ||
+    statusCode === 409 ||
+    statusCode === 404
   ) {
     //do nothing here for now
   } else {
