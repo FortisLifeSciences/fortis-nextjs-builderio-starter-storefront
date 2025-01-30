@@ -128,6 +128,7 @@ const MetadataComponent: React.FC<MetadataComponentProps> = ({
 
         <Box sx={buttonStyle.iconContainer}>
           <IconButton
+            aria-label=" Meta Data Navigate forward"
             sx={[
               styleType === 'primary'
                 ? buttonStyle.arrowPrimaryButton
