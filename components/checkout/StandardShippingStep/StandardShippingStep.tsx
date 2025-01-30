@@ -242,11 +242,36 @@ const StandardShippingStep = (props: ShippingProps) => {
   }, [fallbackShippingId])
 
   // Moved this below to avoid initial error of method conflict.
-  // const { data: shippingMethods } = useGetShippingMethods(
-  //   checkoutId,
-  //   isNewAddressAdded,
-  //   fallbackShippingId ? fallbackShippingId : selectedShippingAddressId
-  // )
+  const shouldFetch = fallbackShippingId || selectedShippingAddressId
+
+  const { data: shippingMethods } = useGetShippingMethods(
+    checkoutId,
+    isNewAddressAdded,
+    shouldFetch ? fallbackShippingId || selectedShippingAddressId : undefined
+  )
+
+  const handleSaveShippingMethod = async (shippingMethodCode: string) => {
+    const shippingMethodName = shippingMethods.find(
+      (method) => method.shippingMethodCode === shippingMethodCode
+    )?.shippingMethodName as string
+
+    try {
+      await updateOrderShippingInfo.mutateAsync({
+        checkout,
+        contact: undefined,
+        email: checkout?.email ?? (user?.emailAddress as string),
+        shippingMethodCode,
+        shippingMethodName,
+      })
+      shippingAddressRef.current &&
+        (shippingAddressRef.current as Element).scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        })
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   // Use this function to submit the form with reCaptcha: Don't delete this code
   // This code is commented out because we are not using reCaptcha for now
@@ -352,37 +377,6 @@ const StandardShippingStep = (props: ShippingProps) => {
         setStepStatusValid()
       }
   }, [checkout.email, isAllItemsDigital, shipItems.length])
-
-  const shouldFetch = fallbackShippingId || selectedShippingAddressId
-
-  const { data: shippingMethods } = useGetShippingMethods(
-    checkoutId,
-    isNewAddressAdded,
-    shouldFetch ? fallbackShippingId || selectedShippingAddressId : undefined
-  )
-
-  const handleSaveShippingMethod = async (shippingMethodCode: string) => {
-    const shippingMethodName = shippingMethods.find(
-      (method) => method.shippingMethodCode === shippingMethodCode
-    )?.shippingMethodName as string
-
-    try {
-      await updateOrderShippingInfo.mutateAsync({
-        checkout,
-        contact: undefined,
-        email: checkout?.email ?? (user?.emailAddress as string),
-        shippingMethodCode,
-        shippingMethodName,
-      })
-      shippingAddressRef.current &&
-        (shippingAddressRef.current as Element).scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        })
-    } catch (error) {
-      console.error(error)
-    }
-  }
 
   if (checkout.items?.every((item) => item?.fulfillmentMethod === FulfillmentOptions.DIGITAL)) {
     return <Typography variant="subtitle2">{t('digital-products-shipping-text')}</Typography>
