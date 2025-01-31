@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import EastIcon from '@mui/icons-material/East'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
 import { Box, Divider, Grid, Paper, Typography } from '@mui/material'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 import MegaMenuTextLink from './MegaMenuTextLink'
 import {
@@ -43,6 +44,16 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
   onClose,
   onMouseEnter,
 }) => {
+  const router = useRouter()
+
+  useEffect(() => {
+    router.events.on('routeChangeComplete', onClose)
+
+    return () => {
+      router.events.off('routeChangeComplete', onClose)
+    }
+  }, [router, onClose])
+
   const [activeCategory, setActiveCategory] = useState(childCategory[0])
 
   const handleMouseEnterCategory = (category: (typeof childCategory)[0]) => {
