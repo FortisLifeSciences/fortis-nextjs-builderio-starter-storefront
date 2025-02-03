@@ -309,7 +309,7 @@ const ResourceProductCardListView = (props: ProductCardListViewProps) => {
                                     )}
                                 </Box> */}
               </Box>
-              <IconButton sx={ProductCardStyles.listIconButton}>
+              <IconButton sx={ProductCardStyles.listIconButton} title={'Product-Detail'}>
                 <ArrowForwardIos sx={{ color: 'white' }} />
               </IconButton>
             </Card>
