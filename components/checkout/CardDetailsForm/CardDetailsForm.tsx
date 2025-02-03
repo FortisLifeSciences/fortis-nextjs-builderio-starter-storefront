@@ -48,7 +48,7 @@ const useCardSchema = (showCvv: boolean) => {
     expiryDate: yup
       .string()
       .required(t('expiry-date-required'))
-      .matches(/^(0?[1-9]|1[012])[/-]\d{4}$/g, t('invalid-expiry-date-format'))
+      .matches(/^(0?[1-9]|1[0-2])[/]\d{4}$/g, t('invalid-expiry-date-format'))
       .test('expiry-date', t('invalid-expiry-date'), (value) => validateExpiryDate(value)),
     cvv: yup.string().when('$isEdit', (isEdit, schema) => {
       if (!isEdit && showCvv) {
@@ -144,11 +144,11 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                   label={t('expires-mm-yyyy')}
                   required={true}
                   onChange={(_name, value) => {
-                    if (value?.length > 1 && value?.length < 3) {
-                      field.onChange(`${value}/`)
-                    } else {
-                      field.onChange(value)
-                    }
+                    const formattedValue = value
+                      .replace(/\D/g, '')
+                      .replace(/^(\d{2})(\d)/g, '$1/$2')
+                      .substring(0, 7)
+                    field.onChange(formattedValue)
                   }}
                   onBlur={field.onBlur}
                   error={!!errors?.expiryDate}
@@ -171,9 +171,13 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                         value={field.value || ''}
                         label={t('cvv-code')}
                         required={true}
-                        onChange={(_name, value) => field.onChange(value)}
+                        onChange={(_name, value) => {
+                          const sanitizedValue = value.replace(/\D/g, '').substring(0, 4)
+                          field.onChange(sanitizedValue)
+                        }}
                         onBlur={field.onBlur}
                         error={!!errors?.cvv}
+                        inputProps={{ maxLength: 4 }}
                         helperText={errors?.cvv?.message as unknown as string}
                         // icon={
                         //   <Box pr={1} pt={0} sx={{ cursor: 'pointer' }}>
