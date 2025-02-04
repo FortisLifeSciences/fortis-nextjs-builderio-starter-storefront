@@ -78,11 +78,13 @@ const LoginDialog = (props: any) => {
   }
 
   const [googleReCaptcha, setGoogleReCaptcha] = useState(null)
+  const [pardOtFormUrl, setPardOtFormUrl] = useState('')
 
   useEffect(() => {
     const fetchSettings = async () => {
       const settings = await builder.get('theme-setting').promise()
       setGoogleReCaptcha(settings?.data?.googleReCaptcha)
+      setPardOtFormUrl(settings?.data?.pardotFormHandlerUrl)
     }
     fetchSettings()
   }, [])
@@ -191,6 +193,8 @@ const LoginDialog = (props: any) => {
         const purchaseOrderPayLoad = {
           accountId: accountId,
         }
+        console.log('creataccount', createAccount)
+
         const addingSalesRep = await fetch('/api/user/addSalesRep', {
           method: 'POST',
           headers: {
@@ -211,6 +215,24 @@ const LoginDialog = (props: any) => {
 
           const activeAccountDetails = await activeAccount.json()
           if (activeAccountDetails?.success === true) {
+            console.log('activeAccountDetails', activeAccountDetails)
+            const pardotFormHandlerRequest = await fetch(pardOtFormUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                userFirstName: activeAccountDetails?.data?.users?.[0]?.firstName,
+                userLastName: activeAccountDetails?.data?.users?.[0]?.lastName,
+                companyName: activeAccountDetails?.data?.companyOrOrganization,
+                userEmail: activeAccountDetails?.data?.users?.[0]?.emailAddress,
+                customerID: activeAccountDetails?.data?.users?.[0]?.userId,
+                accountID: activeAccountDetails?.data?.id,
+                marketing_optin: activeAccountDetails?.data?.users?.[0]?.acceptsMarketing,
+                isActive: true,
+              }),
+            })
+            console.log('pardotFormHandlerRequest success', pardotFormHandlerRequest.json())
             if (
               entityResult?.entityDetails?.creditLine === 'true' ||
               entityResult?.entityDetails?.creditLine === true
