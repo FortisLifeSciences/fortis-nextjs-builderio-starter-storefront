@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useLazyQuery } from '@apollo/client'
 import builder from '@builder.io/react'
 import { Stack, Typography, Link, styled } from '@mui/material'
+import router from 'next/router'
 import { useTranslation } from 'next-i18next'
 
 import { CustomDialog, KiboDialog } from '@/components/common'
@@ -240,21 +241,27 @@ const LoginDialog = (props: any) => {
               const purchaseOrder = await fetch('/api/user/create-purchase-order', {
                 method: 'POST',
                 headers: {
+                  Accept: 'application/json',
                   'Content-Type': 'application/json',
+                  'Access-Control-Allow-Origin': '*',
                 },
+                mode: 'no-cors',
                 body: JSON.stringify({ purchaseOrderPayLoad }),
               })
               const purchaseOrderResponse = await purchaseOrder.json()
               if (purchaseOrderResponse?.success === true) {
                 closeModal()
+                router.push({ pathname: '/account-success' })
               }
             } else {
               closeModal()
+              router.push({ pathname: '/account-success' })
             }
           }
         }
 
         closeModal()
+        router.push({ pathname: '/account-success' })
       }
     } catch (error) {
       showModal({
