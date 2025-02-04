@@ -400,7 +400,7 @@ const B2BAccountCreateForm = (props: AccountHierarchyFormProps) => {
                           dangerouslySetInnerHTML={{
                             __html:
                               t('terms-condition-checkbox-part1') +
-                              '<a href="/sale-terms">Sale Terms and Conditions</a> and the <a href="/privacy-policy">Privacy Policy</a>',
+                              '<a href="/sales-terms">Sales Terms and Conditions</a> and the <a href="/privacy-policy">Privacy Policy</a>',
                           }}
                         />
                       }
