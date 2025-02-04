@@ -119,7 +119,7 @@ const OrderHistoryTemplate = (props: OrderHistoryProps) => {
               <Button
                 variant="outlined"
                 endIcon={<Add fontSize="small" />}
-                sx={{ ...styles.filterByButton }}
+                sx={{ ...styles.filterByButton, fontSize: '1rem' }}
                 onClick={handleFilterBy}
               >
                 {t('filter-orders')}
