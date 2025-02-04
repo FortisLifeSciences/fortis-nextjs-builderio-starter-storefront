@@ -96,7 +96,7 @@ const buildAddressProps = (customerContact: CustomerContact) => {
 
 const AccountAddress = (props: AccountAddressProps) => {
   const { customerContact, isPrimaryAddress, addressType, editAddress, deleteAddress } = props
-  console.log('customerContact', customerContact)
+  //console.log('customerContact', customerContact)
   const { t } = useTranslation('common')
   return (
     <Box>
