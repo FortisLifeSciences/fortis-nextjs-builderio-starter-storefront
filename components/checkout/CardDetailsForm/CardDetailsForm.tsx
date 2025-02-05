@@ -4,7 +4,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { styled, FormControl, Box, Grid } from '@mui/material'
 import creditCardType from 'credit-card-type'
 import { useTranslation } from 'next-i18next'
-import { useForm, Controller, ControllerRenderProps } from 'react-hook-form'
+import { useForm, Controller, ControllerRenderProps, useWatch } from 'react-hook-form'
 import * as yup from 'yup'
 
 import { KiboImage, KiboTextBox } from '@/components/common'
@@ -22,7 +22,7 @@ export interface CardDetailsFormProps {
   validateForm: boolean
   showCvv?: boolean
   onSaveCardData: (cardData: CardForm) => void
-  onFormStatusChange?: (status: boolean) => void
+  onFormStatusChange?: (status: boolean, formData?: CardForm) => void
 }
 
 const StyledCardDiv = styled('div')(() => ({
@@ -82,10 +82,14 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
     context: { isEdit: cardValue?.cardNumber?.includes('*') },
   })
 
+  const watchedFormData = useWatch({ control })
+
   const onValid = async (formData: CardForm) => {
     const cardData = prepareCardDataParams(formData)
     const cardDataParams = { ...cardData, isCardDetailsValidated: isValid, isDataUpdated: true }
     onSaveCardData(cardDataParams)
+
+    if (onFormStatusChange) onFormStatusChange(isValid, cardDataParams) // Send form data
   }
 
   const handleCardType = (field: ControllerRenderProps<CardForm, 'cardNumber'>, value: string) => {
@@ -95,11 +99,18 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
   }
 
   useEffect(() => {
-    if (onFormStatusChange) onFormStatusChange(isValid)
-    if (validateForm) handleSubmit(onValid)()
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isValid, validateForm])
+    if (onFormStatusChange) {
+      const cardDataParams = {
+        ...prepareCardDataParams(watchedFormData), // Prepare card data
+        isCardDetailsValidated: isValid,
+        isDataUpdated: false, // Since it's not saved yet
+      }
+      onFormStatusChange(isValid, cardDataParams)
+    }
+    if (validateForm && isValid) {
+      handleSubmit(onValid)()
+    }
+  }, [isValid, validateForm, watchedFormData])
 
   return (
     <StyledCardDiv data-testid="card-details" sx={{ ml: 0, pl: 0 }}>
