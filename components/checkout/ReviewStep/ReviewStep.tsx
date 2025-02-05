@@ -273,7 +273,7 @@ const ReviewStep = (props: ReviewStepProps) => {
       await onCreateOrder(checkout)
 
       setStepStatusComplete()
-      setStepNext()
+      // setStepNext()
     } catch (e) {
       console.log('error', e)
     }
