@@ -52,6 +52,12 @@ const queryClientHandler = (error: any, showSnackbar: any) => {
     console.warn('API Error:', error) // Log only for other errors
   }
 
+  if (error instanceof SyntaxError && error.message.includes('Auth declined')) {
+    showSnackbar(
+      'Auth Declined, Error in payment details! Enter correct payment details and please try again!',
+      status
+    )
+  }
   if (error instanceof SyntaxError && error.message.includes('Unexpected token')) {
     //do nothing here for now
   } else if (error instanceof SyntaxError && error.message.includes('Item not found:')) {
