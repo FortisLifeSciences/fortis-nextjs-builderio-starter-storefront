@@ -214,24 +214,26 @@ const LoginDialog = (props: any) => {
 
           const activeAccountDetails = await activeAccount.json()
           if (activeAccountDetails?.success === true) {
+            const formData = new URLSearchParams({
+              userFirstName: activeAccountDetails?.data?.users?.[0]?.firstName,
+              userLastName: activeAccountDetails?.data?.users?.[0]?.lastName,
+              companyName: activeAccountDetails?.data?.companyOrOrganization,
+              userEmail: activeAccountDetails?.data?.users?.[0]?.emailAddress,
+              customerID: activeAccountDetails?.data?.users?.[0]?.userId,
+              accountID: activeAccountDetails?.data?.id,
+              marketing_optin: activeAccountDetails?.data?.users?.[0]?.acceptsMarketing,
+            })
+
             const pardotFormHandlerRequest = await fetch(pardOtFormUrl, {
               method: 'POST',
               headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
                 'Access-Control-Allow-Origin': '*',
               },
               mode: 'no-cors',
-              body: JSON.stringify({
-                userFirstName: activeAccountDetails?.data?.users?.[0]?.firstName,
-                userLastName: activeAccountDetails?.data?.users?.[0]?.lastName,
-                companyName: activeAccountDetails?.data?.companyOrOrganization,
-                userEmail: activeAccountDetails?.data?.users?.[0]?.emailAddress,
-                customerID: activeAccountDetails?.data?.users?.[0]?.userId,
-                accountID: activeAccountDetails?.data?.id,
-                marketing_optin: activeAccountDetails?.data?.users?.[0]?.acceptsMarketing,
-              }),
+              body: formData, // Send URLSearchParams as the body
             })
+
             if (
               entityResult?.entityDetails?.creditLine === 'true' ||
               entityResult?.entityDetails?.creditLine === true
