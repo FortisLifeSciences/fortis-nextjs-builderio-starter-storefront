@@ -45,7 +45,7 @@ export const useProductCardActions = (shouldFetchShippingMethods?: boolean) => {
           value,
           '',
           cartItemGetters.getCartItemProductCode(cartResponse),
-          cartItemGetters.getCartItemProductName(cartResponse),
+          cartItemGetters.getCartItemProductName(cartResponse).replace(/[^a-zA-Z0-9 -]/g, ''),
           '',
           cartItemGetters.getCartItemBrand(cartResponse),
           cartItemGetters.getCartItemVariantCode(cartResponse),
