@@ -56,11 +56,35 @@ const queryClientHandler = (error: any, showSnackbar: any) => {
     console.warn('API Error:', error) // Log only for other errors
   }
 
+  if (parsedError && parsedError.response.message.includes('Auth declined')) {
+    showSnackbar(
+      'Auth Declined, Error in payment! Please check billing details and please try again!',
+      status
+    )
+  } else if (
+    parsedError &&
+    parsedError.response.message ===
+      'Validation Error: Auth declined: GatewayResponse: 2 This transaction has been declined.'
+  ) {
+    showSnackbar(
+      'Auth Declined, Error in payment! Please check billing details and please try again!',
+      status
+    )
+  } else if (
+    parsedError &&
+    parsedError.response.message.includes('This transaction has been declined')
+  ) {
+    showSnackbar(
+      'Auth Declined, Error in payment! Please check billing details and please try again!',
+      status
+    )
+  }
+
   if (error instanceof SyntaxError && error.message.includes('Auth declined')) {
-    // showSnackbar(
-    //   'Auth Declined, Error in payment details! Enter correct payment details and please try again!',
-    //   status
-    // )
+    showSnackbar(
+      'Auth Declined, Error in payment details! Enter correct payment details and please try again!',
+      status
+    )
     console.log('Ths is error message in SYntax --> ', error)
   }
   if (error instanceof SyntaxError && error.message.includes('Unexpected token')) {
