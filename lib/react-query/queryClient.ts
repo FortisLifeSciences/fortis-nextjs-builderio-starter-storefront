@@ -36,6 +36,10 @@ const queryClientHandler = (error: any, showSnackbar: any) => {
   const status = 'error'
 
   const parsedError = parseGraphQLError(error)
+
+  console.log('This is error ---> ', error)
+  console.log('This is parsed error ---> ', parsedError)
+
   const statusCode = error?.response?.status
     ? error?.response?.status
     : parsedError?.response?.status
@@ -53,10 +57,11 @@ const queryClientHandler = (error: any, showSnackbar: any) => {
   }
 
   if (error instanceof SyntaxError && error.message.includes('Auth declined')) {
-    showSnackbar(
-      'Auth Declined, Error in payment details! Enter correct payment details and please try again!',
-      status
-    )
+    // showSnackbar(
+    //   'Auth Declined, Error in payment details! Enter correct payment details and please try again!',
+    //   status
+    // )
+    console.log('Ths is error message in SYntax --> ', error)
   }
   if (error instanceof SyntaxError && error.message.includes('Unexpected token')) {
     //do nothing here for now
