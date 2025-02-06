@@ -241,7 +241,19 @@ const PaymentStep = (props: PaymentStepProps) => {
   const handlePaymentTypeRadioChange = (value: string) => {
     setSelectedPaymentTypeRadio(value)
     setIsAddingNewPayment(false)
-    setBillingFormAddress(initialBillingAddressData)
+    if (value === 'CreditCard') {
+      setIsValidPurchaseOrder(false)
+      setPurchaseOrderFormDetails(initialPurchaseOrderFormData)
+    } else if (value === 'PurchaseOrder') {
+      setCardFormDetails(initialCardFormData)
+    }
+
+    if (selectedBillingAddressId) {
+      setIsValidBillingAddress(true)
+      handleBilingAddressSelect(String(selectedBillingAddressId))
+    } else {
+      setIsValidBillingAddress(false)
+    }
   }
   // Purchase Order details
   const handleInitialPODetails: SavedPODetails | null = useMemo(() => {
@@ -400,6 +412,7 @@ const PaymentStep = (props: PaymentStepProps) => {
   const [isAddressFormValid, setIsAddressFormValid] = useState<boolean>(false)
 
   const handleBillingFormAddress = (address: Address) => {
+    console.log('Address', address)
     const updatedAddress = {
       contact: {
         ...address.contact,
@@ -414,6 +427,19 @@ const PaymentStep = (props: PaymentStepProps) => {
     })
     setIsBillingDataUpdated(address?.isDataUpdated ? true : false)
     // handleSaveAddressToCheckout(updatedAddress)
+  }
+
+  const handleBillingFormAddressSAVE = (address: Address) => {
+    console.log('Address Form Data', address)
+    const contact: CrContact = address?.contact
+
+    handleSaveBillingAddressToCheckout({ contact: { ...contact, email: checkout?.email } })
+    handleBillingFormValidDetails(true)
+    handleBillingFormAddress({
+      contact: { ...contact, email: checkout?.email } as ContactForm,
+      isSameBillingShippingAddress: false,
+      isDataUpdated: true,
+    })
   }
 
   const handleBillingFormValidDetails = (isValid: boolean) => {
@@ -451,6 +477,11 @@ const PaymentStep = (props: PaymentStepProps) => {
     }
 
     setIsValidBillingAddress(value)
+    if (selectedPaymentTypeRadio === PaymentType.PURCHASEORDER) {
+      if (isValidBillingAddress && isValidPurchaseOrder) {
+        setValidateForm(true)
+      }
+    }
   }
 
   const cancelAddingNewPaymentMethod = () => {
@@ -886,6 +917,7 @@ const PaymentStep = (props: PaymentStepProps) => {
   }
 
   const handleBilingAddressSelect = (addressId: string) => {
+    console.log('address select', addressId)
     const selectedAddress = savedBillingAddresses?.find(
       (address) => address?.id === Number(addressId)
     )
@@ -912,6 +944,9 @@ const PaymentStep = (props: PaymentStepProps) => {
         isSameBillingShippingAddress: false,
         isDataUpdated: true,
       })
+      if (selectedPaymentTypeRadio === PaymentType.PURCHASEORDER) {
+        setValidateForm(true)
+      }
     }
   }
 
@@ -920,6 +955,7 @@ const PaymentStep = (props: PaymentStepProps) => {
     setShouldShowAddBillingAddressButton(false)
     setIsNewAddressAdded(false)
     setSelectedBillingAddressId(0)
+    setIsValidBillingAddress(false)
     setBillingFormAddress({
       contact: { ...initialBillingAddressData?.contact, email: checkout?.email } as ContactForm,
       isSameBillingShippingAddress: false,
@@ -996,13 +1032,24 @@ const PaymentStep = (props: PaymentStepProps) => {
   }, [stepStatus])
 
   useEffect(() => {
-    if (cardFormDetails.isCardDetailsValidated) {
+    if (cardFormDetails.isCardDetailsValidated || isValidPurchaseOrder) {
       selectedBillingAddressId && setIsValidBillingAddress(true)
       handleBilingAddressSelect(String(selectedBillingAddressId))
     } else {
       null
     }
-  }, [cardFormDetails.isCardDetailsValidated])
+  }, [cardFormDetails.isCardDetailsValidated, isValidPurchaseOrder])
+
+  useEffect(() => {
+    if (selectedPaymentTypeRadio === PaymentType.PURCHASEORDER) {
+      console.log('CD')
+      if (isValidBillingAddress && isValidPurchaseOrder) {
+        setValidateForm(true)
+      }
+    } else {
+      console.log('CD-1')
+    }
+  }, [isValidBillingAddress, isValidPurchaseOrder])
 
   const isAddPaymentMethodButtonDisabled = () => {
     return !(
@@ -1572,85 +1619,97 @@ const PaymentStep = (props: PaymentStepProps) => {
                             </Box>*/}
                           </>
                         )}
+                        {(!shouldShowAddBillingAddressButton ||
+                          (!(selectedPaymentTypeRadio === PaymentType.PURCHASEORDER) &&
+                            !billingFormAddress?.isSameBillingShippingAddress)) && (
+                          <>
+                            <Divider orientation="horizontal" flexItem sx={{ mt: 2 }} />
+                            <Stack
+                              pl={0}
+                              gap={2}
+                              mt={2}
+                              sx={{
+                                width: '100%',
+                                display: 'flex',
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                              }}
+                            >
+                              <Button
+                                variant="contained"
+                                color="secondary"
+                                // onClick={cancelAddingNewPaymentMethod}
+                                onClick={() => {
+                                  if (!shouldShowAddBillingAddressButton) {
+                                    setShouldShowAddBillingAddressButton(true)
+                                    setSelectedBillingAddressId(
+                                      (checkoutBillingContact?.id ||
+                                        defaultBillingAddress?.id) as number
+                                    )
+                                  } else {
+                                    cancelAddingNewPaymentMethod()
+                                  }
+                                }}
+                                sx={{
+                                  width: '180px',
+                                  background: 'transparent',
+                                  color: 'primary.main',
+                                  border: '1px solid primary.main',
+                                  borderTopRightRadius: 26,
+                                  borderBottomLeftRadius: 26,
+                                  fontSize: '1rem',
+                                  padding: '12px 18px',
+                                  lineHeight: 1.4,
+                                  '&:hover': {
+                                    background: '#E3E2FF',
+                                    color: '#4C47C4',
+                                    border: '1px solid #E3E2FF',
+                                  },
+                                }}
+                              >
+                                {t('cancel')}
+                              </Button>
 
-                        <Divider orientation="horizontal" flexItem sx={{ mt: 2 }} />
-                        <Stack
-                          pl={0}
-                          gap={2}
-                          mt={2}
-                          sx={{
-                            width: '100%',
-                            display: 'flex',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                          }}
-                        >
-                          <Button
-                            variant="contained"
-                            color="secondary"
-                            // onClick={cancelAddingNewPaymentMethod}
-                            onClick={() => {
-                              if (!shouldShowAddBillingAddressButton) {
-                                setShouldShowAddBillingAddressButton(true)
-                                setSelectedBillingAddressId(
-                                  (checkoutBillingContact?.id ||
-                                    defaultBillingAddress?.id) as number
-                                )
-                              } else {
-                                cancelAddingNewPaymentMethod()
-                              }
-                            }}
-                            sx={{
-                              width: '180px',
-                              background: 'transparent',
-                              color: 'primary.main',
-                              border: '1px solid primary.main',
-                              borderTopRightRadius: 26,
-                              borderBottomLeftRadius: 26,
-                              fontSize: '1rem',
-                              padding: '12px 18px',
-                              lineHeight: 1.4,
-                              '&:hover': {
-                                background: '#E3E2FF',
-                                color: '#4C47C4',
-                                border: '1px solid #E3E2FF',
-                              },
-                            }}
-                          >
-                            {t('cancel')}
-                          </Button>
-
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            {...(isAddPaymentMethodButtonDisabled() && { disabled: true })}
-                            onClick={handleSaveNewPaymentMethod}
-                            sx={{
-                              width: 'auto',
-                              background: 'primary.main',
-                              color: '#ffffff',
-                              border: 0,
-                              padding: '12px 26px',
-                              textAlign: 'center',
-                              fontFamily: 'Poppins',
-                              fontSize: '16px',
-                              fontStyle: 'normal',
-                              fontWeight: '500',
-                              lineHeight: '24px',
-                              borderRadius: '0px 26px',
-                              '&:hover': {
-                                background: '#4C47C4',
-                                color: '#FFFFFF',
-                                border: 0,
-                              },
-                              '&:disabled': {
-                                backgroundColor: '#8D8D8D !important',
-                              },
-                            }}
-                          >
-                            {t('save address')}
-                          </Button>
-                        </Stack>
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                {...(isAddPaymentMethodButtonDisabled() && { disabled: true })}
+                                // onClick={handleSaveNewPaymentMethod}
+                                onClick={() => {
+                                  if (billingFormAddress) {
+                                    handleBillingFormAddressSAVE(billingFormAddress)
+                                    // handleBillingFormAddress(billingFormAddress) // Save address from state
+                                    handleSaveNewPaymentMethod() // Call save payment method logic
+                                  }
+                                }}
+                                sx={{
+                                  width: 'auto',
+                                  background: 'primary.main',
+                                  color: '#ffffff',
+                                  border: 0,
+                                  padding: '12px 26px',
+                                  textAlign: 'center',
+                                  fontFamily: 'Poppins',
+                                  fontSize: '16px',
+                                  fontStyle: 'normal',
+                                  fontWeight: '500',
+                                  lineHeight: '24px',
+                                  borderRadius: '0px 26px',
+                                  '&:hover': {
+                                    background: '#4C47C4',
+                                    color: '#FFFFFF',
+                                    border: 0,
+                                  },
+                                  '&:disabled': {
+                                    backgroundColor: '#8D8D8D !important',
+                                  },
+                                }}
+                              >
+                                {t('save address')}
+                              </Button>
+                            </Stack>
+                          </>
+                        )}
                       </>
                     ) : null}
                     {!(shouldShowPurchaseOrderForm || shouldShowCardForm) ? (
