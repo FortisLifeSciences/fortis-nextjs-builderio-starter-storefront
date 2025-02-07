@@ -1,0 +1,54 @@
+#robots.txt for https://fortis-nextjs-builderio-starter-storefront-develop.vercel.app/ updated 2025-02-06T09:04:29.215Z  
+
+# Googlebot
+User-agent: Googlebot
+Disallow: /
+
+# PowerMapper
+User-agent: PowerMapper
+Allow: /
+
+# *
+User-agent: *
+Allow: /
+
+# *
+User-agent: *
+Disallow: /admin*
+Disallow: /cart*
+Disallow: /checkout*
+Disallow: /search*
+Disallow: /my-account*
+Disallow: /user*
+Disallow: /util*
+Disallow: /storefront/email/render/*
+Disallow: /print-return*
+Disallow: /guest-checkout*
+Disallow: /print-order*
+Disallow: /nomore*
+Disallow: /registrations-sign-in*
+Disallow: /home-temp*
+Disallow: /test-pricelist*
+Disallow: /*?*
+
+# AhrefsSiteAudit
+User-agent: AhrefsSiteAudit
+Allow: /
+
+# Baiduspider
+User-agent: Baiduspider
+Disallow: /
+
+# *
+User-agent: *
+Disallow: /*
+
+# *
+User-agent: *
+Crawl-delay: 5
+
+# Host
+Host: https://fortis-nextjs-builderio-starter-storefront-develop.vercel.app/
+
+# Sitemaps
+Sitemap: https://fortis-nextjs-builderio-starter-storefront-develop.vercel.app/sitemap.xml

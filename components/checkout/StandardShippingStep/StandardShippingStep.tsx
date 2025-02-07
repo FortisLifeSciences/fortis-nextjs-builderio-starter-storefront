@@ -242,30 +242,13 @@ const StandardShippingStep = (props: ShippingProps) => {
   }, [fallbackShippingId])
 
   // Moved this below to avoid initial error of method conflict.
+  const shouldFetch = fallbackShippingId || selectedShippingAddressId
+
   const { data: shippingMethods } = useGetShippingMethods(
     checkoutId,
     isNewAddressAdded,
-    fallbackShippingId ? fallbackShippingId : selectedShippingAddressId
+    shouldFetch ? fallbackShippingId || selectedShippingAddressId : undefined
   )
-
-  // Use this function to submit the form with reCaptcha: Don't delete this code
-  // This code is commented out because we are not using reCaptcha for now
-  // In order to use this you need to pass this function to AddressForm component as a onSaveAddress
-  // const submitFormWithRecaptcha = ({ contact }: { contact: CrContact }) => {
-  //   if (!executeRecaptcha) {
-  //     console.log('Execute recaptcha not yet available')
-  //     return
-  //   }
-  //   executeRecaptcha('enquiryFormSubmit').then(async (gReCaptchaToken) => {
-  //     const captcha = await validateGoogleReCaptcha(gReCaptchaToken)
-
-  //     if (captcha?.status === 'success') {
-  //       await handleSaveAddressToCheckout({ contact })
-  //     } else {
-  //       showSnackbar(captcha.message, 'error')
-  //     }
-  //   })
-  // }
 
   const handleSaveShippingMethod = async (shippingMethodCode: string) => {
     const shippingMethodName = shippingMethods.find(
@@ -289,6 +272,25 @@ const StandardShippingStep = (props: ShippingProps) => {
       console.error(error)
     }
   }
+
+  // Use this function to submit the form with reCaptcha: Don't delete this code
+  // This code is commented out because we are not using reCaptcha for now
+  // In order to use this you need to pass this function to AddressForm component as a onSaveAddress
+  // const submitFormWithRecaptcha = ({ contact }: { contact: CrContact }) => {
+  //   if (!executeRecaptcha) {
+  //     console.log('Execute recaptcha not yet available')
+  //     return
+  //   }
+  //   executeRecaptcha('enquiryFormSubmit').then(async (gReCaptchaToken) => {
+  //     const captcha = await validateGoogleReCaptcha(gReCaptchaToken)
+
+  //     if (captcha?.status === 'success') {
+  //       await handleSaveAddressToCheckout({ contact })
+  //     } else {
+  //       showSnackbar(captcha.message, 'error')
+  //     }
+  //   })
+  // }
 
   const handleStoreLocatorClick = () => {
     /**/

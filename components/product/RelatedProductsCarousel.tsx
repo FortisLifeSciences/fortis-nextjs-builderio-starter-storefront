@@ -209,6 +209,7 @@ const RelatedProductsCarousel = (props: any) => {
                   color: isBeginning ? 'grey.500' : 'grey.900',
                   padding: 0,
                 }}
+                aria-label="Previous slide"
               >
                 <ArrowBackIos />
               </IconButton>
@@ -224,6 +225,7 @@ const RelatedProductsCarousel = (props: any) => {
                   color: isEnd ? 'grey.500' : 'grey.900',
                   padding: 0,
                 }}
+                aria-label="Next slide"
               >
                 <ArrowForwardIos />
               </IconButton>

@@ -783,7 +783,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
             sx={{
               width: { md: '80%', sm: '80%', xs: '100%' },
               display: 'flex',
-              flexDirection: 'row',
+              flexDirection: { md: 'row', sm: 'row', xs: 'column' },
             }}
           >
             <Box>
@@ -1267,7 +1267,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
       {!isQuickViewModal && (
         <>
           <Grid item xs={12} paddingY={3}>
-            <Divider />
+            <Divider sx={{ borderBottomWidth: '2px' }} />
           </Grid>
           <Grid item xs={12}>
             <Typography
@@ -1291,7 +1291,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
       <ProductApplications product={updatedProduct} currentProduct={currentProduct} />
       <AdditionalProductInfo product={product} />
       <Grid item xs={12} paddingY={3} pb={'20px'}>
-        <Divider />
+        <Divider sx={{ borderBottomWidth: '2px' }} />
       </Grid>
       {digitalDocumentData && digitalDocumentData.length > 0 ? (
         <ProductRecentDocuments
@@ -1300,9 +1300,6 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
           documents={digitalDocumentData}
         />
       ) : null}
-      <Grid item xs={12} paddingY={3}>
-        <Divider />
-      </Grid>
       {!isQuickViewModal && children}
 
       {/* Citations */}
@@ -1322,8 +1319,8 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
         </Box>
       ) : null}
 
-      <Grid item xs={12} paddingY={3} pb={'30px'}>
-        <Divider />
+      <Grid item xs={12} paddingY={4} pb={'30px'}>
+        <Divider sx={{ borderBottomWidth: '2px' }} />
       </Grid>
       {relatedProducts && relatedProducts.length > 0 ? (
         <RelatedProductsCarousel relatedProducts={relatedProducts} />

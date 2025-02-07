@@ -1,3 +1,4 @@
+import builder from '@builder.io/react'
 import getConfig from 'next/config'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
@@ -16,6 +17,7 @@ interface CheckoutPageProps {
   checkoutId: string
   checkout: CrOrder | Checkout
   isMultiShipEnabled?: boolean
+  builderContent?: any
 }
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
@@ -26,6 +28,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const checkout = isMultiShipEnabled
     ? await getMultiShipCheckout(checkoutId, req as NextApiRequest, res as NextApiResponse)
     : await getCheckout(checkoutId, req as NextApiRequest, res as NextApiResponse)
+
+  const builderContent = await builder.get('checkout-order-summary-section').toPromise()
 
   if (!checkout) {
     return { notFound: true }
@@ -44,6 +48,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     props: {
       checkout,
       checkoutId,
+      builderContent,
       isMultiShipEnabled: isMultiShipEnabled,
       ...(await serverSideTranslations(locale as string, ['common'])),
     },
@@ -53,7 +58,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 const CheckoutPage: NextPage<CheckoutPageProps> = (props) => {
   const { t } = useTranslation('common')
   const steps = [t('shipping'), t('payment'), t('review')] //t('details'),
-  const { checkout, isMultiShipEnabled, ...rest } = props
+  const { checkout, isMultiShipEnabled, builderContent, ...rest } = props
   const quoteCheckout = !isMultiShipEnabled ? (checkout as CrOrder) : null
   const quoteId = quoteCheckout?.originalQuoteId
   return (
@@ -70,6 +75,7 @@ const CheckoutPage: NextPage<CheckoutPageProps> = (props) => {
             {...rest}
             checkout={checkout as CrOrder}
             isMultiShipEnabled={!!isMultiShipEnabled}
+            builderContent={builderContent}
           />
         )}
       </CheckoutStepProvider>

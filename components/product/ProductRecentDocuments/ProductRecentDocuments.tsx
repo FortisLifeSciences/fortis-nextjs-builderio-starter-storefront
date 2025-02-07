@@ -94,7 +94,7 @@ const ProductRecentDocuments = (props: any) => {
         component={Paper}
         sx={{
           borderRadius: 0,
-          boxShadow: '0px 1px 0px rgba(0,0,0,0.14),0px 1px 0px rgba(0,0,0,0.12)',
+          boxShadow: 'none',
         }}
       >
         <Table>
@@ -108,9 +108,10 @@ const ProductRecentDocuments = (props: any) => {
                     backgroundColor: grey[300],
                     fontWeight: 500,
                     paddingTop: 0,
+                    paddingLeft: header === 'Lot' ? 0 : tableCellStyles.paddingLeft,
                     width: index === 0 ? '60%' : index === 1 ? '25%' : '15%',
                   }}
-                  aria-label={index===2 ? "Download document": header }
+                  aria-label={index === 2 ? 'Download document' : header}
                 >
                   {header}
                 </TableCell>

@@ -61,6 +61,7 @@ const ResetPasswordDialog = () => {
       setIsResetPassword(res?.resetPassword)
     } catch (error) {
     } finally {
+      setIsResetPassword(true)
       setIsSubmitting(false) // Reset loading state
     }
   }

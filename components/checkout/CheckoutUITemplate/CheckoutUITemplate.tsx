@@ -21,6 +21,7 @@ interface CheckoutUITemplateProps<T> {
   handleApplyCouponCode: (couponCode: string) => void
   handleRemoveCouponCode: (couponCode: string) => void
   children?: React.ReactNode
+  builderContent?: any
 }
 const buttonStyle = {
   height: '48px',
@@ -53,6 +54,7 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
     promoError,
     isMultiShipEnabled = false,
     children,
+    builderContent,
   } = props
   const { t } = useTranslation('common')
   const { activeStep, stepStatus, steps, setStepStatusSubmit, setStepBack } =
@@ -162,6 +164,10 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
             promoError={promoError}
           />
         )} */}
+
+        {/* <Box>
+          <p>{builderContent?.data?.emailAddress}</p>
+        </Box> */}
       </Box>
     </Stack>
   ) : null

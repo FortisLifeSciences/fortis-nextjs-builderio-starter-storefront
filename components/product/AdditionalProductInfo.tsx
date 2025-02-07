@@ -39,6 +39,9 @@ const styles = {
 
 const AdditionalProductInfo = (props: any) => {
   const { product } = props
+
+  //console.log('Product Details: ', product)
+
   const targetSentence = product?.properties?.find(
     (data: any) => data.attributeFQN === 'tenant~target-sentence'
   )

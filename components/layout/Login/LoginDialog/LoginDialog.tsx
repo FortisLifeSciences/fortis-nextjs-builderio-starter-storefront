@@ -216,24 +216,26 @@ const LoginDialog = (props: any) => {
 
           const activeAccountDetails = await activeAccount.json()
           if (activeAccountDetails?.success === true) {
-            console.log('activeAccountDetails', activeAccountDetails)
+            const formData = new URLSearchParams({
+              userFirstName: activeAccountDetails?.data?.users?.[0]?.firstName,
+              userLastName: activeAccountDetails?.data?.users?.[0]?.lastName,
+              companyName: activeAccountDetails?.data?.companyOrOrganization,
+              userEmail: activeAccountDetails?.data?.users?.[0]?.emailAddress,
+              customerID: activeAccountDetails?.data?.users?.[0]?.userId,
+              accountID: activeAccountDetails?.data?.id,
+              marketing_optin: activeAccountDetails?.data?.users?.[0]?.acceptsMarketing,
+            })
+
             const pardotFormHandlerRequest = await fetch(pardOtFormUrl, {
               method: 'POST',
               headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Access-Control-Allow-Origin': '*',
               },
-              body: JSON.stringify({
-                userFirstName: activeAccountDetails?.data?.users?.[0]?.firstName,
-                userLastName: activeAccountDetails?.data?.users?.[0]?.lastName,
-                companyName: activeAccountDetails?.data?.companyOrOrganization,
-                userEmail: activeAccountDetails?.data?.users?.[0]?.emailAddress,
-                customerID: activeAccountDetails?.data?.users?.[0]?.userId,
-                accountID: activeAccountDetails?.data?.id,
-                marketing_optin: activeAccountDetails?.data?.users?.[0]?.acceptsMarketing,
-                isActive: true,
-              }),
+              mode: 'no-cors',
+              body: formData, // Send URLSearchParams as the body
             })
-            console.log('pardotFormHandlerRequest success', pardotFormHandlerRequest.json())
+
             if (
               entityResult?.entityDetails?.creditLine === 'true' ||
               entityResult?.entityDetails?.creditLine === true
