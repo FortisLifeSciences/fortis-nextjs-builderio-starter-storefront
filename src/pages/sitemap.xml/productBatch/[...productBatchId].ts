@@ -12,7 +12,7 @@ function generateSiteMap(categoryItems: Array<Product>) {
          //console.log(JSON.stringify(product))
          return `
          <url>
-           <loc>https://${process.env.CURRENT_DOMAIN}/product/${product.content?.seoFriendlyUrl}/${product.productCode}</loc>
+           <loc>https://${process.env.CURRENT_DOMAIN}/product/${product.productCode}</loc>
            <changefreq>daily</changefreq>
             <priority>.7</priority>
           </url>
