@@ -466,7 +466,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
           cartResponse?.total,
           user?.userId,
           product?.productCode,
-          productGetters.getName(product),
+          productGetters.getName(product).replace(/[^a-zA-Z0-9 -]/g, ''),
           product?.categories?.[0]?.content?.name,
           brandName,
           variationProductCode,

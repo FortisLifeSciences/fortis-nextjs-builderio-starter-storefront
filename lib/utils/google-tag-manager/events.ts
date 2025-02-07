@@ -446,7 +446,7 @@ export const mapCartItemForGAEvent = (cartItem: any): Item => {
 
   return {
     item_id: cartItemGetters.getCartItemProductCode(cartItem),
-    item_name: cartItemGetters.getCartItemProductName(cartItem),
+    item_name: cartItemGetters.getCartItemProductName(cartItem).replace(/[^a-zA-Z0-9 -]/g, ''),
     currency: gaEvents.CURRENCY_CAD,
     item_category: cartItem?.product?.categories?.[0]?.content?.name || '',
     item_brand: cartItemGetters.getCartItemBrandName(cartItem),
