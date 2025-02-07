@@ -8,6 +8,7 @@ import { Maybe, PrCategory, ProductSearchRandomAccessCursor } from '@/lib/gql/ty
 //pages/sitemap.xml.js
 
 function generateSiteMap(categoryItems: Array<PrCategory>) {
+  console.log('categoryItems', categoryItems)
   return `<?xml version="1.0" encoding="UTF-8"?>
   <urlset>
      ${(categoryItems || [])
