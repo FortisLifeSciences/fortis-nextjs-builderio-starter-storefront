@@ -1189,8 +1189,15 @@ const PaymentStep = (props: PaymentStepProps) => {
                                                           placeholder={t('')}
                                                           required={true}
                                                           onChange={(_, value) => {
-                                                            field.onChange(value)
-                                                            setCvv(value)
+                                                            const filteredValue = value.replace(
+                                                              /[^0-9]/g,
+                                                              ''
+                                                            )
+                                                            field.onChange(filteredValue)
+                                                            setCvv(filteredValue)
+                                                          }}
+                                                          inputProps={{
+                                                            maxLength: 4,
                                                           }}
                                                           onBlur={field.onBlur}
                                                           error={!!errors?.cvv}
