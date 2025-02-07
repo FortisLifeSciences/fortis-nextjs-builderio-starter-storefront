@@ -52,22 +52,21 @@ const queryClientHandler = (error: any, showSnackbar: any) => {
     console.warn('API Error:', error) // Log only for other errors
   }
 
-  if (parsedError && parsedError.response.message.includes('Auth declined')) {
+  if (parsedError?.response?.message && parsedError.response.message.includes('Auth declined')) {
     showSnackbar(
       'Auth Declined, Error in payment! Please check billing details and try again!',
       status
     )
   } else if (
-    parsedError &&
-    parsedError.response.message ===
-      'Validation Error: Auth declined: GatewayResponse: 2 This transaction has been declined.'
+    parsedError?.response?.message ===
+    'Validation Error: Auth declined: GatewayResponse: 2 This transaction has been declined.'
   ) {
     showSnackbar(
       'Auth Declined, Error in payment! Please check billing details and try again!',
       status
     )
   } else if (
-    parsedError &&
+    parsedError?.response?.message &&
     parsedError.response.message.includes('This transaction has been declined')
   ) {
     showSnackbar(
@@ -75,9 +74,8 @@ const queryClientHandler = (error: any, showSnackbar: any) => {
       status
     )
   } else if (
-    parsedError &&
-    parsedError.response.message ===
-      'Validation Error: Unable to adjust payments to match order total.'
+    parsedError?.response?.message ===
+    'Validation Error: Unable to adjust payments to match order total.'
   ) {
     showSnackbar('Error in payment! Please check billing details and try again!', status)
   }
