@@ -7,6 +7,7 @@ import { CategoryTreeResponse } from '@/lib/types'
 import { Maybe, PrCategory, ProductSearchRandomAccessCursor } from '@/lib/gql/types'
 //pages/sitemap.xml.js
 
+
 export const generateSiteMap = (categoryItems: Array<PrCategory>): string => {
   const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://example.com'
 
