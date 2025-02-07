@@ -194,6 +194,8 @@ const LoginDialog = (props: any) => {
         const purchaseOrderPayLoad = {
           accountId: accountId,
         }
+        console.log('creataccount', createAccount)
+
         const addingSalesRep = await fetch('/api/user/addSalesRep', {
           method: 'POST',
           headers: {
@@ -241,8 +243,11 @@ const LoginDialog = (props: any) => {
               const purchaseOrder = await fetch('/api/user/create-purchase-order', {
                 method: 'POST',
                 headers: {
+                  Accept: 'application/json',
                   'Content-Type': 'application/json',
+                  'Access-Control-Allow-Origin': '*',
                 },
+                mode: 'no-cors',
                 body: JSON.stringify({ purchaseOrderPayLoad }),
               })
               const purchaseOrderResponse = await purchaseOrder.json()
