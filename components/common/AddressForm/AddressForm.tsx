@@ -49,17 +49,29 @@ export const useFormSchema = () => {
       address2: yup.string().nullable(true).notRequired(),
       cityOrTown: yup.string().required(t('this-field-is-required')),
       stateOrProvince: yup.string().when('countryCode', {
-        is: CountryCode.US || CountryCode.CA,
+        is: (value: string) => [CountryCode.US, CountryCode.CA].includes(value),
         then: yup.string().required(t('this-field-is-required')),
       }),
-      postalOrZipCode: yup.string().when('countryCode', {
-        is: CountryCode.US || CountryCode.CA,
-        then: yup.string().required(t('this-field-is-required')).min(4, t('enter-valid-zip-code')),
-      }),
+      postalOrZipCode: yup
+        .string()
+        .required(t('this-field-is-required'))
+        .when('countryCode', {
+          is: CountryCode.US,
+          then: yup.string().matches(/^\d{5}(-\d{4})?$/, t('enter-valid-zip-code')),
+        })
+        .when('countryCode', {
+          is: CountryCode.CA,
+          then: yup
+            .string()
+            .matches(/^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/, t('enter-valid-zip-code')),
+        }),
       countryCode: yup.string().required(t('this-field-is-required')),
     }),
     phoneNumbers: yup.object().shape({
-      home: yup.string().required(t('this-field-is-required')),
+      home: yup
+        .string()
+        .required(t('this-field-is-required'))
+        .matches(/^[0-9\s\-()+]{10,}$/, t('enter-valid-phone-number')),
     }),
   })
 }
@@ -92,7 +104,7 @@ const AddressForm = (props: AddressFormProps) => {
     reset,
     handleSubmit,
   } = useForm({
-    mode: 'onBlur',
+    mode: 'onChange',
     reValidateMode: 'onBlur',
     defaultValues: contact ? contact : undefined,
     resolver: yupResolver(addressSchema),
@@ -226,9 +238,15 @@ const AddressForm = (props: AddressFormProps) => {
                 ref={null}
                 error={!!errors?.phoneNumbers?.home}
                 helperText={errors?.phoneNumbers?.home?.message}
-                onChange={(_name: string, value: string) => field.onChange(value)}
+                onChange={(_name: string, value: string) => {
+                  const filteredValue = value.replace(/[^0-9]/g, '')
+                  field.onChange(filteredValue)
+                }}
                 onBlur={field.onBlur}
                 required={true}
+                inputProps={{
+                  maxLength: 10,
+                }}
               />
             )}
           />
@@ -357,9 +375,16 @@ const AddressForm = (props: AddressFormProps) => {
                 ref={null}
                 error={!!errors?.address?.postalOrZipCode}
                 helperText={errors?.address?.postalOrZipCode?.message}
-                onChange={(_name: string, value: string) => field.onChange(value)}
+                onChange={(_name: string, value: string) => {
+                  const filteredValue = value.replace(/[^A-Za-z0-9-]/g, '')
+                  field.onChange(filteredValue)
+                }}
                 onBlur={field.onBlur}
                 required={true}
+                inputProps={{
+                  minLength: 5,
+                  maxLength: 10,
+                }}
               />
             )}
           />
