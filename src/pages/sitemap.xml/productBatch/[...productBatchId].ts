@@ -9,10 +9,20 @@ function generateSiteMap(categoryItems: Array<Product>) {
   <urlset>
      ${(categoryItems || [])
        .map((product: Product) => {
-         //console.log(JSON.stringify(product))
+         let productUrl = process.env.NEXT_PUBLIC_URL + 'product/' + product.productCode
+         if (product?.categories?.[0]?.categoryCode) {
+           productUrl =
+             process.env.NEXT_PUBLIC_URL +
+             'products/' +
+             product?.categories?.[0]?.categoryCode +
+             '/' +
+             product.content?.seoFriendlyUrl +
+             '/' +
+             product.productCode
+         }
          return `
          <url>
-           <loc>${process.env.NEXT_PUBLIC_URL}product/${product.productCode}</loc>
+           <loc>${productUrl}</loc>
            <changefreq>daily</changefreq>
             <priority>.7</priority>
           </url>
