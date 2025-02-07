@@ -14,7 +14,7 @@ function generateSiteMap(categoryItems: Array<PrCategory>) {
        .map((category: PrCategory) => {
          return `
          <url>
-           <loc>https://${process.env.CURRENT_DOMAIN}/category/${category.content?.slug}/${category.categoryCode}</loc>
+           <loc>${process.env.NEXT_PUBLIC_URL}products/${category.categoryCode}</loc>
            <changefreq>daily</changefreq>
             <priority>.7</priority>
           </url>

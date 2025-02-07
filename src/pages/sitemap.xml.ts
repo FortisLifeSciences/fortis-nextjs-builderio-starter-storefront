@@ -9,13 +9,13 @@ function generateSiteMap(cursors: ProductSearchRandomAccessCursor) {
   return `<?xml version="1.0" encoding="UTF-8"?>
   <sitemapindex xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
-  <loc>https://${process.env.CURRENT_DOMAIN}/sitemap.xml/categories</loc>
+  <loc>${process.env.NEXT_PUBLIC_URL}sitemap.xml/categories</loc>
   </sitemap>
   <sitemap>
      ${(cursors.cursorMarks || [])
        .map((id: string) => {
          return `
-           <loc>https://${process.env.CURRENT_DOMAIN}/sitemap.xml/productBatch/${`${id}`}</loc>
+           <loc>${process.env.NEXT_PUBLIC_URL}sitemap.xml/productBatch/${`${id}`}</loc>
            `
        })
        .join('')}

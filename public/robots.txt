@@ -1,4 +1,4 @@
-#robots.txt for http://localhost:3000/ updated 2025-02-06T09:04:29.215Z  
+#robots.txt for https://fortis-nextjs-builderio-starter-storefront-develop.vercel.app/ updated 2025-02-06T09:04:29.215Z  
 
 # Googlebot
 User-agent: Googlebot
@@ -48,7 +48,7 @@ User-agent: *
 Crawl-delay: 5
 
 # Host
-Host: http://localhost:3000/
+Host: https://fortis-nextjs-builderio-starter-storefront-develop.vercel.app/
 
 # Sitemaps
-Sitemap: http://localhost:3000/sitemap.xml
+Sitemap: https://fortis-nextjs-builderio-starter-storefront-develop.vercel.app/sitemap.xml
