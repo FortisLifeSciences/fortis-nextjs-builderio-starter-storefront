@@ -20,6 +20,9 @@ function generateSiteMap(cursors: ProductSearchRandomAccessCursor) {
        })
        .join('')}
    </sitemap>
+    <sitemap>
+        <loc>${process.env.NEXT_PUBLIC_URL}sitemap.xml/general-Urls</loc>
+    </sitemap>
    </sitemapindex>
 `
 }
