@@ -9,7 +9,7 @@ import { buildProductSearchParams } from '@/lib/helpers'
 import { productSearchResultKeys } from '@/lib/react-query/queryKeys'
 import type { CategorySearchParams } from '@/lib/types'
 
-import type { ProductSearchResult } from '@/lib/gql/types'
+import type { Product, ProductSearchResult } from '@/lib/gql/types'
 
 /**
  * @hidden
