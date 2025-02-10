@@ -329,8 +329,8 @@ const PaymentStep = (props: PaymentStepProps) => {
     setCvv(cardData.cvv as string)
   }
 
-  const handleCardFormValidDetails = (isValid: boolean) => {
-    setCardFormDetails({ ...cardFormDetails, isCardDetailsValidated: isValid })
+  const handleCardFormValidDetails = (isValid: boolean, cardData?: CardForm) => {
+    setCardFormDetails({ ...cardFormDetails, ...cardData, isCardDetailsValidated: isValid })
   }
 
   // const handleSavePaymentMethodCheckbox = () => {
@@ -542,7 +542,9 @@ const PaymentStep = (props: PaymentStepProps) => {
 
     if (!tokenizedCardResponse) return
 
-    setIsAddingNewPayment(false)
+    if (isValidBillingAddress && validateForm) {
+      setIsAddingNewPayment(false)
+    }
     if (!isAddingNewPayment) {
       setCardOptions([
         ...cardOptions,
@@ -1336,7 +1338,9 @@ const PaymentStep = (props: PaymentStepProps) => {
                           <CardDetailsForm
                             validateForm={validateForm}
                             onSaveCardData={handleCardFormData}
-                            onFormStatusChange={handleCardFormValidDetails}
+                            onFormStatusChange={(status, data) => {
+                              handleCardFormValidDetails(status, data)
+                            }}
                           />
 
                           {isAuthenticated ? (

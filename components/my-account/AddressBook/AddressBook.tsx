@@ -96,7 +96,7 @@ const buildAddressProps = (customerContact: CustomerContact) => {
 
 const AccountAddress = (props: AccountAddressProps) => {
   const { customerContact, isPrimaryAddress, addressType, editAddress, deleteAddress } = props
-  console.log('customerContact', customerContact)
+  //console.log('customerContact', customerContact)
   const { t } = useTranslation('common')
   return (
     <Box>
@@ -471,7 +471,19 @@ const AddressBook = (props: AddressBookProps) => {
               <Grid item xs={12} md={6} pb={2}>
                 <KiboSelect
                   name="address-type"
-                  sx={{ typography: 'body2', width: '100%' }}
+                  label="Select Address-type"
+                  sx={{
+                    typography: 'body2',
+                    width: '100%',
+                    '& .MuiInputLabel-root': {
+                      position: 'absolute',
+                      width: '1px',
+                      height: '1px',
+                      overflow: 'hidden',
+                      clip: 'rect(1px, 1px, 1px, 1px)',
+                      whiteSpace: 'nowrap',
+                    },
+                  }}
                   value={addressType}
                   onChange={(_name, value) => setAddressType(value)}
                 >

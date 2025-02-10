@@ -412,7 +412,7 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>((props, r
                   )}
                 </Box>
               </Box>
-              <IconButton sx={ProductCardStyles.iconButton}>
+              <IconButton sx={ProductCardStyles.iconButton} title={'Product-Detail'}>
                 <ArrowForwardIos sx={{ color: 'white' }} />
               </IconButton>
             </Card>

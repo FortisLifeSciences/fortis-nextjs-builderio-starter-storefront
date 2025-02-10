@@ -57,7 +57,7 @@ const CartItemList = (props: CartItemListProps) => {
         cartItemGetters.getCartItemUnitPrice(cartItem),
         user?.userId,
         cartItem?.product?.productCode,
-        cartItem?.product?.name,
+        cartItem?.product?.name.replace(/[^a-zA-Z0-9 -]/g, ''),
         '',
         cartItemGetters.getCartItemBrandName(cartItem),
         cartItemGetters.getCartItemVariantCode(cartItem),
