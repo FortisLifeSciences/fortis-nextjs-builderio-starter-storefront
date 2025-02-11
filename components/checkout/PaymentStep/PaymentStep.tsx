@@ -1227,7 +1227,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                                               display: 'flex',
                                               flexDirection: 'column',
                                               pt: 1,
-                                              ml: 5,
+                                              ml: { md: 12.5, sm: 12, xs: 5 },
                                             }}
                                           >
                                             <AddressCard
