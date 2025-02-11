@@ -10,7 +10,7 @@ function generateSiteMap(categoryItems: Array<Product>) {
      ${(categoryItems || [])
        .map((product: Product) => {
          let productUrl = process.env.NEXT_PUBLIC_URL + 'product/' + product.productCode
-         if (product?.categories?.[0]?.categoryCode) {
+         if (product?.categories?.[0]?.categoryCode && product.content?.seoFriendlyUrl) {
            productUrl =
              process.env.NEXT_PUBLIC_URL +
              'products/' +
