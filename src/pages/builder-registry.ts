@@ -7,6 +7,7 @@ import Button from '@/components/customComponent/textButton'
 import TextHero from '@/components/customComponent/textHeroComponent'
 
 const BuilderComponents = () => {
+  // The custom component name was not changed as per ticket WEB-1126 and Dann's comment
   Builder.registerComponent(Button, {
     name: 'textButton',
     inputs: [{ name: 'textButton', type: 'text' }],
