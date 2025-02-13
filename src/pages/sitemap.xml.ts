@@ -1,9 +1,31 @@
 import { GetServerSideProps } from 'next'
 
-import { getRandomAccessCursorsResult } from '@/hooks/queries/search/useGetRandomAccessCursors/useGetRandomAccessCursors'
+import { apiAuthClient } from '@/lib/api/util/api-auth-client'
 
 import { ProductSearchRandomAccessCursor } from '@/lib/gql/types'
 //pages/sitemap.xml.js
+
+async function fetchCursorsData() {
+  const authToken = await apiAuthClient.getAccessToken()
+  const baseUrl = process.env.KIBO_API_HOST
+  const url = `https://${baseUrl}/api/commerce/catalog/storefront/productsearch/randomAccessCursor?pageSize=2000`
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json',
+        authorization: `Bearer ${authToken}`,
+      },
+    })
+    const data = await response.json()
+    return { response: data }
+  } catch (error) {
+    console.error('Error in getting cursor', error)
+    return { error }
+  }
+}
 
 function generateSiteMap(cursors: ProductSearchRandomAccessCursor) {
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -33,11 +55,11 @@ function SiteMap() {
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   // We make an API call to gather the URLs for our site
 
-  const cursors = await getRandomAccessCursorsResult()
+  // const cursors = await getRandomAccessCursorsResult()
   //console.log(cursors)
-
+  const cursors = await fetchCursorsData()
   // We generate the XML sitemap with the posts data
-  const sitemap = generateSiteMap(cursors)
+  const sitemap = generateSiteMap(cursors?.response)
 
   res.setHeader('Content-Type', 'text/xml')
   // we send the XML to the browser
