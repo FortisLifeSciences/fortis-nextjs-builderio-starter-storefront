@@ -1,12 +1,9 @@
 import { GetServerSideProps } from 'next'
 
-import { fetchCategoryTree, useGetCategoryTree } from '@/hooks'
-import { getRandomAccessCursorsResult } from '@/hooks/queries/search/useGetRandomAccessCursors/useGetRandomAccessCursors'
-import { CategoryTreeResponse } from '@/lib/types'
+import { fetchCategoryTree } from '@/hooks'
 
-import { Maybe, PrCategory, ProductSearchRandomAccessCursor } from '@/lib/gql/types'
+import { Maybe, PrCategory } from '@/lib/gql/types'
 //pages/sitemap.xml.js
-
 
 export const generateSiteMap = (categoryItems: Array<PrCategory>): string => {
   const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://example.com'
