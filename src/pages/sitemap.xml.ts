@@ -42,12 +42,14 @@ function generateSiteMap(cursors: ProductSearchRandomAccessCursor) {
        })
        .join('')}
    </sitemap>
-    <sitemap>
-        <loc>${process.env.NEXT_PUBLIC_URL}sitemap.xml/general-Urls</loc>
-    </sitemap>
+    
    </sitemapindex>
 `
 }
+// currently hiding general url Dann to confirm which need to display
+// <sitemap>
+//    <loc>${process.env.NEXT_PUBLIC_URL}sitemap.xml/general-Urls</loc>
+// </sitemap>
 
 function SiteMap() {
   // getServerSideProps will do the heavy lifting
