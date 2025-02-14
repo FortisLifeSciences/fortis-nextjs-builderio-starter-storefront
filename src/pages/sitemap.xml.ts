@@ -30,24 +30,28 @@ async function fetchCursorsData() {
 function generateSiteMap(cursors: ProductSearchRandomAccessCursor) {
   return `<?xml version="1.0" encoding="UTF-8"?>
   <sitemapindex xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap>
-  <loc>${process.env.NEXT_PUBLIC_URL}sitemap.xml/categories</loc>
-  </sitemap>
-  <sitemap>
-     ${(cursors.cursorMarks || [])
-       .map((id: string) => {
-         return `
-           <loc>${process.env.NEXT_PUBLIC_URL}sitemap.xml/productBatch/${`${id}`}</loc>
-           `
-       })
-       .join('')}
-   </sitemap>
     <sitemap>
-        <loc>${process.env.NEXT_PUBLIC_URL}sitemap.xml/general-Urls</loc>
+      <loc>${process.env.NEXT_PUBLIC_URL}sitemap.xml/categories</loc>
     </sitemap>
-   </sitemapindex>
+    <sitemap>
+      ${(cursors.cursorMarks || [])
+        .map((id: string) => {
+          return `
+            <loc>${process.env.NEXT_PUBLIC_URL}sitemap.xml/productBatch/${`${id}`}</loc>
+            `
+        })
+        .join('')}
+    </sitemap>
+    <sitemap>
+      <loc>${process.env.NEXT_PUBLIC_URL}sitemap.xml/builderUrls</loc>
+    </sitemap>
+  </sitemapindex>
 `
 }
+// currently hiding general url Dann to confirm which need to display
+// <sitemap>
+//    <loc>${process.env.NEXT_PUBLIC_URL}sitemap.xml/general-Urls</loc>
+// </sitemap>
 
 function SiteMap() {
   // getServerSideProps will do the heavy lifting
