@@ -71,7 +71,19 @@ const CreateList = (props: CreateListProps) => {
   const onUpdateListData = async (product: any, payload: any) => {
     await addToWishlist.mutateAsync({
       customerAccountId: user?.id as number,
-      product,
+      product: {
+        options: product?.options?.map((option: any) => {
+          const selected = option?.values?.find((value: any) => value?.isSelected)
+          return {
+            name: option?.attributeDetail?.name,
+            value: selected?.value || selected?.stringValue || selected?.shopperEnteredValue,
+            attributeFQN: option?.attributeFQN,
+          }
+        }),
+        productCode: productGetters.getProductId(product),
+        variationProductCode: productGetters.getVariationProductCode(product),
+        isPackagedStandAlone: product?.isPackagedStandAlone,
+      },
       currentWishlist: newListState,
       quantity: payload.quantity,
     })
