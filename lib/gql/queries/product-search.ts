@@ -11,6 +11,7 @@ const searchProductsQuery = /* GraphQL */ `
     $facetHierValue: String
     $facetTemplate: String
     $facetValueFilter: String
+    $cursorMark: String
   ) {
     products: productSearch(
       query: $query
@@ -22,6 +23,7 @@ const searchProductsQuery = /* GraphQL */ `
       facetHierValue: $facetHierValue
       facetTemplate: $facetTemplate
       facetValueFilter: $facetValueFilter
+      cursorMark: $cursorMark
     ) {
       ...searchResults
     }

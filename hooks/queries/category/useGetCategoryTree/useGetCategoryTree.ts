@@ -6,8 +6,9 @@ import fetch from 'isomorphic-unfetch'
 
 import { CATEGORY_TREE_ENDPOINT } from '@/lib/gql/client'
 import { categoryTreeKeys } from '@/lib/react-query/queryKeys'
+import { CategoryTreeResponse } from '@/lib/types'
 
-import type { Maybe, PrCategory } from '@/lib/gql/types'
+import type { CategoryCollection, Maybe, PrCategory } from '@/lib/gql/types'
 
 /**
  * @hidden
@@ -18,7 +19,7 @@ export interface UseCategoryResponse {
   isSuccess: boolean
 }
 
-const fetchCategoryTree = async () => {
+export const fetchCategoryTree: () => Promise<Array<PrCategory>> = async () => {
   const endpoint = CATEGORY_TREE_ENDPOINT
   const response = await fetch(endpoint)
   return response.json()
