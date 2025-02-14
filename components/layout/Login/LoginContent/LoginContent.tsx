@@ -239,6 +239,7 @@ const LoginContent = (props: LoginContentProps) => {
                 borderRadius: '0px 26px',
                 border: !isValid ? '1px solid grey.600' : '1px solid primary.main',
                 padding: '12px 30px',
+                boxShadow: 'none', // Remove box shadow
                 '&:hover': {
                   backgroundColor: !isValid ? 'grey.600' : 'primary.light',
                   border: !isValid ? '1px solid grey.600' : '1px solid primary.light',
