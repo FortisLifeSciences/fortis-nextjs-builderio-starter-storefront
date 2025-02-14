@@ -147,3 +147,13 @@ body {
     max-width: 100% !important;
   }
 }
+.breadcrumb-linkStyle {
+  text-decoration: none;
+  color: inherit;
+}
+.breadcrumb-linkStyle.underline {
+  text-decoration: underline;
+}
+.breadcrumb-linkStyle:hover {
+  text-decoration: none;
+}

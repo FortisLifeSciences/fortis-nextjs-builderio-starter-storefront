@@ -82,7 +82,7 @@ const CheckoutProductItem = (props: ProductItemProps) => {
                       },
                     }}
                   >
-                    <Typography variant="body1" data-testid="productName">
+                    <Typography variant="body1" component="h6" data-testid="productName">
                       {name}
                     </Typography>
                   </Grid>

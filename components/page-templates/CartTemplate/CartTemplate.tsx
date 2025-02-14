@@ -324,7 +324,7 @@ const CartTemplate = (props: CartTemplateProps) => {
                   <Typography variant="h3" color="gray.900" fontWeight="500" pt={0.5}>
                     {orderSummaryArgs?.nameLabel}
                   </Typography>
-                  <Typography sx={{}} variant="body1">
+                  <Typography sx={{}} variant="body1" component="h4" color="grey.900">
                     {orderSummaryArgs?.subTotalLabel}
                   </Typography>
                   <Divider />
