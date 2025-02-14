@@ -1649,6 +1649,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                               fontWeight: '500',
                               lineHeight: '24px',
                               borderRadius: '0px 26px',
+                              boxShadow: 'none', // Remove box shadow
                               '&:hover': {
                                 background: '#4C47C4',
                                 color: '#FFFFFF',

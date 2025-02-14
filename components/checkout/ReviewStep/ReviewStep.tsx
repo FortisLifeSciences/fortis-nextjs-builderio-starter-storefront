@@ -88,6 +88,10 @@ const styles = {
     padding: '24px 44px',
     fontSize: '16px',
     fontWeight: 500,
+    boxShadow: 'none', // Remove box shadow
+    '&:hover': {
+      background: '#4C47C4',
+    },
     '&:disabled': {
       color: '#FFFFFF !important',
       backgroundColor: '#8D8D8D !important',
