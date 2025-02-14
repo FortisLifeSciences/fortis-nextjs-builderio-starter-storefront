@@ -52,12 +52,34 @@ const queryClientHandler = (error: any, showSnackbar: any) => {
     console.warn('API Error:', error) // Log only for other errors
   }
 
-  if (error instanceof SyntaxError && error.message.includes('Auth declined')) {
+  if (parsedError?.response?.message && parsedError.response.message.includes('Auth declined')) {
     showSnackbar(
-      'Auth Declined, Error in payment details! Enter correct payment details and please try again!',
+      'Auth Declined, Error in payment! Please check billing details and try again!',
       status
     )
+  } else if (
+    parsedError?.response?.message ===
+    'Validation Error: Auth declined: GatewayResponse: 2 This transaction has been declined.'
+  ) {
+    showSnackbar(
+      'Auth Declined, Error in payment! Please check billing details and try again!',
+      status
+    )
+  } else if (
+    parsedError?.response?.message &&
+    parsedError.response.message.includes('This transaction has been declined')
+  ) {
+    showSnackbar(
+      'Auth Declined, Error in payment! Please check billing details and try again!',
+      status
+    )
+  } else if (
+    parsedError?.response?.message ===
+    'Validation Error: Unable to adjust payments to match order total.'
+  ) {
+    showSnackbar('Error in payment! Please check billing details and try again!', status)
   }
+
   if (error instanceof SyntaxError && error.message.includes('Unexpected token')) {
     //do nothing here for now
   } else if (error instanceof SyntaxError && error.message.includes('Item not found:')) {

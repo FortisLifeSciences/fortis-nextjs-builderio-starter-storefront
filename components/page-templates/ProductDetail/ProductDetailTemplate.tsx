@@ -466,7 +466,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
           cartResponse?.total,
           user?.userId,
           product?.productCode,
-          productGetters.getName(product),
+          productGetters.getName(product).replace(/[^a-zA-Z0-9 -]/g, ''),
           product?.categories?.[0]?.content?.name,
           brandName,
           variationProductCode,
@@ -742,11 +742,17 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
         ? productPrice?.special
         : productPrice?.regular
 
-      if (productPrice && product?.categories?.[0]?.content?.name) {
+      if (
+        productPrice &&
+        productPriceActual &&
+        product?.categories?.[0]?.content?.name &&
+        productGetters.getName(product) &&
+        brandName
+      ) {
         const value = quantity * productPriceActual
         viewItemGTM(
           productCode,
-          user?.userId,
+          '',
           productGetters.getName(product) as string,
           product?.categories?.[0]?.content?.name,
           brandName,

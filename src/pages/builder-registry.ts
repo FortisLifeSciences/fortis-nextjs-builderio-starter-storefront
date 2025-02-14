@@ -7,6 +7,7 @@ import Button from '@/components/customComponent/textButton'
 import TextHero from '@/components/customComponent/textHeroComponent'
 
 const BuilderComponents = () => {
+  // The custom component name was not changed as per ticket WEB-1126 and Dann's comment
   Builder.registerComponent(Button, {
     name: 'textButton',
     inputs: [{ name: 'textButton', type: 'text' }],
@@ -29,7 +30,7 @@ const BuilderComponents = () => {
       'https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2F6bef27ee40d24f3b88239fd7e616f82a',
   })
   Builder.registerComponent(TextHero, {
-    name: 'Home Page Hero Banner Component',
+    name: 'Center Text Hero',
     inputs: [
       {
         name: 'FirstImage',
@@ -50,7 +51,7 @@ const BuilderComponents = () => {
     ],
   })
   Builder.registerComponent(LeftTextHero, {
-    name: 'Left Text Hero Component',
+    name: 'Left Text Hero',
     inputs: [
       {
         name: 'leftTextImage',
@@ -109,7 +110,7 @@ const BuilderComponents = () => {
     ],
   })
   Builder.registerComponent(FeaturedPageButton, {
-    name: 'Featured Page Button Component',
+    name: 'Featured Page Button',
     inputs: [
       {
         name: 'selectMode',

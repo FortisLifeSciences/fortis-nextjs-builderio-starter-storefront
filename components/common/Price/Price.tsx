@@ -42,6 +42,7 @@ const PriceTypography = (priceTypographyProps: PriceTypographyProps) => {
   return (
     <Typography
       variant={variant}
+      component="h4"
       fontWeight={fontWeight}
       color={color || 'text.primary'}
       sx={sx}

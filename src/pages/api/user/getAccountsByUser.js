@@ -3,8 +3,9 @@ import { apiAuthClient } from '@/lib/api/util/api-auth-client'
 export default async function handler(req, res) {
   const authToken = await apiAuthClient.getAccessToken()
   const { emailAddress } = req.body
+  const email = encodeURIComponent(emailAddress)
   const baseUrl = process.env.KIBO_API_HOST
-  const url = `https://${baseUrl}/api/commerce/customer/b2baccounts/accountsbyuser?emailAddress=${emailAddress}&getAllAccounts=true`
+  const url = `https://${baseUrl}/api/commerce/customer/b2baccounts/accountsbyuser?emailAddress=${email}&getAllAccounts=true`
 
   try {
     // Make the request to Add Sails Rep
