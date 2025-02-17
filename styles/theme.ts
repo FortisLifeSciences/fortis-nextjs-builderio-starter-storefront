@@ -6,6 +6,13 @@ declare module '@mui/material/styles/createPalette' {
   }
 }
 
+// Extend MUI's SvgIconProps to accept custom font sizes
+declare module '@mui/material/SvgIcon' {
+  interface SvgIconPropsSizeOverrides {
+    '16px': true
+  }
+}
+
 export const grey = {
   900: '#020027', //Fortis theme
   // Fill Form Label Text, information text
@@ -185,6 +192,9 @@ let theme = createTheme({
     },
     error: {
       main: '#BD3742', //Fortis theme
+    },
+    success: {
+      main: '#348345',
     },
     grey: { ...grey },
     red: { ...red },

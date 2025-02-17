@@ -9,6 +9,15 @@ interface PasswordValidationProps {
   password: string
 }
 
+const style = {
+  resetPassReq: {
+    fontSize: '16px',
+    fontWeight: '300',
+    lineHeight: 'normal',
+    color: '#020027',
+  },
+}
+
 const PasswordValidation = (props: PasswordValidationProps) => {
   const { password = '' } = props
   const { t } = useTranslation('common')
@@ -22,38 +31,42 @@ const PasswordValidation = (props: PasswordValidationProps) => {
 
   return (
     <Stack gap={1} alignItems={'flex-start'}>
-      <Typography variant="subtitle2" component="h4" sx={{ fontWeight: 'bold' }}>
+      <Typography
+        variant="subtitle2"
+        component="h4"
+        sx={{ fontWeight: '500', fontSize: '16px', color: 'grey.900' }}
+      >
         {t('password-requirements')}
       </Typography>
 
-      <Stack direction="row" alignItems="center" gap={1}>
+      <Stack direction="row" alignItems="center" gap={1} sx={style.resetPassReq}>
         <CheckCircle
-          fontSize="small"
-          color={isHavingAtLeastEightCharacters ? 'primary' : 'error'}
+          fontSize="16px"
+          color={isHavingAtLeastEightCharacters ? 'success' : 'error'}
           data-testid="isHavingAtLeastEightCharacters"
         />
         {t('at-least-eight-characters-long')}
       </Stack>
-      <Stack direction="row" alignItems="center" gap={1}>
+      <Stack direction="row" alignItems="center" gap={1} sx={style.resetPassReq}>
         <CheckCircle
-          fontSize="small"
-          color={isHavingAtLeastOneNumber ? 'primary' : 'error'}
+          fontSize="16px"
+          color={isHavingAtLeastOneNumber ? 'success' : 'error'}
           data-testid="isHavingAtLeastOneNumber"
         />
         {t('at-least-one-number')}
       </Stack>
-      <Stack direction="row" alignItems="center" gap={1}>
+      <Stack direction="row" alignItems="center" gap={1} sx={style.resetPassReq}>
         <CheckCircle
-          fontSize="small"
-          color={isHavingAtLeastOneCapitalLetter ? 'primary' : 'error'}
+          fontSize="16px"
+          color={isHavingAtLeastOneCapitalLetter ? 'success' : 'error'}
           data-testid="isHavingAtLeastOneCapitalLetter"
         />
         {t('at-least-one-capital-letter')}
       </Stack>
-      <Stack direction="row" alignItems="center" gap={1}>
+      <Stack direction="row" alignItems="center" gap={1} sx={style.resetPassReq}>
         <CheckCircle
-          fontSize="small"
-          color={isHavingAtLeastOneSpecialCharacter ? 'primary' : 'error'}
+          fontSize="16px"
+          color={isHavingAtLeastOneSpecialCharacter ? 'success' : 'error'}
           data-testid="isHavingAtLeastOneSpecialCharacter"
         />
         {t('at-least-one-special-character')}
