@@ -92,6 +92,7 @@ import type {
   CustomerContact,
   CrPurchaseOrderCustomField,
   CrPaymentCardInput,
+  Maybe,
 } from '@/lib/gql/types'
 
 interface PaymentStepProps {
@@ -239,9 +240,14 @@ const PaymentStep = (props: PaymentStepProps) => {
   const [isAddingNewPayment, setIsAddingNewPayment] = useState<boolean>(false)
 
   const handlePaymentTypeRadioChange = (value: string) => {
-    setSelectedPaymentTypeRadio(value)
     setIsAddingNewPayment(false)
     setBillingFormAddress(initialBillingAddressData)
+    setSelectedPaymentTypeRadio(value)
+    // if (value === 'CreditCard') {
+    //   setIsValidPurchaseOrder(false)
+    // } else if (value === 'PurchaseOrder') {
+    //   setCardFormDetails(initialCardFormData)
+    // }
   }
   // Purchase Order details
   const handleInitialPODetails: SavedPODetails | null = useMemo(() => {
@@ -390,12 +396,49 @@ const PaymentStep = (props: PaymentStepProps) => {
   const defaultBillingAddress = userGetters.getDefaultBillingAddress(
     savedBillingAddresses as CustomerContact[]
   )
-  const previouslySavedBillingAddress = userGetters.getOtherBillingAddress(
+  const savedBillingAddress = userGetters.getOtherBillingAddress(
     savedBillingAddresses as CustomerContact[],
     defaultBillingAddress?.id as number
   )
+
+  // Filter out invalid addresses
+  const isMissing = (value: Maybe<string> | undefined) => {
+    if (typeof value === 'string') return value.trim() === ''
+    return value === null || value === undefined
+  }
+
+  // Filter out invalid addresses
+  const validBillingAddresses = savedBillingAddress.filter((address) => {
+    const { email, firstName, lastNameOrSurname, companyOrOrganization, address: addr } = address
+
+    const isValid =
+      !isMissing(email) &&
+      !isMissing(firstName) &&
+      !isMissing(lastNameOrSurname) &&
+      !isMissing(addr?.address1) &&
+      !isMissing(addr?.postalOrZipCode) &&
+      !isMissing(companyOrOrganization)
+
+    return isValid
+  })
+
+  // Save the valid addresses into previouslySavedBillingAddress
+  const previouslySavedBillingAddress = validBillingAddresses
+
+  let billingAddressId
+
+  // Check if checkoutBillingContact ID exists in previouslySavedBillingAddress
+  const match = previouslySavedBillingAddress.find((addr) => addr.id === checkoutBillingContact?.id)
+
+  if (match) {
+    billingAddressId = checkoutBillingContact?.id
+  } else {
+    billingAddressId =
+      previouslySavedBillingAddress.length > 0 ? previouslySavedBillingAddress[0].id : null
+  }
+
   const [selectedBillingAddressId, setSelectedBillingAddressId] = useState<number>(
-    checkoutBillingContact?.id as number
+    billingAddressId as number
   )
   const [isAddressFormValid, setIsAddressFormValid] = useState<boolean>(false)
 
