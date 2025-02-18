@@ -30,7 +30,7 @@ const BuilderComponents = () => {
       'https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2F6bef27ee40d24f3b88239fd7e616f82a',
   })
   Builder.registerComponent(TextHero, {
-    name: 'Center Text Hero',
+    name: 'Home Page Hero Banner Component',
     inputs: [
       {
         name: 'FirstImage',
@@ -51,7 +51,7 @@ const BuilderComponents = () => {
     ],
   })
   Builder.registerComponent(LeftTextHero, {
-    name: 'Left Text Hero',
+    name: 'Left Text Hero Component',
     inputs: [
       {
         name: 'leftTextImage',
@@ -110,7 +110,7 @@ const BuilderComponents = () => {
     ],
   })
   Builder.registerComponent(FeaturedPageButton, {
-    name: 'Featured Page Button',
+    name: 'Featured Page Button Component',
     inputs: [
       {
         name: 'selectMode',
