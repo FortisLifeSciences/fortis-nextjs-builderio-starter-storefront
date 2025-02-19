@@ -401,8 +401,6 @@ const PaymentStep = (props: PaymentStepProps) => {
     defaultBillingAddress?.id as number
   )
 
-  console.log('savedBillingAddress --- 001', savedBillingAddress)
-
   // Filter out invalid addresses
   const isMissing = (value: Maybe<string> | undefined) => {
     if (typeof value === 'string') return value.trim() === ''
@@ -427,8 +425,6 @@ const PaymentStep = (props: PaymentStepProps) => {
   // Save the valid addresses into previouslySavedBillingAddress
   const previouslySavedBillingAddress = validBillingAddresses
 
-  console.log('previouslySavedBillingAddress --- 001', previouslySavedBillingAddress)
-
   let billingAddressId
 
   // Check if checkoutBillingContact ID exists in previouslySavedBillingAddress
@@ -440,8 +436,6 @@ const PaymentStep = (props: PaymentStepProps) => {
     billingAddressId =
       previouslySavedBillingAddress.length > 0 ? previouslySavedBillingAddress[0].id : null
   }
-
-  console.log('billingAddressId --- 001', billingAddressId)
 
   const [selectedBillingAddressId, setSelectedBillingAddressId] = useState<number>(
     billingAddressId as number
@@ -877,7 +871,7 @@ const PaymentStep = (props: PaymentStepProps) => {
   }
 
   const [shouldShowAddBillingAddressButton, setShouldShowAddBillingAddressButton] =
-    useState<boolean>(Boolean(savedBillingAddresses?.length))
+    useState<boolean>(Boolean(previouslySavedBillingAddress?.length))
 
   const { createCustomerAddress } = useCreateCustomerAddress()
   const { updateOrderBillingInfo } = useUpdateOrderBillingInfo()
@@ -1528,6 +1522,37 @@ const PaymentStep = (props: PaymentStepProps) => {
                                 addressCheckout={true}
                                 onChange={handleBilingAddressSelect}
                               />
+                              {/* currently commented due to error address WEB-1290 */}
+                              {/* <NoSsr>
+                                {hasPermission(actions.CREATE_CONTACTS) &&
+                                  shouldShowAddBillingAddressButton && (
+                                    <Box>
+                                      <Button
+                                        sx={{
+                                          mt: 2,
+                                          padding: '12px 19px',
+                                          ...StandardShippingStepStyle.secondaryButton,
+                                        }}
+                                        onClick={handleAddNewBillingAddress}
+                                      >
+                                        <Typography
+                                          sx={{
+                                            fontSize: '1rem',
+                                            lineHeight: '1.5rem',
+                                            fontWeight: '400',
+                                          }}
+                                        >
+                                          {t('add-new-address')}
+                                        </Typography>
+                                      </Button>
+                                    </Box>
+                                  )}
+                              </NoSsr> */}
+                            </>
+                          )}
+                        {shouldShowAddBillingAddressButton &&
+                          !billingFormAddress?.isSameBillingShippingAddress && (
+                            <>
                               <NoSsr>
                                 {hasPermission(actions.CREATE_CONTACTS) &&
                                   shouldShowAddBillingAddressButton && (
