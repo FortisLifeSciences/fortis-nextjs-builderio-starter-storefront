@@ -48,8 +48,6 @@ const MetadataComponent: React.FC<MetadataComponentProps> = ({
     loadMetadata()
   }, [url])
 
-  console.log('This is the metaData -----> ', metadata)
-
   const resolvedImage = metadata?.image || manualImage
   const resolvedTitle = metadata?.title || manualTitle
   const resolvedDescription = truncateDescription(metadata?.description || manualDescription)
