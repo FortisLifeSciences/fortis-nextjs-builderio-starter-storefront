@@ -871,7 +871,7 @@ const PaymentStep = (props: PaymentStepProps) => {
   }
 
   const [shouldShowAddBillingAddressButton, setShouldShowAddBillingAddressButton] =
-    useState<boolean>(Boolean(savedBillingAddresses?.length))
+    useState<boolean>(Boolean(previouslySavedBillingAddress?.length))
 
   const { createCustomerAddress } = useCreateCustomerAddress()
   const { updateOrderBillingInfo } = useUpdateOrderBillingInfo()
@@ -1522,6 +1522,37 @@ const PaymentStep = (props: PaymentStepProps) => {
                                 addressCheckout={true}
                                 onChange={handleBilingAddressSelect}
                               />
+                              {/* currently commented due to error address WEB-1290 */}
+                              {/* <NoSsr>
+                                {hasPermission(actions.CREATE_CONTACTS) &&
+                                  shouldShowAddBillingAddressButton && (
+                                    <Box>
+                                      <Button
+                                        sx={{
+                                          mt: 2,
+                                          padding: '12px 19px',
+                                          ...StandardShippingStepStyle.secondaryButton,
+                                        }}
+                                        onClick={handleAddNewBillingAddress}
+                                      >
+                                        <Typography
+                                          sx={{
+                                            fontSize: '1rem',
+                                            lineHeight: '1.5rem',
+                                            fontWeight: '400',
+                                          }}
+                                        >
+                                          {t('add-new-address')}
+                                        </Typography>
+                                      </Button>
+                                    </Box>
+                                  )}
+                              </NoSsr> */}
+                            </>
+                          )}
+                        {shouldShowAddBillingAddressButton &&
+                          !billingFormAddress?.isSameBillingShippingAddress && (
+                            <>
                               <NoSsr>
                                 {hasPermission(actions.CREATE_CONTACTS) &&
                                   shouldShowAddBillingAddressButton && (
