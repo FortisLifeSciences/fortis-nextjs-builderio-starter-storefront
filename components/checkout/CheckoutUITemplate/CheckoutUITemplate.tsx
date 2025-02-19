@@ -38,6 +38,7 @@ const buttonStyle = {
   fontWeight: '500',
   lineHeight: '24px',
   cursor: 'pointer',
+  boxShadow: 'none', // Remove box shadow
   '&:hover': {
     background: '#4C47C4',
   },
