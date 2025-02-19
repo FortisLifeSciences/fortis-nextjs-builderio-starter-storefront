@@ -26,6 +26,7 @@ export const B2BAccountCreateFormStyles = {
     borderRadius: '0px 26px',
     border: '1px solid #30299A',
     padding: '12px 30px',
+    boxShadow: 'none',
     '&:hover': {
       backgroundColor: '#4C47C4',
       border: '1px solid #4C47C4',
