@@ -401,6 +401,8 @@ const PaymentStep = (props: PaymentStepProps) => {
     defaultBillingAddress?.id as number
   )
 
+  console.log('savedBillingAddress --- 001', savedBillingAddress)
+
   // Filter out invalid addresses
   const isMissing = (value: Maybe<string> | undefined) => {
     if (typeof value === 'string') return value.trim() === ''
@@ -425,6 +427,8 @@ const PaymentStep = (props: PaymentStepProps) => {
   // Save the valid addresses into previouslySavedBillingAddress
   const previouslySavedBillingAddress = validBillingAddresses
 
+  console.log('previouslySavedBillingAddress --- 001', previouslySavedBillingAddress)
+
   let billingAddressId
 
   // Check if checkoutBillingContact ID exists in previouslySavedBillingAddress
@@ -436,6 +440,8 @@ const PaymentStep = (props: PaymentStepProps) => {
     billingAddressId =
       previouslySavedBillingAddress.length > 0 ? previouslySavedBillingAddress[0].id : null
   }
+
+  console.log('billingAddressId --- 001', billingAddressId)
 
   const [selectedBillingAddressId, setSelectedBillingAddressId] = useState<number>(
     billingAddressId as number
