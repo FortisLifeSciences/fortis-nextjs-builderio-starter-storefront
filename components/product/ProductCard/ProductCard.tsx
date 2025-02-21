@@ -364,6 +364,7 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>((props, r
                   fontWeight={500}
                   className="productNameStyle"
                   sx={ProductCardStyles.productNameStyle}
+                  tabIndex={0}
                 >
                   {sliceValue ? variantProductName : title}
                 </Typography>

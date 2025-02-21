@@ -79,6 +79,7 @@ export const FortisMegaMenu: React.FC<MegaMenuProps> = ({ scrolled }) => {
             <Typography
               variant="h5"
               sx={{ fontSize: '16px', fontWeight: '500', color: 'primary.main' }}
+              tabIndex={0}
             >
               {menu.categoryName}
             </Typography>

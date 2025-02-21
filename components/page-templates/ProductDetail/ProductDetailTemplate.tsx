@@ -812,7 +812,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
             </Box>
             <Box>
               {!isLoading && (
-                <Typography variant="h1" sx={{ color: 'primary.main' }}>
+                <Typography variant="h1" sx={{ color: 'primary.main' }} tabIndex={0}>
                   {variantProductTitle}
                 </Typography>
               )}
