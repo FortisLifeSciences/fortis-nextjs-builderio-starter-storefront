@@ -44,10 +44,12 @@ const KiboImage = (props: KiboImageProps) => {
           height: fortisLogoImage ? (isDesktop ? '44px' : '31px') : 'inherit',
           marginLeft: fortisLogoImage ? (isDesktop ? '5px' : 'opx') : '0px',
         }),
-        ...(props.alt.includes('cardType') && mobileRatio && { width: '45px', height: '35px' }), // Apply only when mobile is true
+        ...(props.alt &&
+          props.alt.includes('cardType') &&
+          mobileRatio && { width: '45px', height: '35px' }), // Apply only when mobile is true
       }}
       // Only add the "fill" property if the alt is NOT "fortis-logo" or cardType
-      fill={props.alt !== 'fortis-logo' && !props.alt.includes('cardType')}
+      fill={props.alt !== 'fortis-logo' && !(props.alt && props.alt.includes('cardType'))}
     />
   )
 }

@@ -6,7 +6,7 @@ import { Maybe, PrCategory } from '@/lib/gql/types'
 //pages/sitemap.xml.js
 
 export const generateSiteMap = (categoryItems: Array<PrCategory>): string => {
-  const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://example.com'
+  const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://www.fortislife.com/'
 
   // Recursive function to generate category URLs
   const generateCategoryUrls = (categories: Maybe<PrCategory>[] = []): string => {
