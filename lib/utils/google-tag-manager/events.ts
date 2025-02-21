@@ -117,9 +117,9 @@ export const plpClick = (
       ],
     },
   }
-  if (prodUrl !== '') {
-    document.location = prodUrl
-  }
+  // if (prodUrl !== '') {
+  //   document.location = prodUrl
+  // }
   sendGTMEvent(data)
 }
 

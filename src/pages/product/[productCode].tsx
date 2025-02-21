@@ -107,6 +107,10 @@ export async function getStaticProps(
   if (!productVariations) {
     return { notFound: true }
   }
+
+  //This is to use custom targeting with section model Ref: WEB-981
+  const targetingBrandName = productCode.split('-')[0].toLowerCase()
+
   const pdpBuilderSectionKey = publicRuntimeConfig?.builderIO?.modelKeys?.productDetailSection || ''
   const section = await builder
     .get(pdpBuilderSectionKey, { userAttributes: { slug: `product-${productCode}` } })
@@ -115,7 +119,11 @@ export async function getStaticProps(
   const PDPCustomAndBulkDisplaySectionKey =
     publicRuntimeConfig?.builderIO?.modelKeys?.PDPCustomAndBulkDisplaySection || ''
   const PDPCustomAndBulkDisplayContentSection = await builder
-    .get(PDPCustomAndBulkDisplaySectionKey)
+    .get(PDPCustomAndBulkDisplaySectionKey, {
+      userAttributes: {
+        brand: [targetingBrandName],
+      },
+    })
     .promise()
 
   return {
