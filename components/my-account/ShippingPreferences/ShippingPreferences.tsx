@@ -66,7 +66,7 @@ const ShippingPreferences = (props: MyProfileProps) => {
     fetchSettings()
   }, [])
 
-  const useDetailsSchema = () => {
+  const useDetailsSchema: any = () => {
     return yup.object().shape({
       fedexNumber: yup
         .string()
@@ -187,7 +187,7 @@ const ShippingPreferences = (props: MyProfileProps) => {
 
         {editForm && (
           <Box>
-            <Typography
+            {/* <Typography
               variant="body2"
               sx={{ color: 'primary.main', fontWeight: '500', marginBottom: '5px' }}
             >
@@ -195,7 +195,7 @@ const ShippingPreferences = (props: MyProfileProps) => {
             </Typography>
             <Typography variant="body2" sx={{ color: 'gray.900' }}>
               Customer Fedex Account Number
-            </Typography>
+            </Typography> */}
             <form onSubmit={handleSubmit(handleResetPassword)}>
               <FormControl sx={{ width: '100%' }}>
                 <Controller
@@ -205,7 +205,7 @@ const ShippingPreferences = (props: MyProfileProps) => {
                     <KiboTextBox
                       name="fedexNumber"
                       value={field.value}
-                      label={t('fedexNumber')}
+                      label={t('FedEx Account Number')}
                       required={false}
                       // eslint-disable-next-line jsx-a11y/no-autofocus
                       autoFocus={setAutoFocus}
@@ -256,6 +256,7 @@ const ShippingPreferences = (props: MyProfileProps) => {
                         borderRadius: '0px 26px',
                         border: !isValid ? '1px solid grey.600' : '1px solid primary.main',
                         padding: '12px 30px',
+                        boxShadow: 'none',
                         '&:hover': {
                           backgroundColor: !isValid ? 'grey.600' : 'primary.light',
                           border: !isValid ? '1px solid grey.600' : '1px solid primary.light',
