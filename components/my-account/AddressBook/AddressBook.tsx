@@ -563,6 +563,7 @@ const AddressBook = (props: AddressBookProps) => {
             <Button
               variant="contained"
               color="primary"
+              disableElevation
               onClick={handleAddressValidationAndSave}
               {...(!isAddressFormValid && { disabled: true })}
             >
