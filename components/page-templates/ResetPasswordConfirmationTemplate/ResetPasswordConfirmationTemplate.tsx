@@ -148,8 +148,29 @@ const ResetPasswordConfirmationTemplate = (props: ResetPasswordConfirmationTempl
             <Button
               variant="contained"
               color="inherit"
-              fullWidth
-              sx={{ mt: '0.75rem' }}
+              sx={{
+                width: 'auto',
+                mt: '0.75rem',
+                fontSize: '16px',
+                fontFamily: 'poppins',
+                fontWeight: '500',
+                lineHeight: '24px',
+                color: '#ffffff',
+                borderRadius: '0 26px',
+                backgroundColor: 'primary.main',
+                padding: '12px 26px',
+                border: 0,
+                boxShadow: 'none',
+                '&:hover': {
+                  background: '#4C47C4',
+                  color: '#FFFFFF',
+                  border: 0,
+                },
+                '&.Mui-disabled': {
+                  color: '#ffffff',
+                  backgroundColor: '#8d8d8d',
+                },
+              }}
               {...((!isValid || !isDirty) && { disabled: true })}
               onClick={() => handleSubmit(onValid)()}
             >
