@@ -114,7 +114,12 @@ const MyAccountTemplate = (props: MyAccountTemplateProps) => {
     <Grid container>
       <Grid item md={8} xs={12}>
         {!mdScreen && (
-          <Link aria-label={t('back')} sx={{ ...MyAccountTemplateStyle.backButton }} href="/">
+          <Link
+            component={'a' as React.ElementType}
+            aria-label={String(t('back'))}
+            sx={{ ...MyAccountTemplateStyle.backButton }}
+            href="/"
+          >
             <ChevronLeft />
             {t('back')}
           </Link>

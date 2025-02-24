@@ -33,9 +33,7 @@ export default function KiboBreadcrumbs({
                 sx={{
                   fontSize: '14px',
                   lineHeight: '20px',
-                  textDecoration: index + 1 < breadcrumbs.length ? 'underline' : 'none',
                   fontWeight: '500',
-                  '&:hover': { textDecoration: 'none' },
                 }}
                 aria-label={item.text ?? ''}
               >

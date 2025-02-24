@@ -196,6 +196,7 @@ const ExistingUserDialog = () => {
                   borderRadius: '0px 26px',
                   border: '1px solid primary.main',
                   padding: '12px 30px',
+                  boxShadow: 'none',
                   '&:hover': {
                     backgroundColor: 'primary.light',
                     border: '1px solid primary.light',

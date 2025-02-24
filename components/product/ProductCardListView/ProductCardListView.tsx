@@ -212,7 +212,7 @@ const ProductCardListView = React.forwardRef<HTMLDivElement, ProductCardListView
         ? variationProductCode
         : ProductCatalogNumber !== undefined
         ? ProductCatalogNumber
-        : ''
+        : brandLabel
     }`
     truncatedTitle = truncatedTitle + `${uniqueVal}`
 

@@ -51,7 +51,12 @@ const OrderPriceList = (props: OrderPriceListProps) => {
         >
           <ListItemText
             primary={
-              <Typography variant="body2" sx={{ fontSize: '1.375rem' }}>
+              <Typography
+                variant="body2"
+                component="h4"
+                color="grey.900"
+                sx={{ fontSize: '1.375rem' }}
+              >
                 {t(title)}
               </Typography>
             }
