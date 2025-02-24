@@ -153,7 +153,7 @@ const ShippingPreferences = (props: MyProfileProps) => {
     <Box width="100%">
       <Box>
         <Typography variant="h3" sx={{ color: 'primary.main', fontWeight: '500' }}>
-          Fedex Shipping
+          FedEx Shipping
         </Typography>
         <Divider
           sx={{
@@ -167,7 +167,7 @@ const ShippingPreferences = (props: MyProfileProps) => {
               variant="body2"
               sx={{ color: 'primary.main', fontWeight: '500', marginBottom: '5px' }}
             >
-              Fedex Shipping{' '}
+              FedEx Shipping{' '}
               <Button onClick={() => setEditForm(true)}>
                 <span className="material-symbols-outlined">edit</span>
               </Button>
@@ -175,7 +175,7 @@ const ShippingPreferences = (props: MyProfileProps) => {
             {fedexNumber && (
               <>
                 <Typography variant="body2" sx={{ color: 'gray.900' }}>
-                  Customer Fedex Account Number
+                  Fed<span style={{ textTransform: 'capitalize' }}>Ex</span> Account Number
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'gray.900' }}>
                   {fedexNumber}
