@@ -63,6 +63,7 @@ const PlpIconAttributes = (props: any) => {
             onClick={handleOpenModal}
             style={{ cursor: 'pointer' }}
             key={data.attributeFQN}
+            tabIndex={0}
           >
             <Box sx={{ ...plpIconStyles.plpIconCss, color: '#348345' }}>
               <span
@@ -91,7 +92,7 @@ const PlpIconAttributes = (props: any) => {
       {properties?.map((data: any) => {
         return data?.attributeFQN === 'tenant~trial-size-available' ? (
           data?.values[0]?.value === 'Yes' ? (
-            <Grid item md={3} sm={3}>
+            <Grid item md={3} sm={3} tabIndex={0}>
               <Box sx={plpIconStyles.flexDirectionRow}>
                 <Box sx={plpIconStyles.flexDirectionRow}>
                   <Box sx={plpIconStyles.plpIconCss}>
@@ -115,7 +116,7 @@ const PlpIconAttributes = (props: any) => {
       {properties?.map((data: any) => {
         return data?.attributeFQN === 'tenant~formulation' ? (
           data?.values[0]?.value === 'bsa_free' ? (
-            <Grid item md={3} sm={3}>
+            <Grid item md={3} sm={3} tabIndex={0}>
               <Box sx={plpIconStyles.flexDirectionRow}>
                 <Box sx={plpIconStyles.flexDirectionRow}>
                   <Box sx={plpIconStyles.plpIconCss}>
@@ -166,7 +167,7 @@ const PlpIconAttributes = (props: any) => {
       {properties?.map((data: any) => {
         return data?.attributeFQN === publicRuntimeConfig?.mfgCertificationAttrFQN ? (
           data?.values[0]?.value === 'ISO13485' ? (
-            <Grid item md={3} sm={3}>
+            <Grid item md={3} sm={3} tabIndex={0}>
               <Box sx={plpIconStyles.flexDirectionRow}>
                 <Box sx={plpIconStyles.plpIconCss}>
                   <span
@@ -188,7 +189,7 @@ const PlpIconAttributes = (props: any) => {
       {properties?.map((data: any) => {
         return data?.attributeFQN === publicRuntimeConfig?.mfgAvailabilityAttrFQN ? (
           data?.values[0]?.value === 'gmp_ready' ? (
-            <Grid item md={3} sm={3}>
+            <Grid item md={3} sm={3} tabIndex={0}>
               <Box sx={plpIconStyles.flexDirectionRow}>
                 <Box sx={plpIconStyles.flexDirectionRow}>
                   <Box sx={plpIconStyles.plpIconCss}>
@@ -212,7 +213,7 @@ const PlpIconAttributes = (props: any) => {
       {properties?.map((data: any) => {
         return data?.attributeFQN === publicRuntimeConfig?.mfgAvailabilityAttrFQN ? (
           data?.values[0]?.value === 'lyo_ready' ? (
-            <Grid item md={3} sm={3}>
+            <Grid item md={3} sm={3} tabIndex={0}>
               <Box sx={plpIconStyles.flexDirectionRow}>
                 <Box sx={plpIconStyles.flexDirectionRow}>
                   <Box sx={plpIconStyles.plpIconCss}>
