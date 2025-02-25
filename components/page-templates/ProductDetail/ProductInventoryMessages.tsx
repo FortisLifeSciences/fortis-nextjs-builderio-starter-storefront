@@ -536,14 +536,16 @@ const ProductInventoryMessages = ({
   //console.log('inevntory message final', inventoryResponse)
   const MessageBox = ({ message }: { message: string }) => (
     <StyledBox>
-      {skuStatus && skuStatus === 'Active' && (
-        <span
-          className="material-symbols-outlined responsiveShippingSpanIcon"
-          style={{ fontSize: '28px', fontWeight: 500, lineHeight: '20px' }}
-        >
-          local_shipping
-        </span>
-      )}
+      {skuStatus &&
+        skuStatus === 'Active' &&
+        !(stockBehaviour?.toLowerCase() === 'denybackorder' && stockAvailable < minimumStock) && (
+          <span
+            className="material-symbols-outlined responsiveShippingSpanIcon"
+            style={{ fontSize: '28px', fontWeight: 500, lineHeight: '20px', marginTop: '6px' }}
+          >
+            local_shipping
+          </span>
+        )}
       <Typography
         variant="body1"
         sx={{
