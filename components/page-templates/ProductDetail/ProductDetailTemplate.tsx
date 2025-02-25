@@ -1,16 +1,10 @@
 import React, { useState, useEffect } from 'react'
 
 import { BuilderComponent } from '@builder.io/react'
-import { RttOutlined, WidthFull } from '@mui/icons-material'
-import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded'
-import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded'
-import StarRounded from '@mui/icons-material/StarRounded'
 import { LoadingButton } from '@mui/lab'
 import {
   Box,
   Grid,
-  Rating,
-  Button,
   Typography,
   Divider,
   Link as MuiLink,
@@ -225,7 +219,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     (type) => type === FulfillmentOptionsConstant.DIGITAL
   )
 
-  //console.log('This is updatedProduct ---> ', updatedProduct)
+  // console.log('This is updatedProduct ---> ', updatedProduct)
 
   const [purchaseType, setPurchaseType] = useState<string>(PurchaseTypes.ONETIMEPURCHASE)
   const [selectedFrequency, setSelectedFrequency] = useState<string>('')
@@ -298,6 +292,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     },
     productPriceResponse?.price as ProductPrice
   )
+  const [variationCodeDynamic, setVariationCodeDynamic] = useState<string>()
   const [variantProductTitle, setVariantProductTitle] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const newProductData = product?.properties?.find(
@@ -759,8 +754,11 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
           value
         )
       }
+      setVariationCodeDynamic(variationProductCode)
     }
   }, [variationProductCode])
+
+  const siteUrl = process.env.NEXT_PUBLIC_URL
 
   return (
     <Grid container>
@@ -1156,13 +1154,20 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                 )}
               </Box>
             )}
-            {PDPCustomAndBulkDisplayContentSection && PDPCustomAndBulkDisplaySectionKey && (
-              <BuilderComponent
-                model={PDPCustomAndBulkDisplaySectionKey}
-                content={PDPCustomAndBulkDisplayContentSection}
-                data={{ linkURL: `/bulk-request?Catalog_Num=${variationProductCode}` }}
-              />
-            )}
+            {PDPCustomAndBulkDisplayContentSection &&
+              PDPCustomAndBulkDisplaySectionKey &&
+              variationCodeDynamic && (
+                <BuilderComponent
+                  key={variationCodeDynamic}
+                  model={PDPCustomAndBulkDisplaySectionKey}
+                  content={PDPCustomAndBulkDisplayContentSection}
+                  context={{
+                    bulkRedirect: () => {
+                      window.location.href = `${siteUrl}bulk-request?Catalog_Num=${variationCodeDynamic}`
+                    },
+                  }}
+                />
+              )}
             {/* <Box paddingY={1}>
               <QuantitySelector
                 label="Qty"
