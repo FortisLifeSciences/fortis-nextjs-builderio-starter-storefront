@@ -264,6 +264,7 @@ const ProfileDetailsForm = (props: ProfileDetailsFormProps) => {
             <Button
               variant="contained"
               color="primary"
+              disableElevation
               {...((!isValid || !isDirty) && { disabled: true })}
               onClick={() => handleSubmit(onValid)()}
             >
