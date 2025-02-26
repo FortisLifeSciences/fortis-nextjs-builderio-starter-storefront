@@ -523,6 +523,7 @@ const PaymentMethod = (props: PaymentMethodProps) => {
             <Button
               variant="contained"
               color="primary"
+              disableElevation
               {...(isAddPaymentMethodButtonDisabled() && { disabled: true })}
               onClick={handleSaveNewPaymentMethod}
             >

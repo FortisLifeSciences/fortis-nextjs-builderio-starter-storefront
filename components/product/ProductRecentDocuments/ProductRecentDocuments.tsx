@@ -65,7 +65,7 @@ const ProductRecentDocuments = (props: any) => {
         (document: any) =>
           document.properties.assettype &&
           document.properties.assettype !== 'ProductImage' &&
-          document.properties.displayonpdp
+          document.properties.displayonpdp === 'True'
       )
     }
   }
