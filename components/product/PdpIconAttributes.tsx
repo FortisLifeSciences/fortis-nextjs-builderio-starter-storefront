@@ -20,11 +20,15 @@ const styles = {
     fontFamily: 'Poppins',
     fontSize: '16px',
     fontWeight: '400',
-    lineHeight: '25px',
+    lineHeight: '20px',
     marginLeft: '8px',
-    textDecorationLine: 'underline',
+  },
+  linkUnderlineStyle: {
+    borderBottom: '1px solid currentColor',
+    textDecoration: 'none',
+    display: 'inline',
     '&:hover': {
-      textDecorationLine: 'none',
+      borderBottom: 'none',
     },
   },
 }
