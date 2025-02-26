@@ -115,22 +115,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   // Prioritize input
   useEffect(() => {
     setFedExAccountNumber(fedExAccountNumberInput || fedExAccountNumber)
-    console.log('fedExAccountNumber-101', fedExAccountNumber)
   }, [fedExAccountNumber, fedExAccountNumberInput])
-
-  // useEffect(() => {
-  //   if (customerAccount?.attributes?.length) {
-  //     // Get FedEx account shipping method name
-  //     const customerShippingMethodAttr = find(customerAccount?.attributes, {
-  //       fullyQualifiedName: 'tenant~shipping-method',
-  //     })
-  //     const shippingMethodName = customerShippingMethodAttr?.values?.length ? customerShippingMethodAttr.values[0] : ''
-  //     const shippingMethod = find(orderShipmentMethods, (shipMethod) =>
-  //       shippingMethodName?.includes(shipMethod?.shippingMethodName)
-  //     ) as CrShippingRate
-  //     setFedExAccountShippingMethod(shippingMethod)
-  //   }
-  // }, [customerAccount?.attributes, orderShipmentMethods, t])
 
   useEffect(() => {
     if (fedExAccountShippingMethod?.shippingMethodName) {
@@ -179,7 +164,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         handleShippingMethodSelectChange('', '')
       }
     }
-    console.log('fedExAccountNumber-102', fedExAccountNumber)
+
     // Update the previous value
     if (isFedExMethodSelected && fedExAccountNumber) {
       previousFedExAccountNumber.current = fedExAccountNumber
@@ -350,8 +335,6 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       console.error(error)
     }
   }
-
-  console.log('fedExAccountNumber-103', fedExAccountNumber)
 
   return (
     <Box data-testid="ship-items">
