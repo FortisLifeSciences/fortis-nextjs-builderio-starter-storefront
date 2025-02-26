@@ -1,3 +1,4 @@
+import { get } from '@vercel/edge-config'
 import { NextResponse, NextRequest } from 'next/server'
 
 const apiUrlStart = process.env.KIBO_API_HOST
@@ -128,11 +129,19 @@ export async function middleware(request: NextRequest) {
               ? `/products/${categoryCode}/${productSlug}/${productCode}`
               : null
 
-          const redirects = await getCustomRedirects()
-          const customRedirect = redirects.find((redirect) => redirect.sourceUrl === pathname)
+          // const redirects = await getCustomRedirects()
+
+          const redirects = await get<
+            Record<string, { source: string; destination: string; permanent: boolean }>
+          >('redirects')
+          if (!redirects || typeof redirects !== 'object') return NextResponse.next()
+
+          const customRedirect = Object.values(redirects).find((entry) => entry.source === pathname)
+
+          // const customRedirect = redirects.find((redirect) => redirect.sourceUrl === pathname)
 
           if (customRedirect) {
-            const finalUrl = new URL(customRedirect.destinationUrl, request.url)
+            const finalUrl = new URL(customRedirect.destination, request.url)
             // Clean query parameters to remove productCode and keep others
             const cleanedSearch = cleanQueryParams(search)
             if (cleanedSearch) {
