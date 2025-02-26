@@ -132,22 +132,30 @@ export async function middleware(request: NextRequest) {
           // const redirects = await getCustomRedirects()
 
           const redirects = await get<
-            Record<string, { source: string; destination: string; permanent: boolean }>
+            { source: string; destination: string; permanent: boolean }[]
           >('redirects')
-          if (!redirects || typeof redirects !== 'object') return NextResponse.next()
 
-          const customRedirect = Object.values(redirects).find((entry) => entry.source === pathname)
+          console.log('Fetched redirects from Edge Config:', redirects)
+
+          // Ensure redirects is an array
+          if (!Array.isArray(redirects)) {
+            console.error('Error: Edge Config data is not an array')
+            return NextResponse.next()
+          }
+
+          const customRedirect = redirects.find((entry) => entry.source === pathname)
 
           // const customRedirect = redirects.find((redirect) => redirect.sourceUrl === pathname)
 
           if (customRedirect) {
+            console.log('Match found:', customRedirect)
             const finalUrl = new URL(customRedirect.destination, request.url)
             // Clean query parameters to remove productCode and keep others
             const cleanedSearch = cleanQueryParams(search)
             if (cleanedSearch) {
               finalUrl.search = `?${cleanedSearch}`
             }
-            return NextResponse.redirect(finalUrl, customRedirect.permanent ? 301 : 302)
+            return NextResponse.redirect(finalUrl, customRedirect.permanent ? 308 : 307)
           }
 
           if (slugUrl && request.nextUrl.pathname !== slugUrl) {
@@ -173,4 +181,9 @@ export async function middleware(request: NextRequest) {
       }
     }
   }
+}
+
+// Apply middleware to all routes
+export const config = {
+  matcher: '/:path*', // Run middleware on all requests
 }
