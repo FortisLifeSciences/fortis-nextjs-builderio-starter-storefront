@@ -552,18 +552,18 @@ module.exports = {
       },
     ]
   },
-  async redirects() {
-    return [
-      {
-        source: '/products/immunoassay-buffers',
-        destination: '/control-swabs',
-        permanent: false,
-      },
-      {
-        source: '/clinical-diagnostics-antibodies',
-        destination: '/products/primary-antibodies',
-        permanent: false,
-      },
-    ]
-  },
+  // async redirects() {
+  //   return [
+  //     {
+  //       source: '/products/immunoassay-buffers',
+  //       destination: '/control-swabs',
+  //       permanent: false,
+  //     },
+  //     {
+  //       source: '/clinical-diagnostics-antibodies',
+  //       destination: '/products/primary-antibodies',
+  //       permanent: false,
+  //     },
+  //   ]
+  // },
 }
