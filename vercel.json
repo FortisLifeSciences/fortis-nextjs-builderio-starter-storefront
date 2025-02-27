@@ -1,8 +1,8 @@
 {
   "redirects": [
     {
-      "source": "/products/immunoassay-buffers",
-      "destination": "/control",
+      "source": "/old-control-page",
+      "destination": "/control-page",
       "permanent": false
     },
     {
