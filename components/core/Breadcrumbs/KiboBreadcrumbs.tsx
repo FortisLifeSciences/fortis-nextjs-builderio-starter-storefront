@@ -37,11 +37,13 @@ export default function KiboBreadcrumbs({
               <Typography
                 variant="body2"
                 color="primary.main"
+                component="a"
                 sx={{
                   fontSize: '14px',
                   lineHeight: '20px',
                   fontWeight: '500',
                 }}
+                aria-label={item.text ?? ''}
               >
                 {item.text}
               </Typography>

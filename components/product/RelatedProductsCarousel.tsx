@@ -115,7 +115,7 @@ const RelatedProductsCarousel = (props: any) => {
               const imgUrl = productGetters.handleProtocolRelativeUrl(
                 data?.productImages[0]?.imageUrl as string
               )
-              const altText = 'product-image-alt'
+              const altText = productName
               const productUrl =
                 categoryCode !== undefined && seoFriendlyUrl
                   ? `/products/${categoryCode}/${seoFriendlyUrl}/${productCode}`
