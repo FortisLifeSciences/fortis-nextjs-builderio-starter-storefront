@@ -78,12 +78,13 @@ const OrderConfirmation = ({ order }: { order: CrOrder }) => {
             variant="h2"
             component="h2"
             sx={{ color: 'primary.main', marginBottom: '30px' }}
+            tabIndex={0}
           >
             {t('thank-you')}
           </Typography>
         </Grid>
         <Grid item xs={12}>
-          <Typography variant="body1" component="span" sx={{ fontWeight: '600' }}>
+          <Typography variant="body1" component="span" sx={{ fontWeight: '600' }} tabIndex={0}>
             {t('order-was-placed-successfully', { orderNumber: orderNumber })}
           </Typography>
           <Typography variant="body1" component="span">
@@ -101,6 +102,7 @@ const OrderConfirmation = ({ order }: { order: CrOrder }) => {
             variant="h2"
             component="h2"
             sx={{ color: 'primary.main', marginBottom: '20px' }}
+            tabIndex={0}
           >
             {t('order-details')}
           </Typography>
@@ -109,6 +111,7 @@ const OrderConfirmation = ({ order }: { order: CrOrder }) => {
             variant="h3"
             component="h3"
             sx={{ color: 'primary.main', marginBottom: '10px' }}
+            tabIndex={0}
           >
             {t('shipping-information')}
           </Typography>
@@ -117,6 +120,7 @@ const OrderConfirmation = ({ order }: { order: CrOrder }) => {
             variant="h3"
             component="h3"
             sx={{ color: 'primary.main', marginBottom: '10px' }}
+            tabIndex={0}
           >
             {t('billing-information')}
           </Typography>
