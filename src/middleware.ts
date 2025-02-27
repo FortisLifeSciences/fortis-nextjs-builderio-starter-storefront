@@ -103,70 +103,70 @@ export async function middleware(request: NextRequest) {
   }
 
   // Custom routes requests for product page
-  if (pathname.startsWith('/p/') || pathname.startsWith('/product/')) {
-    const authToken = await getApiAuthToken()
-    const urlProductCode = pathname.split('/')[2]
+  // if (pathname.startsWith('/p/') || pathname.startsWith('/product/')) {
+  //   const authToken = await getApiAuthToken()
+  //   const urlProductCode = pathname.split('/')[2]
 
-    // Make an Product API call using Fetch
-    if (urlProductCode && authToken) {
-      try {
-        const apiUrl = `https://${apiUrlStart}/api/commerce/catalog/storefront/products/${urlProductCode}`
-        const productData = await fetchApi(apiUrl, {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            'Content-Type': 'application/json',
-          },
-        })
+  //   // Make an Product API call using Fetch
+  //   if (urlProductCode && authToken) {
+  //     try {
+  //       const apiUrl = `https://${apiUrlStart}/api/commerce/catalog/storefront/products/${urlProductCode}`
+  //       const productData = await fetchApi(apiUrl, {
+  //         method: 'GET',
+  //         headers: {
+  //           Authorization: `Bearer ${authToken}`,
+  //           'Content-Type': 'application/json',
+  //         },
+  //       })
 
-        const { productCode, categories, content } = productData || {}
-        const categoryCode = categories?.[0]?.categoryCode
-        const productSlug = content?.seoFriendlyUrl
+  //       const { productCode, categories, content } = productData || {}
+  //       const categoryCode = categories?.[0]?.categoryCode
+  //       const productSlug = content?.seoFriendlyUrl
 
-        if (urlProductCode === productCode) {
-          const slugUrl =
-            productSlug && categoryCode
-              ? `/products/${categoryCode}/${productSlug}/${productCode}`
-              : null
+  //       if (urlProductCode === productCode) {
+  //         const slugUrl =
+  //           productSlug && categoryCode
+  //             ? `/products/${categoryCode}/${productSlug}/${productCode}`
+  //             : null
 
-          const redirects = await getCustomRedirects()
+  //         const redirects = await getCustomRedirects()
 
-          const customRedirect = redirects.find((redirect) => redirect.sourceUrl === pathname)
+  //         const customRedirect = redirects.find((redirect) => redirect.sourceUrl === pathname)
 
-          if (customRedirect) {
-            console.log('Match found:', customRedirect)
-            const finalUrl = new URL(customRedirect.destination, request.url)
-            // Clean query parameters to remove productCode and keep others
-            const cleanedSearch = cleanQueryParams(search)
-            if (cleanedSearch) {
-              finalUrl.search = `?${cleanedSearch}`
-            }
-            return NextResponse.redirect(finalUrl, customRedirect.permanent ? 308 : 307)
-          }
+  //         if (customRedirect) {
+  //           console.log('Match found:', customRedirect)
+  //           const finalUrl = new URL(customRedirect.destination, request.url)
+  //           // Clean query parameters to remove productCode and keep others
+  //           const cleanedSearch = cleanQueryParams(search)
+  //           if (cleanedSearch) {
+  //             finalUrl.search = `?${cleanedSearch}`
+  //           }
+  //           return NextResponse.redirect(finalUrl, customRedirect.permanent ? 308 : 307)
+  //         }
 
-          if (slugUrl && request.nextUrl.pathname !== slugUrl) {
-            const slugRedirectUrl = new URL(slugUrl, request.url)
-            // Clean query parameters to remove productCode and append others
-            const cleanedSearch = cleanQueryParams(search)
-            if (cleanedSearch) {
-              slugRedirectUrl.search = `?${cleanedSearch}`
-            }
-            const slugRedirect = NextResponse.redirect(slugRedirectUrl)
-            slugRedirect.headers.set('Cache-Control', 'no-store')
-            return slugRedirect
-          }
+  //         if (slugUrl && request.nextUrl.pathname !== slugUrl) {
+  //           const slugRedirectUrl = new URL(slugUrl, request.url)
+  //           // Clean query parameters to remove productCode and append others
+  //           const cleanedSearch = cleanQueryParams(search)
+  //           if (cleanedSearch) {
+  //             slugRedirectUrl.search = `?${cleanedSearch}`
+  //           }
+  //           const slugRedirect = NextResponse.redirect(slugRedirectUrl)
+  //           slugRedirect.headers.set('Cache-Control', 'no-store')
+  //           return slugRedirect
+  //         }
 
-          // If no custom redirect and slug URL or it's the same as the current URL, continue to the product page
-          return NextResponse.next()
-        }
+  //         // If no custom redirect and slug URL or it's the same as the current URL, continue to the product page
+  //         return NextResponse.next()
+  //       }
 
-        return NextResponse.next()
-      } catch (error) {
-        console.error(error)
-        return NextResponse.next() // Handle error as needed
-      }
-    }
-  }
+  //       return NextResponse.next()
+  //     } catch (error) {
+  //       console.error(error)
+  //       return NextResponse.next() // Handle error as needed
+  //     }
+  //   }
+  // }
 }
 
 // Apply middleware to all routes

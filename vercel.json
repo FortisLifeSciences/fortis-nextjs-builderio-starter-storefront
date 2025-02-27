@@ -1,12 +1,12 @@
 {
   "redirects": [
     {
-      "source": "/products/immunoassay-buffers-test",
+      "source": "/products/immunoassay-buffers",
       "destination": "/control",
       "permanent": false
     },
     {
-      "source": "/clinical-diagnostics-antibodies-test",
+      "source": "/clinical-diagnostics-antibodies",
       "destination": "/testpage",
       "permanent": false
     }
