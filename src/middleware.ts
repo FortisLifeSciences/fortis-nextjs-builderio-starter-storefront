@@ -129,23 +129,9 @@ export async function middleware(request: NextRequest) {
               ? `/products/${categoryCode}/${productSlug}/${productCode}`
               : null
 
-          // const redirects = await getCustomRedirects()
+          const redirects = await getCustomRedirects()
 
-          const redirects = await get<
-            { source: string; destination: string; permanent: boolean }[]
-          >('redirects')
-
-          console.log('Fetched redirects from Edge Config:', redirects)
-
-          // Ensure redirects is an array
-          if (!Array.isArray(redirects)) {
-            console.error('Error: Edge Config data is not an array')
-            return NextResponse.next()
-          }
-
-          const customRedirect = redirects.find((entry) => entry.source === pathname)
-
-          // const customRedirect = redirects.find((redirect) => redirect.sourceUrl === pathname)
+          const customRedirect = redirects.find((redirect) => redirect.sourceUrl === pathname)
 
           if (customRedirect) {
             console.log('Match found:', customRedirect)
@@ -184,6 +170,6 @@ export async function middleware(request: NextRequest) {
 }
 
 // Apply middleware to all routes
-export const config = {
-  matcher: '/:path*', // Run middleware on all requests
-}
+// export const config = {
+//   matcher: '/:path*', // Run middleware on all requests
+// }
