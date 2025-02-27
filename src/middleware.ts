@@ -85,89 +85,115 @@ async function getCustomRedirects() {
   }
 }
 
-// export async function middleware(request: NextRequest) {
-//   const { pathname, search } = request.nextUrl
-//   if (
-//     request.nextUrl.pathname.startsWith('/my-account') ||
-//     request.nextUrl.pathname.startsWith('/checkout')
-//   ) {
-//     if (checkIsAuthenticated(request)) {
-//       return NextResponse.next()
-//     } else if (request.nextUrl.pathname.startsWith('/checkout')) {
-//       const cartUrl = new URL('/cart', request.url)
-//       return NextResponse.redirect(cartUrl)
-//     }
+export async function middleware(request: NextRequest) {
+  const { pathname, search } = request.nextUrl
+  if (
+    request.nextUrl.pathname.startsWith('/my-account') ||
+    request.nextUrl.pathname.startsWith('/checkout')
+  ) {
+    if (checkIsAuthenticated(request)) {
+      return NextResponse.next()
+    } else if (request.nextUrl.pathname.startsWith('/checkout')) {
+      const cartUrl = new URL('/cart', request.url)
+      return NextResponse.redirect(cartUrl)
+    }
 
-//     const homeUrl = new URL('/', request.url)
-//     return NextResponse.redirect(homeUrl)
-//   }
+    const homeUrl = new URL('/', request.url)
+    return NextResponse.redirect(homeUrl)
+  }
 
-//   // Custom routes requests for product page
-//   // if (pathname.startsWith('/p/') || pathname.startsWith('/product/')) {
-//   //   const authToken = await getApiAuthToken()
-//   //   const urlProductCode = pathname.split('/')[2]
+  // Custom routes requests for product page
+  if (pathname.startsWith('/p/') || pathname.startsWith('/product/')) {
+    const authToken = await getApiAuthToken()
+    const urlProductCode = pathname.split('/')[2]
 
-//   //   // Make an Product API call using Fetch
-//   //   if (urlProductCode && authToken) {
-//   //     try {
-//   //       const apiUrl = `https://${apiUrlStart}/api/commerce/catalog/storefront/products/${urlProductCode}`
-//   //       const productData = await fetchApi(apiUrl, {
-//   //         method: 'GET',
-//   //         headers: {
-//   //           Authorization: `Bearer ${authToken}`,
-//   //           'Content-Type': 'application/json',
-//   //         },
-//   //       })
+    // Make an Product API call using Fetch
+    if (urlProductCode && authToken) {
+      try {
+        const apiUrl = `https://${apiUrlStart}/api/commerce/catalog/storefront/products/${urlProductCode}`
+        const productData = await fetchApi(apiUrl, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            'Content-Type': 'application/json',
+          },
+        })
 
-//   //       const { productCode, categories, content } = productData || {}
-//   //       const categoryCode = categories?.[0]?.categoryCode
-//   //       const productSlug = content?.seoFriendlyUrl
+        const { productCode, categories, content } = productData || {}
+        const categoryCode = categories?.[0]?.categoryCode
+        const productSlug = content?.seoFriendlyUrl
 
-//   //       if (urlProductCode === productCode) {
-//   //         const slugUrl =
-//   //           productSlug && categoryCode
-//   //             ? `/products/${categoryCode}/${productSlug}/${productCode}`
-//   //             : null
+        if (urlProductCode === productCode) {
+          const slugUrl =
+            productSlug && categoryCode
+              ? `/products/${categoryCode}/${productSlug}/${productCode}`
+              : null
 
-//   //         const redirects = await getCustomRedirects()
+          const redirects = await getCustomRedirects()
 
-//   //         const customRedirect = redirects.find((redirect) => redirect.sourceUrl === pathname)
+          const customRedirect = redirects.find((redirect) => redirect.sourceUrl === pathname)
 
-//   //         if (customRedirect) {
-//   //           console.log('Match found:', customRedirect)
-//   //           const finalUrl = new URL(customRedirect.destination, request.url)
-//   //           // Clean query parameters to remove productCode and keep others
-//   //           const cleanedSearch = cleanQueryParams(search)
-//   //           if (cleanedSearch) {
-//   //             finalUrl.search = `?${cleanedSearch}`
-//   //           }
-//   //           return NextResponse.redirect(finalUrl, customRedirect.permanent ? 308 : 307)
-//   //         }
+          if (customRedirect) {
+            console.log('Match found:', customRedirect)
+            const finalUrl = new URL(customRedirect.destination, request.url)
+            // Clean query parameters to remove productCode and keep others
+            const cleanedSearch = cleanQueryParams(search)
+            if (cleanedSearch) {
+              finalUrl.search = `?${cleanedSearch}`
+            }
+            return NextResponse.redirect(finalUrl, customRedirect.permanent ? 308 : 307)
+          }
 
-//   //         if (slugUrl && request.nextUrl.pathname !== slugUrl) {
-//   //           const slugRedirectUrl = new URL(slugUrl, request.url)
-//   //           // Clean query parameters to remove productCode and append others
-//   //           const cleanedSearch = cleanQueryParams(search)
-//   //           if (cleanedSearch) {
-//   //             slugRedirectUrl.search = `?${cleanedSearch}`
-//   //           }
-//   //           const slugRedirect = NextResponse.redirect(slugRedirectUrl)
-//   //           slugRedirect.headers.set('Cache-Control', 'no-store')
-//   //           return slugRedirect
-//   //         }
+          if (slugUrl && request.nextUrl.pathname !== slugUrl) {
+            const slugRedirectUrl = new URL(slugUrl, request.url)
+            // Clean query parameters to remove productCode and append others
+            const cleanedSearch = cleanQueryParams(search)
+            if (cleanedSearch) {
+              slugRedirectUrl.search = `?${cleanedSearch}`
+            }
+            const slugRedirect = NextResponse.redirect(slugRedirectUrl)
+            slugRedirect.headers.set('Cache-Control', 'no-store')
+            return slugRedirect
+          }
 
-//   //         // If no custom redirect and slug URL or it's the same as the current URL, continue to the product page
-//   //         return NextResponse.next()
-//   //       }
+          // If no custom redirect and slug URL or it's the same as the current URL, continue to the product page
+          return NextResponse.next()
+        }
 
-//   //       return NextResponse.next()
-//   //     } catch (error) {
-//   //       console.error(error)
-//   //       return NextResponse.next() // Handle error as needed
-//   //     }
-//   //   }
-//   // }
-// }
+        // Fetch redirects from Edge Config
+        const edgeRedirects = await get<
+          { source: string; destination: string; permanent: boolean }[]
+        >('redirects')
+
+        console.log('Fetched redirects from Edge Config:', edgeRedirects)
+
+        // Ensure redirects is an array
+        if (!Array.isArray(edgeRedirects)) {
+          console.error('Error: Edge Config data is not an array')
+          return NextResponse.next() // Continue without redirection if data is not an array
+        }
+
+        // Find the matching redirect for the current pathname
+        const customEdgeRedirect = edgeRedirects.find((entry) => entry.source === pathname)
+
+        if (customEdgeRedirect) {
+          console.log('Match found:', customEdgeRedirect)
+
+          // Prepare the destination URL with any query parameters if necessary
+          const finalUrl = new URL(customEdgeRedirect.destination, request.url)
+
+          // If the redirect is permanent, send a 308 status (permanent redirect)
+          return NextResponse.redirect(finalUrl, customEdgeRedirect.permanent ? 308 : 307)
+        }
+
+        return NextResponse.next()
+      } catch (error) {
+        console.error(error)
+        return NextResponse.next() // Handle error as needed
+      }
+    }
+  }
+}
 
 // Apply middleware to all routes
 // export const config = {

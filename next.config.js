@@ -539,19 +539,19 @@ module.exports = {
   experimental: {
     workerThreads: false,
   },
-  // async rewrites() {
-  //   //custom routes
-  //   return [
-  //     {
-  //       source: '/products/:categoryCode/:productSlug/:productCode', // Match product URLs under categories
-  //       destination: '/product/:productCode', // Destination for the product page
-  //     },
-  //     {
-  //       source: '/p/:productCode', // Match product URLs under categories
-  //       destination: '/product/:productCode', // Destination for the product page
-  //     },
-  //   ]
-  // },
+  async rewrites() {
+    //custom routes
+    return [
+      {
+        source: '/products/:categoryCode/:productSlug/:productCode', // Match product URLs under categories
+        destination: '/product/:productCode', // Destination for the product page
+      },
+      {
+        source: '/p/:productCode', // Match product URLs under categories
+        destination: '/product/:productCode', // Destination for the product page
+      },
+    ]
+  },
   // async redirects() {
   //   return [
   //     {
