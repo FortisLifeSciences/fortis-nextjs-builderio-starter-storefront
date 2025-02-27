@@ -2,7 +2,7 @@
   "redirects": [
     {
       "source": "/products/immunoassay-buffers",
-      "destination": "/control-swabs",
+      "destination": "/control",
       "permanent": false
     },
     {
