@@ -552,4 +552,13 @@ module.exports = {
       },
     ]
   },
+  async redirects() {
+    return [
+      {
+        source: '/products/monoclonal-antibodies',
+        destination: '/products/primary-antibodies',
+        permanent: true,
+      },
+    ]
+  },
 }
