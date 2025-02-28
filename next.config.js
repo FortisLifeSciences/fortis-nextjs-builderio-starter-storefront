@@ -539,31 +539,31 @@ module.exports = {
   experimental: {
     workerThreads: false,
   },
-  // async rewrites() {
-  //   //custom routes
-  //   return [
-  //     {
-  //       source: '/products/:categoryCode/:productSlug/:productCode', // Match product URLs under categories
-  //       destination: '/product/:productCode', // Destination for the product page
-  //     },
-  //     {
-  //       source: '/p/:productCode', // Match product URLs under categories
-  //       destination: '/product/:productCode', // Destination for the product page
-  //     },
-  //   ]
-  // },
-  // async redirects() {
-  //   return [
-  //     {
-  //       source: '/products/immunoassay-buffers',
-  //       destination: '/control-swabs',
-  //       permanent: false,
-  //     },
-  //     {
-  //       source: '/clinical-diagnostics-antibodies',
-  //       destination: '/products/primary-antibodies',
-  //       permanent: false,
-  //     },
-  //   ]
-  // },
+  async rewrites() {
+    //custom routes
+    return [
+      {
+        source: '/products/:categoryCode/:productSlug/:productCode', // Match product URLs under categories
+        destination: '/product/:productCode', // Destination for the product page
+      },
+      {
+        source: '/p/:productCode', // Match product URLs under categories
+        destination: '/product/:productCode', // Destination for the product page
+      },
+    ]
+  },
+  async redirects() {
+    return [
+      {
+        source: '/old-test-url',
+        destination: '/new-test-url',
+        permanent: true,
+      },
+      {
+        source: '/old-product-url',
+        destination: '/new-product-url',
+        permanent: false,
+      },
+    ]
+  },
 }
