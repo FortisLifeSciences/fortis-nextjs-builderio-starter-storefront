@@ -18,7 +18,7 @@ interface HeaderActionProps {
 }
 const StyledBadge = styled(Badge)(() => ({
   '& .MuiBadge-badge': {
-    fontSize: '0.625rem',
+    fontSize: '0.75rem',
     height: '16px',
     minWidth: '16px',
     padding: '0 2px',
