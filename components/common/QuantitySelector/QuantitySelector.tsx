@@ -68,6 +68,7 @@ const QuantityTextField = ({ quantity, handleCustomQuantity }: QuantityInputProp
           lineHeight: '25px',
           border: '1px solid #000',
           borderRadius: '3px',
+          backgroundColor: '#ffffff',
         },
       }}
       sx={{ width: '35px', height: '24px', borderRadius: '3px' }}
