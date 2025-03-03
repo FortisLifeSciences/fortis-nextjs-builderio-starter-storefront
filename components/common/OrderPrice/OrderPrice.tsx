@@ -127,7 +127,7 @@ const OrderPrice = <T extends CrCart | CrOrder | Checkout>(props: OrderPriceProp
       {promoComponent && <Box>{promoComponent}</Box>}
 
       <Box sx={{ ...styles.priceTotalRow }}>
-        <Typography variant="body1" sx={{ ...styles.priceLabel }}>
+        <Typography variant="body1" component="h4" sx={{ ...styles.priceLabel }}>
           {totalLabel}
         </Typography>
         <Price variant="body1" fontWeight="500" price={t('currency', { val: total })} />

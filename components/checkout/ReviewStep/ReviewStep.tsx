@@ -331,6 +331,7 @@ const ReviewStep = (props: ReviewStepProps) => {
         component="h2"
         gutterBottom
         sx={{ color: 'primary.main', marginBottom: '20px' }}
+        tabIndex={0}
       >
         {t('Review Order')}
       </Typography>
@@ -474,6 +475,7 @@ const ReviewStep = (props: ReviewStepProps) => {
             variant="h3"
             component="h3"
             sx={{ color: 'primary.main', marginBottom: '10px' }}
+            tabIndex={0}
           >
             {t('Shipping Information')}
           </Typography>
@@ -482,6 +484,7 @@ const ReviewStep = (props: ReviewStepProps) => {
               sx={{ cursor: 'pointer', fontSize: '16px', color: '#30299A', fontWeight: '500' }}
               component="span"
               variant="caption"
+              tabIndex={0}
             >
               {t('Change')}
             </Typography>
@@ -566,6 +569,7 @@ const ReviewStep = (props: ReviewStepProps) => {
             variant="h3"
             component="h3"
             sx={{ color: 'primary.main', marginBottom: '10px' }}
+            tabIndex={0}
           >
             {t('Billing Information')}
           </Typography>
@@ -574,6 +578,7 @@ const ReviewStep = (props: ReviewStepProps) => {
               sx={{ cursor: 'pointer', fontSize: '16px', color: '#30299A', fontWeight: '500' }}
               component="span"
               variant="caption"
+              tabIndex={0}
             >
               {t('Change')}
             </Typography>
@@ -829,6 +834,7 @@ const ReviewStep = (props: ReviewStepProps) => {
           }}
           disabled={!isEnabled()}
           onClick={handleComplete}
+          tabIndex={0}
         >
           {t('Place Order')}
         </LoadingButton>

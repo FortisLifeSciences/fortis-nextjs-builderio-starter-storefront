@@ -32,7 +32,7 @@ const styles = {
   },
 }
 
-const KiboLogo = ({ logo = Logo, alt = 'kibo-logo', small, mobileRatio }: KiboLogoProps) => {
+const KiboLogo = ({ logo = Logo, alt = 'fortis-logo', small, mobileRatio }: KiboLogoProps) => {
   return (
     <Box
       width={'100%'}

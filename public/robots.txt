@@ -1,5 +1,6 @@
 #robots.txt for https://www.fortislife.com/ updated 2025-02-24T09:04:29.215Z
 
+
 # Googlebot
 User-agent: Googlebot
 Allow: /
@@ -41,3 +42,4 @@ Host: https://www.fortislife.com/
 
 # Sitemaps
 Sitemap: https://www.fortislife.com/sitemap.xml
+

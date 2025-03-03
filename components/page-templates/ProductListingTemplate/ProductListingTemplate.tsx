@@ -361,6 +361,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
                       onClick={() => setIsListView(true)}
                       title="List View"
                       sx={{ cursor: 'pointer' }}
+                      tabIndex={0}
                     >
                       <ReorderRounded fontSize="medium" {...(isListView && { color: 'primary' })} />
                     </Box>
@@ -368,6 +369,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
                       onClick={() => setIsListView(false)}
                       title="Grid View"
                       sx={{ cursor: 'pointer' }}
+                      tabIndex={0}
                     >
                       <Apps fontSize="medium" {...(!isListView && { color: 'primary' })} />
                     </Box>

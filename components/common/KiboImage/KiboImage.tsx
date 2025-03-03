@@ -38,7 +38,7 @@ const KiboImage = (props: KiboImageProps) => {
       onError={() => setIsErrorState(true)}
       style={{
         objectFit: props.objectFit ?? 'contain',
-        ...(props.alt === 'kibo-logo' && { position: 'relative' }),
+        ...(props.alt === 'fortis-logo' && { position: 'relative' }),
         ...(mobileRatio && {
           width: fortisLogoImage ? (isDesktop ? '164px' : '121px') : 'inherit',
           height: fortisLogoImage ? (isDesktop ? '44px' : '31px') : 'inherit',
@@ -48,8 +48,8 @@ const KiboImage = (props: KiboImageProps) => {
           props.alt.includes('cardType') &&
           mobileRatio && { width: '45px', height: '35px' }), // Apply only when mobile is true
       }}
-      // Only add the "fill" property if the alt is NOT "kibo-logo" or cardType
-      fill={props.alt !== 'kibo-logo' && !(props.alt && props.alt.includes('cardType'))}
+      // Only add the "fill" property if the alt is NOT "fortis-logo" or cardType
+      fill={props.alt !== 'fortis-logo' && !(props.alt && props.alt.includes('cardType'))}
     />
   )
 }

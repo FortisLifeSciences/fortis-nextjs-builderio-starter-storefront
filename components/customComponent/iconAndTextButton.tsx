@@ -5,7 +5,7 @@ import ButtonCss from '../../components/customComponent/iconAndTextBtn.module.cs
 const IconTextButton = (props: any) => {
   return (
     <div className={ButtonCss.btnContainer}>
-      <Image src={props.Icon} alt="icon" width={32} height={32} />
+      <Image src={props.Icon} alt={`icon ${props.title}`} width={32} height={32} />
       <p className={ButtonCss.linkText}>{props.title}</p>
       <span className={ButtonCss.cornerDarkBtn}></span>
     </div>
