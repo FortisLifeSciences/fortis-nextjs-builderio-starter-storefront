@@ -87,6 +87,26 @@ const App = (props: KiboAppProps) => {
   }`
 
   useEffect(() => {
+    const addAriaLabel = () => {
+      const iframe = document.querySelectorAll('.g-recaptcha-response')
+      if (iframe) {
+        iframe.forEach((iframe, index) => {
+          iframe.setAttribute('aria-label', 'Security verification using reCAPTCHA')
+        })
+      }
+    }
+    const observer = new MutationObserver(() => {
+      addAriaLabel()
+    })
+
+    observer.observe(document.body, { childList: true, subtree: true })
+    setTimeout(() => {
+      addAriaLabel()
+    }, 2000)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
     // Update metadata dynamically
 
     const updateMetaTags = () => {

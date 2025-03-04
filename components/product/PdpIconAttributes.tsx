@@ -20,11 +20,15 @@ const styles = {
     fontFamily: 'Poppins',
     fontSize: '16px',
     fontWeight: '400',
-    lineHeight: '25px',
+    lineHeight: '20px',
     marginLeft: '8px',
-    textDecorationLine: 'underline',
+  },
+  linkUnderlineStyle: {
+    borderBottom: '1px solid currentColor',
+    textDecoration: 'none',
+    display: 'inline',
     '&:hover': {
-      textDecorationLine: 'none',
+      borderBottom: 'none',
     },
   },
 }
@@ -76,7 +80,9 @@ const PdpIconAttributes = (props: any) => {
             onClick={handleOpenModal}
           >
             <span className="material-symbols-outlined">verified</span>
-            <Box sx={{ ...styles.iconText, color: '#348345' }}>Validated</Box>
+            <Box sx={{ ...styles.iconText, ...styles.linkUnderlineStyle, color: '#348345' }}>
+              Validated
+            </Box>
           </Box>
         ) : null
       )}
@@ -89,7 +95,7 @@ const PdpIconAttributes = (props: any) => {
         <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
           draft
         </span>
-        <Box sx={styles.iconText}>Documents</Box>
+        <Box sx={{ ...styles.iconText, ...styles.linkUnderlineStyle }}>Documents</Box>
       </Box>
 
       {/* Citations */}
@@ -104,7 +110,7 @@ const PdpIconAttributes = (props: any) => {
               <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
                 note_stack
               </span>
-              <Box sx={{ ...styles.iconText, marginLeft: '4px' }}>
+              <Box sx={{ ...styles.iconText, ...styles.linkUnderlineStyle, marginLeft: '4px' }}>
                 Citations ({data?.values[0]?.value})
               </Box>
             </Box>
@@ -118,7 +124,14 @@ const PdpIconAttributes = (props: any) => {
           data?.values[0]?.value === 'ISO13485' ? (
             <Box sx={{ ...styles.iconCss, color: '#348345' }} key="iso-certification">
               <span className="material-symbols-outlined">task_alt</span>
-              <Box sx={{ ...styles.iconText, color: '#348345', textDecoration: 'none' }}>
+              <Box
+                sx={{
+                  ...styles.iconText,
+                  ...styles.linkUnderlineStyle,
+                  color: '#348345',
+                  textDecoration: 'none',
+                }}
+              >
                 {data?.values[0]?.stringValue}
               </Box>
             </Box>
@@ -132,7 +145,14 @@ const PdpIconAttributes = (props: any) => {
           data?.values[0]?.value === 'gmp_ready' ? (
             <Box sx={{ ...styles.iconCss, color: '#1468C8' }} key="gmp-ready">
               <span className="material-symbols-outlined">manufacturing</span>
-              <Box sx={{ ...styles.iconText, color: '#1468C8', textDecoration: 'none' }}>
+              <Box
+                sx={{
+                  ...styles.iconText,
+                  ...styles.linkUnderlineStyle,
+                  color: '#1468C8',
+                  textDecoration: 'none',
+                }}
+              >
                 {data?.values[0]?.stringValue}
               </Box>
             </Box>
@@ -148,7 +168,14 @@ const PdpIconAttributes = (props: any) => {
               <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
                 grain
               </span>
-              <Box sx={{ ...styles.iconText, color: '#CD461D', textDecoration: 'none' }}>
+              <Box
+                sx={{
+                  ...styles.iconText,
+                  ...styles.linkUnderlineStyle,
+                  color: '#CD461D',
+                  textDecoration: 'none',
+                }}
+              >
                 {data?.values[0]?.stringValue}
               </Box>
             </Box>

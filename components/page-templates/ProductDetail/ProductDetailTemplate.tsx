@@ -221,6 +221,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
 
   // console.log('This is updatedProduct ---> ', updatedProduct)
 
+  const sectionTargetUrl = PDPCustomAndBulkDisplayContentSection?.data?.targetUrl
   const [purchaseType, setPurchaseType] = useState<string>(PurchaseTypes.ONETIMEPURCHASE)
   const [selectedFrequency, setSelectedFrequency] = useState<string>('')
   const [isSubscriptionPricingSelected, setIsSubscriptionPricingSelected] = useState<boolean>(false)
@@ -810,7 +811,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
             </Box>
             <Box>
               {!isLoading && (
-                <Typography variant="h1" sx={{ color: 'primary.main' }}>
+                <Typography variant="h1" sx={{ color: 'primary.main' }} tabIndex={0}>
                   {variantProductTitle}
                 </Typography>
               )}
@@ -1163,7 +1164,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                   content={PDPCustomAndBulkDisplayContentSection}
                   context={{
                     bulkRedirect: () => {
-                      window.location.href = `${siteUrl}bulk-request?Catalog_Num=${variationCodeDynamic}`
+                      window.location.href = `${siteUrl}${sectionTargetUrl}?Catalog_Num=${variationCodeDynamic}`
                     },
                   }}
                 />

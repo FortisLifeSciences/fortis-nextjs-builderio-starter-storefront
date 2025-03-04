@@ -78,11 +78,22 @@ const HeaderActionArea = (props: HeaderActionAreaProps) => {
               CONTACT
             </Link>
           </Box>
-          <AccountIcon
-            size={isHeaderSmall ? 'small' : 'medium'}
-            onAccountIconClick={onAccountIconClick}
-          />
-          <CartIcon size={isHeaderSmall ? 'small' : 'medium'} />
+          <button
+            aria-label="Login"
+            onClick={onAccountIconClick}
+            style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+          >
+            <AccountIcon
+              size={isHeaderSmall ? 'small' : 'medium'}
+              onAccountIconClick={onAccountIconClick}
+            />
+          </button>
+          <button
+            aria-label="Cart"
+            style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+          >
+            <CartIcon size={isHeaderSmall ? 'small' : 'medium'} />
+          </button>
         </Box>
       </Container>
     </Box>
