@@ -4,8 +4,9 @@ const IpWhoIs = async (countryCode: string) => {
   let expiryDate: any
   try {
     const ipWhoIsApiKey = process.env.IP_WHO_IS_API_KEY
+    const existingCookie = cookieNext.getCookie('ipBasedCountryCode')
 
-    if (!cookieNext.getCookie('ipBasedCountryCode')) {
+    if (!existingCookie || (typeof existingCookie === 'string' && existingCookie.trim() === '')) {
       expiryDate = new Date()
       expiryDate.setMonth(expiryDate.getMonth() + 1)
 
