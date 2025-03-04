@@ -212,7 +212,7 @@ const ProductCardListView = React.forwardRef<HTMLDivElement, ProductCardListView
         ? variationProductCode
         : ProductCatalogNumber !== undefined
         ? ProductCatalogNumber
-        : ''
+        : brandLabel
     }`
     truncatedTitle = truncatedTitle + `${uniqueVal}`
 
@@ -405,6 +405,7 @@ const ProductCardListView = React.forwardRef<HTMLDivElement, ProductCardListView
                       gutterBottom
                       fontWeight={500}
                       sx={ProductCardStyles.productTitle}
+                      tabIndex={0}
                     >
                       {sliceValue ? variantProductName : title}
                     </Typography>
