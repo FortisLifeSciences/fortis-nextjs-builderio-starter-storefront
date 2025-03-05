@@ -3,6 +3,7 @@ import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
+import IpWhoIs from '../api/ipWhoIs'
 import { ProductDetailTemplate, ProductDetailSkeleton } from '@/components/page-templates'
 import { ProductRecommendations } from '@/components/product'
 import { useGetProduct } from '@/hooks/queries/product/useGetProduct/useGetProduct'
@@ -69,8 +70,15 @@ export async function getStaticProps(
 ): Promise<GetStaticPropsResult<any>> {
   const { locale, params } = context
   const { productCode } = params as any
+
+  const settings = await builder.get('theme-setting').toPromise()
+  console.log('ipBasedCountryCode', settings?.data?.ipBasedCountryCode)
+  if (settings?.data?.ipBasedCountryCode) {
+    IpWhoIs(settings?.data?.ipBasedCountryCode)
+  }
   const product = await getProduct(productCode)
   const variantCodes = product?.variations
+  console.log('variantCodes', variantCodes)
   const relatedProducts = []
   const relatedProductData =
     product && product.properties
