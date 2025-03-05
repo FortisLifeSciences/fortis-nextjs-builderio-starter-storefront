@@ -126,6 +126,7 @@ const FeaturedPageButton: React.FC<FeaturedPageButtonProps> = ({
             {selectedStyle === 'primary' && (
               <IconButton
                 aria-label="Primary Navigate forward"
+                component="span"
                 sx={[buttonStyle.arrowPrimaryButton, isHovered && { backgroundColor: '#4C47C4' }]}
               >
                 <ArrowForwardIos
@@ -137,6 +138,7 @@ const FeaturedPageButton: React.FC<FeaturedPageButtonProps> = ({
             {selectedStyle === 'secondary' && (
               <IconButton
                 aria-label="Secondary Navigate forward"
+                component="span"
                 sx={[buttonStyle.arrowSecondaryButton, isHovered && { backgroundColor: '#4C47C4' }]}
               >
                 <ArrowForwardIos
