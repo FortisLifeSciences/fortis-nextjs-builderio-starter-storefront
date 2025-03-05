@@ -87,21 +87,6 @@ async function getCustomRedirects() {
 
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl
-  if (
-    request.nextUrl.pathname.startsWith('/my-account') ||
-    request.nextUrl.pathname.startsWith('/checkout')
-  ) {
-    if (checkIsAuthenticated(request)) {
-      return NextResponse.next()
-    } else if (request.nextUrl.pathname.startsWith('/checkout')) {
-      const cartUrl = new URL('/cart', request.url)
-      return NextResponse.redirect(cartUrl)
-    }
-
-    const homeUrl = new URL('/', request.url)
-    return NextResponse.redirect(homeUrl)
-  }
-
   // Fetch redirects from Edge Config
   const edgeRedirects = await get<{ source: string; destination: string; permanent: boolean }[]>(
     'redirects'
@@ -121,6 +106,20 @@ export async function middleware(request: NextRequest) {
     const finalUrl = new URL(customEdgeRedirect.destination, request.url)
 
     return NextResponse.redirect(finalUrl, customEdgeRedirect.permanent ? 308 : 307)
+  }
+  if (
+    request.nextUrl.pathname.startsWith('/my-account') ||
+    request.nextUrl.pathname.startsWith('/checkout')
+  ) {
+    if (checkIsAuthenticated(request)) {
+      return NextResponse.next()
+    } else if (request.nextUrl.pathname.startsWith('/checkout')) {
+      const cartUrl = new URL('/cart', request.url)
+      return NextResponse.redirect(cartUrl)
+    }
+
+    const homeUrl = new URL('/', request.url)
+    return NextResponse.redirect(homeUrl)
   }
 
   // Custom routes requests for product page
