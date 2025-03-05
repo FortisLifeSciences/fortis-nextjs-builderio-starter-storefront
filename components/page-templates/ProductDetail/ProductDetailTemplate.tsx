@@ -252,7 +252,11 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
 
   const { addOrRemoveWishlistItem, checkProductInWishlist, isWishlistLoading } = useWishlist()
 
-  const countryCode = cookieNext.getCookie('ipBasedCountryCode')
+  // const countryCode = cookieNext.getCookie('ipBasedCountryCode')
+  let countryCode = cookieNext.getCookie('ipBasedCountryCode')
+  if (!countryCode) {
+    countryCode = '' // Set default value if countryCode is null or empty
+  }
   console.log('countryCode-productDetailsTemplate', countryCode)
 
   const {

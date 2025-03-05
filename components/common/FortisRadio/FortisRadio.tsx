@@ -52,7 +52,10 @@ export const FortisRadio = (props: FortisRadioProps) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onChange(event.target.value)
   }
-  const countryCode = cookieNext.getCookie('ipBasedCountryCode') || ''
+  let countryCode = cookieNext.getCookie('ipBasedCountryCode')
+  if (!countryCode) {
+    countryCode = '' // Set default value if countryCode is null or empty
+  }
 
   console.log('countryCode-fortisRadio', countryCode)
   return (
