@@ -40,7 +40,7 @@ const StyledBox = styled(Box)({
 
 const { publicRuntimeConfig } = getConfig()
 const inventorySettings = publicRuntimeConfig?.inventorySettings
-const countryCode = cookieNext.getCookie('ipBasedCountryCode')
+const countryCode = cookieNext.getCookie('ipBasedCountryCode') || ''
 console.log('countryCode-InventoryMsg', countryCode)
 const selectCountryCode = countryCode && countryCode === 'US' ? 'United States' : ''
 const inventoryMessagesObj: InventoryMessages = inventoryMessages as InventoryMessages
