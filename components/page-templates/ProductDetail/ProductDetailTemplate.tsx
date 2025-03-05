@@ -254,7 +254,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
 
   // const countryCode = cookieNext.getCookie('ipBasedCountryCode')
   let countryCode = cookieNext.getCookie('ipBasedCountryCode')
-  if (!countryCode) {
+  if (!countryCode || (typeof countryCode === 'string' && countryCode.trim() === '')) {
     countryCode = 'UP' // Set default value if countryCode is null or empty
   }
   console.log('countryCode-productDetailsTemplate', countryCode)
