@@ -81,7 +81,7 @@ const MetadataComponent: React.FC<MetadataComponentProps> = ({
         {resolvedImage && (
           <Image
             src={resolvedImage}
-            alt={resolvedImage || 'Image'}
+            alt=""
             width={388}
             height={255}
             style={{ objectFit: 'cover' }}
@@ -127,6 +127,7 @@ const MetadataComponent: React.FC<MetadataComponentProps> = ({
         <Box sx={buttonStyle.iconContainer}>
           <IconButton
             aria-label=" Meta Data Navigate forward"
+            component="span"
             sx={[
               styleType === 'primary'
                 ? buttonStyle.arrowPrimaryButton

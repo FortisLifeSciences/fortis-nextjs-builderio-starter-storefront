@@ -123,6 +123,7 @@ const ProductSpecifications = ({ product }: { product: any }) => {
           Specifications
         </Typography>
         <TableContainer
+          role="presentation"
           component={Paper}
           sx={{
             borderRadius: 0,
