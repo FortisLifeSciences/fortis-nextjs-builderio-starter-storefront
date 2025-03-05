@@ -54,7 +54,7 @@ export const FortisRadio = (props: FortisRadioProps) => {
   }
   let countryCode = cookieNext.getCookie('ipBasedCountryCode')
   if (!countryCode) {
-    countryCode = '' // Set default value if countryCode is null or empty
+    countryCode = 'UP' // Set default value if countryCode is null or empty
   }
 
   console.log('countryCode-fortisRadio', countryCode)
