@@ -53,6 +53,8 @@ export const FortisRadio = (props: FortisRadioProps) => {
     onChange(event.target.value)
   }
   const countryCode = cookieNext.getCookie('ipBasedCountryCode') || ''
+
+  console.log('countryCode-fortisRadio', countryCode)
   return (
     <FormControl sx={{ width: '100%' }}>
       {/* <FormLabel
