@@ -254,6 +254,8 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
 
   const countryCode = cookieNext.getCookie('ipBasedCountryCode')
 
+  // console.log("pdp-countryCode", countryCode)
+
   const {
     currentProduct,
     quantity,
@@ -995,103 +997,115 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
               })}
             </Box>
             <PdpIconAttributes product={updatedProduct} />
-            {countryCode && countryCode === 'US' && (
-              <Box
-                display="flex"
-                sx={{
-                  padding: '20px',
-                  bgcolor: theme?.palette.secondary.main,
-                  margin: '30px 0',
-                  flexDirection: { xs: 'column', lg: 'row' },
-                }}
-              >
-                {/* Column for ProductInventoryMessages */}
+            {countryCode &&
+              countryCode === 'US' &&
+              typeof countryCode === 'string' &&
+              countryCode.trim() !== '' && (
                 <Box
-                  flex={1}
-                  sx={{ minWidth: '0', [theme.breakpoints.up('lg')]: { minWidth: '333px' } }}
+                  display="flex"
+                  sx={{
+                    padding: '20px',
+                    bgcolor: theme?.palette.secondary.main,
+                    margin: '30px 0',
+                    flexDirection: { xs: 'column', lg: 'row' },
+                  }}
                 >
-                  <ProductInventoryMessages
-                    product={currentProduct}
-                    inventoryInfo={currentlocationInventory}
-                    stockAvailable={stockAvailable}
-                    availabilityMessageArr={availabilityMessageArr}
-                  />
-                </Box>
-
-                {/* Column for QuantitySelector and LoadingButton */}
-                {skuStatusText && skuStatusText === 'CustomCTA' && (
-                  <LoadingButton
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    className="add-to-cart-button"
-                    onClick={() => handleCustomCTATarget()}
-                    sx={{
-                      marginTop: 1,
-                      bgcolor: theme?.palette.primary.main,
-                      fontSize: '16px !important',
-                      fontWeight: 500,
-                      width: '100%',
-                      transition: 'none',
-                      boxShadow: 'none',
-                      '&:hover': {
-                        bgcolor: theme?.palette.primary.light,
-                      },
-                      '@media (max-width: 1023px)': {
-                        width: '52%',
-                      },
-                    }} // Add margin top for spacing between QuantitySelector and LoadingButton
+                  {/* Column for ProductInventoryMessages */}
+                  <Box
+                    flex={1}
+                    sx={{ minWidth: '0', [theme.breakpoints.up('lg')]: { minWidth: '333px' } }}
                   >
-                    {customCTALabel}
-                  </LoadingButton>
-                )}
-                {skuStatusText &&
-                  skuStatusText === 'Active' &&
-                  stockBehaviour &&
-                  (stockBehaviour !== 'DenyBackorder' ||
-                    (stockBehaviour === 'DenyBackorder' && stockAvailable >= minimumStock)) && (
-                    <Box display="flex" flexDirection="column" justifyContent="flex-start">
-                      {/* Align items in a column */}
-                      <Box
-                        sx={{ width: '100%', '@media (max-width: 1023px)': { marginTop: '20px' } }}
-                      >
-                        <QuantitySelector
-                          label="Quantity"
-                          quantity={quantity}
-                          {...(maxQuantity ? { maxQuantity } : {})}
-                          onIncrease={() => setQuantity((prevQuantity) => Number(prevQuantity) + 1)}
-                          onDecrease={() => setQuantity((prevQuantity) => Number(prevQuantity) - 1)}
-                        />
-                      </Box>
-                      <LoadingButton
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        className="add-to-cart-button"
-                        onClick={() => handleAddToCart()}
-                        loading={addToCart.isPending}
-                        sx={{
-                          marginTop: '20px',
-                          bgcolor: theme?.palette.primary.main,
-                          fontSize: '16px !important',
-                          fontWeight: 500,
-                          transition: 'none',
-                          boxShadow: 'none',
-                          '&:hover': {
-                            bgcolor: theme?.palette.primary.light,
-                          },
-                          '@media (max-width: 1023px)': {
-                            width: '52%',
-                          },
-                        }}
-                      >
-                        {t('add-to-cart')}
-                      </LoadingButton>
-                    </Box>
+                    <ProductInventoryMessages
+                      product={currentProduct}
+                      inventoryInfo={currentlocationInventory}
+                      stockAvailable={stockAvailable}
+                      availabilityMessageArr={availabilityMessageArr}
+                      countryCode={countryCode}
+                    />
+                  </Box>
+
+                  {/* Column for QuantitySelector and LoadingButton */}
+                  {skuStatusText && skuStatusText === 'CustomCTA' && (
+                    <LoadingButton
+                      variant="contained"
+                      color="primary"
+                      fullWidth
+                      className="add-to-cart-button"
+                      onClick={() => handleCustomCTATarget()}
+                      sx={{
+                        marginTop: 1,
+                        bgcolor: theme?.palette.primary.main,
+                        fontSize: '16px !important',
+                        fontWeight: 500,
+                        width: '100%',
+                        transition: 'none',
+                        boxShadow: 'none',
+                        '&:hover': {
+                          bgcolor: theme?.palette.primary.light,
+                        },
+                        '@media (max-width: 1023px)': {
+                          width: '52%',
+                        },
+                      }} // Add margin top for spacing between QuantitySelector and LoadingButton
+                    >
+                      {customCTALabel}
+                    </LoadingButton>
                   )}
-              </Box>
-            )}
-            {countryCode && countryCode !== 'US' && (
+                  {skuStatusText &&
+                    skuStatusText === 'Active' &&
+                    stockBehaviour &&
+                    (stockBehaviour !== 'DenyBackorder' ||
+                      (stockBehaviour === 'DenyBackorder' && stockAvailable >= minimumStock)) && (
+                      <Box display="flex" flexDirection="column" justifyContent="flex-start">
+                        {/* Align items in a column */}
+                        <Box
+                          sx={{
+                            width: '100%',
+                            '@media (max-width: 1023px)': { marginTop: '20px' },
+                          }}
+                        >
+                          <QuantitySelector
+                            label="Quantity"
+                            quantity={quantity}
+                            {...(maxQuantity ? { maxQuantity } : {})}
+                            onIncrease={() =>
+                              setQuantity((prevQuantity) => Number(prevQuantity) + 1)
+                            }
+                            onDecrease={() =>
+                              setQuantity((prevQuantity) => Number(prevQuantity) - 1)
+                            }
+                          />
+                        </Box>
+                        <LoadingButton
+                          variant="contained"
+                          color="primary"
+                          fullWidth
+                          className="add-to-cart-button"
+                          onClick={() => handleAddToCart()}
+                          loading={addToCart.isPending}
+                          sx={{
+                            marginTop: '20px',
+                            bgcolor: theme?.palette.primary.main,
+                            fontSize: '16px !important',
+                            fontWeight: 500,
+                            transition: 'none',
+                            boxShadow: 'none',
+                            '&:hover': {
+                              bgcolor: theme?.palette.primary.light,
+                            },
+                            '@media (max-width: 1023px)': {
+                              width: '52%',
+                            },
+                          }}
+                        >
+                          {t('add-to-cart')}
+                        </LoadingButton>
+                      </Box>
+                    )}
+                </Box>
+              )}
+            {((countryCode && countryCode !== 'US') ||
+              (typeof countryCode === 'string' && countryCode.trim() === '')) && (
               <Box
                 display="flex"
                 sx={{
