@@ -1104,7 +1104,8 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                     )}
                 </Box>
               )}
-            {((countryCode && countryCode !== 'US') ||
+            {(!countryCode ||
+              (countryCode && countryCode !== 'US') ||
               (typeof countryCode === 'string' && countryCode.trim() === '')) && (
               <Box
                 display="flex"
