@@ -24,7 +24,6 @@ const styles = {
     marginLeft: '8px',
   },
   linkUnderlineStyle: {
-
     borderBottom: '1px solid currentColor',
     textDecoration: 'none',
     display: 'inline',
