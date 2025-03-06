@@ -1015,12 +1015,12 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                   flex={1}
                   sx={{ minWidth: '0', [theme.breakpoints.up('lg')]: { minWidth: '333px' } }}
                 >
-                  <ProductInventoryMessages
+                  {/* <ProductInventoryMessages
                     product={currentProduct}
                     inventoryInfo={currentlocationInventory}
                     stockAvailable={stockAvailable}
                     availabilityMessageArr={availabilityMessageArr}
-                  />
+                  /> */}
                 </Box>
 
                 {/* Column for QuantitySelector and LoadingButton */}
