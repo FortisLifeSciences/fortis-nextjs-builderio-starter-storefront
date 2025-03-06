@@ -414,7 +414,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
                         name="sort-plp"
                         sx={{
                           color: '#2B2B2B',
-                          fontFamily: 'Roboto',
+                          fontFamily: 'Poppins',
                           fontSize: '14px',
                           fontStyle: 'normal',
                           fontWeight: '400',
@@ -427,7 +427,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
                           <MenuItem
                             sx={{
                               color: '#2B2B2B',
-                              fontFamily: 'Roboto',
+                              fontFamily: 'Poppins',
                               fontSize: '14px',
                               fontStyle: 'normal',
                               fontWeight: '400',
