@@ -64,12 +64,13 @@ const ShippingPreferences = (props: MyProfileProps) => {
       setUserAttribute(hasFQN)
     }
     fetchSettings()
-  }, [])
+  }, [fedexNumber])
 
   const useDetailsSchema: any = () => {
     return yup.object().shape({
       fedexNumber: yup
         .string()
+        .matches(/^[0-9]*$/, t('please-enter-a-valid-account-number')) // Allow only numbers (0-9)
         .test(
           'empty-or-length-9',
           t('please-enter-a-valid-account-number'),
@@ -138,17 +139,6 @@ const ShippingPreferences = (props: MyProfileProps) => {
     setEditForm(false)
   }
 
-  useEffect(() => {
-    const handleKeyPress = (event: { key: string; preventDefault: () => void }) => {
-      if (event.key === 'Enter') {
-        event.preventDefault() // Prevent default behavior
-        handleSubmit(handleResetPassword)() // Explicitly call the handler
-      }
-    }
-    document.addEventListener('keydown', handleKeyPress)
-    return () => document.removeEventListener('keydown', handleKeyPress)
-  }, [])
-
   return (
     <Box width="100%">
       <Box>
@@ -212,7 +202,7 @@ const ShippingPreferences = (props: MyProfileProps) => {
                       onBlur={field.onBlur}
                       onChange={(_name, value) => {
                         // Remove spaces dynamically as the user types
-                        const sanitizedValue = value.replace(/\s/g, '')
+                        const sanitizedValue = value.replace(/[^0-9]/g, '').slice(0, 9)
                         field.onChange(sanitizedValue)
                       }}
                       error={!!errors?.fedexNumber}
@@ -263,7 +253,6 @@ const ShippingPreferences = (props: MyProfileProps) => {
                         },
                         marginLeft: '20px',
                       }}
-                      onClick={() => handleSubmit(handleResetPassword)()}
                       disabled={!isValid}
                     >
                       {t('save')}
