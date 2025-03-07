@@ -85,27 +85,41 @@ async function getCustomRedirects() {
   }
 }
 
+let cachedRedirects: { source: string; destination: string; permanent: boolean }[] | null = null
+
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl
   // Fetch redirects from Edge Config
-  const edgeRedirects = await get<{ source: string; destination: string; permanent: boolean }[]>(
-    'redirects'
-  )
+  if (
+    !(
+      pathname.startsWith('/my-account') ||
+      pathname.startsWith('/checkout') ||
+      pathname.startsWith('/p/') ||
+      pathname.startsWith('/product/')
+    )
+  ) {
+    if (cachedRedirects) {
+      console.log('Using cached redirects')
+      return handleRedirects(request, cachedRedirects)
+    } else {
+      const edgeRedirects = await fetchEdgeConfigRedirects()
 
-  console.log('Fetched redirects from Edge Config:', edgeRedirects)
+      console.log('edgeRedirects in middlware function:', edgeRedirects)
 
-  if (!Array.isArray(edgeRedirects)) {
-    console.error('Error: Edge Config data is not an array')
-    return NextResponse.next()
-  }
+      if (!Array.isArray(edgeRedirects)) {
+        console.error('Error: Edge Config data is not an array')
+        return NextResponse.next()
+      }
 
-  const customEdgeRedirect = edgeRedirects.find((entry) => entry.source === pathname)
+      const customEdgeRedirect = edgeRedirects.find((entry) => entry.source === pathname)
 
-  if (customEdgeRedirect) {
-    console.log('Match found customEdgeRedirect:', customEdgeRedirect)
-    const finalUrl = new URL(customEdgeRedirect.destination, request.url)
+      if (customEdgeRedirect) {
+        console.log('Match found customEdgeRedirect:', customEdgeRedirect)
+        const finalUrl = new URL(customEdgeRedirect.destination, request.url)
 
-    return NextResponse.redirect(finalUrl, customEdgeRedirect.permanent ? 308 : 307)
+        return NextResponse.redirect(finalUrl, customEdgeRedirect.permanent ? 308 : 307)
+      }
+    }
   }
   if (
     request.nextUrl.pathname.startsWith('/my-account') ||
@@ -190,4 +204,52 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
   return NextResponse.next()
+}
+
+async function handleRedirects(
+  request: NextRequest,
+  redirectsCached: { source: string; destination: string; permanent: boolean }[]
+) {
+  const { pathname, search } = request.nextUrl
+
+  if (!Array.isArray(redirectsCached)) {
+    console.error('Error: in handlredirects method Edge Config data is not an array')
+    return NextResponse.next()
+  }
+
+  const customCachedEdgeRedirect = redirectsCached.find((entry) => entry.source === pathname)
+
+  if (customCachedEdgeRedirect) {
+    console.log(
+      'Match found customCachedEdgeRedirect in handlredirects method:',
+      customCachedEdgeRedirect
+    )
+    const finalUrl = new URL(customCachedEdgeRedirect.destination, request.url)
+    return NextResponse.redirect(finalUrl, customCachedEdgeRedirect.permanent ? 308 : 307)
+  }
+
+  // Handle other routing conditions...
+  return NextResponse.next()
+}
+
+async function fetchEdgeConfigRedirects(): Promise<
+  { source: string; destination: string; permanent: boolean }[] | null
+> {
+  try {
+    const edgeRedirectsFromApi = await get<
+      { source: string; destination: string; permanent: boolean }[]
+    >('redirects')
+    if (Array.isArray(edgeRedirectsFromApi) && edgeRedirectsFromApi.length > 0) {
+      // Cache the redirects for subsequent requests
+      cachedRedirects = edgeRedirectsFromApi
+      console.log('Fetched edgeRedirectsFromApi from Edge Config:', edgeRedirectsFromApi)
+      return edgeRedirectsFromApi
+    } else {
+      console.error('Error: Edge Config data is not a valid array or is empty')
+      return null
+    }
+  } catch (error) {
+    console.error('Error fetching redirects from Edge Config:', error)
+    return null
+  }
 }
