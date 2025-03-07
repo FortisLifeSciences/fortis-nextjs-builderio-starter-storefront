@@ -40,8 +40,8 @@ const StyledBox = styled(Box)({
 
 const { publicRuntimeConfig } = getConfig()
 const inventorySettings = publicRuntimeConfig?.inventorySettings
-const countryCode = cookieNext.getCookie('ipBasedCountryCode')
-const selectCountryCode = countryCode && countryCode === 'US' ? 'United States' : ''
+// const countryCode = cookieNext.getCookie('ipBasedCountryCode')
+// const selectCountryCode = countryCode && countryCode === 'US' ? 'United States' : ''
 const inventoryMessagesObj: InventoryMessages = inventoryMessages as InventoryMessages
 
 // Helper function to find a property by its attributeFQN
@@ -54,6 +54,7 @@ const ProductInventoryMessages = ({
   currentlocationInventory,
   stockAvailable,
   availabilityMessageArr,
+  countryCode,
 }: any) => {
   //   let manageStock = product?.inventoryInfo?.manageStock,
   //     //itemCode = product.get('variationProductCode') || product.get('productCode'),
@@ -74,6 +75,9 @@ const ProductInventoryMessages = ({
   const minimumStockArr = findProperty(product, 'tenant~minimum-stock')
   // Extract value for skuStatus if skuStatusArr exists
   skuStatus = skuStatusArr?.values?.[0]?.value || null
+
+  // console.log("countryCode-inv", countryCode)
+  const selectCountryCode = countryCode && countryCode === 'US' ? 'United States' : ''
 
   const getInventoryMessageText = (
     product: Product,

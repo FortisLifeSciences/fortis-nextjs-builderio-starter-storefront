@@ -254,6 +254,8 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
 
   const countryCode = cookieNext.getCookie('ipBasedCountryCode')
 
+  // console.log("pdp-countryCode", countryCode)
+
   const {
     currentProduct,
     quantity,
@@ -995,7 +997,9 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
               })}
             </Box>
             <PdpIconAttributes product={updatedProduct} />
-            {countryCode && countryCode === 'US' && (
+            {((countryCode && countryCode === 'US') ||
+              !countryCode ||
+              (typeof countryCode === 'string' && countryCode.trim() === '')) && (
               <Box
                 display="flex"
                 sx={{
@@ -1015,6 +1019,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                     inventoryInfo={currentlocationInventory}
                     stockAvailable={stockAvailable}
                     availabilityMessageArr={availabilityMessageArr}
+                    countryCode={'US'}
                   />
                 </Box>
 
@@ -1053,7 +1058,10 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                     <Box display="flex" flexDirection="column" justifyContent="flex-start">
                       {/* Align items in a column */}
                       <Box
-                        sx={{ width: '100%', '@media (max-width: 1023px)': { marginTop: '20px' } }}
+                        sx={{
+                          width: '100%',
+                          '@media (max-width: 1023px)': { marginTop: '20px' },
+                        }}
                       >
                         <QuantitySelector
                           label="Quantity"
@@ -1091,70 +1099,75 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                   )}
               </Box>
             )}
-            {countryCode && countryCode !== 'US' && (
-              <Box
-                display="flex"
-                sx={{
-                  padding: '20px',
-                  bgcolor: theme?.palette.secondary.main,
-                  margin: '30px 0',
-                  flexDirection: { xs: 'column', lg: 'row' },
-                }}
-              >
-                {/* Column for Messages */}
+            {countryCode &&
+              countryCode !== 'US' &&
+              typeof countryCode === 'string' &&
+              countryCode.trim() !== '' && (
                 <Box
-                  flex={1}
-                  sx={{ minWidth: '0', [theme.breakpoints.up('lg')]: { minWidth: '333px' } }}
+                  display="flex"
+                  sx={{
+                    padding: '20px',
+                    bgcolor: theme?.palette.secondary.main,
+                    margin: '30px 0',
+                    flexDirection: { xs: 'column', lg: 'row' },
+                  }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'start' }}>
-                    <Typography
-                      variant="body1"
+                  {/* Column for Messages */}
+                  <Box
+                    flex={1}
+                    sx={{ minWidth: '0', [theme.breakpoints.up('lg')]: { minWidth: '333px' } }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'start' }}>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          margin: '0 35px 0 10px',
+                          lineHeight: '25px',
+                          color: '#000000',
+                          fontSize: '16px',
+                          '@media (max-width: 910px)': {
+                            fontSize: '0.875rem',
+                            lineHeight: '1.375rem',
+                          },
+                        }}
+                      >
+                        {ousShowDistributorBtn
+                          ? t('distributorMessage')
+                          : t('nonDistributorMessage')}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {/* Column for OUS Button */}
+                  {!(skuStatusText !== 'CustomCTA' && !ousShowDistributorBtn) && (
+                    <LoadingButton
+                      variant="contained"
+                      color="primary"
+                      fullWidth
+                      className="add-to-cart-button"
+                      onClick={() =>
+                        ousShowDistributorBtn ? handleLinkTarget() : handleCustomCTATarget()
+                      }
                       sx={{
-                        margin: '0 35px 0 10px',
-                        lineHeight: '25px',
-                        color: '#000000',
-                        fontSize: '16px',
-                        '@media (max-width: 910px)': {
-                          fontSize: '0.875rem',
-                          lineHeight: '1.375rem',
+                        bgcolor: theme?.palette.primary.main,
+                        fontSize: '16px !important',
+                        fontWeight: '500',
+                        transition: 'none',
+                        boxShadow: 'none',
+                        '&:hover': {
+                          bgcolor: theme?.palette.primary.light,
+                        },
+                        '@media (max-width: 1023px)': {
+                          width: '52%',
                         },
                       }}
                     >
-                      {ousShowDistributorBtn ? t('distributorMessage') : t('nonDistributorMessage')}
-                    </Typography>
-                  </Box>
+                      {ousShowDistributorBtn && t('distributors')}
+                      {!ousShowDistributorBtn && skuStatusText === 'CustomCTA' && customCTALabel}
+                    </LoadingButton>
+                  )}
                 </Box>
-
-                {/* Column for OUS Button */}
-                {!(skuStatusText !== 'CustomCTA' && !ousShowDistributorBtn) && (
-                  <LoadingButton
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    className="add-to-cart-button"
-                    onClick={() =>
-                      ousShowDistributorBtn ? handleLinkTarget() : handleCustomCTATarget()
-                    }
-                    sx={{
-                      bgcolor: theme?.palette.primary.main,
-                      fontSize: '16px !important',
-                      fontWeight: '500',
-                      transition: 'none',
-                      boxShadow: 'none',
-                      '&:hover': {
-                        bgcolor: theme?.palette.primary.light,
-                      },
-                      '@media (max-width: 1023px)': {
-                        width: '52%',
-                      },
-                    }}
-                  >
-                    {ousShowDistributorBtn && t('distributors')}
-                    {!ousShowDistributorBtn && skuStatusText === 'CustomCTA' && customCTALabel}
-                  </LoadingButton>
-                )}
-              </Box>
-            )}
+              )}
             {PDPCustomAndBulkDisplayContentSection &&
               PDPCustomAndBulkDisplaySectionKey &&
               variationCodeDynamic && (
