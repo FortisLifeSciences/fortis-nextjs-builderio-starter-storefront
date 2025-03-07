@@ -997,8 +997,110 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
               })}
             </Box>
             <PdpIconAttributes product={updatedProduct} />
+            {((countryCode && countryCode === 'US') ||
+              !countryCode ||
+              (typeof countryCode === 'string' && countryCode.trim() === '')) && (
+              <Box
+                display="flex"
+                sx={{
+                  padding: '20px',
+                  bgcolor: theme?.palette.secondary.main,
+                  margin: '30px 0',
+                  flexDirection: { xs: 'column', lg: 'row' },
+                }}
+              >
+                {/* Column for ProductInventoryMessages */}
+                <Box
+                  flex={1}
+                  sx={{ minWidth: '0', [theme.breakpoints.up('lg')]: { minWidth: '333px' } }}
+                >
+                  <ProductInventoryMessages
+                    product={currentProduct}
+                    inventoryInfo={currentlocationInventory}
+                    stockAvailable={stockAvailable}
+                    availabilityMessageArr={availabilityMessageArr}
+                    countryCode={'US'}
+                  />
+                </Box>
+
+                {/* Column for QuantitySelector and LoadingButton */}
+                {skuStatusText && skuStatusText === 'CustomCTA' && (
+                  <LoadingButton
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    className="add-to-cart-button"
+                    onClick={() => handleCustomCTATarget()}
+                    sx={{
+                      marginTop: 1,
+                      bgcolor: theme?.palette.primary.main,
+                      fontSize: '16px !important',
+                      fontWeight: 500,
+                      width: '100%',
+                      transition: 'none',
+                      boxShadow: 'none',
+                      '&:hover': {
+                        bgcolor: theme?.palette.primary.light,
+                      },
+                      '@media (max-width: 1023px)': {
+                        width: '52%',
+                      },
+                    }} // Add margin top for spacing between QuantitySelector and LoadingButton
+                  >
+                    {customCTALabel}
+                  </LoadingButton>
+                )}
+                {skuStatusText &&
+                  skuStatusText === 'Active' &&
+                  stockBehaviour &&
+                  (stockBehaviour !== 'DenyBackorder' ||
+                    (stockBehaviour === 'DenyBackorder' && stockAvailable >= minimumStock)) && (
+                    <Box display="flex" flexDirection="column" justifyContent="flex-start">
+                      {/* Align items in a column */}
+                      <Box
+                        sx={{
+                          width: '100%',
+                          '@media (max-width: 1023px)': { marginTop: '20px' },
+                        }}
+                      >
+                        <QuantitySelector
+                          label="Quantity"
+                          quantity={quantity}
+                          {...(maxQuantity ? { maxQuantity } : {})}
+                          onIncrease={() => setQuantity((prevQuantity) => Number(prevQuantity) + 1)}
+                          onDecrease={() => setQuantity((prevQuantity) => Number(prevQuantity) - 1)}
+                        />
+                      </Box>
+                      <LoadingButton
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        className="add-to-cart-button"
+                        onClick={() => handleAddToCart()}
+                        loading={addToCart.isPending}
+                        sx={{
+                          marginTop: '20px',
+                          bgcolor: theme?.palette.primary.main,
+                          fontSize: '16px !important',
+                          fontWeight: 500,
+                          transition: 'none',
+                          boxShadow: 'none',
+                          '&:hover': {
+                            bgcolor: theme?.palette.primary.light,
+                          },
+                          '@media (max-width: 1023px)': {
+                            width: '52%',
+                          },
+                        }}
+                      >
+                        {t('add-to-cart')}
+                      </LoadingButton>
+                    </Box>
+                  )}
+              </Box>
+            )}
             {countryCode &&
-              countryCode === 'US' &&
+              countryCode !== 'US' &&
               typeof countryCode === 'string' &&
               countryCode.trim() !== '' && (
                 <Box
@@ -1010,34 +1112,46 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                     flexDirection: { xs: 'column', lg: 'row' },
                   }}
                 >
-                  {/* Column for ProductInventoryMessages */}
+                  {/* Column for Messages */}
                   <Box
                     flex={1}
                     sx={{ minWidth: '0', [theme.breakpoints.up('lg')]: { minWidth: '333px' } }}
                   >
-                    <ProductInventoryMessages
-                      product={currentProduct}
-                      inventoryInfo={currentlocationInventory}
-                      stockAvailable={stockAvailable}
-                      availabilityMessageArr={availabilityMessageArr}
-                      countryCode={countryCode}
-                    />
+                    <Box sx={{ display: 'flex', alignItems: 'start' }}>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          margin: '0 35px 0 10px',
+                          lineHeight: '25px',
+                          color: '#000000',
+                          fontSize: '16px',
+                          '@media (max-width: 910px)': {
+                            fontSize: '0.875rem',
+                            lineHeight: '1.375rem',
+                          },
+                        }}
+                      >
+                        {ousShowDistributorBtn
+                          ? t('distributorMessage')
+                          : t('nonDistributorMessage')}
+                      </Typography>
+                    </Box>
                   </Box>
 
-                  {/* Column for QuantitySelector and LoadingButton */}
-                  {skuStatusText && skuStatusText === 'CustomCTA' && (
+                  {/* Column for OUS Button */}
+                  {!(skuStatusText !== 'CustomCTA' && !ousShowDistributorBtn) && (
                     <LoadingButton
                       variant="contained"
                       color="primary"
                       fullWidth
                       className="add-to-cart-button"
-                      onClick={() => handleCustomCTATarget()}
+                      onClick={() =>
+                        ousShowDistributorBtn ? handleLinkTarget() : handleCustomCTATarget()
+                      }
                       sx={{
-                        marginTop: 1,
                         bgcolor: theme?.palette.primary.main,
                         fontSize: '16px !important',
-                        fontWeight: 500,
-                        width: '100%',
+                        fontWeight: '500',
                         transition: 'none',
                         boxShadow: 'none',
                         '&:hover': {
@@ -1046,130 +1160,14 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                         '@media (max-width: 1023px)': {
                           width: '52%',
                         },
-                      }} // Add margin top for spacing between QuantitySelector and LoadingButton
-                    >
-                      {customCTALabel}
-                    </LoadingButton>
-                  )}
-                  {skuStatusText &&
-                    skuStatusText === 'Active' &&
-                    stockBehaviour &&
-                    (stockBehaviour !== 'DenyBackorder' ||
-                      (stockBehaviour === 'DenyBackorder' && stockAvailable >= minimumStock)) && (
-                      <Box display="flex" flexDirection="column" justifyContent="flex-start">
-                        {/* Align items in a column */}
-                        <Box
-                          sx={{
-                            width: '100%',
-                            '@media (max-width: 1023px)': { marginTop: '20px' },
-                          }}
-                        >
-                          <QuantitySelector
-                            label="Quantity"
-                            quantity={quantity}
-                            {...(maxQuantity ? { maxQuantity } : {})}
-                            onIncrease={() =>
-                              setQuantity((prevQuantity) => Number(prevQuantity) + 1)
-                            }
-                            onDecrease={() =>
-                              setQuantity((prevQuantity) => Number(prevQuantity) - 1)
-                            }
-                          />
-                        </Box>
-                        <LoadingButton
-                          variant="contained"
-                          color="primary"
-                          fullWidth
-                          className="add-to-cart-button"
-                          onClick={() => handleAddToCart()}
-                          loading={addToCart.isPending}
-                          sx={{
-                            marginTop: '20px',
-                            bgcolor: theme?.palette.primary.main,
-                            fontSize: '16px !important',
-                            fontWeight: 500,
-                            transition: 'none',
-                            boxShadow: 'none',
-                            '&:hover': {
-                              bgcolor: theme?.palette.primary.light,
-                            },
-                            '@media (max-width: 1023px)': {
-                              width: '52%',
-                            },
-                          }}
-                        >
-                          {t('add-to-cart')}
-                        </LoadingButton>
-                      </Box>
-                    )}
-                </Box>
-              )}
-            {(!countryCode ||
-              (countryCode && countryCode !== 'US') ||
-              (typeof countryCode === 'string' && countryCode.trim() === '')) && (
-              <Box
-                display="flex"
-                sx={{
-                  padding: '20px',
-                  bgcolor: theme?.palette.secondary.main,
-                  margin: '30px 0',
-                  flexDirection: { xs: 'column', lg: 'row' },
-                }}
-              >
-                {/* Column for Messages */}
-                <Box
-                  flex={1}
-                  sx={{ minWidth: '0', [theme.breakpoints.up('lg')]: { minWidth: '333px' } }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'start' }}>
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        margin: '0 35px 0 10px',
-                        lineHeight: '25px',
-                        color: '#000000',
-                        fontSize: '16px',
-                        '@media (max-width: 910px)': {
-                          fontSize: '0.875rem',
-                          lineHeight: '1.375rem',
-                        },
                       }}
                     >
-                      {ousShowDistributorBtn ? t('distributorMessage') : t('nonDistributorMessage')}
-                    </Typography>
-                  </Box>
+                      {ousShowDistributorBtn && t('distributors')}
+                      {!ousShowDistributorBtn && skuStatusText === 'CustomCTA' && customCTALabel}
+                    </LoadingButton>
+                  )}
                 </Box>
-
-                {/* Column for OUS Button */}
-                {!(skuStatusText !== 'CustomCTA' && !ousShowDistributorBtn) && (
-                  <LoadingButton
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    className="add-to-cart-button"
-                    onClick={() =>
-                      ousShowDistributorBtn ? handleLinkTarget() : handleCustomCTATarget()
-                    }
-                    sx={{
-                      bgcolor: theme?.palette.primary.main,
-                      fontSize: '16px !important',
-                      fontWeight: '500',
-                      transition: 'none',
-                      boxShadow: 'none',
-                      '&:hover': {
-                        bgcolor: theme?.palette.primary.light,
-                      },
-                      '@media (max-width: 1023px)': {
-                        width: '52%',
-                      },
-                    }}
-                  >
-                    {ousShowDistributorBtn && t('distributors')}
-                    {!ousShowDistributorBtn && skuStatusText === 'CustomCTA' && customCTALabel}
-                  </LoadingButton>
-                )}
-              </Box>
-            )}
+              )}
             {PDPCustomAndBulkDisplayContentSection &&
               PDPCustomAndBulkDisplaySectionKey &&
               variationCodeDynamic && (
