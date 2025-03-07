@@ -282,6 +282,7 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>((props, r
               link
             )
           }
+          aria-label={title ? `View details for ${title}` : 'Product details'}
         >
           <Box>
             <Card sx={{ ...ProductCardStyles.cardRoot, minHeight: 321 }} data-testid="product-card">
@@ -413,7 +414,11 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>((props, r
                   )}
                 </Box>
               </Box>
-              <IconButton sx={ProductCardStyles.iconButton} title={'Product-Detail'}>
+              <IconButton
+                sx={ProductCardStyles.iconButton}
+                title={'Product-Detail'}
+                component="span"
+              >
                 <ArrowForwardIos sx={{ color: 'white' }} />
               </IconButton>
             </Card>
