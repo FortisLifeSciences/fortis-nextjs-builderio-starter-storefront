@@ -84,9 +84,10 @@ async function getCustomRedirects() {
     return []
   }
 }
+const CACHE_EXPIRATION_TIME = 5 * 60 * 1000
 
 let cachedRedirects: { source: string; destination: string; permanent: boolean }[] | null = null
-
+let cachedRedirectsTimestamp: number | null = null
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl
   // Fetch redirects from Edge Config
@@ -98,9 +99,12 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith('/product/')
     )
   ) {
-    if (cachedRedirects) {
-      console.log('Using cached redirects')
-      return handleRedirects(request, cachedRedirects)
+    if (cachedRedirects && cachedRedirectsTimestamp) {
+      const currentTime = Date.now()
+      if (currentTime - cachedRedirectsTimestamp < CACHE_EXPIRATION_TIME) {
+        console.log('Using cached redirects')
+        return handleRedirects(request, cachedRedirects)
+      }
     } else {
       const edgeRedirects = await fetchEdgeConfigRedirects()
 
@@ -242,6 +246,7 @@ async function fetchEdgeConfigRedirects(): Promise<
     if (Array.isArray(edgeRedirectsFromApi) && edgeRedirectsFromApi.length > 0) {
       // Cache the redirects for subsequent requests
       cachedRedirects = edgeRedirectsFromApi
+      cachedRedirectsTimestamp = Date.now()
       console.log('Fetched edgeRedirectsFromApi from Edge Config:', edgeRedirectsFromApi)
       return edgeRedirectsFromApi
     } else {
