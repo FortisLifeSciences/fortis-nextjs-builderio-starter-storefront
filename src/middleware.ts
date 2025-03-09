@@ -84,7 +84,8 @@ async function getCustomRedirects() {
     return []
   }
 }
-const CACHE_EXPIRATION_TIME = 5 * 60 * 1000
+const CACHE_EXPIRATION_TIME = 60 * 60 * 1000 // 1 hour in seconds
+const STALE_WHILE_REVALIDATE_TIME = 60 * 1000 // 1 minute in seconds
 
 let cachedRedirects: { source: string; destination: string; permanent: boolean }[] | null = null
 let cachedRedirectsTimestamp: number | null = null
@@ -101,9 +102,20 @@ export async function middleware(request: NextRequest) {
   ) {
     if (cachedRedirects && cachedRedirectsTimestamp) {
       const currentTime = Date.now()
-      if (currentTime - cachedRedirectsTimestamp < CACHE_EXPIRATION_TIME) {
+      if (currentTime - cachedRedirectsTimestamp < CACHE_EXPIRATION_TIME * 1000) {
         console.log('Using cached redirects')
         return handleRedirects(request, cachedRedirects)
+      } else {
+        // Cache is stale but within stale-while-revalidate window, serve stale data and re-fetch
+        if (
+          currentTime - cachedRedirectsTimestamp <
+          (CACHE_EXPIRATION_TIME + STALE_WHILE_REVALIDATE_TIME) * 1000
+        ) {
+          console.log('Serving stale redirects while revalidating')
+          // Serve the stale cached redirects while fetching fresh data in the background
+          fetchEdgeConfigRedirects()
+          return handleRedirects(request, cachedRedirects)
+        }
       }
     } else {
       const edgeRedirects = await fetchEdgeConfigRedirects()
@@ -123,6 +135,7 @@ export async function middleware(request: NextRequest) {
 
         return NextResponse.redirect(finalUrl, customEdgeRedirect.permanent ? 308 : 307)
       }
+      return NextResponse.next()
     }
   }
   if (
@@ -217,7 +230,7 @@ async function handleRedirects(
   const { pathname, search } = request.nextUrl
 
   if (!Array.isArray(redirectsCached)) {
-    console.error('Error: in handlredirects method Edge Config data is not an array')
+    console.error('Error: in handlredirects method: Edge Config data is not an array')
     return NextResponse.next()
   }
 
@@ -232,7 +245,6 @@ async function handleRedirects(
     return NextResponse.redirect(finalUrl, customCachedEdgeRedirect.permanent ? 308 : 307)
   }
 
-  // Handle other routing conditions...
   return NextResponse.next()
 }
 
@@ -254,7 +266,7 @@ async function fetchEdgeConfigRedirects(): Promise<
       return null
     }
   } catch (error) {
-    console.error('Error fetching redirects from Edge Config:', error)
+    console.error('Error fetching redirects from Edge Config api:', error)
     return null
   }
 }
