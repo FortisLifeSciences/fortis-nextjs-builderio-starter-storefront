@@ -25,7 +25,7 @@ const loadCustomRedirects = () => {
 // Cached redirects to avoid reloading on every request
 let cachedStaticRedirects = loadCustomRedirects()
 let lastFetchTime = Date.now()
-const CACHE_EXPIRATION_TIME = 10 * 60 * 1000 // 1 hour in milliseconds
+const CACHE_EXPIRATION_TIME = 60 * 60 * 1000 // 1 hour in milliseconds
 
 // Function to refresh redirects if cache is expired
 const refreshStaticRedirectsCache = () => {
