@@ -84,8 +84,8 @@ async function getCustomRedirects() {
     return []
   }
 }
-const CACHE_EXPIRATION_TIME = 60 * 60 * 1000 // 1 hour in seconds
-const STALE_WHILE_REVALIDATE_TIME = 60 * 1000 // 1 minute in seconds
+const CACHE_EXPIRATION_TIME = 60 * 60 * 1000 // 1 hour in milliseconds
+const STALE_WHILE_REVALIDATE_TIME = 60 * 1000 // 1 minute in milliseconds
 
 let cachedRedirects: { source: string; destination: string; permanent: boolean }[] | null = null
 let cachedRedirectsTimestamp: number | null = null
