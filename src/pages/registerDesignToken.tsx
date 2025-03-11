@@ -24,10 +24,7 @@ const registerDesignToken = () => {
         { name: 'Light Green', value: '#B8F078' },
         { name: 'Green', value: '#348345' },
       ],
-      fontFamily: [
-        { name: 'Poppins', value: 'Poppins' },
-        { name: 'Roboto', value: 'Roboto' },
-      ],
+      fontFamily: [{ name: 'Poppins', value: 'Poppins' }],
       fontSize: [
         { name: '40px', value: '40px' },
         { name: '38px', value: '38px' },

@@ -22,7 +22,7 @@ const styles = {
       marginTop: '1',
     },
     color: '#2B2B2B',
-    fontFamily: 'Roboto',
+    fontFamily: 'Poppins',
     fontSize: '14px',
     fontStyle: 'normal',
     fontWeight: '400',
