@@ -1,11 +1,12 @@
 /** @type {import('next').NextConfig} */
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { i18n } = require('./next-i18next.config')
 
 const LOCATION_COOKIE = 'kibo_purchase_location'
 const DEFAULT_WISHLIST_NAME = 'default-wishlist'
 const fs = require('fs')
 const path = require('path')
+
+const { i18n } = require('./next-i18next.config')
 const redirectsFilePath = path.resolve(__dirname, 'customRedirects', 'custom-redirects.json')
 const loadCustomRedirects = () => {
   if (fs.existsSync(redirectsFilePath)) {
