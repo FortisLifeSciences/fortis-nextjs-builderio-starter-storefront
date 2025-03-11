@@ -43,9 +43,6 @@ const plpIconStyles = {
 const PlpIconAttributes = (props: any) => {
   const { productProperties, sliceValue } = props
   const properties = productProperties
-  const [isModalOpen, setModalOpen] = useState(false)
-  const handleOpenModal = () => setModalOpen(true)
-  const handleCloseModal = () => setModalOpen(false)
 
   if (!productProperties || !Array.isArray(productProperties) || productProperties.length === 0) {
     return null
@@ -55,39 +52,21 @@ const PlpIconAttributes = (props: any) => {
     <Grid container spacing={2} sx={{ marginBottom: '10px' }}>
       {properties?.map((data: any) => {
         return data?.attributeFQN === 'tenant~validation-text' ? (
-          <Grid
-            item
-            md={3}
-            sm={3}
-            sx={plpIconStyles.flexDirectionRow}
-            onClick={handleOpenModal}
-            style={{ cursor: 'pointer' }}
-            key={data.attributeFQN}
-            tabIndex={0}
-          >
-            <Box sx={{ ...plpIconStyles.plpIconCss, color: '#348345' }}>
-              <span
-                className="material-symbols-outlined"
-                style={{ fontSize: '16px', color: '#348345' }}
-              >
-                verified
-              </span>
-            </Box>
-            <Box
-              sx={{
-                ...plpIconStyles.plpIconText,
-                color: '#348345',
-              }}
-            >
-              Validated
+          <Grid item md={3} sm={3} tabIndex={0} key={data.attributeFQN}>
+            <Box sx={plpIconStyles.flexDirectionRow}>
+              <Box sx={plpIconStyles.plpIconCss}>
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: '16px', color: '#348345' }}
+                >
+                  verified
+                </span>
+              </Box>
+              <Box sx={{ ...plpIconStyles.plpIconText, color: '#348345' }}>Validated</Box>
             </Box>
           </Grid>
         ) : null
       })}
-
-      {isModalOpen && (
-        <PdpValidationAttributes product={productProperties} onClose={handleCloseModal} />
-      )}
 
       {properties?.map((data: any) => {
         return data?.attributeFQN === 'tenant~trial-size-available' ? (
