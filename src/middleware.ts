@@ -210,11 +210,8 @@ export async function middleware(request: NextRequest) {
           // If no custom redirect and slug URL or it's the same as the current URL, continue to the product page
           return NextResponse.next()
         }
-
-        return NextResponse.next()
       } catch (error) {
         console.error(error)
-        return NextResponse.next() // Handle error as needed
       }
     }
 
