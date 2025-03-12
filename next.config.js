@@ -1,11 +1,12 @@
 /** @type {import('next').NextConfig} */
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { i18n } = require('./next-i18next.config')
 
 const LOCATION_COOKIE = 'kibo_purchase_location'
 const DEFAULT_WISHLIST_NAME = 'default-wishlist'
 const fs = require('fs')
 const path = require('path')
+
+const { i18n } = require('./next-i18next.config')
 const redirectsFilePath = path.resolve(__dirname, 'customRedirects', 'custom-redirects.json')
 const loadCustomRedirects = () => {
   if (fs.existsSync(redirectsFilePath)) {
@@ -25,7 +26,7 @@ const loadCustomRedirects = () => {
 // Cached redirects to avoid reloading on every request
 let cachedStaticRedirects = loadCustomRedirects()
 let lastFetchTime = Date.now()
-const CACHE_EXPIRATION_TIME = 10 * 60 * 1000 // 1 hour in milliseconds
+const CACHE_EXPIRATION_TIME = 60 * 60 * 1000 // 1 hour in milliseconds
 
 // Function to refresh redirects if cache is expired
 const refreshStaticRedirectsCache = () => {
