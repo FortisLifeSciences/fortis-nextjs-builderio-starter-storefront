@@ -185,8 +185,8 @@ export async function middleware(request: NextRequest) {
           const customRedirect = redirects.find((redirect) => redirect.sourceUrl === pathname)
 
           if (customRedirect) {
-            console.log('Match found:', customRedirect)
-            const finalUrl = new URL(customRedirect.destination, request.url)
+            console.log('Match found in builder redirect:', customRedirect)
+            const finalUrl = new URL(customRedirect.destinationUrl, request.url)
             // Clean query parameters to remove productCode and keep others
             const cleanedSearch = cleanQueryParams(search)
             if (cleanedSearch) {
