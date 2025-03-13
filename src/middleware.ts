@@ -1,3 +1,4 @@
+import { get } from '@vercel/edge-config'
 import { NextResponse, NextRequest } from 'next/server'
 
 const apiUrlStart = process.env.KIBO_API_HOST
@@ -83,9 +84,60 @@ async function getCustomRedirects() {
     return []
   }
 }
+const CACHE_EXPIRATION_TIME = 60 * 60 * 1000 // 1 hour in milliseconds
+const STALE_WHILE_REVALIDATE_TIME = 60 * 1000 // 1 minute in milliseconds
 
+let cachedRedirects: { source: string; destination: string; permanent: boolean }[] | null = null
+let cachedRedirectsTimestamp: number | null = null
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl
+  // Fetch redirects from Edge Config
+  if (
+    !(
+      pathname.startsWith('/my-account') ||
+      pathname.startsWith('/checkout') ||
+      pathname.startsWith('/p/') ||
+      pathname.startsWith('/product/')
+    )
+  ) {
+    if (cachedRedirects && cachedRedirectsTimestamp) {
+      const currentTime = Date.now()
+      if (currentTime - cachedRedirectsTimestamp < CACHE_EXPIRATION_TIME * 1000) {
+        console.log('Using cached redirects')
+        return handleRedirects(request, cachedRedirects)
+      } else {
+        // Cache is stale but within stale-while-revalidate window, serve stale data and re-fetch
+        if (
+          currentTime - cachedRedirectsTimestamp <
+          (CACHE_EXPIRATION_TIME + STALE_WHILE_REVALIDATE_TIME) * 1000
+        ) {
+          console.log('Serving stale redirects while revalidating')
+          // Serve the stale cached redirects while fetching fresh data in the background
+          fetchEdgeConfigRedirects()
+          return handleRedirects(request, cachedRedirects)
+        }
+      }
+    } else {
+      const edgeRedirects = await fetchEdgeConfigRedirects()
+
+      console.log('edgeRedirects in middlware function:', edgeRedirects)
+
+      if (!Array.isArray(edgeRedirects)) {
+        console.error('Error: Edge Config data is not an array')
+        return NextResponse.next()
+      }
+
+      const customEdgeRedirect = edgeRedirects.find((entry) => entry.source === pathname)
+
+      if (customEdgeRedirect) {
+        console.log('Match found customEdgeRedirect:', customEdgeRedirect)
+        const finalUrl = new URL(customEdgeRedirect.destination, request.url)
+
+        return NextResponse.redirect(finalUrl, customEdgeRedirect.permanent ? 308 : 307)
+      }
+      return NextResponse.next()
+    }
+  }
   if (
     request.nextUrl.pathname.startsWith('/my-account') ||
     request.nextUrl.pathname.startsWith('/checkout')
@@ -129,16 +181,18 @@ export async function middleware(request: NextRequest) {
               : null
 
           const redirects = await getCustomRedirects()
+
           const customRedirect = redirects.find((redirect) => redirect.sourceUrl === pathname)
 
           if (customRedirect) {
+            console.log('Match found in builder redirect:', customRedirect)
             const finalUrl = new URL(customRedirect.destinationUrl, request.url)
             // Clean query parameters to remove productCode and keep others
             const cleanedSearch = cleanQueryParams(search)
             if (cleanedSearch) {
               finalUrl.search = `?${cleanedSearch}`
             }
-            return NextResponse.redirect(finalUrl, customRedirect.permanent ? 301 : 302)
+            return NextResponse.redirect(finalUrl, customRedirect.permanent ? 308 : 307)
           }
 
           if (slugUrl && request.nextUrl.pathname !== slugUrl) {
@@ -156,12 +210,60 @@ export async function middleware(request: NextRequest) {
           // If no custom redirect and slug URL or it's the same as the current URL, continue to the product page
           return NextResponse.next()
         }
-
-        return NextResponse.next()
       } catch (error) {
         console.error(error)
-        return NextResponse.next() // Handle error as needed
       }
     }
+
+    return NextResponse.next()
+  }
+  return NextResponse.next()
+}
+
+async function handleRedirects(
+  request: NextRequest,
+  redirectsCached: { source: string; destination: string; permanent: boolean }[]
+) {
+  const { pathname, search } = request.nextUrl
+
+  if (!Array.isArray(redirectsCached)) {
+    console.error('Error: in handlredirects method: Edge Config data is not an array')
+    return NextResponse.next()
+  }
+
+  const customCachedEdgeRedirect = redirectsCached.find((entry) => entry.source === pathname)
+
+  if (customCachedEdgeRedirect) {
+    console.log(
+      'Match found customCachedEdgeRedirect in handlredirects method:',
+      customCachedEdgeRedirect
+    )
+    const finalUrl = new URL(customCachedEdgeRedirect.destination, request.url)
+    return NextResponse.redirect(finalUrl, customCachedEdgeRedirect.permanent ? 308 : 307)
+  }
+
+  return NextResponse.next()
+}
+
+async function fetchEdgeConfigRedirects(): Promise<
+  { source: string; destination: string; permanent: boolean }[] | null
+> {
+  try {
+    const edgeRedirectsFromApi = await get<
+      { source: string; destination: string; permanent: boolean }[]
+    >('redirects')
+    if (Array.isArray(edgeRedirectsFromApi) && edgeRedirectsFromApi.length > 0) {
+      // Cache the redirects for subsequent requests
+      cachedRedirects = edgeRedirectsFromApi
+      cachedRedirectsTimestamp = Date.now()
+      console.log('Fetched edgeRedirectsFromApi from Edge Config:', edgeRedirectsFromApi)
+      return edgeRedirectsFromApi
+    } else {
+      console.error('Error: Edge Config data is not a valid array or is empty')
+      return null
+    }
+  } catch (error) {
+    console.error('Error fetching redirects from Edge Config api:', error)
+    return null
   }
 }

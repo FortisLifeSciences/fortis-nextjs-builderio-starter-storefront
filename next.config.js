@@ -1,10 +1,46 @@
 /** @type {import('next').NextConfig} */
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { i18n } = require('./next-i18next.config')
 
 const LOCATION_COOKIE = 'kibo_purchase_location'
 const DEFAULT_WISHLIST_NAME = 'default-wishlist'
+const fs = require('fs')
+const path = require('path')
 
+const { i18n } = require('./next-i18next.config')
+const redirectsFilePath = path.resolve(__dirname, 'customRedirects', 'custom-redirects.json')
+const loadCustomRedirects = () => {
+  if (fs.existsSync(redirectsFilePath)) {
+    const rawData = fs.readFileSync(redirectsFilePath)
+    try {
+      const redirects = JSON.parse(rawData)
+      console.log('raw redirects', rawData)
+      return redirects
+    } catch (error) {
+      console.error('Error parsing custom redirects JSON:', error)
+      return []
+    }
+  }
+  return []
+}
+
+// Cached redirects to avoid reloading on every request
+let cachedStaticRedirects = loadCustomRedirects()
+let lastFetchTime = Date.now()
+const CACHE_EXPIRATION_TIME = 60 * 60 * 1000 // 1 hour in milliseconds
+
+// Function to refresh redirects if cache is expired
+const refreshStaticRedirectsCache = () => {
+  const currentTime = Date.now()
+  console.log('static redirects')
+  if (currentTime - lastFetchTime > CACHE_EXPIRATION_TIME) {
+    cachedStaticRedirects = loadCustomRedirects()
+    lastFetchTime = currentTime
+    console.log('Redirects cache refreshed')
+  } else {
+    console.log('Using cached redirects')
+  }
+}
+refreshStaticRedirectsCache()
 module.exports = {
   reactStrictMode: false,
   // This config ensures that when you import an SVG file, it will be treated as a React component.
@@ -552,5 +588,15 @@ module.exports = {
         destination: '/product/:productCode', // Destination for the product page
       },
     ]
+  },
+  async redirects() {
+    // Merge the static redirects from custom-redirects.json
+    const staticRedirects = cachedStaticRedirects.map((redirect) => ({
+      source: redirect.source,
+      destination: redirect.destination,
+      permanent: redirect.permanent,
+    }))
+
+    return staticRedirects
   },
 }
