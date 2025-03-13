@@ -5,12 +5,11 @@ export default async function handler(req, res) {
   const { payload } = req.body // Ensure `payload` is correctly destructured
 
   const countryCode = payload?.ipBasedCountryCode
-  const ipData = payload?.ipResponse
+  //  const ipData = payload?.ipResponse
 
   const forwarded = req.headers['x-forwarded-for']
   const ip = forwarded ? forwarded.split(',')[0] : req.socket.remoteAddress
   console.log("req.headers['x-forwarded-for']", ip)
-  console.log('req.headers:', req.headers, 'req:', req)
   console.log('req.connection.remoteAddress:', req.connection.remoteAddress)
   // console.log("Payload:", payload, "Country Code:", countryCode);
   // console.log("process.env.IP_WHO_IS_API_KEY:", process.env.IP_WHO_IS_API_KEY);
@@ -35,7 +34,7 @@ export default async function handler(req, res) {
         return res.status(200).json({ success: true, message: 'retrieve country code from theme' })
       } else {
         const ipWhoisResponse = await fetch(
-          `https://ipwhois.app/json/${ipData.ip}?key=${process.env.IP_WHO_IS_API_KEY}`
+          `https://ipwhois.app/json/${ip}?key=${process.env.IP_WHO_IS_API_KEY}`
         )
         const ipWhoisData = await ipWhoisResponse.json()
 
@@ -55,7 +54,7 @@ export default async function handler(req, res) {
             success: true,
             message: 'retrieve country code from IPWhois',
             ipWhoisData: ipWhoisData,
-            ip: ipData.ip,
+            ip: ip,
           })
         } else {
           return res.status(500).json({
