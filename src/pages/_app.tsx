@@ -69,11 +69,10 @@ const App = (props: KiboAppProps) => {
 
       if (settings?.data?.ipBasedCountryCode) {
         //  IpWhoIs(settings?.data?.ipBasedCountryCode)
-        const ipResponse = await fetch('https://api.ipify.org?format=json')
-        const ipData = await ipResponse.json()
+        // const ipResponse = await fetch('https://api.ipify.org?format=json')
+        // const ipData = await ipResponse.json()
         const payload = {
           ipBasedCountryCode: settings?.data?.ipBasedCountryCode,
-          ipResponse: ipData,
         }
         const ipWhoisApi = await fetch('/api/ipWhoisApi', {
           method: 'POST',
