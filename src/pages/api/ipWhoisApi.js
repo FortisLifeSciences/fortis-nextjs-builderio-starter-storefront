@@ -25,7 +25,7 @@ export default async function handler(req, res) {
           sameSite: 'Strict',
         })
 
-        return res.status(200).json({ success: true })
+        return res.status(200).json({ success: true, message: 'retrieve country code from theme' })
       } else {
         // Fallback: Detect country from IP
         const ipResponse = await fetch('https://api.ipify.org?format=json')
@@ -48,7 +48,9 @@ export default async function handler(req, res) {
             sameSite: 'Strict',
           })
 
-          return res.status(200).json({ success: true })
+          return res
+            .status(200)
+            .json({ success: true, message: 'retrieve country code from IPWhois' })
         } else {
           return res.status(500).json({
             success: false,
