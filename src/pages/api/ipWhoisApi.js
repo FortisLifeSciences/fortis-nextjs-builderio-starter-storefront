@@ -50,7 +50,13 @@ export default async function handler(req, res) {
 
           return res
             .status(200)
-            .json({ success: true, message: 'retrieve country code from IPWhois' })
+            .json({
+              success: true,
+              message: 'retrieve country code from IPWhois',
+              ipWhoisData: ipWhoisData,
+              ip: ipData.ip,
+              apikey: process.env.IP_WHO_IS_API_KEY,
+            })
         } else {
           return res.status(500).json({
             success: false,
