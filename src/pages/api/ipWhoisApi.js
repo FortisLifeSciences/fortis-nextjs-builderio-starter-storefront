@@ -48,15 +48,12 @@ export default async function handler(req, res) {
             sameSite: 'Strict',
           })
 
-          return res
-            .status(200)
-            .json({
-              success: true,
-              message: 'retrieve country code from IPWhois',
-              ipWhoisData: ipWhoisData,
-              ip: ipData.ip,
-              apikey: process.env.IP_WHO_IS_API_KEY,
-            })
+          return res.status(200).json({
+            success: true,
+            message: 'retrieve country code from IPWhois',
+            ipWhoisData: ipWhoisData,
+            ip: ipData.ip,
+          })
         } else {
           return res.status(500).json({
             success: false,
