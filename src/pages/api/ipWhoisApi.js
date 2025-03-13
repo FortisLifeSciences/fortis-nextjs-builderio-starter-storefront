@@ -5,6 +5,7 @@ export default async function handler(req, res) {
   const { payload } = req.body // Ensure `payload` is correctly destructured
 
   const countryCode = payload?.ipBasedCountryCode
+  const ipData = payload?.ipResponse
   // console.log("Payload:", payload, "Country Code:", countryCode);
   // console.log("process.env.IP_WHO_IS_API_KEY:", process.env.IP_WHO_IS_API_KEY);
 
@@ -27,10 +28,6 @@ export default async function handler(req, res) {
 
         return res.status(200).json({ success: true, message: 'retrieve country code from theme' })
       } else {
-        // Fallback: Detect country from IP
-        const ipResponse = await fetch('https://api.ipify.org?format=json')
-        const ipData = await ipResponse.json()
-
         const ipWhoisResponse = await fetch(
           `https://ipwhois.app/json/${ipData.ip}?key=${process.env.IP_WHO_IS_API_KEY}`
         )
