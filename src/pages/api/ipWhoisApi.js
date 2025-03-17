@@ -9,8 +9,6 @@ export default async function handler(req, res) {
 
   const forwarded = req.headers['x-forwarded-for']
   const ip = forwarded ? forwarded.split(',')[0] : req.socket.remoteAddress
-  console.log("req.headers['x-forwarded-for']", ip)
-  console.log('req.connection.remoteAddress:', req.connection.remoteAddress)
   // console.log("Payload:", payload, "Country Code:", countryCode);
   // console.log("process.env.IP_WHO_IS_API_KEY:", process.env.IP_WHO_IS_API_KEY);
 
@@ -53,8 +51,6 @@ export default async function handler(req, res) {
           return res.status(200).json({
             success: true,
             message: 'retrieve country code from IPWhois',
-            ipWhoisData: ipWhoisData,
-            ip: ip,
           })
         } else {
           return res.status(500).json({
