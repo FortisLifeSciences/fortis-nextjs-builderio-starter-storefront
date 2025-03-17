@@ -30,7 +30,7 @@ export default async function handler(req, res) {
         })
 
         return res.status(200).json({ success: true, message: 'retrieve country code from theme' })
-      } else {
+      } else if (countryCode === 'ipWhois') {
         const ipWhoisResponse = await fetch(
           `https://ipwhois.app/json/${ip}?key=${process.env.IP_WHO_IS_API_KEY}`
         )
@@ -58,6 +58,18 @@ export default async function handler(req, res) {
             message: 'Failed to retrieve country code from IPWhois',
           })
         }
+      } else {
+        setCookie('ipBasedCountryCode', 'US', {
+          req,
+          res,
+          expires: expiryDate,
+          secure: true,
+          httpOnly: true,
+          sameSite: 'Strict',
+        })
+        return res
+          .status(200)
+          .json({ success: true, message: "Stop triggering this Api it's no use of you" })
       }
     } else {
       return res.status(200).json({ success: true, message: 'Cookie already exists' })
