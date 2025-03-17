@@ -14,7 +14,7 @@ import Router from 'next/router'
 import NProgress from 'nprogress'
 
 import GetThemeSettings from './api/getThemeSettings'
-import IpWhoIs from './api/ipWhoIs'
+// import IpWhoIs from './api/ipWhoIs'
 import BuilderComponents from './builder-registry'
 import registerDesignToken from './registerDesignToken'
 import { DefaultLayout } from '@/components/layout'
@@ -68,7 +68,19 @@ const App = (props: KiboAppProps) => {
       setGoogleReCaptcha(settings?.data?.googleReCaptcha)
 
       if (settings?.data?.ipBasedCountryCode) {
-        IpWhoIs(settings?.data?.ipBasedCountryCode)
+        //  IpWhoIs(settings?.data?.ipBasedCountryCode)
+        // const ipResponse = await fetch('https://api.ipify.org?format=json')
+        // const ipData = await ipResponse.json()
+        const payload = {
+          ipBasedCountryCode: settings?.data?.ipBasedCountryCode,
+        }
+        const ipWhoisApi = await fetch('/api/ipWhoisApi', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ payload }),
+        })
       }
       if (settings?.data?.googleTagManagerId) {
         setGtmId(settings?.data?.googleTagManagerId)
