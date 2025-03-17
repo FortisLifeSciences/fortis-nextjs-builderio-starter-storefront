@@ -25,7 +25,6 @@ export default async function handler(req, res) {
           res,
           expires: expiryDate,
           secure: true,
-          httpOnly: true,
           sameSite: 'Strict',
         })
 
@@ -44,7 +43,6 @@ export default async function handler(req, res) {
             res,
             expires: expiryDate,
             secure: true,
-            httpOnly: true,
             sameSite: 'Strict',
           })
 
@@ -64,7 +62,6 @@ export default async function handler(req, res) {
           res,
           expires: expiryDate,
           secure: true,
-          httpOnly: true,
           sameSite: 'Strict',
         })
         return res
@@ -83,7 +80,6 @@ export default async function handler(req, res) {
       res,
       expires: expiryDate,
       secure: true,
-      httpOnly: true,
       sameSite: 'Strict',
     })
 
