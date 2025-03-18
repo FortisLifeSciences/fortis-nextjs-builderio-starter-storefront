@@ -72,7 +72,7 @@ const PurchaseOrderForm = (props: PurchaseOrderFormProps) => {
 
   const formatPhoneNumber = (phoneNumber: string): string => {
     // Remove all non-digit characters
-    phoneNumber = phoneNumber.replace(/\D/g, '')
+    phoneNumber = phoneNumber.replace(/\D/g, '').slice(0, 10)
     // Format the number as 111-111-1111
     if (phoneNumber.length > 3 && phoneNumber.length <= 6) {
       phoneNumber = phoneNumber.replace(/(\d{3})(\d+)/, '$1-$2')
@@ -87,7 +87,7 @@ const PurchaseOrderForm = (props: PurchaseOrderFormProps) => {
     formState: { isValid, errors, dirtyFields },
     handleSubmit,
   } = useForm({
-    mode: 'onBlur',
+    mode: 'onChange',
     reValidateMode: 'onBlur',
     defaultValues: {
       purchaseOrderNumber: purchaseOrderNumber,
