@@ -185,19 +185,13 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
           const affiliation = process.env.NEXT_PUBLIC_KIBO_HOST
           purchaseGTM(order as CrOrder, user?.userId, affiliation)
 
-          router.push(
-            { pathname: '/order-confirmation', query: { checkoutId: order.id } },
-            { pathname: '/order-confirmation' }
-          )
+          router.push({ pathname: '/order-confirmation', query: { checkoutId: order.id } })
         }
       }
       const affiliation = process.env.NEXT_PUBLIC_KIBO_HOST
       purchaseGTM(order as CrOrder, user?.userId, affiliation)
 
-      router.push(
-        { pathname: '/order-confirmation', query: { checkoutId: order.id } },
-        { pathname: '/order-confirmation' }
-      )
+      router.push({ pathname: '/order-confirmation', query: { checkoutId: order.id } })
     } catch (error) {
       checkoutFailure(order as CrOrder, user?.userId, error as any, 'Website Error')
     }
