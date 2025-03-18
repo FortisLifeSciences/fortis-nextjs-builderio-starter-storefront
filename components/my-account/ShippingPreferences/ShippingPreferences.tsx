@@ -37,13 +37,14 @@ interface UserAttribute {
 const ShippingPreferences = (props: MyProfileProps) => {
   const { setAutoFocus = true, user } = props
   const { t } = useTranslation('common')
-  const [userAttribute, setUserAttribute] = useState<UserAttribute[]>([])
+  const [userAttribute, setUserAttribute] = useState<UserAttribute | null>(null)
   const [fedexNumber, setFedexNumber] = useState('')
   const [editForm, setEditForm] = useState(false)
 
   const payload = {
     userId: user?.userId,
     accountId: user?.id,
+    attributeFqn: 'tenant~customer-fedex-account-number',
   }
   useEffect(() => {
     const fetchSettings = async () => {
@@ -56,12 +57,9 @@ const ShippingPreferences = (props: MyProfileProps) => {
       })
 
       const attributeDetails = await entityResponse.json()
-      const hasFQN = attributeDetails?.data?.items.filter(
-        (item: { fullyQualifiedName: string }) =>
-          item.fullyQualifiedName === 'tenant~customer-fedex-account-number'
-      )
-      setFedexNumber(hasFQN[0]?.values[0])
-      setUserAttribute(hasFQN)
+      // console.log("attributeDetails", attributeDetails)
+      setFedexNumber(attributeDetails?.data?.values[0])
+      setUserAttribute(attributeDetails?.data)
     }
     fetchSettings()
   }, [fedexNumber])
@@ -103,10 +101,9 @@ const ShippingPreferences = (props: MyProfileProps) => {
     }
   }, [fedexNumber, reset])
 
-  const handleResetPassword = async (data: FedexNumberInputData) => {
+  const handleAddAttribute = async (data: FedexNumberInputData) => {
     const { userId, id: accountId } = user || {}
-    const attributePayload = userAttribute?.[0]
-
+    const attributePayload = userAttribute
     const payload = {
       userId,
       accountId,
@@ -186,7 +183,7 @@ const ShippingPreferences = (props: MyProfileProps) => {
             <Typography variant="body2" sx={{ color: 'gray.900' }}>
               Customer Fedex Account Number
             </Typography> */}
-            <form onSubmit={handleSubmit(handleResetPassword)}>
+            <form onSubmit={handleSubmit(handleAddAttribute)}>
               <FormControl sx={{ width: '100%' }}>
                 <Controller
                   name="fedexNumber"
