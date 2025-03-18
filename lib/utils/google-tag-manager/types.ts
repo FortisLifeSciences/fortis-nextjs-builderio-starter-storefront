@@ -142,6 +142,10 @@ export interface CheckoutFailure {
   errorCategory: any
 }
 
+export interface PageNotFound {
+  event: typeof gaConstants.PAGE_NOT_FOUND
+  pageNotFoundPath: any
+}
 export interface Purchase {
   event: typeof gaConstants.PURCHASE
   userId?: any
