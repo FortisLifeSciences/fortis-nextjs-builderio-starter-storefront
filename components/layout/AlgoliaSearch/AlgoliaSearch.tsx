@@ -39,7 +39,7 @@ const AlgoliaSearch = ({ placeholderText = 'SEARCH' }) => {
           borderRadius: '9px', // Rounded corners
           backgroundColor: '#fff', // Light purple background
           width: '100%',
-          maxWidth: 600, // Adjust width as needed
+          maxWidth: 1500, // Adjust width as needed
           boxShadow: 'none',
           marginRight: '13px',
         }}
@@ -97,7 +97,7 @@ const AlgoliaSearch = ({ placeholderText = 'SEARCH' }) => {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', // Ensures responsiveness
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
               gap: '15px',
             }}
           >
@@ -129,6 +129,7 @@ const AlgoliaSearch = ({ placeholderText = 'SEARCH' }) => {
                       }}
                     />
                   </a>
+
                   <p
                     style={{
                       marginBottom: '5px',
@@ -140,18 +141,42 @@ const AlgoliaSearch = ({ placeholderText = 'SEARCH' }) => {
                     {hit.brand}
                   </p>
 
-                  <p
-                    style={{
-                      fontSize: '16px',
-                      fontWeight: '400',
-                      margin: '5px 0',
-                      textAlign: 'left',
-                      color: '#333',
-                    }}
-                  >
-                    {hit.product_name}
-                  </p>
-                  <p style={{ fontSize: '14px', margin: '5px 0', textAlign: 'left' }}>{hit.sku}</p>
+                  {/* Conditional Rendering based on hit.slice_product */}
+                  {hit.slice_product ? (
+                    <>
+                      <p
+                        style={{
+                          fontSize: '16px',
+                          fontWeight: '400',
+                          margin: '5px 0',
+                          textAlign: 'left',
+                          color: '#333',
+                        }}
+                      >
+                        {hit.product_name_variant}
+                      </p>
+                      <p style={{ fontSize: '14px', margin: '5px 0', textAlign: 'left' }}>
+                        {hit.sku}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p
+                        style={{
+                          fontSize: '16px',
+                          fontWeight: '400',
+                          margin: '5px 0',
+                          textAlign: 'left',
+                          color: '#333',
+                        }}
+                      >
+                        {hit.product_name}
+                      </p>
+                      <p style={{ fontSize: '14px', margin: '5px 0', textAlign: 'left' }}>
+                        {hit.plp_catalog_number}
+                      </p>
+                    </>
+                  )}
                 </Box>
               ))
             )}
