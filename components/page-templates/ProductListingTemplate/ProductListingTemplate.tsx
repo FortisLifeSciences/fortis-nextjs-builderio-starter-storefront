@@ -131,7 +131,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
   const handleClearAllFilters = () => {
     updateRoute('')
     window.scrollTo({
-      top: 200,
+      top: window.scrollY,
       behavior: 'smooth',
     })
   }
@@ -139,7 +139,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
   const handleSelectedTileRemoval = (selectedTile: string) => {
     updateRoute(selectedTile)
     window.scrollTo({
-      top: 200,
+      top: window.scrollY,
       behavior: 'smooth',
     })
   }
@@ -353,7 +353,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
               </Box> */}
             </Box>
 
-            <Box sx={{ ...PLPStyles.plpGrid }}>
+            <Box id="product-listing-section" sx={{ ...PLPStyles.plpGrid }}>
               <Box sx={{ ...PLPStyles.navBar }}>
                 <Box sx={{ ...PLPStyles.navBarMain }}>
                   <Box sx={{ ...PLPStyles.navBarView }}>
@@ -414,7 +414,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
                         name="sort-plp"
                         sx={{
                           color: '#2B2B2B',
-                          fontFamily: 'Roboto',
+                          fontFamily: 'Poppins',
                           fontSize: '14px',
                           fontStyle: 'normal',
                           fontWeight: '400',
@@ -427,7 +427,7 @@ const ProductListingTemplate = (props: ProductListingTemplateProps) => {
                           <MenuItem
                             sx={{
                               color: '#2B2B2B',
-                              fontFamily: 'Roboto',
+                              fontFamily: 'Poppins',
                               fontSize: '14px',
                               fontStyle: 'normal',
                               fontWeight: '400',

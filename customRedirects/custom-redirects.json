@@ -1,0 +1,1102 @@
+[
+  {
+    "source": "/products/monoclonal-antibodies",
+    "destination": "/products/primary-antibodies",
+    "permanent": true
+  },
+  {
+    "source": "/products/polyclonal-antibodies",
+    "destination": "/products/primary-antibodies",
+    "permanent": true
+  },
+  {
+    "source": "/protocols/simple-western-protocol",
+    "destination": "/simple-western/",
+    "permanent": true
+  },
+  {
+    "source": "/custom-multiplex-imaging",
+    "destination": "/spatial-biology-services",
+    "permanent": true
+  },
+  {
+    "source": "/oem-products-solutions",
+    "destination": "/gmp-bulk-enzymes-master-mixes",
+    "permanent": true
+  },
+  {
+    "source": "/custom-single-domain-antibody-discovery-services-faq",
+    "destination": "/custom-single-domain-antibody-discovery-services",
+    "permanent": true
+  },
+  {
+    "source": "/ngs-library-prep-kit",
+    "destination": "/products/ngs-library-prep-enzymes",
+    "permanent": true
+  },
+  {
+    "source": "/silver-nanoparticles-silver-nanopowders",
+    "destination": "/silver-nanoparticles",
+    "permanent": true
+  },
+  {
+    "source": "/platinum-nanoparticles-nanopowders",
+    "destination": "/platinum-nanoparticles",
+    "permanent": true
+  },
+  {
+    "source": "/products/pathplex-ihc",
+    "destination": "/products/pathplex-ihc-panels",
+    "permanent": true
+  },
+  {
+    "source": "/custom-multiplex-imaging",
+    "destination": "/spatial-biology-services",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/advances-in-dna-repair-insights-into-the-next-frontier-of-dna-repair/ebook005",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/aldh1a1-a-protein-of-many-hats/article005",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/antibody-detection-for-cancer-research/ebook001",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/brd4-epigenetic-regulator-and-emerging-cancer-target/article064",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/cd3e-and-the-fight-to-save-beta-cells/article010",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/codon-bias-and-heterologous-protein-expression/article013",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/dead-box-rna-helicases/article014",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/encode-a-free-publicly-funded-source-for-reagent-validation/article016",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/exosomes-lipid-based-extracellular-vesicles/article067",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/genetic-conservation-across-species/article021",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/genome-stability-and-chromosome-segregation-a-unique-set-of-functions/article022",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/granzyme-b-and-tumor-cells-an-enzymatic-death/article023",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/herc2-don-t-it-make-my-brown-eyes-blue/article056",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/https-www.bethyl.com-content-the-2018-nobel-prize-in-physiology-or-medicine/article047",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/immunoprecipitation-insights-into-protein-protein-and-protein-nucleic-acid-interactions/ebook006",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/introducing-the-bethyl-laboratories-sars-cov-2-igg-and-igm-elisa-kits/article044",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/it-s-getting-hot-in-here-cd163-and-inflammation/article026",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/january-is-cervical-health-awareness-month/article027",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/just-tell-it-like-it-is/article028",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/kap-1-many-names-even-more-functions/article029",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/making-discoveries-in-multicolor/poster001",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/modern-antibody-applications-standing-on-the-shoulders-of-giants/article034",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/molecular-abnormalities-in-breast-cancer/article035",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/pancreatic-cancer-treatments-the-promise-of-signal-transduction-pathways/article038",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/prostate-cancer-detection/article040",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/the-2019-nobel-prize-in-physiology-or-medicine/article048",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/the-best-antibody-validation-methods/article069",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/the-big-brd-wolf/article059",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/the-transcriptional-effects-of-med1/article051",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/uba6-an-e1-enzyme-critical-for-hippocampal-and-amygdalar-development/article060",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/what-is-mouse-igg/What-is-Mouse-IgG",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/you-are-what-and-when-you-eat/article061",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/antibodies-the-key-to-spatial-mass-spectrometry-success/webinar005",
+    "destination": "/products/antibody-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/diagnostics-resources/boosting-lateral-flow-immunoassay-sensitivity-by-increasing-antigen-antibody-interaction-time-and-test-line-antibody-concentration/boosting-lfa-sensitivity",
+    "destination": "/products/diagnostics-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/a-diagnostic-device-for-detecting-biomarkers-of-organ-injury-in-saliva/diagnostic-organ-injury",
+    "destination": "/products/nanomaterial-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/gold-nanoparticle-lateral-flow-assay-applications/gold-np-lf-applications",
+    "destination": "/products/nanomaterial-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/nanoxact-carboxyl-gold-nanorod-covalent-conjugation/nanoxact-gold-nanorod",
+    "destination": "/products/nanomaterial-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/performance-comparison-nanoparticles-lateral-flow-assay/performance-comparison-lf-nps",
+    "destination": "/products/nanomaterial-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/webinar-multiplexed-lateral-flow-assay-development/multiplex-lfa",
+    "destination": "/products/nanomaterial-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/white-paper-considerations-for-developing-saliva-based-lateral-flow-immunoassays/wp-saliva-lfa",
+    "destination": "/products/nanomaterial-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/white-paper-quality-considerations-for-a-successful-diagnostic-assay-launch/wp-quality-fla",
+    "destination": "/products/nanomaterial-resources",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/2-step-immunofluorescence-protocol-cells-grown-in-culture-and-cytospin-preparations/protocol014",
+    "destination": "/protocols/2-step-immunofluorescence-protocol-cells-grown-in-culture-and-cytospin-preparations",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/2-step-immunofluorescence-protocol-epitope-retrieval-method-for-formalin-fixed-paraffin-embedded-tissues-and-cell-blocks/protocol011",
+    "destination": "/protocols/2-step-immunofluorescence-protocol-epitope-retrieval-method-for-formalin-fixed-paraffin-embedded-tissues-and-cell-blocks",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/2-step-immunofluorescence-protocol-formaldehyde-fixed-cells-and-cytospin-preparations/protocol012",
+    "destination": "/protocols/2-step-immunofluorescence-protocol-formaldehyde-fixed-cells-and-cytospin-preparations",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/2-step-immunofluorescence-protocol-formalin-fixed-paraffin-embedded-tissues-and-cell-blocks/protocol010",
+    "destination": "/protocols/2-step-immunofluorescence-protocol-formalin-fixed-paraffin-embedded-tissues-and-cell-blocks",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/2-step-immunofluorescence-protocol-fresh-frozen-tissue-sections/protocol013",
+    "destination": "/protocols/2-step-immunofluorescence-protocol-fresh-frozen-tissue-sections",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/2-step-immunoperoxidase-procedure-epitope-retrieval-method-for-formalin-fixed-paraffin-embedded-tissues-and-cell-blocks/protocol007",
+    "destination": "/protocols/2-step-immunoperoxidase-procedure-epitope-retrieval-method-for-formalin-fixed-paraffin-embedded-tissues-and-cell-blocks",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/2-step-immunoperoxidase-procedure-formalin-fixed-paraffin-embedded-tissues-and-cell-blocks/protocol006",
+    "destination": "/protocols/2-step-immunoperoxidase-procedure-formalin-fixed-paraffin-embedded-tissues-and-cell-blocks",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/2-step-immunoperoxidase-protocol-cells-grown-in-culture-and-cytospin-preparations/protocol009",
+    "destination": "/protocols/2-step-immunoperoxidase-protocol-cells-grown-in-culture-and-cytospin-preparations",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/2-step-immunoperoxidase-protocol-formaldehyde-fixed-cells-and-cytospin-preparations/protocol008",
+    "destination": "/protocols/2-step-immunoperoxidase-protocol-formaldehyde-fixed-cells-and-cytospin-preparations",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/3-types-of-antigen-proteins/3-Types-of-Antigen-Proteins",
+    "destination": "/resources/antibody-resources/3-types-of-antigen-proteins",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/a-western-blot-and-immunoprecipitation-assay-to-verify-antibody-specificity/appnote001",
+    "destination": "/resources/antibody-resources/a-western-blot-and-immunoprecipitation-assay-to-verify-antibody-specificity",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/aacr-2022-poster-presentation/webinar006",
+    "destination": "/resources/antibody-resources/aacr-2022-poster-presentation",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/albumin-is-a-useful-marker-of-organ-function-and-tissue-damage/article006",
+    "destination": "/resources/antibody-resources/albumin-is-a-useful-marker-of-organ-function-and-tissue-damage",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/an-introduction-to-multiplex-immunohistochemistry/article001",
+    "destination": "/resources/antibody-resources/an-introduction-to-multiplex-immunohistochemistry",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/antibodies-the-key-to-spatial-mass-spectrometry-success/webinar005",
+    "destination": "/resources/antibody-resources/antibodies-the-key-to-spatial-mass-spectrometry-success",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/antibody-production/ebook007",
+    "destination": "/resources/antibody-resources/antibody-production",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/antibody-validation-for-successful-immunohistochemistry-and-multiplex-immunofluorescence/webinar003",
+    "destination": "/resources/antibody-resources/antibody-validation-for-successful-immunohistochemistry-and-multiplex-immunofluorescence",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/apoptosis-pathway/apoptosis-pathway",
+    "destination": "/products/apoptosis-pathway-antibodies",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/atrx-loss-in-glioma-results-in-dysregulation-of-cell-cycle-phase-transition/artx-loss",
+    "destination": "/resources/antibody-resources/atrx-loss-in-glioma-results-in-dysregulation-of-cell-cycle-phase-transition",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/b-is-for-bursa/article055",
+    "destination": "/resources/antibody-resources/b-is-for-bursa",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/benefits-of-fluorescent-multiplex-immunohistochemistry-using-tyramide-signal-amplification-part-3-of-4/article003",
+    "destination": "/resources/antibody-resources/benefits-of-fluorescent-multiplex-immunohistochemistry-using-tyramide-signal-amplification-part-3-of-4",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/between-yes-and-no-b7-h4-and-t-cell-activation/article007",
+    "destination": "/resources/antibody-resources/between-yes-and-no-b7-h4-and-t-cell-activation",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/beyond-mabs-the-unrealized-potential-of-vhh-antibodies/vhh-antibodies",
+    "destination": "/resources/antibody-resources/beyond-mabs-the-unrealized-potential-of-vhh-antibodies",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/bovine-serum-albumin-bsa-quantification-with-elisa-white-paper/BSA-ELISA",
+    "destination": "/resources/antibody-resources/bovine-serum-albumin-bsa-quantification-with-elisa-white-paper",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/bringing-the-tumor-microenvironment-into-focus/whitepaper001",
+    "destination": "/resources/antibody-resources/bringing-the-tumor-microenvironment-into-focus",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/car-t-cells-for-the-treatment-of-blood-and-solid-tumors/article008",
+    "destination": "/resources/antibody-resources/car-t-cells-for-the-treatment-of-blood-and-solid-tumors",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/cardiovascular-protein-families-in-development-and-disease/cardiovascular-proteins",
+    "destination": "/resources/antibody-resources/cardiovascular-protein-families-in-development-and-disease",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/categories-of-cancer-immunotherapy/article012",
+    "destination": "/resources/antibody-resources/categories-of-cancer-immunotherapy",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/cd247-cd3z-the-gatekeeper-of-t-cell-activation/article009",
+    "destination": "/resources/antibody-resources/cd247-cd3z-the-gatekeeper-of-t-cell-activation",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/cd27-an-emerging-target-for-cancer-immunotherapy/article018",
+    "destination": "/resources/antibody-resources/cd27-an-emerging-target-for-cancer-immunotherapy",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/cd68-and-pd-l1-better-together/article011",
+    "destination": "/resources/antibody-resources/cd68-and-pd-l1-better-together",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/cell-lysate-preparation-netn-method/protocol002",
+    "destination": "/protocols/cell-lysate-preparation-netn-method",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/cell-lysate-preparation-nuclear-extract/protocol003",
+    "destination": "/protocols/cell-lysate-preparation-nuclear-extract",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/cell-lysate-preparation-ripa-method/protocol004",
+    "destination": "/protocols/cell-lysate-preparation-ripa-method",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/cell-lysate-protocols-ebook/cell-lysate-ebook",
+    "destination": "/resources/antibody-resources/cell-lysate-protocols-ebook",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/cell-surface-staining-for-live-cells-using-flow-cytometry/flow-cytometry-live",
+    "destination": "/resources/antibody-resources/cell-surface-staining-for-live-cells-using-flow-cytometry",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/clinically-used-broad-spectrum-antibiotics-compromise-inflammatory-monocyte-dependent-antibacterial-defense-in-the-lung/antibiotics-compromise-defense",
+    "destination": "/resources/antibody-resources/clinically-used-broad-spectrum-antibiotics-compromise-inflammatory-monocyte-dependent-antibacterial-defense-in-the-lung",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/control-line-systems-for-lateral-flow-assays-/lfa-control-line",
+    "destination": "/resources/antibody-resources/control-line-systems-for-lateral-flow-assays-",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/cooperative-interaction-between-er-and-the-emt-inducer-zeb1-reprograms-breast-cancer-cells-for-bone-metastasis/era-emt-zeb1",
+    "destination": "/resources/antibody-resources/cooperative-interaction-between-er-and-the-emt-inducer-zeb1-reprograms-breast-cancer-cells-for-bone-metastasis",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/defeating-covid-19-the-science-behind-a-new-elisa-for-covid-19-seroconversion-detection/article063",
+    "destination": "/resources/antibody-resources/defeating-covid-19-the-science-behind-a-new-elisa-for-covid-19-seroconversion-detection",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/design-and-optimization-of-mouse-markers-for-use-in-melanoma-cardiac-applications/mouse-markers-poster",
+    "destination": "/resources/antibody-resources/design-and-optimization-of-mouse-markers-for-use-in-melanoma-cardiac-applications",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/development-of-modern-immuno-oncology/article015",
+    "destination": "/resources/antibody-resources/development-of-modern-immuno-oncology",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/difficult-cancer-therapeutics/difficult-cancer-therapeutics",
+    "destination": "/resources/antibody-resources/difficult-cancer-therapeutics",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/direct-elisa-protocol/protocol018",
+    "destination": "/protocols/direct-elisa-protocol",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/direct-vs.-indirect-staining-for-flow-cytometry/flow-direct-indirect",
+    "destination": "/resources/antibody-resources/direct-vs-indirect-staining-for-flow-cytometry",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/drugs-of-abuse-pairing-guide/drugs-abuse-guide",
+    "destination": "/resources/antibody-resources/drugs-of-abuse-pairing-guide",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/ensuring-antibody-specificity-and-reproducibility-the-six-pillars-of-antibody-validation/six-pillars-wp",
+    "destination": "/resources/antibody-resources/ensuring-antibody-specificity-and-reproducibility-the-six-pillars-of-antibody-validation",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/epithelial-mesenchymal-transition/article017",
+    "destination": "/resources/antibody-resources/epithelial-mesenchymal-transition",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/epitope-tag-conjugation-system-provides-versatility-for-multiplex-assay-design-video/epitope-tag-video",
+    "destination": "/resources/antibody-resources/epitope-tag-conjugation-system-provides-versatility-for-multiplex-assay-design-video",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/epitope-tag-conjugation-system-provides-versatility-for-multiplex-assay-design/epitope-tag-poster",
+    "destination": "/resources/antibody-resources/epitope-tag-conjugation-system-provides-versatility-for-multiplex-assay-design",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/evolution-and-future-of-multiplex-immunohistochemistry-using-tyramide-signal-amplification-part-4-of-4/article004",
+    "destination": "/resources/antibody-resources/evolution-and-future-of-multiplex-immunohistochemistry-using-tyramide-signal-amplification-part-4-of-4",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/fixation-and-permeabilization-of-whole-blood-with-red-blood-cell-lysis/protocol005",
+    "destination": "/protocols/fixation-and-permeabilization-of-whole-blood-with-red-blood-cell-lysis",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/flow-cytometry-controls/flow-cytometry-controls",
+    "destination": "/resources/antibody-resources/flow-cytometry-controls",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/flow-cytometry-principles-best-practices-and-considerations-for-experimental-design-/flow-ebook",
+    "destination": "/resources/antibody-resources/flow-cytometry-principles-best-practices-and-considerations-for-experimental-design-",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/flow-cytometry-protocol-for-indirect-intracellular-staining-of-cultured-cells-grown-in-suspension/protocol021",
+    "destination": "/protocols/flow-cytometry-protocol-for-indirect-intracellular-staining-of-cultured-cells-grown-in-suspension",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/flow-cytometry-protocols-for-extracellular-intracellular-targets/appnote002",
+    "destination": "/resources/antibody-resources/flow-cytometry-protocols-for-extracellular-intracellular-targets",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/foxp3-critical-for-the-immunosuppressive-function-of-regulatory-t-cells/article019",
+    "destination": "/resources/antibody-resources/foxp3-critical-for-the-immunosuppressive-function-of-regulatory-t-cells",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/from-cancer-to-crops-how-antibody-engineering-is-changing-everything-/from-cancer-to-crops",
+    "destination": "/resources/antibody-resources/from-cancer-to-crops-how-antibody-engineering-is-changing-everything-",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/gitr-research-in-tumor-immunotherapy/article020",
+    "destination": "/resources/antibody-resources/gitr-research-in-tumor-immunotherapy",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/how-to-interpret-flow-cytometry-data/flow-cytometry-interpret",
+    "destination": "/resources/antibody-resources/how-to-interpret-flow-cytometry-data",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/human-umbilical-cord-derived-mesenchymal-stem-cell-sheets-for-clinical-use/human-uc-mscs",
+    "destination": "/resources/antibody-resources/human-umbilical-cord-derived-mesenchymal-stem-cell-sheets-for-clinical-use",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/hypoxia-signaling-hif1-alpha-hif2-alpha-recombinant-rabbit-monoclonal-antibodies/article065",
+    "destination": "/resources/antibody-resources/hypoxia-signaling-hif1-alpha-hif2-alpha-recombinant-rabbit-monoclonal-antibodies",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/identifying-a-novel-biomarker-of-primary-sclerosing-cholangitis/biomarker-psc",
+    "destination": "/resources/antibody-resources/identifying-a-novel-biomarker-of-primary-sclerosing-cholangitis",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/ido1-an-intracellular-target-for-cancer-therapy/article024",
+    "destination": "/resources/antibody-resources/ido1-an-intracellular-target-for-cancer-therapy",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/immune-checkpoints-in-cancer-therapy/ebook004",
+    "destination": "/resources/antibody-resources/immune-checkpoints-in-cancer-therapy",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/immuno-oncology-2021/webinar004",
+    "destination": "/resources/antibody-resources/immuno-oncology-2021",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/immunoprecipitation-protocol/protocol023",
+    "destination": "/protocols/immunoprecipitation-protocol",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/immunoprecipitation-with-agarose-immobilized-antibody/protocol015",
+    "destination": "/protocols/immunoprecipitation-with-agarose-immobilized-antibody",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/improving-antibody-purification-for-veterinary-medicine/ab-purification-vet",
+    "destination": "/resources/antibody-resources/improving-antibody-purification-for-veterinary-medicine",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/in-depth-with-cd137/article025",
+    "destination": "/resources/antibody-resources/in-depth-with-cd137",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/indirect-elisa-protocol/protocol019",
+    "destination": "/protocols/indirect-elisa-protocol",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/ki-67-a-nuclear-antigen-uniquely-qualified-as-a-marker-of-cellular-proliferation/article030",
+    "destination": "/resources/antibody-resources/ki-67-a-nuclear-antigen-uniquely-qualified-as-a-marker-of-cellular-proliferation",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/lag3-and-t-cell-exhaustion/article031",
+    "destination": "/resources/antibody-resources/lag3-and-t-cell-exhaustion",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/lateral-flow-assay-tests-for-detecting-drugs-of-abuse/lfa-drugs-abuse",
+    "destination": "/resources/antibody-resources/lateral-flow-assay-tests-for-detecting-drugs-of-abuse",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/lysis-buffers-ripa-vs.-netn/ripa-vs-netn",
+    "destination": "/resources/antibody-resources/lysis-buffers-ripa-vs-netn",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/mapk-pathway/mapk-pathway",
+    "destination": "/products/mapk-pathway-antibodies",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/mechanisms-of-resistance-to-cancer-immunotherapy/article032",
+    "destination": "/resources/antibody-resources/mechanisms-of-resistance-to-cancer-immunotherapy",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/mediobasal-hypothalamic-fkbp51-acts-as-a-molecular-switch-linking-autophagy-to-whole-body-metabolism/FKBP51",
+    "destination": "/resources/antibody-resources/mediobasal-hypothalamic-fkbp51-acts-as-a-molecular-switch-linking-autophagy-to-whole-body-metabolism",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/microtubule-associated-proteins-maps-life-s-mini-conveyor-belts/article033",
+    "destination": "/resources/antibody-resources/microtubule-associated-proteins-maps-lifes-mini-conveyor-belts",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/mondoa-controls-senescence-through-autophagy-and-mitochondrial-homesostasis/MondoA",
+    "destination": "/resources/antibody-resources/mondoa-controls-senescence-through-autophagy-and-mitochondrial-homesostasis",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/move-over-mhc-ii-there-s-a-new-lag-3-ligand-in-town/article036",
+    "destination": "/resources/antibody-resources/move-over-mhc-ii-there-s-a-new-lag-3-ligand-in-town",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/mtor-pathyway/mtor-pathway",
+    "destination": "/products/mtor-pathway-antibodies",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/nanomolar-vhh-binders-of-pd-l1-and-other-therapeutic-targets-from-the-abnano-vhh-naive-library/nanomolar-vhh-binders",
+    "destination": "/resources/antibody-resources/nanomolar-vhh-binders-of-pd-l1-and-other-therapeutic-targets-from-the-abnano-vhh-naive-library",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/navigating-the-sea-of-blots/article057",
+    "destination": "/resources/antibody-resources/navigating-the-sea-of-blots",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/novel-autophagy-pathway-links-cd38-and-lrrk2-to-tfeb-nuclear-translocation/tfeb0001",
+    "destination": "/resources/antibody-resources/novel-autophagy-pathway-links-cd38-and-lrrk2-to-tfeb-nuclear-translocation",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/p53-pathway/p53-pathway",
+    "destination": "/products/p53-pathway-antibodies",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/pbrm1-joins-p53-to-impact-kidney-cancer/article037",
+    "destination": "/resources/antibody-resources/pbrm1-joins-p53-to-impact-kidney-cancer",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/practical-overview-of-multiplex-immunohistochemistry-using-tsa-part-2-of-4/article002",
+    "destination": "/resources/antibody-resources/practical-overview-of-multiplex-immunohistochemistry-using-tsa-part-2-of-4",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/preparation-of-cell-lysate-used-for-immunoprecipitation/protocol026",
+    "destination": "/protocols/preparation-of-cell-lysate-used-for-immunoprecipitation",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/profiling-cytokeratins-in-the-tumor-microenvironment-using-multiplex-immunofluorescence/cytokeratins-muliplex",
+    "destination": "/resources/antibody-resources/profiling-cytokeratins-in-the-tumor-microenvironment-using-multiplex-immunofluorescence",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/programmed-cell-death-1-pd-1-/article039",
+    "destination": "/resources/antibody-resources/programmed-cell-death-1-pd-1",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/protein-nucleic-acid-interactions/article041",
+    "destination": "/resources/antibody-resources/protein-nucleic-acid-interactions",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/raising-the-bar-for-biomarkers-and-early-diagnostics-in-neurodegenerative-disease/Neurodegenerative-Disease",
+    "destination": "/resources/antibody-resources/raising-the-bar-for-biomarkers-and-early-diagnostics-in-neurodegenerative-disease",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/ran-proteins-in-health-and-disease/article042",
+    "destination": "/resources/antibody-resources/ran-proteins-in-health-and-disease",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/recombinant-monoclonal-antibodies-versatile-tools-for-research-diagnostics-and-disease-therapy/webinar007",
+    "destination": "/resources/antibody-resources/recombinant-monoclonal-antibodies-versatile-tools-for-research-diagnostics-and-disease-therapy",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/reinvigorating-the-immune-system-to-attack-cancer-cells-using-highly-specific-antibodies/Reinvigorating-Immune-System",
+    "destination": "/resources/antibody-resources/reinvigorating-the-immune-system-to-attack-cancer-cells-using-highly-specific-antibodies",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/resistance-to-immunotherapy/ebook002",
+    "destination": "/resources/antibody-resources/resistance-to-immunotherapy",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/retrieval-buffers-citrate-vs.-tris-edta/citrate-vs-tris-edta",
+    "destination": "/resources/antibody-resources/retrieval-buffers-citrate-vs-tris-edta",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/role-of-kinesin-molecular-motor-proteins-in-cancer/article043",
+    "destination": "/resources/antibody-resources/role-of-kinesin-molecular-motor-proteins-in-cancer",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/role-of-ox40-in-t-cell-biology-of-cancer-and-infectious-disease/Role-of-OX40",
+    "destination": "/resources/antibody-resources/role-of-ox40-in-t-cell-biology-of-cancer-and-infectious-disease",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/sandwich-elisa-protocol/protocol020",
+    "destination": "/protocols/sandwich-elisa-protocol",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/sars-cov-2-igg-elisa-kit-protocol/protocol016",
+    "destination": "/protocols/sars-cov-2-igg-elisa-kit-protocol",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/sars-cov-2-igm-elisa-kit-protocol/protocol017",
+    "destination": "/protocols/sars-cov-2-igm-elisa-kit-protocol",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/self-renewal/article058",
+    "destination": "/resources/antibody-resources/self-renewal",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/serial-dilutions/protocol025",
+    "destination": "/protocols/serial-dilutions",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/setting-high-standards-for-antibody-production-using-nucleosomes/nucleosomes",
+    "destination": "/resources/antibody-resources/setting-high-standards-for-antibody-production-using-nucleosomes",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/simple-western-trade-protocol/simple-western-protocol",
+    "destination": "/protocols/simple-western-protocol",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/staining-of-intracellular-nuclear-antigens-by-flow-cytometry/flow-cytometry-staining",
+    "destination": "/resources/antibody-resources/staining-of-intracellular-nuclear-antigens-by-flow-cytometry",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/targeting-both-t-and-nk-cells-via-tigit/article046",
+    "destination": "/resources/antibody-resources/targeting-both-t-and-nk-cells-via-tigit",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/targeting-cancer-stem-cells-with-dendritic-cell-vaccines-in-melanoma/efficacy-of-ALDH-cell-vaccine",
+    "destination": "/resources/antibody-resources/targeting-cancer-stem-cells-with-dendritic-cell-vaccines-in-melanoma",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/targeting-t-regulatory-cells-in-cancer-immunotherapy-with-anti-cd73/article068",
+    "destination": "/resources/antibody-resources/targeting-t-regulatory-cells-in-cancer-immunotherapy-with-anti-cd73",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/the-many-sides-of-pbrm1-/abstract001",
+    "destination": "/resources/antibody-resources/the-many-sides-of-pbrm1",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/the-rb-e2f-switch-regulation-of-cellular-quiescence/article049",
+    "destination": "/resources/antibody-resources/the-rb-e2f-switch-regulation-of-cellular-quiescence",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/the-speed-limit-of-the-cell-cycle/article050",
+    "destination": "/resources/antibody-resources/the-speed-limit-of-the-cell-cycle",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/the-vista-of-cancer-treatment/article052",
+    "destination": "/resources/antibody-resources/the-vista-of-cancer-treatment",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/tim-3-for-a-change/article045",
+    "destination": "/resources/antibody-resources/tim-3-for-a-change",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/tumor-infiltrating-lymphocytes-tils-/poster003",
+    "destination": "/resources/antibody-resources/tumor-infiltrating-lymphocytes-tils",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/tumor-microenvironment/ebook003",
+    "destination": "/resources/antibody-resources/tumor-microenvironment",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/tyramide-signal-amplification-tsa-based-immunofluorescent-multiplex-mif-assays/protocol001",
+    "destination": "/resources/antibody-resources/tyramide-signal-amplification-tsa-based-immunofluorescent-multiplex-mif-assays",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/understanding-neuronal-network-activity-in-developmental-and-epileptic-encephalopathy-9/understanding-neuronal-dee9",
+    "destination": "/resources/antibody-resources/understanding-neuronal-network-activity-in-developmental-and-epileptic-encephalopathy-9",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/upgrade-your-t-cell-marker-research-with-bethyl-antibodies/article066",
+    "destination": "/resources/antibody-resources/upgrade-your-t-cell-marker-research-with-bethyl-antibodies",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/ushering-in-the-second-wave-of-checkpoint-blockade-therapies/article062",
+    "destination": "/resources/antibody-resources/ushering-in-the-second-wave-of-checkpoint-blockade-therapies",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/usp11-is-a-potential-new-therapeutic-target-to-inhibit-autophagy-in-cancer/USP11",
+    "destination": "/resources/antibody-resources/usp11-is-a-potential-new-therapeutic-target-to-inhibit-autophagy-in-cancer",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/usp5-promotes-breast-cancer-proliferation-and-metastasis-by-stabilizing-hif2-/usp5-hif2a",
+    "destination": "/resources/antibody-resources/usp5-promotes-breast-cancer-proliferation-and-metastasis-by-stabilizing-hif2-",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/validate-your-antibodies/poster002",
+    "destination": "/resources/antibody-resources/validate-your-antibodies",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/validating-antibodies-for-better-science-and-better-medicine/validating-antibodies-video",
+    "destination": "/resources/antibody-resources/validating-antibodies-for-better-science-and-better-medicine",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/vhh-antibodies-novel-engineering-strategies-beget-diverse-application/vhh-engineering",
+    "destination": "/resources/antibody-resources/vhh-antibodies-novel-engineering-strategies-beget-diverse-application",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/volume-to-volume-dilutions/protocol024",
+    "destination": "/protocols/volume-to-volume-dilutions",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/webinar-an-end-to-end-workflow-for-exploring-spatial-biology-through-multiplex-ihc/webinar-spatial-bio-multiplex",
+    "destination": "/resources/antibody-resources/webinar-an-end-to-end-workflow-for-exploring-spatial-biology-through-multiplex-ihc",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/webinar-vhh-discovery-by-phage-display/vhh-discovery-by-phage-display",
+    "destination": "/resources/antibody-resources/webinar-vhh-discovery-by-phage-display",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/welcome-to-the-b7-family/article053",
+    "destination": "/resources/antibody-resources/welcome-to-the-b7-family",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/western-blot-protocol/protocol022",
+    "destination": "/protocols/standard-western-blot-protocol",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/western-blot-protocol/protocol027",
+    "destination": "/protocols/western-blot-protocol-using-biotin",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/when-dna-repair-goes-wrong/article054",
+    "destination": "/resources/antibody-resources/when-dna-repair-goes-wrong",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/white-paper-eights-tips-for-ensuring-a-successful-elisa/whitepaper002",
+    "destination": "/resources/antibody-resources/white-paper-eights-tips-for-ensuring-a-successful-elisa",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/white-paper-t-cell-profiling/whitepaper003",
+    "destination": "/resources/antibody-resources/white-paper-t-cell-profiling",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/white-paper-tigit-an-emerging-checkpoint/whitepaper004",
+    "destination": "/resources/antibody-resources/white-paper-tigit-an-emerging-checkpoint",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/whitepaper-multiplex-cyclic-immunofluorescence-workflow/wp-workflow-spatial",
+    "destination": "/resources/antibody-resources/whitepaper-multiplex-cyclic-immunofluorescence-workflow",
+    "permanent": true
+  },
+  {
+    "source": "/products/diagnostics-resources/5-reasons-to-consider-lyophilized-reagents-for-molecular-diagnostics/infographic003",
+    "destination": "/resources/diagnostic-resources/5-reasons-to-consider-lyophilized-reagents",
+    "permanent": true
+  },
+  {
+    "source": "/products/diagnostics-resources/antibody-based-sensors-for-multiplex-point-of-care-drug-monitoring/poc-drug-monitoring",
+    "destination": "/resources/diagnostic-resources/poc-drug-monitoring",
+    "permanent": true
+  },
+  {
+    "source": "/products/diagnostics-resources/democratizing-molecular-diagnostics-with-custom-lyophilized-reagents/democratizing-molDX",
+    "destination": "/resources/diagnostic-resources/democratizing-moldx",
+    "permanent": true
+  },
+  {
+    "source": "/products/diagnostics-resources/how-to-optimize-your-multiplex-testing-for-diagnostics-applications/article-optimize-multiplex",
+    "destination": "/resources/diagnostic-resources/optimize-multiplex-testing-for-diagnostics",
+    "permanent": true
+  },
+  {
+    "source": "/products/diagnostics-resources/lyophilization-the-future-of-molecular-diagnostics/whitepaper005",
+    "destination": "/resources/diagnostic-resources/lyophilization-the-future-of-molecular-diagnostics",
+    "permanent": true
+  },
+  {
+    "source": "/products/diagnostics-resources/one-size-fits-one/article070",
+    "destination": "/resources/diagnostic-resources/advancing-infectious-disease-diagnostics",
+    "permanent": true
+  },
+  {
+    "source": "/products/diagnostics-resources/solutions-for-common-challenges-in-developing-pcr-based-diagnostic-assays/solutions-pcr-dx",
+    "destination": "/resources/diagnostic-resources/solutions-pcr-dx",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/adapting-lateral-flow-assays-for-nucleic-acid-detection/lfa-nalfa-info",
+    "destination": "/resources/nanomaterial-resources/adapting-lateral-flow-assays-for-nucleic-acid-detection",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/antibody-purification-protocol/antibody-purification",
+    "destination": "/protocols/antibody-purification-protocol",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/bioready-150-nm-carboxyl-gold-nanoshells-covalent-conjugation-protocol/bioready-150-nm-carboxyl",
+    "destination": "/protocols/bioready-150-nm-carboxyl-gold-nanoshells-covalent-conjugation-protocol",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/bioready-150-nm-nhs-gold-nanoshells-covalent-conjugation-protocol/bioready-150-nm-nhs-protocol",
+    "destination": "/protocols/bioready-150-nm-nhs-gold-nanoshells-covalent-conjugation-protocol",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/bioready-40-nm-bare-gold-passive-conjugation-protocol/bioready-40-nm-passive",
+    "destination": "/protocols/bioready-40-nm-bare-gold-passive-conjugation-protocol",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/bioready-40-nm-carboxyl-gold-covalent-conjugation-protocol/bioready-40-nm-carboxyl",
+    "destination": "/protocols/bioready-40-nm-carboxyl-gold-covalent-conjugation-protocol",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/bioready-40-nm-nhs-gold-covalent-conjugation-protocol/bioready-40-nm-nhs-protocol",
+    "destination": "/protocols/bioready-40-nm-nhs-gold-covalent-conjugation-protocol",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/bioready-80-nm-bare-gold-passive-conjugation-protocol/bioready-80-nm-passive",
+    "destination": "/protocols/bioready-80-nm-bare-gold-passive-conjugation-protocol",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/bioready-80-nm-carboxyl-gold-covalent-conjugation-protocol/bioready-80-nm-carboxyl",
+    "destination": "/protocols/bioready-80-nm-carboxyl-gold-covalent-conjugation-protocol",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/bioready-streptavidin-150-nm-gold-nanoshells-conjugation-protocol/bioready-streptavidin-150-nm",
+    "destination": "/protocols/bioready-streptavidin-150-nm-gold-nanoshells-conjugation-protocol",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/bioready-streptavidin-gold-conjugation-protocol/bioready-streptavidin-protocol",
+    "destination": "/protocols/bioready-streptavidin-gold-conjugation-protocol",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/considerations-for-nanoparticle-therapeutics/webinar011",
+    "destination": "/resources/nanomaterial-resources/considerations-for-nanoparticle-therapeutics",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/nanomaterials-for-cancer-nanomedicine-case-studies/cancer-nanomed-wp",
+    "destination": "/resources/nanomaterial-resources/nanomaterials-for-cancer-nanomedicine-case-studies",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/nanoparticle-enabled-biosensor-technologies-for-rapid-diagnostics/biosensor-diagnostics",
+    "destination": "/resources/nanomaterial-resources/nanoparticle-enabled-biosensor-technologies-for-rapid-diagnostics",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/performance-comparison-of-passively-conjugated-nanoparticles-in-lateral-flow-assays/passive-gns-performance",
+    "destination": "/resources/nanomaterial-resources/performance-comparison-of-passively-conjugated-nanoparticles-in-lateral-flow-assays",
+    "permanent": true
+  },
+  {
+    "source": "/products/nanomaterial-resources/plga-nanoparticles-bridging-the-gap-from-r-d-to-gmp/wp-plga-nps",
+    "destination": "/resources/nanomaterial-resources/plga-nanoparticles-bridging-the-gap-from-r-d-to-gmp",
+    "permanent": true
+  },
+  {
+    "source": "/products/documents/a-comprehensive-guide-to-elisas-enzyme-linked-immunosorbent-assays/Guide-to-ELISAs",
+    "destination": "/resources/antibody-resources/guide-to-elisas",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/utilizing-the-abnano-vhh-na-ve-library-for-identifying-and-characterizing-vhh-binders-to-key-immuno-oncology-targets/VHH-binders-to-IO-targets",
+    "destination": "/resources/antibody-resources/VHH-binders-to-IO-targets",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/development-and-application-of-an-end-to-end-staining-and-analysis-pipeline-to-identify-immune-cell-infiltrates-in-oral-cancer-samples-using-a-targeted-multiplex-immunohistochemistry-antibody-panel/oral-cancer-mIHC-panel",
+    "destination": "/resources/antibody-resources/oral-cancer-mIHC-panel",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/igg-fractions-enrich-affinity-and-reduce-background/igg-fractions-whitepaper",
+    "destination": "/resources/antibody-resources/igg-fractions-whitepaper",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/happy-hollidays-/happy-hollidays",
+    "destination": "/resources/antibody-resources/happy-hollidays",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/advantages-of-recombinant-monoclonal-antibodies-over-hybridoma-derived-antibodies/advantages-of-rmab",
+    "destination": "/resources/antibody-resources/advantages-of-rmab",
+    "permanent": true
+  },
+  {
+    "source": "/products/antibody-resources/a-comprehensive-guide-to-elisas-enzyme-linked-immunosorbent-assays/Guide-to-ELISAs",
+    "destination": "/resources/antibody-resources/guide-to-elisas",
+    "permanent": true
+  }
+]

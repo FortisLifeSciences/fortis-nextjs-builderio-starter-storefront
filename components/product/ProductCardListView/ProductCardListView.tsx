@@ -328,6 +328,7 @@ const ProductCardListView = React.forwardRef<HTMLDivElement, ProductCardListView
                 link
               )
             }
+            aria-label={title ? `View details for ${title}` : 'Product details'}
           >
             <Box>
               <Card sx={ProductCardStyles.cardRoot} data-testid="product-card">
@@ -491,7 +492,12 @@ const ProductCardListView = React.forwardRef<HTMLDivElement, ProductCardListView
                     )}
                   </Box>
                 </Box>
-                <IconButton sx={ProductCardStyles.listIconButton} title={'Product-Detail'}>
+                <IconButton
+                  component="span"
+                  sx={ProductCardStyles.listIconButton}
+                  title="View product details"
+                  aria-label="View product details"
+                >
                   <ArrowForwardIos sx={{ color: 'white' }} />
                 </IconButton>
               </Card>

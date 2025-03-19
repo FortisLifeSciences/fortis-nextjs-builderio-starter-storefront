@@ -14,7 +14,7 @@ import Router from 'next/router'
 import NProgress from 'nprogress'
 
 import GetThemeSettings from './api/getThemeSettings'
-import IpWhoIs from './api/ipWhoIs'
+// import IpWhoIs from './api/ipWhoIs'
 import BuilderComponents from './builder-registry'
 import registerDesignToken from './registerDesignToken'
 import { DefaultLayout } from '@/components/layout'
@@ -68,7 +68,19 @@ const App = (props: KiboAppProps) => {
       setGoogleReCaptcha(settings?.data?.googleReCaptcha)
 
       if (settings?.data?.ipBasedCountryCode) {
-        IpWhoIs(settings?.data?.ipBasedCountryCode)
+        //  IpWhoIs(settings?.data?.ipBasedCountryCode)
+        // const ipResponse = await fetch('https://api.ipify.org?format=json')
+        // const ipData = await ipResponse.json()
+        const payload = {
+          ipBasedCountryCode: settings?.data?.ipBasedCountryCode,
+        }
+        const ipWhoisApi = await fetch('/api/ipWhoisApi', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ payload }),
+        })
       }
       if (settings?.data?.googleTagManagerId) {
         setGtmId(settings?.data?.googleTagManagerId)
@@ -154,8 +166,6 @@ const App = (props: KiboAppProps) => {
           @import
           url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
           {/* font-family: "poppins" */}
-          @import
-          url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
         </style>
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
