@@ -17,6 +17,7 @@ import {
   MobileHeader,
   NavigationBar,
   SearchSuggestions,
+  AlgoliaSearch,
 } from '@/components/layout'
 import { useAuthContext, useHeaderContext, useModalContext } from '@/context'
 import { useCreateCustomerB2bAccountMutation } from '@/hooks'
@@ -55,14 +56,22 @@ const HeaderActionArea = (props: HeaderActionAreaProps) => {
           justifyContent: 'space-between',
         }}
       >
+        {/* Algolia Search Implementation - Web -1346 */}
         {showSearchBarInLargeHeader && (
           <Box sx={headerActionAreaStyles.searchSuggestionsWrapper} data-testid="Search-container">
+            <AlgoliaSearch />
+          </Box>
+        )}
+
+        {/* Suggestion Search is commention for algolia search integration - WEB-1346 */}
+        {/*
+        {showSearchBarInLargeHeader && (
+         <Box sx={headerActionAreaStyles.searchSuggestionsWrapper} data-testid="Search-container">
             <SearchSuggestions
               isViewSearchPortal={isMobileSearchPortalVisible}
               onEnterSearch={() => toggleSearchBar(false)}
-            />
-          </Box>
-        )}
+            />      
+      */}
 
         <Box display="flex" flex={1} justifyContent={'flex-end'} gap={2}>
           <Box
