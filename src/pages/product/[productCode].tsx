@@ -173,6 +173,7 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
   } = useGetProduct(query)
 
   const { sliceValue } = queryParams
+  const { selected } = queryParams
 
   if (isFallback || isProductLoading) {
     return <ProductDetailSkeleton />
@@ -188,6 +189,7 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
           relatedProducts={relatedProducts}
           breadcrumbs={breadcrumbs}
           sliceValue={sliceValue}
+          selectedUrlVariant={selected}
           PDPCustomAndBulkDisplayContentSection={PDPCustomAndBulkDisplayContentSection}
           PDPCustomAndBulkDisplaySectionKey={PDPCustomAndBulkDisplaySectionKey}
         >
