@@ -79,6 +79,8 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   const [fedExAccountSelectedShippingMethodName, setFedExAccountSelectedShippingMethodName] =
     useState<string>()
   const [isFedExAccountUpdated, setIsFedExAccountUpdated] = useState<boolean>(false)
+  const [isOtherShippingMethod, setIsOtherShippingMethod] = useState<boolean>(true)
+
   const [isFedexAccountMethodUpdated, setIsFedexAccountMethodUpdated] = useState<boolean>(false)
   const [localError, setLocalError] = useState('')
   const fedExSchema = useFedExSchema()
@@ -174,12 +176,19 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   }, [fedExAccountNumber, isFedExMethodSelected])
 
   useEffect(() => {
+    if (!fedExAccountNumber || fedExAccountNumber.length < 9) {
+      handleShippingMethodSelectChange('', '')
+    }
+  }, [])
+
+  useEffect(() => {
     if (selectedShippingMethodCode && !isFedExMethodSelected) {
       const fedExShippings = getFedExShippingMethods()
       const selectedFexEdMethod = find(
         fedExShippings,
         (fedExShip) => fedExShip?.shippingMethodCode === selectedShippingMethodCode
       )
+
       if (
         fedExShippings &&
         selectedFexEdMethod &&
@@ -191,6 +200,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
           selectedFexEdMethod?.shippingMethodCode as string
         )
         setIsFedExMethodSelected(true)
+        setIsOtherShippingMethod(false)
       }
     }
   }, [selectedShippingMethodCode, fedExAccountNumber])
@@ -393,6 +403,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
               handleShippingMethodChange(value)
               setIsFedExMethodSelected(false)
               setIsFedExAccountUpdated(true)
+              setIsOtherShippingMethod(true)
             }}
             sx={{
               borderRadius: 1,
@@ -467,6 +478,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
               }
               setIsFedExAccountUpdated(false)
               setIsFedExMethodSelected(true)
+              setIsOtherShippingMethod(false)
             }}
             sx={{ ml: 1.5 }}
           />
