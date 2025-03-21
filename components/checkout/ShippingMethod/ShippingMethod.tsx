@@ -70,10 +70,10 @@ export const useFedExSchema = () => {
 const ShipItemList = (shipProps: ShipItemListProps) => {
   const { checkout, orderShipmentMethods, selectedShippingMethodCode, onShippingMethodChange } =
     shipProps
+  const { data: customerAccount } = useGetCurrentCustomer()
   const { t } = useTranslation('common')
-
-  const [isFedExMethodSelected, setIsFedExMethodSelected] = useState<boolean>(false)
   const [fedExAccountNumber, setFedExAccountNumber] = useState<string>()
+  const [isFedExMethodSelected, setIsFedExMethodSelected] = useState<boolean>(false)
   const [fedExAccountNumberInput, setFedExAccountNumberInput] = useState<string>()
   const [fedExAccountShippingMethod, setFedExAccountShippingMethod] = useState<CrShippingRate>()
   const [fedExAccountSelectedShippingMethodName, setFedExAccountSelectedShippingMethodName] =
@@ -83,21 +83,17 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
 
   const [isFedexAccountMethodUpdated, setIsFedexAccountMethodUpdated] = useState<boolean>(false)
   const [localError, setLocalError] = useState('')
-
   const fedExSchema = useFedExSchema()
+
+  const selectShippingMethodRef = useRef<HTMLInputElement | null>(null)
   // Define Variables and States
-  const {
-    control,
-    formState: { errors },
-  } = useForm({
+  const { control } = useForm({
     shouldUseNativeValidation: false,
     mode: 'onBlur',
     reValidateMode: 'onBlur',
     resolver: yupResolver(fedExSchema),
     shouldFocusError: true,
   })
-
-  const { data: customerAccount } = useGetCurrentCustomer()
 
   useEffect(() => {
     if (customerAccount?.attributes?.length) {
@@ -106,20 +102,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         fullyQualifiedName: 'tenant~customer-fedex-account-number',
       })
       setFedExAccountNumber(attr?.values?.length ? attr.values[0] : '')
-    }
-  }, [])
 
-  useEffect(() => {
-    if (customerAccount?.attributes?.length) {
-      // Get FedEx account number
-      // const attr = find(customerAccount?.attributes, {
-      //   fullyQualifiedName: 'tenant~customer-fedex-account-number',
-      // })
-      if (fedExAccountNumberInput) {
-        setFedExAccountNumber(fedExAccountNumberInput)
-      }
-
-      // Get FedEx account shipping method name
       const customerShippingMethodAttr = find(customerAccount?.attributes, {
         fullyQualifiedName: 'tenant~shipping-method',
       })
@@ -131,7 +114,12 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       ) as CrShippingRate
       setFedExAccountShippingMethod(shippingMethod)
     }
-  }, [customerAccount?.attributes, orderShipmentMethods, t])
+  }, [customerAccount?.attributes, orderShipmentMethods])
+
+  // Prioritize input
+  useEffect(() => {
+    setFedExAccountNumber(fedExAccountNumberInput || fedExAccountNumber)
+  }, [fedExAccountNumber, fedExAccountNumberInput])
 
   useEffect(() => {
     if (fedExAccountShippingMethod?.shippingMethodName) {
@@ -141,7 +129,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
           t('currency', { val: fedExAccountShippingMethod?.price })
       )
     }
-  }, [fedExAccountShippingMethod])
+  }, [fedExAccountShippingMethod, t])
 
   useEffect(() => {
     if (
@@ -159,7 +147,13 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         fedExAccountSelectedShippingMethodName
       )
     }
-  }, [fedExAccountNumber, fedExAccountSelectedShippingMethodName])
+  }, [
+    customerAccount,
+    fedExAccountNumber,
+    fedExAccountSelectedShippingMethodName,
+    isFedExAccountUpdated,
+    isFedExMethodSelected,
+  ])
 
   const previousFedExAccountNumber = useRef('')
 
@@ -176,7 +170,9 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
     }
 
     // Update the previous value
-    previousFedExAccountNumber.current = fedExAccountNumber || ''
+    if (isFedExMethodSelected && fedExAccountNumber) {
+      previousFedExAccountNumber.current = fedExAccountNumber
+    }
   }, [fedExAccountNumber, isFedExMethodSelected])
 
   useEffect(() => {
@@ -212,6 +208,11 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   const handleShippingMethodChange = (value: string, name?: string) => {
     setFedExAccountShippingMethod({})
     onShippingMethodChange && onShippingMethodChange(value, name)
+    selectShippingMethodRef.current &&
+      (selectShippingMethodRef.current as Element).scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
   }
 
   const handleShippingMethodSelectChange = (name: string, value: string) => {
@@ -616,14 +617,14 @@ const ShippingMethod = (props: ShippingMethodProps) => {
   const { t } = useTranslation('common')
   const shippingMethodRef = useRef()
 
-  useEffect(() => {
-    shippingMethodRef.current &&
-      !selectedShippingMethodCode &&
-      (shippingMethodRef.current as Element).scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      })
-  }, [selectedShippingMethodCode])
+  // useEffect(() => {
+  //   shippingMethodRef.current &&
+  //     !selectedShippingMethodCode &&
+  //     (shippingMethodRef.current as Element).scrollIntoView({
+  //       behavior: 'smooth',
+  //       block: 'center',
+  //     })
+  // }, [selectedShippingMethodCode])
 
   return (
     <Box data-testid="shipping-method" ref={shippingMethodRef}>

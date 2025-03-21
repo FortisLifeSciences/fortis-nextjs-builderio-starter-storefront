@@ -18,6 +18,7 @@ import {
   addToWishlist,
   viewCart,
   removeFromCart,
+  PageNotFound,
 } from './types'
 import { PaymentType } from '@/lib/constants'
 import { cartGetters, orderGetters, productGetters, wishlistGetters } from '@/lib/getters'
@@ -403,6 +404,15 @@ export const checkoutFailure = (order: CrOrder, userId: any, errMsg: string, err
     errorCategory: errorCat,
   }
 
+  sendGTMEvent(data)
+}
+
+export const pageNotFound = (url: any) => {
+  resetEcommerceDataLayer()
+  const data: PageNotFound = {
+    event: gaEvents.PAGE_NOT_FOUND,
+    pageNotFoundPath: url,
+  }
   sendGTMEvent(data)
 }
 

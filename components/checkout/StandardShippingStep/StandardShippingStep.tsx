@@ -87,6 +87,7 @@ const StandardShippingStep = (props: ShippingProps) => {
     savedShippingAddresses as CustomerContact[],
     defaultShippingAddress?.id as number
   )
+  const selectShippingAddressRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
     if (checkoutShippingContact && checkoutShippingContact.id === null) {
@@ -231,6 +232,14 @@ const StandardShippingStep = (props: ShippingProps) => {
         },
       }
       handleSaveAddressToCheckout({ contact })
+
+      if (selectShippingAddressRef.current) {
+        selectShippingAddressRef.current.focus()
+        selectShippingAddressRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        })
+      }
     }
   }
 
@@ -263,11 +272,6 @@ const StandardShippingStep = (props: ShippingProps) => {
         shippingMethodCode,
         shippingMethodName,
       })
-      shippingAddressRef.current &&
-        (shippingAddressRef.current as Element).scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        })
     } catch (error) {
       console.error(error)
     }
