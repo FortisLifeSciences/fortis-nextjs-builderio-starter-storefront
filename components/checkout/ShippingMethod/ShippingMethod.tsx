@@ -180,8 +180,12 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         fedExShippings,
         (fedExShip) => fedExShip?.shippingMethodCode === selectedShippingMethodCode
       )
-
-      if (fedExShippings && selectedFexEdMethod) {
+      if (
+        fedExShippings &&
+        selectedFexEdMethod &&
+        fedExAccountNumber &&
+        fedExAccountNumber.length === 9
+      ) {
         handleShippingMethodSelectChange(
           selectedFexEdMethod?.shippingMethodName as string,
           selectedFexEdMethod?.shippingMethodCode as string
@@ -189,7 +193,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         setIsFedExMethodSelected(true)
       }
     }
-  }, [selectedShippingMethodCode])
+  }, [selectedShippingMethodCode, fedExAccountNumber])
 
   const handleShippingMethodChange = (value: string, name?: string) => {
     setFedExAccountShippingMethod({})
@@ -355,6 +359,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
             '&:hover': { borderRadius: '5px', backgroundColor: '#E3E2FF' },
           }}
         >
+          {/* Normal Shipping method */}
           <KiboRadio
             radioOptions={
               getFortisShippingMethods()?.map((item) => {
@@ -408,6 +413,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
             borderRadius: '5px',
           }}
         >
+          {/* Customer FedEx Shipping method */}
           <KiboRadio
             radioOptions={[
               {
@@ -452,6 +458,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                       getFedExShippingMethods()?.[0]?.shippingMethodCode as string
                     )
                   } else {
+                    // This disables continue button to stop checkout flow
                     handleShippingMethodSelectChange('', '')
                   }
                 }
