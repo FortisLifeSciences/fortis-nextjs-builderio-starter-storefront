@@ -200,7 +200,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         setIsFedExMethodSelected(true)
       }
     }
-  }, [selectedShippingMethodCode])
+  }, [selectedShippingMethodCode, fedExAccountNumber])
 
   const handleShippingMethodChange = (value: string, name?: string) => {
     setFedExAccountShippingMethod({})
