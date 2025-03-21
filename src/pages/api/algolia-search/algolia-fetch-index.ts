@@ -21,7 +21,7 @@ export const fetchAlgoliaResults = async (query: any) => {
       indexName,
       query, // Dynamic query term
       params: {
-        hitsPerPage: 5, // Fetch 50 results per index (adjust as needed)
+        hitsPerPage: 4, // Fetch 50 results per index (adjust as needed)
         page: 0, // Start from the first page
       },
     }))
@@ -46,11 +46,13 @@ export const fetchAlgoliaResults = async (query: any) => {
             console.log('Product Name Variant:', hit.product_name_variant)
             console.log('SKU:', hit.sku)
             console.log('URL:', hit.product_url)
+            console.log('new Product:', hit.new_product)
           } else {
             console.log('*** Brand:', hit.brand)
             console.log('PLP Catalog Number:', hit.plp_catalog_number)
             console.log('Product Name:', hit.product_name)
             console.log('URL:', hit.product_url)
+            console.log('new Product:', hit.new_product)
           }
         } else {
           console.log('Hit:', hit) // Default case for other indexes
