@@ -5,8 +5,9 @@ export default async function handler(req, res) {
   const { payload } = req.body
   const userId = payload.userId
   const accountId = payload.accountId
+  const attributeFqn = payload.attributeFqn
   const baseUrl = process.env.KIBO_API_HOST
-  const url = `https://${baseUrl}/api/commerce/customer/accounts/${accountId}/attributes?startIndex=0&pageSize=20&userId=${userId}`
+  const url = `https://${baseUrl}/api/commerce/customer/accounts/${accountId}/attributes/${attributeFqn}?userId=${userId}`
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -21,7 +22,7 @@ export default async function handler(req, res) {
       data: data,
     })
   } catch (error) {
-    console.error('Error in Adding Sails Rep', error)
+    console.error('Error in getting attribute', error)
     res.status(500).json({
       message: 'Internal server error',
       success: false,
