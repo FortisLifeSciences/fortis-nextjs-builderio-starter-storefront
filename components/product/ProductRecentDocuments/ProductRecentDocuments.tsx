@@ -110,6 +110,7 @@ const ProductRecentDocuments = (props: any) => {
                     paddingTop: 0,
                     paddingLeft: header === 'Lot' ? 0 : tableCellStyles.paddingLeft,
                     width: index === 0 ? '60%' : index === 1 ? '25%' : '15%',
+                    textAlign: index === 1 ? 'center' : 'left',
                   }}
                   aria-label={index === 2 ? 'Download document' : header}
                 >
@@ -140,7 +141,7 @@ const ProductRecentDocuments = (props: any) => {
                   </Link>
                 </TableCell>
                 <TableCell sx={{ ...tableCellStyles, paddingLeft: 0, width: '25%' }}>
-                  <span>
+                  <span style={{ display: 'block', textAlign: 'center' }}>
                     {document.properties.assetlotnumber
                       ? `${document.properties.assetlotnumber} ${
                           document.properties.assetlotnumber === getCurrentLotAttributeValue()
