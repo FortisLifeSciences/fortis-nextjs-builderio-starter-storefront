@@ -74,6 +74,20 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
 
   // console.log('This is child category ---> ', childCategory)
 
+  const handleKeyDown = (event: React.KeyboardEvent, category: any, index: number) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      const nextIndex = (index + 1) % childCategory.length
+      document.getElementById(`menu-item-${nextIndex}`)?.focus()
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      const prevIndex = (index - 1 + childCategory.length) % childCategory.length
+      document.getElementById(`menu-item-${prevIndex}`)?.focus()
+    } else if (event.key === 'Enter' || event.key === ' ') {
+      setActiveCategory(category)
+    }
+  }
+
   return (
     <Paper
       onMouseOver={handleMouseOver}
@@ -167,6 +181,7 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                   // If there are child categories, render the normal category block
                   <Box
                     key={index}
+                    id={`menu-item-${index}`} // Added for keyboard navigation
                     sx={{
                       ...menuItem,
                       ...(category === activeCategory
@@ -176,7 +191,9 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                           }
                         : {}),
                     }}
-                    onMouseEnter={() => handleMouseEnterCategory(category)}
+                    tabIndex={0}
+                    onMouseEnter={() => setActiveCategory(category)}
+                    onKeyDown={(event) => handleKeyDown(event, category, index)}
                   >
                     {category === activeCategory ? (
                       <>
