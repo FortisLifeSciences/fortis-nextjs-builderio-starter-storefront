@@ -346,15 +346,19 @@ const PaymentStep = (props: PaymentStepProps) => {
   //   })
   // }
 
-  const [checked, setChecked] = useState(!cardFormDetails.isCardInfoSaved)
+  const [checked, setChecked] = useState(cardFormDetails.isCardInfoSaved)
 
   const handleSavePaymentMethodCheckbox = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCardFormDetails({
-      ...cardFormDetails,
-      isCardInfoSaved: !event.target.checked, // Use the checkbox's checked state
-    })
     setChecked(event.target.checked)
   }
+
+  // Create a useEffect hook to respond to changes in isCardInfoSaved and handleSavePaymentMethodCheckbox
+  useEffect(() => {
+    setCardFormDetails({
+      ...cardFormDetails,
+      isCardInfoSaved: !checked,
+    })
+  }, [checked])
 
   // purchase order form values
   const [purchaseOrderFormDetails, setPurchaseOrderFormDetails] = useState<
