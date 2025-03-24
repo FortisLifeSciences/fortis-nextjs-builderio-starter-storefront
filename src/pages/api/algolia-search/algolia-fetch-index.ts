@@ -1,4 +1,5 @@
 import algoliasearch from 'algoliasearch/lite'
+import { AnyCnameRecord } from 'node:dns'
 
 // Replace with your Algolia credentials
 const ALGOLIA_APP_ID = 'YQAIETZ5F1'
@@ -31,16 +32,18 @@ export const fetchAlgoliaResults = async (query: any) => {
     console.log('Main Results:', results)
 
     // Extract hits from each index
-    const allHits = results.map((result: any, index: any) => ({
-      indexName: ALGOLIA_INDEXES[index], // Keep track of index name
-      hits: result.hits || [],
+    const allHits = results.map((result: any) => ({
+      //indexName: ALGOLIA_INDEXES[index], // Keep track of index name
+      //hits: result.hits || [],
+      resultsData: result,
     }))
 
-    allHits.forEach(({ indexName, hits }) => {
-      console.log(`Results from ${indexName}:`)
+    allHits.forEach(({ resultsData }) => {
+      console.log(`Results from ${resultsData.index}:`)
 
-      hits.forEach((hit: any) => {
-        if (indexName === 'products') {
+      resultsData.hits.forEach((hit: any) => {
+        if (resultsData.index === 'products') {
+          console.log(typeof hit.nbHits)
           if (hit.slice_product) {
             console.log('*** Brand:', hit.brand)
             console.log('Product Name Variant:', hit.product_name_variant)
