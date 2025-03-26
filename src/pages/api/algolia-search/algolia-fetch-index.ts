@@ -10,7 +10,7 @@ console.log('ALGOLIA_APP_ID', ALGOLIA_APP_ID)
 const searchClient = algoliasearch(ALGOLIA_APP_ID, ALGOLIA_SEARCH_KEY)
 
 // Define multiple index names
-const ALGOLIA_INDEXES = ['builder-page', 'products'] // Add as many indexes as needed
+const ALGOLIA_INDEXES = ['builder-page', 'products', 'products_query_suggestions'] // Add as many indexes as needed
 console.log('Algolia Indexes', ALGOLIA_INDEXES)
 
 // Function to fetch results from multiple indexes

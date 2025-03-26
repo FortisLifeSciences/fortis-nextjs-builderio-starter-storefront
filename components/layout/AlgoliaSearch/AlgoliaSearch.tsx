@@ -5,6 +5,7 @@ import { Box, Paper, InputBase, IconButton } from '@mui/material'
 import Link from 'next/link'
 
 import fortisLogo from '@/assets/fortisLogo.png'
+import resourceTypeArr from '@/components/common/ResourceTypeArr'
 import { fetchAlgoliaResults } from 'src/pages/api/algolia-search/algolia-fetch-index'
 
 const fortisLogoUrl = fortisLogo.src
@@ -93,7 +94,7 @@ const AlgoliaSearch = ({ placeholderText = 'SEARCH' }) => {
             width: '1000px',
             maxHeight: 400,
             overflowY: 'auto',
-            border: '2px solid #ddd',
+            border: '2px solid #e3e2ff',
             background: 'white',
             zIndex: 10,
             padding: '10px',
@@ -213,31 +214,36 @@ const AlgoliaSearch = ({ placeholderText = 'SEARCH' }) => {
                       </Box>
                     ) : null
                   )}
-                  <button
-                    style={{
-                      textAlign: 'center',
-                      marginTop: '10px',
-                      marginBottom: '15px',
-                      fontSize: '14px',
-                      fontWeight: '400',
-                      color: '#fff',
-                      background: '#30299A',
-                      fontFamily: 'Poppins',
-                      padding: '10px 25px',
-                      border: 'none',
-                      lineHeight: '18px',
-                      borderRadius: '0 18px 0 18px',
-                    }}
-                  >
-                    See All Products (
-                    {results.reduce(
-                      (acc, curr) =>
-                        acc +
-                        (curr.resultsData.index === 'products' ? curr.resultsData.nbHits || 0 : 0),
-                      0
-                    )}
-                    )
-                  </button>
+                  <a href="https://www.fortislife.com/products" style={{ textDecoration: 'none' }}>
+                    <button
+                      style={{
+                        textAlign: 'center',
+                        marginTop: '10px',
+                        marginBottom: '15px',
+                        fontSize: '14px',
+                        fontWeight: '400',
+                        color: '#fff',
+                        background: '#30299A',
+                        fontFamily: 'Poppins',
+                        padding: '10px 25px',
+                        border: 'none',
+                        lineHeight: '18px',
+                        borderRadius: '0 18px 0 18px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      See All Products (
+                      {results.reduce(
+                        (acc, curr) =>
+                          acc +
+                          (curr.resultsData.index === 'products'
+                            ? curr.resultsData.nbHits || 0
+                            : 0),
+                        0
+                      )}
+                      )
+                    </button>
+                  </a>
                 </>
               )}
 
@@ -277,9 +283,9 @@ const AlgoliaSearch = ({ placeholderText = 'SEARCH' }) => {
                                   display: 'flex',
                                   alignItems: 'center',
                                   padding: '10px',
-                                  border: '1px solid #ddd',
-                                  borderRadius: '8px',
-                                  background: '#f4f4f4',
+                                  border: '1px solid #e3e2ff',
+                                  borderRadius: '0 0 30px 0',
+                                  background: 'none',
                                   width: '250px',
                                   height: '80px',
                                   marginBottom: '10px',
@@ -294,7 +300,7 @@ const AlgoliaSearch = ({ placeholderText = 'SEARCH' }) => {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     background: hit.data.image ? 'transparent' : '#30299A',
-                                    borderRadius: '5px',
+                                    borderRadius: '0',
                                     flexShrink: 0,
                                   }}
                                 >
@@ -310,15 +316,17 @@ const AlgoliaSearch = ({ placeholderText = 'SEARCH' }) => {
                                       }}
                                     />
                                   ) : (
-                                    <img
-                                      src={fortisLogoUrl}
-                                      alt="Default Icon"
-                                      style={{
-                                        width: '40px',
-                                        height: '40px',
-                                        objectFit: 'contain',
-                                      }}
-                                    />
+                                    resourceTypeArr.map((data) =>
+                                      data.resourceType === hit.data.resourceType ? ( // Use hit.data.resourceType
+                                        <span
+                                          key={data.value}
+                                          className="material-symbols-outlined"
+                                          style={{ fontSize: '42px', color: '#fff' }}
+                                        >
+                                          {data.value}
+                                        </span>
+                                      ) : null
+                                    )
                                   )}
                                 </Box>
 
@@ -330,9 +338,9 @@ const AlgoliaSearch = ({ placeholderText = 'SEARCH' }) => {
                                     rel="noopener noreferrer"
                                     style={{
                                       fontSize: '13px',
-                                      color: '#30299A',
+                                      color: '#020027',
                                       fontWeight: '500',
-                                      textDecoration: 'underline',
+                                      textDecoration: 'none',
                                       display: '-webkit-box',
                                       WebkitBoxOrient: 'vertical',
                                       WebkitLineClamp: 3, // Limits title to 3 lines
@@ -340,7 +348,7 @@ const AlgoliaSearch = ({ placeholderText = 'SEARCH' }) => {
                                       textOverflow: 'ellipsis',
                                     }}
                                   >
-                                    {hit.data.title}
+                                    {hit.data.title.split(' | ')[0]}
                                   </a>
                                 </Box>
                               </Box>
@@ -350,7 +358,7 @@ const AlgoliaSearch = ({ placeholderText = 'SEARCH' }) => {
                             {hasMore && (
                               <Box sx={{ display: 'flex', alignItems: 'center', height: '80px' }}>
                                 <Link
-                                  href="/all-builder-pages"
+                                  href="https://www.fortislife.com/products/resources"
                                   style={{
                                     fontSize: '14px',
                                     fontWeight: '600',
