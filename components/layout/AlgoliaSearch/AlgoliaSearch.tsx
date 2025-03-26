@@ -1,10 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react'
 
+import CloseIcon from '@mui/icons-material/Close'
+import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined'
 import SearchIcon from '@mui/icons-material/Search'
 import { Box, Paper, InputBase, IconButton } from '@mui/material'
 import Link from 'next/link'
 
+import RecentSearches from './RecentSearches'
 import fortisLogo from '@/assets/fortisLogo.png'
+import { saveSearch } from '@/lib/utils/localStorage'
 import { fetchAlgoliaResults } from 'src/pages/api/algolia-search/algolia-fetch-index'
 
 const fortisLogoUrl = fortisLogo.src
@@ -13,12 +17,15 @@ const AlgoliaSearch = ({ placeholderText = 'SEARCH' }) => {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<any[]>([])
   const [isFocused, setIsFocused] = useState(false)
+  const [suggestions, setSuggestions] = useState([]) // State to hold predefined suggestions
+  const [showSuggestions, setShowSuggestions] = useState(false) // To toggle showing suggestion
+  const [latestSuggestions, setLatestSuggestions] = useState([])
   const searchContainerRef = useRef<HTMLDivElement | null>(null)
 
   const handleSearchChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const queryValue = event.target.value.trim()
+    const queryValue = event.target.value
     setQuery(queryValue)
-
+    saveSearch(queryValue)
     if (queryValue.length < 2) {
       setResults([])
       return
@@ -28,10 +35,34 @@ const AlgoliaSearch = ({ placeholderText = 'SEARCH' }) => {
       const searchResults = await fetchAlgoliaResults(queryValue)
       console.log('All data', searchResults)
       setResults(searchResults)
+      const LatestSuggestionsValues =
+        searchResults.find((result) => result?.resultsData?.index === 'products_query_suggestions')
+          ?.resultsData?.hits || []
+      setLatestSuggestions(LatestSuggestionsValues.map((hit: any) => hit.query))
     } catch (error) {
       console.error('Error fetching Algolia results:', error)
     }
   }
+
+  // Fetch predefined popular searches when the component mounts
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      try {
+        const suggestionResults = await fetchAlgoliaResults('')
+        console.log('suggestionResults poonam:', suggestionResults)
+        const suggestions =
+          suggestionResults.find(
+            (result) => result?.resultsData?.index === 'products_query_suggestions'
+          )?.resultsData?.hits || []
+
+        setSuggestions(suggestions.map((hit: any) => hit.query))
+      } catch (error) {
+        console.error('Error fetching suggestions:', error)
+      }
+    }
+
+    fetchSuggestions()
+  }, [])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -50,6 +81,20 @@ const AlgoliaSearch = ({ placeholderText = 'SEARCH' }) => {
     }
   }, [])
 
+  const handleFocus = () => {
+    setIsFocused(true)
+    setShowSuggestions(true)
+  }
+
+  const handleBlur = () => {
+    // setShowSuggestions(false) // You can disable this line if you want suggestions to stay
+  }
+
+  const handleCloseSuggestion = (suggestion: string) => {
+    // Logic to remove suggestion, or handle close action
+    setSuggestions(suggestions.filter((item) => item !== suggestion))
+  }
+
   return (
     <Box sx={{ position: 'relative', width: '100%' }} ref={searchContainerRef}>
       <Paper
@@ -63,6 +108,7 @@ const AlgoliaSearch = ({ placeholderText = 'SEARCH' }) => {
           maxWidth: 600,
           boxShadow: 'none',
           marginRight: '13px',
+          height: '27px',
         }}
       >
         <IconButton sx={{ padding: '5px', color: '#443ec6' }} disableRipple>
@@ -80,29 +126,157 @@ const AlgoliaSearch = ({ placeholderText = 'SEARCH' }) => {
           value={query}
           onChange={handleSearchChange}
           placeholder={placeholderText}
-          onFocus={() => setIsFocused(true)}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
         />
       </Paper>
 
-      {isFocused && (
+      {isFocused && showSuggestions && (query.length === 0 || query.length >= 2) && (
         <Box
           sx={{
             position: 'absolute',
             top: '100%',
-            left: '-35%',
-            width: '1000px',
-            maxHeight: 400,
-            overflowY: 'auto',
+            left: '50%',
+            transform: 'translateX(-50%)', // Centers the container horizontally
+            width: '1170px', // Set the main container width to 900px
+            maxHeight: 440,
+            overflowY: 'auto', // Enable vertical scrolling if the content overflows
             border: '2px solid #ddd',
             background: 'white',
             zIndex: 10,
             padding: '10px',
+            display: 'flex', // Flex container to display both sections side by side
           }}
         >
-          {results.length > 0 && (
-            <>
-              {/* Products Section */}
-              {results.some((resultData) => resultData.resultsData.index === 'products') && (
+          {/* Left Column (Suggestions + Popular Searches) */}
+          <Box
+            sx={{
+              flex: '0 0 25%', // The first column takes up 25% of the container width
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+              padding: '5px',
+              backgroundColor: '#fff',
+              maxHeight: 440,
+              //overflowY: 'auto',
+            }}
+          >
+            <RecentSearches />
+            {latestSuggestions && latestSuggestions.length > 0 && (
+              <h3
+                style={{
+                  fontSize: '16px',
+                  fontWeight: '400',
+                  marginBottom: '10px',
+                  color: '#020027',
+                }}
+              >
+                Suggestions
+              </h3>
+            )}
+            {latestSuggestions.map((suggestion, index) => (
+              <Box
+                key={index}
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  background: '#fff',
+                  padding: '8px',
+                  color: '#30299A',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '14px',
+                    color: '#30299A',
+                    textAlign: 'left',
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  <RefreshOutlinedIcon
+                    sx={{ fontSize: '18px', marginRight: '8px', transform: 'rotate(260deg)' }}
+                  />
+                  {suggestion}
+                </span>
+                <IconButton
+                  onClick={() => handleCloseSuggestion(suggestion)}
+                  sx={{
+                    padding: '4px',
+                    backgroundColor: '#fff',
+                  }}
+                >
+                  <CloseIcon sx={{ fontSize: '16px', color: '#30299A' }} />
+                </IconButton>
+              </Box>
+            ))}
+            <h3
+              style={{
+                fontSize: '16px',
+                fontWeight: '400',
+                marginBottom: '10px',
+                color: '#020027',
+              }}
+            >
+              Popular Searches
+            </h3>
+            <Box
+              sx={{
+                display: 'flex',
+                flexWrap: 'wrap', // Allow items to wrap if needed
+                gap: '10px', // Space between items
+                justifyContent: 'flex-start',
+              }}
+            >
+              {suggestions.map((suggestion, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    border: '1px solid #30299A',
+                    borderRadius: '0 15px 0 15px',
+                    background: '#fff',
+                    padding: '7px 12px',
+                    color: '#30299A',
+                    width: 'auto',
+                    minWidth: '100px',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '14px',
+                      color: '#30299A',
+                      textAlign: 'left',
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    {suggestion}
+                  </span>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+
+          {/* Right Column (Products + Builder Pages) */}
+          <Box
+            sx={{
+              flex: '1', // The second column takes up the remaining space (75%)
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+              padding: '5px',
+              backgroundColor: '#fff',
+              maxHeight: 440,
+              //overflowY: 'auto',
+            }}
+          >
+            {/* Products Section */}
+            {results.length > 0 &&
+              results.some((resultData) => resultData.resultsData.index === 'products') && (
                 <>
                   <h3
                     style={{
@@ -227,6 +401,7 @@ const AlgoliaSearch = ({ placeholderText = 'SEARCH' }) => {
                       border: 'none',
                       lineHeight: '18px',
                       borderRadius: '0 18px 0 18px',
+                      width: 'fit-content',
                     }}
                   >
                     See All Products (
@@ -241,8 +416,9 @@ const AlgoliaSearch = ({ placeholderText = 'SEARCH' }) => {
                 </>
               )}
 
-              {/* Builder Pages Section */}
-              {results.some((resultData) => resultData.resultsData.index === 'builder-page') && (
+            {/* Builder Pages Section */}
+            {results.length > 0 &&
+              results.some((resultData) => resultData.resultsData.index === 'builder-page') && (
                 <>
                   <h3
                     style={{
@@ -371,8 +547,7 @@ const AlgoliaSearch = ({ placeholderText = 'SEARCH' }) => {
                   </Box>
                 </>
               )}
-            </>
-          )}
+          </Box>
         </Box>
       )}
     </Box>
