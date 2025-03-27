@@ -9,6 +9,7 @@ import * as yup from 'yup'
 
 import ResetPasswordConfirmationModal from './ResetPasswordConfirmationModel'
 import { KiboTextBox, PasswordValidation } from '@/components/common'
+import { useModalContext } from '@/context/ModalContext'
 import { useUpdateForgottenPassword } from '@/hooks'
 import { isPasswordValid } from '@/lib/helpers/validations/validations'
 
@@ -40,7 +41,7 @@ const ResetPasswordConfirmationTemplate = (props: ResetPasswordConfirmationTempl
 
   const passwordSchema = usePasswordInputSchema()
   const { updateForgottenPassword } = useUpdateForgottenPassword()
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const { showModal, closeModal } = useModalContext()
   const [showPassword, setShowPassword] = useState({
     newPassword: false,
     confirmPassword: false,
@@ -76,8 +77,7 @@ const ResetPasswordConfirmationTemplate = (props: ResetPasswordConfirmationTempl
       })
 
       if (updatedPassword) {
-        console.log('✅ Password reset successful! Opening modal...')
-        setIsModalOpen(true)
+        showModal({ Component: ResetPasswordConfirmationModal })
       }
     } catch (err) {
       console.error('❌ Password reset failed:', err)
@@ -177,8 +177,6 @@ const ResetPasswordConfirmationTemplate = (props: ResetPasswordConfirmationTempl
           </Box>
         </FormControl>
       </Box>
-
-      <ResetPasswordConfirmationModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </Container>
   )
 }
