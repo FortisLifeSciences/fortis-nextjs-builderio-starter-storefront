@@ -1,91 +1,208 @@
 import React from 'react'
 
-import { Modal, Box, Typography, Button } from '@mui/material'
+import {
+  Box,
+  Typography,
+  Button,
+  useTheme,
+  useMediaQuery,
+  Grid,
+  Link,
+  Divider,
+} from '@mui/material'
+import router from 'next/router'
+import { useTranslation } from 'next-i18next'
+
+import { CustomDialog } from '@/components/common'
+import { LoginDialog, ResetPasswordDialog } from '@/components/layout'
+import { useModalContext } from '@/context/ModalContext'
 
 interface ResetPasswordConfirmationModalProps {
   open: boolean
   onClose: () => void
 }
 
-const ResetPasswordConfirmationModal: React.FC<ResetPasswordConfirmationModalProps> = ({
-  open,
-  onClose,
-}) => {
+const PasswordSuccessStyle = {
+  title: {
+    color: 'primary.main',
+    fontFamily: 'Poppins',
+    fontSize: '30px',
+    fontStyle: 'normal',
+    fontWeight: '500',
+    lineHeight: '45px',
+  },
+  actionsContainer: {
+    width: '100%',
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    padding: '0 2%',
+    marginBottom: '1rem',
+    marginTop: '1rem',
+  },
+  link: {
+    textDecoration: 'underline',
+    color: 'primary.main',
+    fontFamily: 'Poppins',
+    fontSize: '16px',
+    fontStyle: 'normal',
+    fontWeight: '300',
+    lineHeight: '25px',
+  },
+}
+
+const customMaxWidth = '832px'
+
+const ResetPasswordConfirmationModal = () => {
+  const { t } = useTranslation('common')
+  const theme = useTheme()
+  const mdScreen = useMediaQuery(theme.breakpoints.up('md'))
+
+  const { showModal, closeModal } = useModalContext()
+
+  const gotoLogin = () => {
+    showModal({ Component: LoginDialog })
+  }
+
+  const contactUs = async () => {
+    router.push('/contact-us')
+    closeModal()
+  }
+
+  const Title = (
+    <Box display={'flex'} alignItems={'center'} data-testid="title-component">
+      <Typography variant={mdScreen ? 'h3' : 'h2'} sx={{ ...PasswordSuccessStyle.title }}>
+        {t('password-reset-successful')}
+      </Typography>
+    </Box>
+  )
+
   return (
-    <Modal open={open} onClose={onClose} aria-labelledby="password-reset-success">
-      <Box
-        sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 900,
-          borderRadius: '0px 50px',
-          backgroundColor: 'secondary.light',
-          border: '3px solid #348345',
-          p: 4,
-          boxShadow: '0px 4px 4px 0px rgba(0, 0, 0, 0.25)',
-          padding: '16px',
-          '&:focus': {
-            outline: 'none',
-            borderColor: '#348345',
-          },
-        }}
-      >
-        <Typography id="password-reset-success" variant="h5" component="h2" gutterBottom>
-          Password Reset Successful
-        </Typography>
-        <Typography variant="body2" gutterBottom>
-          Your password has been successfully reset. You can now log in with your new credentials.
-        </Typography>
-        <Box mt={2} display="flex" justifyContent="center" gap={2}>
-          <Button
-            onClick={() => (window.location.href = '/login')}
-            sx={{
-              backgroundColor: 'primary.main',
-              color: 'secondary.light',
-              borderRadius: '0px 26px',
-              border: '1px solid secondary.light',
-              display: 'inline-flex',
-              padding: '12px 18px',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: 'auto',
-              height: { md: '49px' },
-              fontSize: '16px',
-              fontWeight: 500,
-              '&:hover': {
-                backgroundColor: 'primary.light',
-              },
-            }}
-          >
-            Log In
-          </Button>
-          <Button
-            onClick={() => (window.location.href = '/')}
-            sx={{
-              backgroundColor: 'primary.main',
-              color: 'secondary.light',
-              borderRadius: '0px 26px',
-              border: '1px solid secondary.light',
-              display: 'inline-flex',
-              padding: '12px 18px',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: 'auto',
-              height: { md: '49px' },
-              fontSize: '16px',
-              fontWeight: 500,
-              '&:hover': {
-                backgroundColor: 'primary.light',
-              },
-            }}
-          >
-            Home
-          </Button>
-        </Box>
-      </Box>
-    </Modal>
+    <CustomDialog
+      Title={Title}
+      Content={
+        <>
+          <Grid container columnSpacing={{ md: 5 }}>
+            <Grid item sm={12} xs={12}>
+              <Typography variant="body2" sx={{ color: 'gray.900', marginBottom: '25px' }}>
+                {t('password-reset-successful-paragraph1')}{' '}
+                <Link
+                  variant="body1"
+                  type="button"
+                  onClick={gotoLogin}
+                  sx={{
+                    ...PasswordSuccessStyle.link,
+                    '&:hover': {
+                      textDecoration: 'none',
+                      color: 'primary.light',
+                    },
+                    cursor: 'pointer',
+                  }}
+                >
+                  {t('log-in')}
+                </Link>{' '}
+                {t('password-reset-successful-paragraph2')}
+              </Typography>
+            </Grid>
+            <Grid item sm={12} xs={12}>
+              <Typography variant="body2" sx={{ color: 'gray.900', marginBottom: '15px' }}>
+                {t('existingUser-paragraph-p2')}{' '}
+                <Link
+                  variant="body1"
+                  type="button"
+                  onClick={contactUs}
+                  sx={{
+                    ...PasswordSuccessStyle.link,
+                    textTransform: 'lowercase',
+                    '&:hover': {
+                      textDecoration: 'none',
+                      color: 'primary.light',
+                    },
+                    cursor: 'pointer',
+                  }}
+                >
+                  {t('contact-us')}
+                </Link>{' '}
+                {t('existingUser-paragraph-p3')}
+              </Typography>
+            </Grid>
+            <Grid item sm={12} xs={12}>
+              <Divider
+                sx={{
+                  borderColor: 'grey.300',
+                  margin: '20px 0px',
+                }}
+              />
+            </Grid>
+            <Grid
+              item
+              sm={12}
+              xs={12}
+              sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}
+            >
+              <Button
+                data-testid="cancel-button"
+                variant="contained"
+                color="secondary"
+                sx={{
+                  width: 'auto',
+                  backgroundColor: 'secondary.light',
+                  color: 'primary.main',
+                  textAlign: 'center',
+                  fontFamily: 'Poppins',
+                  fontSize: '16px',
+                  fontStyle: 'normal',
+                  fontWeight: '500',
+                  lineHeight: '24px',
+                  borderRadius: '0px 26px',
+                  border: '1px solid primary.main',
+                  padding: '12px 30px',
+                  '&:hover': {
+                    backgroundColor: 'secondary.main',
+                    border: '1px solid secondary.main',
+                  },
+                }}
+                onClick={closeModal}
+              >
+                {t('cancel')}
+              </Button>
+              <Button
+                variant="contained"
+                sx={{
+                  width: 'auto',
+                  backgroundColor: 'primary.main',
+                  color: 'secondary.light',
+                  textAlign: 'center',
+                  fontFamily: 'Poppins',
+                  fontSize: '16px',
+                  fontStyle: 'normal',
+                  fontWeight: '500',
+                  lineHeight: '24px',
+                  borderRadius: '0px 26px',
+                  border: '1px solid primary.main',
+                  padding: '12px 30px',
+                  boxShadow: 'none',
+                  '&:hover': {
+                    backgroundColor: 'primary.light',
+                    border: '1px solid primary.light',
+                  },
+                  marginLeft: '20px',
+                }}
+                onClick={gotoLogin}
+              >
+                {t('log-in')}
+              </Button>
+            </Grid>
+          </Grid>
+        </>
+      }
+      Actions={''}
+      isDialogCentered={true}
+      customMaxWidth={customMaxWidth}
+      onClose={closeModal}
+      showCloseButton
+      showContentTopDivider={false}
+      showContentBottomDivider={false}
+    />
   )
 }
 
