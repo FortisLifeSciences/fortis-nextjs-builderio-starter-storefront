@@ -1588,21 +1588,66 @@ const PaymentStep = (props: PaymentStepProps) => {
                         {(!shouldShowAddBillingAddressButton ||
                           billingFormAddress?.isSameBillingShippingAddress) && (
                           <>
-                            <AddressForm
-                              key={selectedPaymentTypeRadio}
-                              contact={billingFormAddress.contact}
-                              // saveAddressLabel={
-                              //   selectedBillingAddressId === 0 ||
-                              //   !billingFormAddress?.isSameBillingShippingAddress
-                              //     ? t('save-billing-address')
-                              //     : undefined
-                              // }
-                              setAutoFocus={false}
-                              isUserLoggedIn={isAuthenticated}
-                              onSaveAddress={handleBillingFormAddress}
-                              validateForm={validateForm}
-                              onFormStatusChange={handleBillingFormValidDetails}
-                            />
+                            <Box
+                              sx={{
+                                display: billingFormAddress?.isSameBillingShippingAddress
+                                  ? 'block'
+                                  : 'none',
+                                paddingLeft: '33px',
+                              }}
+                            >
+                              <AddressCard
+                                key={`billing-address-1`}
+                                firstName={billingFormAddress?.contact?.firstName as string}
+                                middleNameOrInitial={
+                                  billingFormAddress?.contact?.middleNameOrInitial as string
+                                }
+                                lastNameOrSurname={
+                                  billingFormAddress?.contact?.lastNameOrSurname as string
+                                }
+                                companyOrOrganization={addressGetters.getCompanyOrOrganization(
+                                  billingFormAddress?.contact
+                                )}
+                                address1={billingFormAddress?.contact?.address?.address1 as string}
+                                address2={billingFormAddress?.contact?.address?.address2 as string}
+                                cityOrTown={
+                                  billingFormAddress?.contact?.address?.cityOrTown as string
+                                }
+                                stateOrProvince={
+                                  billingFormAddress?.contact?.address?.stateOrProvince as string
+                                }
+                                postalOrZipCode={
+                                  billingFormAddress?.contact?.address?.postalOrZipCode as string
+                                }
+                                countryCode={
+                                  billingFormAddress?.contact?.address?.countryCode as string
+                                }
+                                variant="body2"
+                              />
+                            </Box>
+                            <Box
+                              sx={{
+                                display: billingFormAddress?.isSameBillingShippingAddress
+                                  ? 'none'
+                                  : 'block',
+                              }}
+                            >
+                              <AddressForm
+                                key={selectedPaymentTypeRadio}
+                                contact={billingFormAddress.contact}
+                                // saveAddressLabel={
+                                //   selectedBillingAddressId === 0 ||
+                                //   !billingFormAddress?.isSameBillingShippingAddress
+                                //     ? t('save-billing-address')
+                                //     : undefined
+                                // }
+                                setAutoFocus={false}
+                                isUserLoggedIn={isAuthenticated}
+                                onSaveAddress={handleBillingFormAddress}
+                                validateForm={validateForm}
+                                onFormStatusChange={handleBillingFormValidDetails}
+                              />
+                            </Box>
 
                             {/*<Box m={1} maxWidth={'872px'} data-testid="address-form">
                               <Divider sx={{ marginBottom: '20px' }} flexItem />
