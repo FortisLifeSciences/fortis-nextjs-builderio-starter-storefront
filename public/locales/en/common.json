@@ -583,5 +583,8 @@
   "distributors": "Distributors",
   "distributorMessage": "For ordering information, see our International Distributors",
   "nonDistributorMessage": "Helpful information about catalog orders to appear here.",
-  "fortis-shipping": "Fortis Shipping"
+  "fortis-shipping": "Fortis Shipping",
+  "password-reset-successful": "Password Reset Successful",
+  "password-reset-successful-paragraph1": "Your password has been successfully reset. You can now",
+  "password-reset-successful-paragraph2": "with your new credentials."
 }

@@ -36,6 +36,10 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     })
     .toPromise()
 
+  if (!page) {
+    return { notFound: true } // This will render `pages/404.tsx`
+  }
+
   return {
     props: {
       page: page || null,

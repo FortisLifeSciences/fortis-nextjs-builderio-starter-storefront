@@ -201,6 +201,8 @@ const PaymentStep = (props: PaymentStepProps) => {
   const [isAddressSavedToAccount, setIsAddressSavedToAccount] = useState<boolean>(true)
   const [isNewAddressAdded, setIsNewAddressAdded] = useState<boolean>(false)
 
+  const userAccountId = useMemo(() => user?.id ?? 0, [user?.id])
+
   const newPaymentTypes = paymentTypes
     .map((paymentType: PaymentsType) =>
       paymentType.id === PaymentType.CREDITCARD ||
@@ -346,15 +348,19 @@ const PaymentStep = (props: PaymentStepProps) => {
   //   })
   // }
 
-  const [checked, setChecked] = useState(!cardFormDetails.isCardInfoSaved)
+  const [checked, setChecked] = useState(cardFormDetails.isCardInfoSaved)
 
   const handleSavePaymentMethodCheckbox = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCardFormDetails({
-      ...cardFormDetails,
-      isCardInfoSaved: !event.target.checked, // Use the checkbox's checked state
-    })
     setChecked(event.target.checked)
   }
+
+  // Create a useEffect hook to respond to changes in isCardInfoSaved and handleSavePaymentMethodCheckbox
+  useEffect(() => {
+    setCardFormDetails({
+      ...cardFormDetails,
+      isCardInfoSaved: !checked,
+    })
+  }, [checked])
 
   // purchase order form values
   const [purchaseOrderFormDetails, setPurchaseOrderFormDetails] = useState<
@@ -396,9 +402,16 @@ const PaymentStep = (props: PaymentStepProps) => {
   const defaultBillingAddress = userGetters.getDefaultBillingAddress(
     savedBillingAddresses as CustomerContact[]
   )
-  const savedBillingAddress = userGetters.getOtherBillingAddress(
-    savedBillingAddresses as CustomerContact[],
-    defaultBillingAddress?.id as number
+  // const savedBillingAddress = userGetters.getOtherBillingAddress(
+  //   savedBillingAddresses as CustomerContact[],
+  //   defaultBillingAddress?.id as number
+  // )
+
+  const [savedBillingAddress, setSavedBillingAddress] = useState<CustomerContact[]>(
+    userGetters.getOtherBillingAddress(
+      savedBillingAddresses as CustomerContact[],
+      defaultBillingAddress?.id as number
+    )
   )
 
   // Filter out invalid addresses
@@ -407,28 +420,34 @@ const PaymentStep = (props: PaymentStepProps) => {
     return value === null || value === undefined
   }
 
-  // Filter out invalid addresses
-  const validBillingAddresses = savedBillingAddress.filter((address) => {
-    const { email, firstName, lastNameOrSurname, companyOrOrganization, address: addr } = address
+  const validBillingAddresses = useMemo(() => {
+    return savedBillingAddress.filter((address) => {
+      const { email, firstName, lastNameOrSurname, companyOrOrganization, address: addr } = address
 
-    const isValid =
-      !isMissing(email) &&
-      !isMissing(firstName) &&
-      !isMissing(lastNameOrSurname) &&
-      !isMissing(addr?.address1) &&
-      !isMissing(addr?.postalOrZipCode) &&
-      !isMissing(companyOrOrganization)
+      const isValid =
+        !isMissing(email) &&
+        !isMissing(firstName) &&
+        !isMissing(lastNameOrSurname) &&
+        !isMissing(addr?.address1) &&
+        !isMissing(addr?.postalOrZipCode) &&
+        !isMissing(companyOrOrganization)
 
-    return isValid
-  })
+      return isValid
+    })
+  }, [savedBillingAddress]) // Dependency array ensures it recomputes only when savedBillingAddress changes
 
   // Save the valid addresses into previouslySavedBillingAddress
-  const previouslySavedBillingAddress = validBillingAddresses
+  const previouslySavedBillingAddress = useMemo(
+    () => validBillingAddresses,
+    [validBillingAddresses]
+  )
 
   let billingAddressId
 
   // Check if checkoutBillingContact ID exists in previouslySavedBillingAddress
-  const match = previouslySavedBillingAddress.find((addr) => addr.id === checkoutBillingContact?.id)
+  const match = previouslySavedBillingAddress?.find(
+    (addr) => addr.id === checkoutBillingContact?.id
+  )
 
   if (match) {
     billingAddressId = checkoutBillingContact?.id
@@ -440,6 +459,7 @@ const PaymentStep = (props: PaymentStepProps) => {
   const [selectedBillingAddressId, setSelectedBillingAddressId] = useState<number>(
     billingAddressId as number
   )
+
   const [isAddressFormValid, setIsAddressFormValid] = useState<boolean>(false)
 
   const handleBillingFormAddress = (address: Address) => {
@@ -455,8 +475,50 @@ const PaymentStep = (props: PaymentStepProps) => {
       ...billingFormAddress,
       ...updatedAddress,
     })
+
+    //Adding new billing address upon closing form
+    const newAddress = {
+      ...address.contact,
+      email: checkout?.email,
+      id: 1,
+      accountId: userAccountId,
+    }
+
+    setSavedBillingAddress((prevAddresses) => {
+      const addressIndex = prevAddresses.findIndex((addr) => addr.id === 1)
+
+      if (addressIndex !== -1) {
+        // Update existing address
+        const updatedAddresses = [...prevAddresses]
+        updatedAddresses[addressIndex] = newAddress
+        return updatedAddresses
+      } else {
+        // Prepend new address if not found
+        return [newAddress, ...prevAddresses]
+      }
+    })
+
     setIsBillingDataUpdated(address?.isDataUpdated ? true : false)
     // handleSaveAddressToCheckout(updatedAddress)
+    setShouldShowAddBillingAddressButton(true)
+  }
+
+  const handleBillingFormAddressRadio = (address: Address) => {
+    const updatedAddress = {
+      contact: {
+        ...address.contact,
+        email: checkout?.email,
+      },
+      isAddressValid: true,
+      isDataUpdated: address.isDataUpdated,
+    } as Address
+    setBillingFormAddress({
+      ...billingFormAddress,
+      ...updatedAddress,
+    })
+    setIsBillingDataUpdated(address?.isDataUpdated ? true : false)
+    // handleSaveAddressToCheckout(updatedAddress)
+    setShouldShowAddBillingAddressButton(true)
   }
 
   const handleBillingFormValidDetails = (isValid: boolean) => {
@@ -931,7 +993,7 @@ const PaymentStep = (props: PaymentStepProps) => {
   }
 
   const handleBilingAddressSelect = (addressId: string) => {
-    const selectedAddress = savedBillingAddresses?.find(
+    const selectedAddress = savedBillingAddress?.find(
       (address) => address?.id === Number(addressId)
     )
     if (selectedAddress?.id) {
@@ -952,7 +1014,7 @@ const PaymentStep = (props: PaymentStepProps) => {
 
       handleSaveBillingAddressToCheckout({ contact: { ...contact, email: checkout?.email } })
       handleBillingFormValidDetails(true)
-      handleBillingFormAddress({
+      handleBillingFormAddressRadio({
         contact: { ...contact, email: checkout?.email } as ContactForm,
         isSameBillingShippingAddress: false,
         isDataUpdated: true,
@@ -964,26 +1026,14 @@ const PaymentStep = (props: PaymentStepProps) => {
     setValidateForm(false)
     setShouldShowAddBillingAddressButton(false)
     setIsNewAddressAdded(false)
-    setSelectedBillingAddressId(0)
+    // setSelectedBillingAddressId(0)
+    setSelectedBillingAddressId(1)
     setBillingFormAddress({
       contact: { ...initialBillingAddressData?.contact, email: checkout?.email } as ContactForm,
       isSameBillingShippingAddress: false,
       isAddressValid: false,
     })
   }
-
-  useEffect(() => {
-    setSavedBillingAddresses(
-      userGetters.getAllShippingAddresses(
-        checkoutBillingContact,
-        savedBillingAddresses as CustomerContact[]
-      )
-    )
-  }, [
-    JSON.stringify(checkoutBillingContact),
-    JSON.stringify(savedBillingAddresses),
-    isNewAddressAdded,
-  ])
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -1584,21 +1634,66 @@ const PaymentStep = (props: PaymentStepProps) => {
                         {(!shouldShowAddBillingAddressButton ||
                           billingFormAddress?.isSameBillingShippingAddress) && (
                           <>
-                            <AddressForm
-                              key={selectedPaymentTypeRadio}
-                              contact={billingFormAddress.contact}
-                              // saveAddressLabel={
-                              //   selectedBillingAddressId === 0 ||
-                              //   !billingFormAddress?.isSameBillingShippingAddress
-                              //     ? t('save-billing-address')
-                              //     : undefined
-                              // }
-                              setAutoFocus={false}
-                              isUserLoggedIn={isAuthenticated}
-                              onSaveAddress={handleBillingFormAddress}
-                              validateForm={validateForm}
-                              onFormStatusChange={handleBillingFormValidDetails}
-                            />
+                            <Box
+                              sx={{
+                                display: billingFormAddress?.isSameBillingShippingAddress
+                                  ? 'block'
+                                  : 'none',
+                                paddingLeft: '33px',
+                              }}
+                            >
+                              <AddressCard
+                                key={`billing-address-1`}
+                                firstName={billingFormAddress?.contact?.firstName as string}
+                                middleNameOrInitial={
+                                  billingFormAddress?.contact?.middleNameOrInitial as string
+                                }
+                                lastNameOrSurname={
+                                  billingFormAddress?.contact?.lastNameOrSurname as string
+                                }
+                                companyOrOrganization={addressGetters.getCompanyOrOrganization(
+                                  billingFormAddress?.contact
+                                )}
+                                address1={billingFormAddress?.contact?.address?.address1 as string}
+                                address2={billingFormAddress?.contact?.address?.address2 as string}
+                                cityOrTown={
+                                  billingFormAddress?.contact?.address?.cityOrTown as string
+                                }
+                                stateOrProvince={
+                                  billingFormAddress?.contact?.address?.stateOrProvince as string
+                                }
+                                postalOrZipCode={
+                                  billingFormAddress?.contact?.address?.postalOrZipCode as string
+                                }
+                                countryCode={
+                                  billingFormAddress?.contact?.address?.countryCode as string
+                                }
+                                variant="body2"
+                              />
+                            </Box>
+                            <Box
+                              sx={{
+                                display: billingFormAddress?.isSameBillingShippingAddress
+                                  ? 'none'
+                                  : 'block',
+                              }}
+                            >
+                              <AddressForm
+                                key={selectedPaymentTypeRadio}
+                                contact={billingFormAddress.contact}
+                                // saveAddressLabel={
+                                //   selectedBillingAddressId === 0 ||
+                                //   !billingFormAddress?.isSameBillingShippingAddress
+                                //     ? t('save-billing-address')
+                                //     : undefined
+                                // }
+                                setAutoFocus={false}
+                                isUserLoggedIn={isAuthenticated}
+                                onSaveAddress={handleBillingFormAddress}
+                                validateForm={validateForm}
+                                onFormStatusChange={handleBillingFormValidDetails}
+                              />
+                            </Box>
 
                             {/*<Box m={1} maxWidth={'872px'} data-testid="address-form">
                               <Divider sx={{ marginBottom: '20px' }} flexItem />
