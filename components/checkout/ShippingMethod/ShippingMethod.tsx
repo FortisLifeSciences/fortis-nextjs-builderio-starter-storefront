@@ -95,8 +95,6 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
     shouldFocusError: true,
   })
 
-  const { data: customerAccount } = useGetCurrentCustomer()
-
   const payload = {
     userId: customerAccount?.userId,
     accountId: customerAccount?.id,
