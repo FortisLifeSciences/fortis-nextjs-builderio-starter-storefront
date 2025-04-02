@@ -101,14 +101,30 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
 
   const { data: customerAccount } = useGetCurrentCustomer()
 
+  const payload = {
+    userId: customerAccount?.userId,
+    accountId: customerAccount?.id,
+    attributeFqn: 'tenant~customer-fedex-account-number',
+  }
+
   useEffect(() => {
-    if (customerAccount?.attributes?.length) {
-      // Get FedEx account number
-      const attr = find(customerAccount?.attributes, {
-        fullyQualifiedName: 'tenant~customer-fedex-account-number',
+    // console.log("customerAccount",customerAccount)
+    const fetchSettings = async () => {
+      const entityResponse = await fetch('/api/user/getCustomerAttribute', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ payload }),
       })
-      setFedExAccountNumber(attr?.values?.length ? attr.values[0] : '')
+
+      const attributeDetails = await entityResponse.json()
+      // console.log("attributeDetails", attributeDetails)
+      setFedExAccountNumber(
+        attributeDetails?.data?.values[0] ? attributeDetails?.data?.values[0] : ''
+      )
     }
+    fetchSettings()
   }, [])
 
   useEffect(() => {
