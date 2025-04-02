@@ -296,10 +296,16 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       updateFortisOrderAttribute('tenant~b2bAccountName', customerAccount?.companyOrOrganization)
     }
 
-    if (fedExAccountNumber && fedExAccountNumber.length === 9) {
-      updateFortisOrderAttribute('tenant~customerFedexAccountNumber', fedExAccountNumber)
+    if (isOtherShippingMethod) {
+      if (fedExAccountNumber && fedExAccountNumber.length === 9) {
+        updateFortisOrderAttribute('tenant~customerFedexAccountNumber', '0')
+      }
+    } else {
+      if (fedExAccountNumber && fedExAccountNumber.length === 9) {
+        updateFortisOrderAttribute('tenant~customerFedexAccountNumber', fedExAccountNumber)
+      }
     }
-  }, [customerAccount?.companyOrOrganization, fedExAccountNumber])
+  }, [customerAccount?.companyOrOrganization, fedExAccountNumber, isOtherShippingMethod])
 
   const handleFexExAccountShipping = async (
     customerAccount: CustomerAccount,
