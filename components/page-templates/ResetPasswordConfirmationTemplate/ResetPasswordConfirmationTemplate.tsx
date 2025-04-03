@@ -3,11 +3,11 @@ import React, { useEffect, useState } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { Visibility, VisibilityOff } from '@mui/icons-material'
 import { Button, Divider, Box, Typography, Container, FormControl } from '@mui/material'
-import router from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { Controller, useForm } from 'react-hook-form'
 import * as yup from 'yup'
 
+import ResetPasswordConfirmationModal from './ResetPasswordConfirmationModel'
 import { KiboTextBox, PasswordValidation } from '@/components/common'
 import { useUpdateForgottenPassword } from '@/hooks'
 import { isPasswordValid } from '@/lib/helpers/validations/validations'
@@ -26,9 +26,7 @@ const usePasswordInputSchema = () => {
     newPassword: yup
       .string()
       .required(t('this-field-is-required'))
-      .test((value = '') => {
-        return isPasswordValid(value)
-      }),
+      .test((value = '') => isPasswordValid(value)),
     confirmPassword: yup
       .string()
       .required(t('this-field-is-required'))
@@ -38,11 +36,11 @@ const usePasswordInputSchema = () => {
 
 const ResetPasswordConfirmationTemplate = (props: ResetPasswordConfirmationTemplateProps) => {
   const { token, userName } = props
-
   const { t } = useTranslation('common')
 
   const passwordSchema = usePasswordInputSchema()
   const { updateForgottenPassword } = useUpdateForgottenPassword()
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const [showPassword, setShowPassword] = useState({
     newPassword: false,
     confirmPassword: false,
@@ -54,6 +52,7 @@ const ResetPasswordConfirmationTemplate = (props: ResetPasswordConfirmationTempl
       [type]: !showPassword[type],
     })
   }
+
   const {
     formState: { errors, isValid, isDirty },
     watch,
@@ -62,29 +61,28 @@ const ResetPasswordConfirmationTemplate = (props: ResetPasswordConfirmationTempl
     handleSubmit,
   } = useForm({
     mode: 'onChange',
-    reValidateMode: 'onChange',
-    criteriaMode: 'firstError',
     resolver: yupResolver(passwordSchema),
-    shouldFocusError: true,
   })
+
   const newPassword = watch('newPassword')
   const confirmationPassword = watch('confirmPassword')
 
   const handleResetPassword = async (formData: any) => {
     try {
       const updatedPassword = await updateForgottenPassword.mutateAsync({
-        userName: userName,
+        userName,
         confirmationCode: token,
         newPassword: formData.newPassword,
       })
 
-      if (updatedPassword) router.push('/')
+      if (updatedPassword) {
+        console.log('✅ Password reset successful! Opening modal...')
+        setIsModalOpen(true)
+      }
     } catch (err) {
-      console.log(err)
+      console.error('❌ Password reset failed:', err)
     }
   }
-
-  const onValid = (formData: any) => handleResetPassword(formData)
 
   useEffect(() => {
     if (newPassword && confirmationPassword) {
@@ -147,7 +145,7 @@ const ResetPasswordConfirmationTemplate = (props: ResetPasswordConfirmationTempl
           <Box maxWidth="23.5rem">
             <Button
               variant="contained"
-              color="inherit"
+              color="primary"
               sx={{
                 width: 'auto',
                 mt: '0.75rem',
@@ -171,14 +169,16 @@ const ResetPasswordConfirmationTemplate = (props: ResetPasswordConfirmationTempl
                   backgroundColor: '#8d8d8d',
                 },
               }}
-              {...((!isValid || !isDirty) && { disabled: true })}
-              onClick={() => handleSubmit(onValid)()}
+              disabled={!isValid || !isDirty}
+              onClick={handleSubmit(handleResetPassword)}
             >
               {t('reset-password')}
             </Button>
           </Box>
         </FormControl>
       </Box>
+
+      <ResetPasswordConfirmationModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </Container>
   )
 }
