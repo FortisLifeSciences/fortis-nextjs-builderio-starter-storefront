@@ -83,9 +83,8 @@ const ProductSpecifications = ({ product }: { product: any }) => {
                 fontSize: '16px',
                 fontStyle: 'normal',
                 fontWeight: 500,
-                lineHeight: '42px',
-                padding: 0,
-                paddingLeft: '20px',
+                lineHeight: 'normal',
+                padding: '8px 0 8px 20px',
               }}
             >
               {name}
@@ -98,9 +97,8 @@ const ProductSpecifications = ({ product }: { product: any }) => {
                 fontSize: '16px',
                 fontStyle: 'normal',
                 fontWeight: 300,
-                lineHeight: '42px',
-                padding: 0,
-                paddingLeft: '20px',
+                lineHeight: 'normal',
+                padding: '8px 0 8px 20px',
                 ul: {
                   marginLeft: '20px',
                 },
