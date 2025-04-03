@@ -79,6 +79,8 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   const [fedExAccountSelectedShippingMethodName, setFedExAccountSelectedShippingMethodName] =
     useState<string>()
   const [isFedExAccountUpdated, setIsFedExAccountUpdated] = useState<boolean>(false)
+  const [isOtherShippingMethod, setIsOtherShippingMethod] = useState<boolean>(true)
+
   const [isFedexAccountMethodUpdated, setIsFedexAccountMethodUpdated] = useState<boolean>(false)
   const [localError, setLocalError] = useState('')
   const fedExSchema = useFedExSchema()
@@ -174,6 +176,12 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   }, [fedExAccountNumber, isFedExMethodSelected])
 
   useEffect(() => {
+    if (!fedExAccountNumber || fedExAccountNumber.length < 9) {
+      handleShippingMethodSelectChange('', '')
+    }
+  }, [])
+
+  useEffect(() => {
     if (selectedShippingMethodCode && !isFedExMethodSelected) {
       const fedExShippings = getFedExShippingMethods()
       const selectedFexEdMethod = find(
@@ -181,15 +189,21 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         (fedExShip) => fedExShip?.shippingMethodCode === selectedShippingMethodCode
       )
 
-      if (fedExShippings && selectedFexEdMethod) {
+      if (
+        fedExShippings &&
+        selectedFexEdMethod &&
+        fedExAccountNumber &&
+        fedExAccountNumber.length === 9
+      ) {
         handleShippingMethodSelectChange(
           selectedFexEdMethod?.shippingMethodName as string,
           selectedFexEdMethod?.shippingMethodCode as string
         )
         setIsFedExMethodSelected(true)
+        setIsOtherShippingMethod(false)
       }
     }
-  }, [selectedShippingMethodCode])
+  }, [selectedShippingMethodCode, fedExAccountNumber])
 
   const handleShippingMethodChange = (value: string, name?: string) => {
     setFedExAccountShippingMethod({})
@@ -355,6 +369,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
             '&:hover': { borderRadius: '5px', backgroundColor: '#E3E2FF' },
           }}
         >
+          {/* Normal Shipping method */}
           <KiboRadio
             radioOptions={
               getFortisShippingMethods()?.map((item) => {
@@ -388,6 +403,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
               handleShippingMethodChange(value)
               setIsFedExMethodSelected(false)
               setIsFedExAccountUpdated(true)
+              setIsOtherShippingMethod(true)
             }}
             sx={{
               borderRadius: 1,
@@ -408,6 +424,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
             borderRadius: '5px',
           }}
         >
+          {/* Customer FedEx Shipping method */}
           <KiboRadio
             radioOptions={[
               {
@@ -452,6 +469,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                       getFedExShippingMethods()?.[0]?.shippingMethodCode as string
                     )
                   } else {
+                    // This disables continue button to stop checkout flow
                     handleShippingMethodSelectChange('', '')
                   }
                 }
@@ -460,6 +478,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
               }
               setIsFedExAccountUpdated(false)
               setIsFedExMethodSelected(true)
+              setIsOtherShippingMethod(false)
             }}
             sx={{ ml: 1.5 }}
           />
