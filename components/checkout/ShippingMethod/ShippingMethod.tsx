@@ -82,6 +82,8 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   const [isFedexAccountMethodUpdated, setIsFedexAccountMethodUpdated] = useState<boolean>(false)
   const [localError, setLocalError] = useState('')
   const fedExSchema = useFedExSchema()
+
+  const selectShippingMethodRef = useRef<HTMLInputElement | null>(null)
   // Define Variables and States
   const { control } = useForm({
     shouldUseNativeValidation: false,
@@ -192,6 +194,11 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   const handleShippingMethodChange = (value: string, name?: string) => {
     setFedExAccountShippingMethod({})
     onShippingMethodChange && onShippingMethodChange(value, name)
+    selectShippingMethodRef.current &&
+      (selectShippingMethodRef.current as Element).scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
   }
 
   const handleShippingMethodSelectChange = (name: string, value: string) => {
@@ -591,14 +598,14 @@ const ShippingMethod = (props: ShippingMethodProps) => {
   const { t } = useTranslation('common')
   const shippingMethodRef = useRef()
 
-  useEffect(() => {
-    shippingMethodRef.current &&
-      !selectedShippingMethodCode &&
-      (shippingMethodRef.current as Element).scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      })
-  }, [selectedShippingMethodCode])
+  // useEffect(() => {
+  //   shippingMethodRef.current &&
+  //     !selectedShippingMethodCode &&
+  //     (shippingMethodRef.current as Element).scrollIntoView({
+  //       behavior: 'smooth',
+  //       block: 'center',
+  //     })
+  // }, [selectedShippingMethodCode])
 
   return (
     <Box data-testid="shipping-method" ref={shippingMethodRef}>
