@@ -80,6 +80,8 @@ export const FortisMegaMenu: React.FC<MegaMenuProps> = ({ scrolled }) => {
               variant="h5"
               sx={{ fontSize: '16px', fontWeight: '500', color: 'primary.main' }}
               tabIndex={0}
+              onFocus={() => handleMouseEnter(menu)}
+              onBlur={handleMouseLeave}
             >
               {menu.categoryName}
             </Typography>
@@ -107,8 +109,11 @@ export const FortisMegaMenu: React.FC<MegaMenuProps> = ({ scrolled }) => {
                   boxShadow: '3px 3px 10px rgba(0,0,0,0.2)',
                   width: '1200px',
                 }}
+                tabIndex={0}
                 onMouseEnter={() => handleMouseEnter(menu)}
                 onMouseLeave={handleMouseLeave}
+                onFocus={() => handleMouseEnter(menu)}
+                onBlur={handleMouseLeave}
               >
                 <MenuPopover
                   parentName={menu.categoryName}
