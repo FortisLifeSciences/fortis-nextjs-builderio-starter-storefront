@@ -281,7 +281,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   const { createOrderAttributes } = useCreateOrderAttribute()
   const { updateOrderAttributes } = useUpdateOrderAttributes()
 
-  const updateFortisOrderAttribute = async (orderAttributeFQN: string, value: string) => {
+  const updateFortisOrderAttribute = async (orderAttributeFQN: string, value: any) => {
     // Update order attributes if found
     const orderAttr = find(
       checkout?.attributes,
@@ -319,9 +319,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
     }
 
     if (isOtherShippingMethod) {
-      if (fedExAccountNumber && fedExAccountNumber.length === 9) {
-        updateFortisOrderAttribute('tenant~customerFedexAccountNumber', '0')
-      }
+      updateFortisOrderAttribute('tenant~customerFedexAccountNumber', null)
     } else {
       if (fedExAccountNumber && fedExAccountNumber.length === 9) {
         updateFortisOrderAttribute('tenant~customerFedexAccountNumber', fedExAccountNumber)
