@@ -110,6 +110,7 @@ const pdpBrandLogos: Record<string, string> = {
 interface ProductDetailTemplateProps {
   product: ProductCustom
   sliceValue?: string
+  selectedUrlVariant?: string
   productVariations?: Product[] | FilteredProduct[]
   breadcrumbs?: BreadCrumb[]
   isQuickViewModal?: boolean
@@ -197,6 +198,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
   const {
     product,
     sliceValue,
+    selectedUrlVariant,
     productVariations,
     breadcrumbs = [],
     isQuickViewModal = false,
@@ -353,13 +355,6 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
         if (b?.childPriority === undefined) return -1
         return a?.childPriority - b?.childPriority
       })
-
-      // Move the item that matches `sliceValue` to the top
-      const matchedIndex = selectOption?.values?.findIndex((item) => item.value === sliceValue)
-      if (matchedIndex !== -1) {
-        const matchedItem = selectOption?.values?.splice(matchedIndex, 1)[0] // Remove the matched item
-        selectOption?.values?.unshift(matchedItem) // Insert the matched item at the top
-      }
     })
     return options
   }
@@ -367,8 +362,15 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
   useEffect(() => {
     const fetchOptionData = async () => {
       const optionData = getModifiedOptionData(productOptions)
-      const selectedValue = optionData?.selectOptions?.[0]?.values?.[0]?.value
-
+      let selectedValue = sliceValue
+        ? sliceValue
+        : optionData?.selectOptions?.[0]?.values?.[0]?.value
+      const selectedValueFromUrl = selectedUrlVariant
+        ? optionData?.selectOptions?.[0]?.values?.find(
+            (value: any) => value.variationProductCode === selectedUrlVariant
+          )?.value
+        : null
+      selectedValue = selectedValueFromUrl ? selectedValueFromUrl : selectedValue
       await selectProductOption(
         optionData?.selectOptions?.[0]?.attributeFQN as string,
         selectedValue,
