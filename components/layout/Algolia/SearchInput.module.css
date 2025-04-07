@@ -4,25 +4,25 @@
   width: 100%;
 }
 .aa-Autocomplete {
-  margin: 0 auto;
+  margin: 0 auto !important;
 }
-.aa-Form {
-  border-radius: 9px;
+.aa-Autocomplete .aa-Form {
+  border-radius: 9px !important;
   box-shadow: none;
   height: 27px;
   border: none;
   display: flex;
   align-items: center;
 }
-.aa-Input {
-  width: 543px;
+.aa-Autocomplete .aa-Input {
+  width: 543px !important;
   box-shadow: none;
   height: 27px;
   background-color: #fff;
   color: #020027;
-  border-radius: 9px;
+  border-radius: 9px !important;
 }
-.aa-SubmitButton {
+.aa-Autocomplete .aa-SubmitButton {
   margin: 2px 0px;
 }
 .aa-Form:focus-within {
