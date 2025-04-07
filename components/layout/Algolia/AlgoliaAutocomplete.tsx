@@ -321,7 +321,43 @@ const AlgoliaAutocomplete = () => {
     return () => search.destroy()
   }, [])
 
-  return <div ref={containerRef} id="autocomplete" />
+  //return <div ref={containerRef} id="autocomplete" />
+  return (
+    <>
+      <div ref={containerRef} id="autocomplete" />
+      <style jsx global>{`
+        #autocomplete {
+          display: flex;
+          width: 100%;
+        }
+        .aa-Autocomplete {
+          margin: 0 auto !important;
+        }
+        .aa-Autocomplete .aa-Form {
+          border-radius: 9px !important;
+          box-shadow: none;
+          height: 27px;
+          border: none;
+          display: flex;
+          align-items: center;
+        }
+        .aa-Autocomplete .aa-Input {
+          width: 543px !important;
+          box-shadow: none;
+          height: 27px;
+          background-color: #fff;
+          color: #020027;
+          border-radius: 9px !important;
+        }
+        .aa-Autocomplete .aa-SubmitButton {
+          margin: 2px 0px;
+        }
+        .aa-Form:focus-within {
+          box-shadow: none;
+        }
+      `}</style>
+    </>
+  )
 }
 
 export default AlgoliaAutocomplete
