@@ -167,7 +167,7 @@ body {
 }
 
 /* Style the autocomplete input */
-.autocomplete-container .aa-Input {
+.aa-Autocomplete .aa-Input {
   width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
@@ -176,11 +176,13 @@ body {
   /* Add your color customizations here */
   background-color: #f9f9f9;
   color: #333;
+  border: none;
 }
 
-.autocomplete-container .aa-Input:focus {
+.aa-Autocomplete .aa-Input:focus {
   outline: none;
   border-color: #007bff; /* Example focus color */
+  box-shadow: none;
 }
 
 /* Style the autocomplete panel */
@@ -278,6 +280,11 @@ body {
   background-color: #fff;
   color: #020027;
   border-radius: 9px !important;
+  border: none;
+}
+.aa-Autocomplete .aa-Input:focus {
+  outline: none;
+  box-shadow: none;
 }
 .aa-Autocomplete .aa-SubmitButton {
   margin: 2px 0px;
@@ -340,6 +347,7 @@ body {
   background: white;
   z-index: 9999;
   border-radius: 0;
+  height: 650px;
 }
 [data-autocomplete-source-id='querySuggestions'] .aa-List .aa-Item,
 [data-autocomplete-source-id='querySuggestions'] .aa-ItemActions .aa-ItemActionButton svg,
