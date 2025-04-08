@@ -176,6 +176,7 @@ body {
   /* Add your color customizations here */
   background-color: #f9f9f9;
   color: #333;
+  border: none;
 }
 
 .aa-Autocomplete .aa-Input:focus {
@@ -279,6 +280,11 @@ body {
   background-color: #fff;
   color: #020027;
   border-radius: 9px !important;
+  border: none;
+}
+.aa-Autocomplete .aa-Input:focus {
+  outline: none;
+  box-shadow: none;
 }
 .aa-Autocomplete .aa-SubmitButton {
   margin: 2px 0px;
@@ -293,7 +299,6 @@ body {
   grid-auto-rows: auto; /* auto height rows */
   /*grid-template-rows: 200px auto; */
   gap: 10px; /* spacing between items */
-  min-height: 700px;
 }
 
 /* section 1: first column, first row */
