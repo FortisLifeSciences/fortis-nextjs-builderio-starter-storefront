@@ -167,7 +167,7 @@ body {
 }
 
 /* Style the autocomplete input */
-.autocomplete-container .aa-Input {
+.aa-Autocomplete .aa-Input {
   width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
@@ -178,9 +178,10 @@ body {
   color: #333;
 }
 
-.autocomplete-container .aa-Input:focus {
+.aa-Autocomplete .aa-Input:focus {
   outline: none;
   border-color: #007bff; /* Example focus color */
+  box-shadow: none;
 }
 
 /* Style the autocomplete panel */
@@ -292,6 +293,7 @@ body {
   grid-auto-rows: auto; /* auto height rows */
   /*grid-template-rows: 200px auto; */
   gap: 10px; /* spacing between items */
+  min-height: 700px;
 }
 
 /* section 1: first column, first row */
@@ -340,6 +342,7 @@ body {
   background: white;
   z-index: 9999;
   border-radius: 0;
+  height: 650px;
 }
 [data-autocomplete-source-id='querySuggestions'] .aa-List .aa-Item,
 [data-autocomplete-source-id='querySuggestions'] .aa-ItemActions .aa-ItemActionButton svg,
