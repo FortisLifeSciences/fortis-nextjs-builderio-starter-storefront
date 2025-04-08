@@ -14,9 +14,6 @@ const appId = 'YQAIETZ5F1'
 const apiKey = 'c2cc99ace97599deaf1606dba442f9ae'
 const searchClient = algoliasearch(appId, apiKey)
 
-//const ALGOLIA_INDEXES = ['products', 'builder-page']
-const POPULAR_SEARCH_QUERIES = ['t-shirt', 'dress', 'shoes', 'electronics']
-
 const AlgoliaAutocomplete = () => {
   const containerRef = useRef<HTMLDivElement | null>(null)
 
@@ -50,7 +47,78 @@ const AlgoliaAutocomplete = () => {
                 querySuggestionsTitle.prepend(header)
               }
 
-              return '' // 👈 satisfies TypeScript by returning a string
+              return ''
+            },
+          },
+        }
+      },
+    })
+    const popularPlugin = createQuerySuggestionsPlugin({
+      searchClient,
+      indexName: 'products_query_suggestions', // reuse the same index
+      getSearchParams() {
+        console.log('[PopularPlugin] getSearchParams')
+        return {
+          query: '',
+          hitsPerPage: 6,
+        }
+      },
+      transformSource({ source }) {
+        console.log('[PopularPlugin] transformSource called with source:', source)
+
+        return {
+          ...source,
+          sourceId: 'popularPlugin',
+          getItemInputValue({ item }) {
+            console.log('[PopularPlugin] getItemInputValue:', item)
+            return item.query
+          },
+          onSelect({ setIsOpen }) {
+            console.log('[PopularPlugin] onSelect triggered')
+            setIsOpen(true)
+          },
+          templates: {
+            header({ Fragment }) {
+              console.log('[PopularPlugin] Rendering header template')
+
+              const popularSearchTitle = document.querySelector(
+                '[data-autocomplete-source-id="popularPlugin"]'
+              )
+
+              if (
+                popularSearchTitle &&
+                !popularSearchTitle.querySelector('.aa-suggestion-header')
+              ) {
+                const header = document.createElement('div')
+                header.className = 'aa-suggestion-header'
+                header.innerHTML = '<h4>Popular Searches</h4>'
+                popularSearchTitle.prepend(header)
+              }
+
+              return ''
+            },
+            item({ item }: { item: any }) {
+              const popularId = item.__autocomplete_id
+              const partialPopularId = `popularPlugin-item-${popularId}`
+              console.log('[PopularPlugin] popularId:', popularId)
+              console.log(
+                '[PopularPlugin] partialPopularId selector:',
+                `[id*='${partialPopularId}']`
+              )
+
+              const html = `
+                <div class="aa-ItemWrapper" id="${partialPopularId}">
+                  <div class="aa-ItemContentTitle">${item.query}</div>
+                </div>
+              `
+
+              // Optional DOM patching if you need it
+              const el = document.querySelector(`[id*='${partialPopularId}']`)
+              if (el) {
+                el.innerHTML = html
+              }
+
+              return html
             },
           },
         }
@@ -60,45 +128,10 @@ const AlgoliaAutocomplete = () => {
     const search = autocomplete({
       container: containerRef.current,
       openOnFocus: true,
-      plugins: [querySuggestionsPlugin],
+      plugins: [querySuggestionsPlugin, popularPlugin],
 
       getSources: async ({ query }) => {
-        const sources = []
-
-        sources.push({
-          sourceId: 'popularSearches',
-          getItems() {
-            return POPULAR_SEARCH_QUERIES
-          },
-          templates: {
-            header() {
-              const div = document.createElement('div')
-              div.className = 'aa-SourceHeader'
-              div.appendChild(document.createTextNode('Popular Searches'))
-              return div
-            },
-            item({ item }: { item: { query: string } }) {
-              const wrapper = document.createElement('div')
-              wrapper.className = 'aa-ItemWrapper'
-
-              const content = document.createElement('div')
-              content.className = 'aa-ItemContent'
-              content.style.padding = '8px'
-              content.style.fontWeight = 'bold'
-              content.appendChild(document.createTextNode(item.query))
-
-              wrapper.appendChild(content)
-              return wrapper
-            },
-            footer() {
-              const div = document.createElement('div')
-              div.className = 'aa-SourceFooter'
-              div.appendChild(document.createTextNode('Popular Searches'))
-              return div
-            },
-          },
-        })
-
+        const sources: any[] = []
         // Only fetch products and builder-page if query length >= 2
         if (query.length < 2) return sources
 
@@ -321,43 +354,7 @@ const AlgoliaAutocomplete = () => {
     return () => search.destroy()
   }, [])
 
-  //return <div ref={containerRef} id="autocomplete" />
-  return (
-    <>
-      <div ref={containerRef} id="autocomplete" />
-      <style jsx global>{`
-        #autocomplete {
-          display: flex;
-          width: 100%;
-        }
-        .aa-Autocomplete {
-          margin: 0 auto !important;
-        }
-        .aa-Autocomplete .aa-Form {
-          border-radius: 9px !important;
-          box-shadow: none;
-          height: 27px;
-          border: none;
-          display: flex;
-          align-items: center;
-        }
-        .aa-Autocomplete .aa-Input {
-          width: 543px !important;
-          box-shadow: none;
-          height: 27px;
-          background-color: #fff;
-          color: #020027;
-          border-radius: 9px !important;
-        }
-        .aa-Autocomplete .aa-SubmitButton {
-          margin: 2px 0px;
-        }
-        .aa-Form:focus-within {
-          box-shadow: none;
-        }
-      `}</style>
-    </>
-  )
+  return <div ref={containerRef} id="autocomplete" />
 }
 
 export default AlgoliaAutocomplete
