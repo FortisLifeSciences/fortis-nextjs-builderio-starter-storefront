@@ -281,7 +281,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   const { createOrderAttributes } = useCreateOrderAttribute()
   const { updateOrderAttributes } = useUpdateOrderAttributes()
 
-  const updateFortisOrderAttribute = async (orderAttributeFQN: string, value: any) => {
+  const updateFortisOrderAttribute = async (orderAttributeFQN: string, value: string) => {
     // Update order attributes if found
     const orderAttr = find(
       checkout?.attributes,
@@ -290,26 +290,40 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
 
     if (orderAttr) {
       // Updating Order Attribute
-      await updateOrderAttributes.mutateAsync({
-        orderId: checkout?.id as string,
-        orderAttributeInput: [
-          {
-            fullyQualifiedName: orderAttributeFQN,
-            values: [value],
-          },
-        ],
-      })
+      if (value === '' || value === null) {
+        await updateOrderAttributes.mutateAsync({
+          orderId: checkout?.id as string,
+          orderAttributeInput: [
+            {
+              fullyQualifiedName: orderAttributeFQN,
+              values: [],
+            },
+          ],
+        })
+      } else {
+        await updateOrderAttributes.mutateAsync({
+          orderId: checkout?.id as string,
+          orderAttributeInput: [
+            {
+              fullyQualifiedName: orderAttributeFQN,
+              values: [value],
+            },
+          ],
+        })
+      }
     } else {
       // Adding Order Attribute
-      await createOrderAttributes.mutateAsync({
-        orderId: checkout?.id as string,
-        orderAttributeInput: [
-          {
-            fullyQualifiedName: orderAttributeFQN,
-            values: [value],
-          },
-        ],
-      })
+      if (value !== '' && value !== null) {
+        await createOrderAttributes.mutateAsync({
+          orderId: checkout?.id as string,
+          orderAttributeInput: [
+            {
+              fullyQualifiedName: orderAttributeFQN,
+              values: [value],
+            },
+          ],
+        })
+      }
     }
   }
 
@@ -319,7 +333,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
     }
 
     if (isOtherShippingMethod) {
-      updateFortisOrderAttribute('tenant~customerFedexAccountNumber', null)
+      updateFortisOrderAttribute('tenant~customerFedexAccountNumber', '')
     } else {
       if (fedExAccountNumber && fedExAccountNumber.length === 9) {
         updateFortisOrderAttribute('tenant~customerFedexAccountNumber', fedExAccountNumber)
