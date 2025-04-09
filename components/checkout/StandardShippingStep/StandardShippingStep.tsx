@@ -120,11 +120,11 @@ const StandardShippingStep = (props: ShippingProps) => {
     Boolean(savedShippingAddresses?.length)
   )
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      setIsAddressSavedToAccount(true)
-    }
-  }, [isAuthenticated, savedShippingAddresses?.length])
+  // useEffect(() => {
+  //   if (isAuthenticated) {
+  //     setIsAddressSavedToAccount(true)
+  //   }
+  // }, [isAuthenticated, savedShippingAddresses?.length])
 
   useEffect(() => {
     if (savedShippingAddresses?.length) {
@@ -302,6 +302,7 @@ const StandardShippingStep = (props: ShippingProps) => {
     setValidateForm(false)
     setShouldShowAddAddressButton(false)
     setIsNewAddressAdded(false)
+    setIsAddressSavedToAccount(true)
   }
 
   useEffect(() => {
