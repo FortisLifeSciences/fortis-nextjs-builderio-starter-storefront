@@ -101,6 +101,12 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
     attributeFqn: 'tenant~customer-fedex-account-number',
   }
 
+  const payload = {
+    userId: customerAccount?.userId,
+    accountId: customerAccount?.id,
+    attributeFqn: 'tenant~customer-fedex-account-number',
+  }
+
   useEffect(() => {
     // console.log("customerAccount",customerAccount)
     const fetchSettings = async () => {
