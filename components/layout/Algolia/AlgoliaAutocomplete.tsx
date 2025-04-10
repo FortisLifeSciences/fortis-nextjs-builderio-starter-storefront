@@ -10,6 +10,8 @@ import '@algolia/autocomplete-theme-classic'
 import fortisLogo from '@/assets/fortisLogo.png'
 import resourceTypeArr from '@/components/common/ResourceTypeArr'
 
+const h = React.createElement
+
 const appId = 'YQAIETZ5F1'
 const apiKey = 'c2cc99ace97599deaf1606dba442f9ae'
 const searchClient = algoliasearch(appId, apiKey)
@@ -32,22 +34,6 @@ const AlgoliaAutocomplete = () => {
           sourceId: 'querySuggestions',
           templates: {
             ...source.templates,
-            /*header() {
-              const querySuggestionsTitle = document.querySelector(
-                '[data-autocomplete-source-id="querySuggestions"]'
-              )
-
-              if (
-                querySuggestionsTitle &&
-                !querySuggestionsTitle.querySelector('.aa-suggestion-header')
-              ) {
-                const header = document.createElement('div')
-                header.className = 'aa-suggestion-header'
-                header.innerHTML = '<h4>Suggestions</h4>'
-                querySuggestionsTitle.prepend(header)
-              }
-              return ''
-            },*/
             header() {
               // Prevent server-side execution
               if (typeof window === 'undefined') return ''
@@ -74,65 +60,74 @@ const AlgoliaAutocomplete = () => {
     })
     const popularPlugin = createQuerySuggestionsPlugin({
       searchClient,
-      indexName: 'products_query_suggestions', // reuse the same index
+      indexName: 'products_query_suggestions',
       getSearchParams() {
-        console.log('[PopularPlugin] getSearchParams')
         return {
           query: '',
           hitsPerPage: 6,
         }
       },
       transformSource({ source }) {
-        console.log('[PopularPlugin] transformSource called with source:', source)
-
         return {
           ...source,
           sourceId: 'popularPlugin',
           getItemInputValue({ item }) {
-            console.log('[PopularPlugin] getItemInputValue:', item)
             return item.query
           },
           onSelect({ setIsOpen }) {
-            console.log('[PopularPlugin] onSelect triggered')
             setIsOpen(true)
           },
           templates: {
-            header({ Fragment }) {
+            header() {
               // Prevent server-side execution
               if (typeof window === 'undefined') return ''
+
               console.log('[PopularPlugin] Rendering header template')
 
-              const popularSearchTitle = document.querySelector(
+              const container = document.querySelector(
                 '[data-autocomplete-source-id="popularPlugin"]'
               )
+              const alreadyHasHeader = container?.querySelector('.aa-popular-header')
 
-              if (popularSearchTitle && !popularSearchTitle.querySelector('.aa-popular-header')) {
+              if (container && !alreadyHasHeader) {
                 const header = document.createElement('div')
                 header.className = 'aa-popular-header'
-                header.innerHTML = '<h4>Popular Searches</h4>'
-                popularSearchTitle.prepend(header)
+
+                const heading = document.createElement('h4')
+                heading.textContent = 'Popular Searches'
+
+                header.appendChild(heading)
+                container.prepend(header)
               }
 
               return ''
             },
+
             item({ item }: { item: any }) {
-              if (typeof window === 'undefined') return ''
-              const popularId = item.__autocomplete_id
-              const partialPopularId = `popularPlugin-item-${popularId}`
+              console.log('item.query', item.query)
 
-              const html = `
-                <div class="aa-ItemWrapper" id="${partialPopularId}">
-                  <div class="aa-ItemContentTitle">${item.query}</div>
-                </div>
-              `
+              const wrapper = document.createElement('div')
+              wrapper.className = 'aa-ItemWrapper'
+              wrapper.id = `popularPlugin-item-${item.__autocomplete_id}`
+              console.log('wrapper.id', wrapper.id)
 
-              // Optional DOM patching if you need it
-              const el = document.querySelector(`[id*='${partialPopularId}']`)
+              const title = document.createElement('div')
+              title.className = 'aa-ItemContentTitle'
+              title.textContent = item.query
+
+              wrapper.appendChild(title)
+
+              // Safe selection even with Algolia's autocomplete prefix
+              const el = document.querySelector(
+                `[id*="popularPlugin-item-${item.__autocomplete_id}"]`
+              )
               if (el) {
-                el.innerHTML = html
+                // You can modify the inner content of the matched element if needed
+                el.innerHTML = ''
+                el.appendChild(title.cloneNode(true))
               }
 
-              return html
+              return ''
             },
           },
         }

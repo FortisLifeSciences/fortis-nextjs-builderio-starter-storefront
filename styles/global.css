@@ -337,9 +337,15 @@ body {
   grid-row: 1;
   height: 400px;
 }
+.aa-PanelLayout.aa-Panel--scrollable > section[data-autocomplete-source-id='builder-page'] {
+  grid-column: 2;
+  grid-row: 1;
+}
 
 /* section 4: second column, second row */
-.aa-PanelLayout.aa-Panel--scrollable > section[data-autocomplete-source-id='builder-page'] {
+.aa-PanelLayout.aa-Panel--scrollable
+  > section[data-autocomplete-source-id='products']
+  + section[data-autocomplete-source-id='builder-page'] {
   grid-column: 2;
   grid-row: 2;
 }
