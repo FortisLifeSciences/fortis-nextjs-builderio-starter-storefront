@@ -277,7 +277,8 @@ body {
 }
 .aa-Autocomplete .aa-Form:focus,
 .aa-Autocomplete .aa-InputWrapperPrefix:focus,
-.aa-Autocomplete .aa-InputWrapper:focus {
+.aa-Autocomplete .aa-InputWrapper:focus,
+.aa-Autocomplete .aa-Input {
   outline: none !important;
   box-shadow: none !important;
 }
