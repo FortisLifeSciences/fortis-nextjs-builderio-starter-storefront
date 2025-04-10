@@ -285,7 +285,7 @@ body {
 
 .aa-Autocomplete .aa-Input {
   width: 543px !important;
-  box-shadow: none;
+  box-shadow: none !important;
   height: 27px;
   background-color: #fff;
   color: #020027;
