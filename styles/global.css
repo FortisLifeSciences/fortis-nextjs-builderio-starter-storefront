@@ -492,6 +492,7 @@ body {
   padding: 0;
   gap: 10px;
   display: flex;
+  align-items: flex-start;
 }
 
 /* Make the footer display inline and take 25% */
@@ -511,6 +512,7 @@ body {
   display: flex;
   gap: 10px;
   width: 100%;
+  align-items: flex-start;
 }
 [data-autocomplete-source-id='products'] .aa-CustomCard {
   padding: 5px 10px;
