@@ -32,7 +32,7 @@ const AlgoliaAutocomplete = () => {
           sourceId: 'querySuggestions',
           templates: {
             ...source.templates,
-            header() {
+            /*header() {
               const querySuggestionsTitle = document.querySelector(
                 '[data-autocomplete-source-id="querySuggestions"]'
               )
@@ -46,6 +46,26 @@ const AlgoliaAutocomplete = () => {
                 header.innerHTML = '<h4>Suggestions</h4>'
                 querySuggestionsTitle.prepend(header)
               }
+              return ''
+            },*/
+            header() {
+              // Prevent server-side execution
+              if (typeof window === 'undefined') return ''
+
+              const querySuggestionsTitle = document.querySelector(
+                '[data-autocomplete-source-id="querySuggestions"]'
+              )
+
+              if (
+                querySuggestionsTitle &&
+                !querySuggestionsTitle.querySelector('.aa-suggestion-header')
+              ) {
+                const header = document.createElement('div')
+                header.className = 'aa-suggestion-header'
+                header.innerHTML = '<h4>Suggestions</h4>'
+                querySuggestionsTitle.prepend(header)
+              }
+
               return ''
             },
           },
@@ -78,18 +98,17 @@ const AlgoliaAutocomplete = () => {
           },
           templates: {
             header({ Fragment }) {
+              // Prevent server-side execution
+              if (typeof window === 'undefined') return ''
               console.log('[PopularPlugin] Rendering header template')
 
               const popularSearchTitle = document.querySelector(
                 '[data-autocomplete-source-id="popularPlugin"]'
               )
 
-              if (
-                popularSearchTitle &&
-                !popularSearchTitle.querySelector('.aa-suggestion-header')
-              ) {
+              if (popularSearchTitle && !popularSearchTitle.querySelector('.aa-popular-header')) {
                 const header = document.createElement('div')
-                header.className = 'aa-suggestion-header'
+                header.className = 'aa-popular-header'
                 header.innerHTML = '<h4>Popular Searches</h4>'
                 popularSearchTitle.prepend(header)
               }
@@ -97,6 +116,7 @@ const AlgoliaAutocomplete = () => {
               return ''
             },
             item({ item }: { item: any }) {
+              if (typeof window === 'undefined') return ''
               const popularId = item.__autocomplete_id
               const partialPopularId = `popularPlugin-item-${popularId}`
 
@@ -158,6 +178,8 @@ const AlgoliaAutocomplete = () => {
             },
             templates: {
               header() {
+                // Prevent server-side execution
+                if (typeof window === 'undefined') return ''
                 const wrapper = document.querySelector('[data-autocomplete-source-id="products"]')
                 if (wrapper && !wrapper.querySelector('.aa-products-header')) {
                   const header = document.createElement('div')
@@ -167,6 +189,8 @@ const AlgoliaAutocomplete = () => {
                 }
               },
               item({ item }: { item: any }) {
+                // Prevent server-side execution
+                if (typeof window === 'undefined') return ''
                 const productDiv = document.createElement('div')
                 productDiv.className = 'aa-ItemWrapper'
 
@@ -255,6 +279,8 @@ const AlgoliaAutocomplete = () => {
             },
             templates: {
               header() {
+                // Prevent server-side execution
+                if (typeof window === 'undefined') return ''
                 const builderTitle = document.querySelector(
                   '[data-autocomplete-source-id="builder-page"]'
                 )
@@ -266,6 +292,8 @@ const AlgoliaAutocomplete = () => {
                 }
               },
               item({ item }: { item: any }) {
+                // Prevent server-side execution
+                if (typeof window === 'undefined') return ''
                 const div = document.createElement('div')
                 div.className = 'aa-ItemWrapper'
 
