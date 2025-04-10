@@ -46,7 +46,6 @@ const AlgoliaAutocomplete = () => {
                 header.innerHTML = '<h4>Suggestions</h4>'
                 querySuggestionsTitle.prepend(header)
               }
-
               return ''
             },
           },
@@ -100,11 +99,6 @@ const AlgoliaAutocomplete = () => {
             item({ item }: { item: any }) {
               const popularId = item.__autocomplete_id
               const partialPopularId = `popularPlugin-item-${popularId}`
-              console.log('[PopularPlugin] popularId:', popularId)
-              console.log(
-                '[PopularPlugin] partialPopularId selector:',
-                `[id*='${partialPopularId}']`
-              )
 
               const html = `
                 <div class="aa-ItemWrapper" id="${partialPopularId}">
@@ -127,7 +121,9 @@ const AlgoliaAutocomplete = () => {
 
     const search = autocomplete({
       container: containerRef.current,
+      placeholder: 'SEARCH',
       openOnFocus: true,
+      insights: true,
       plugins: [querySuggestionsPlugin, popularPlugin],
 
       getSources: async ({ query }) => {
@@ -233,12 +229,13 @@ const AlgoliaAutocomplete = () => {
                     footerEl.className = 'aa-SourceFooter'
                     wrapper.appendChild(footerEl)
                   }
-
-                  footerEl.innerHTML = `
+                  if (totalHits > 4) {
+                    footerEl.innerHTML = `
                     <a class="aa-products-see-all" href="https://www.fortislife.com/products">
                       See All Products (${totalHits})
                     </a>
                   `
+                  }
 
                   return footerEl
                 }
@@ -322,6 +319,7 @@ const AlgoliaAutocomplete = () => {
                 let totalHits = 0
                 if (articleResults && 'nbHits' in articleResults) {
                   totalHits = articleResults.nbHits
+                  console.log('****Total Hits for builder-page:', totalHits)
                 }
 
                 if (articleWrapper) {
@@ -332,11 +330,13 @@ const AlgoliaAutocomplete = () => {
                     articleWrapper.appendChild(articlefooterEl)
                   }
 
-                  articlefooterEl.innerHTML = `
-                    <a class="aa-builder-see-all" href="https://www.fortislife.com/products/resources">
-                      See All <span>(${totalHits})</span>
-                    </a>
-                  `
+                  if (totalHits > 3) {
+                    articlefooterEl.innerHTML = `
+                      <a class="aa-builder-see-all" href="https://www.fortislife.com/resources">
+                        See All 
+                      </a>
+                    `
+                  }
 
                   return articlefooterEl
                 }

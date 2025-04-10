@@ -272,7 +272,14 @@ body {
   border: none;
   display: flex;
   align-items: center;
+  box-shadow: none;
+  outline: none;
 }
+.aa-Autocomplete .aa-Form:focus {
+  outline: none;
+  box-shadow: none;
+}
+
 .aa-Autocomplete .aa-Input {
   width: 543px !important;
   box-shadow: none;
