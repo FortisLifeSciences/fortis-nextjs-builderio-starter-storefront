@@ -275,10 +275,19 @@ body {
   box-shadow: none;
   outline: none;
 }
-.aa-Autocomplete .aa-Form:focus,
-.aa-Autocomplete .aa-InputWrapperPrefix:focus,
-.aa-Autocomplete .aa-InputWrapper:focus,
-.aa-Autocomplete .aa-Input {
+.aa-Autocomplete .aa-Form:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.aa-Autocomplete .aa-InputWrapperPrefix:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.aa-Autocomplete .aa-InputWrapper:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.aa-Autocomplete .aa-InputWrapperSuffix:focus {
   outline: none !important;
   box-shadow: none !important;
 }
@@ -293,8 +302,8 @@ body {
   border: none;
 }
 .aa-Autocomplete .aa-Input:focus {
-  outline: none;
-  box-shadow: none;
+  outline: none !important;
+  box-shadow: none !important;
 }
 .aa-Autocomplete .aa-SubmitButton {
   margin: 2px 0px;
