@@ -82,8 +82,6 @@ const AlgoliaAutocomplete = () => {
               // Prevent server-side execution
               if (typeof window === 'undefined') return ''
 
-              console.log('[PopularPlugin] Rendering header template')
-
               const container = document.querySelector(
                 '[data-autocomplete-source-id="popularPlugin"]'
               )
@@ -104,13 +102,9 @@ const AlgoliaAutocomplete = () => {
             },
 
             item({ item }: { item: any }) {
-              console.log('item.query', item.query)
-
               const wrapper = document.createElement('div')
               wrapper.className = 'aa-ItemWrapper'
               wrapper.id = `popularPlugin-item-${item.__autocomplete_id}`
-              console.log('wrapper.id', wrapper.id)
-
               const title = document.createElement('div')
               title.className = 'aa-ItemContentTitle'
               title.textContent = item.query
@@ -342,7 +336,6 @@ const AlgoliaAutocomplete = () => {
                 let totalHits = 0
                 if (articleResults && 'nbHits' in articleResults) {
                   totalHits = articleResults.nbHits
-                  console.log('****Total Hits for builder-page:', totalHits)
                 }
 
                 if (articleWrapper) {
