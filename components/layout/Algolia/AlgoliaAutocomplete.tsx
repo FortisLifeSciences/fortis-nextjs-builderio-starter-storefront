@@ -335,7 +335,7 @@ const AlgoliaAutocomplete = () => {
 
                 let totalHits = 0
                 if (articleResults && 'nbHits' in articleResults) {
-                  totalHits = articleResults.nbHits
+                  totalHits = Number(articleResults.nbHits) // Coerce to number
                 }
 
                 if (articleWrapper) {
@@ -346,12 +346,16 @@ const AlgoliaAutocomplete = () => {
                     articleWrapper.appendChild(articlefooterEl)
                   }
 
-                  if (totalHits > 3) {
+                  //console.log("nbHits value:", totalHits, "Condition result:", totalHits > 3);
+
+                  if (typeof totalHits === 'number' && totalHits > 3) {
                     articlefooterEl.innerHTML = `
                       <a class="aa-builder-see-all" href="https://www.fortislife.com/resources">
                         See All 
                       </a>
                     `
+                  } else {
+                    articlefooterEl.innerHTML = ''
                   }
 
                   return articlefooterEl
