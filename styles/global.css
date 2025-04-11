@@ -359,6 +359,16 @@ body {
   grid-row: 2;
 }
 
+.aa-PanelLayout.aa-Panel--scrollable
+  section[data-autocomplete-source-id='querySuggestions']
+  .aa-ItemContentTitle,
+.aa-PanelLayout.aa-Panel--scrollable
+  section[data-autocomplete-source-id='popularPlugin']
+  .aa-ItemContentTitle {
+  font-size: 14px;
+  color: #30299a;
+}
+
 /* Optional visual styling */
 .aa-PanelLayout.aa-Panel--scrollable > section {
   padding: 10px;
