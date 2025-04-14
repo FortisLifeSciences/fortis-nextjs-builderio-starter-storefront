@@ -107,9 +107,9 @@ const AlgoliaAutocomplete = () => {
               )
 
               const html = `
-                <div class="aa-ItemWrapper" id="${partialPopularId}">
+                <div class="algolia-popular-searches"><div class="aa-ItemWrapper" id="${partialPopularId}">
                   <div class="aa-ItemContentTitle">${item.query}</div>
-                </div>
+                </div></div>
               `
 
               // Optional DOM patching if you need it
