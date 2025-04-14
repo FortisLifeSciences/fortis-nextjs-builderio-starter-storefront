@@ -603,6 +603,9 @@ body {
   display: block;
   padding-bottom: 12px;
 }
+[data-autocomplete-source-id='popularPlugin'] .aa-List .aa-Item {
+  display: inline-block;
+}
 [data-autocomplete-source-id='popularPlugin'] .aa-ItemContentTitle {
   display: flex;
   justify-content: space-between;
