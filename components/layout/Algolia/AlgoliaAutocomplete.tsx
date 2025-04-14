@@ -162,9 +162,13 @@ const AlgoliaAutocomplete = () => {
               const productResults = results.find((r: any) => r.index === 'products')
               return (productResults as any)?.hits || []
             },
-            getItemInputValue({ item }: { item: any }) {
+            /*getItemInputValue({ item }: { item: any }) {
               return item.product_name || ''
+            },*/
+            getItemInputValue({ item }: { item: any; query: string }) {
+              return query
             },
+
             templates: {
               header() {
                 // Prevent server-side execution
@@ -263,8 +267,11 @@ const AlgoliaAutocomplete = () => {
               const builderResults = results.find((r: any) => r.index === 'builder-page')
               return (builderResults as any)?.hits || []
             },
-            getItemInputValue({ item }: { item: any }) {
+            /*getItemInputValue({ item }: { item: any }) {
               return item.data?.title || ''
+            },*/
+            getItemInputValue({ item }: { item: any; query: string }) {
+              return query
             },
             templates: {
               header() {
