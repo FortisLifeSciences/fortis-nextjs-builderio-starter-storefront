@@ -600,11 +600,11 @@ body {
 
 /**** POPULAR PLUGIN CSS ****/
 [data-autocomplete-source-id='popularPlugin'] .aa-List {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: flex-start;
+  display: block;
   padding-bottom: 12px;
+}
+[data-autocomplete-source-id='popularPlugin'] .aa-List .aa-Item {
+  display: inline-block;
 }
 [data-autocomplete-source-id='popularPlugin'] .aa-ItemContentTitle {
   display: flex;
@@ -616,5 +616,4 @@ body {
   padding: 7px 12px;
   color: #30299a;
   width: auto;
-  min-width: 100px;
 }
