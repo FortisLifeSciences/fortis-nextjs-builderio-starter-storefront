@@ -10,6 +10,8 @@ import '@algolia/autocomplete-theme-classic'
 import fortisLogo from '@/assets/fortisLogo.png'
 import resourceTypeArr from '@/components/common/ResourceTypeArr'
 
+const h = React.createElement
+
 const appId = 'YQAIETZ5F1'
 const apiKey = 'c2cc99ace97599deaf1606dba442f9ae'
 const searchClient = algoliasearch(appId, apiKey)
@@ -33,6 +35,9 @@ const AlgoliaAutocomplete = () => {
           templates: {
             ...source.templates,
             header() {
+              // Prevent server-side execution
+              if (typeof window === 'undefined') return ''
+
               const querySuggestionsTitle = document.querySelector(
                 '[data-autocomplete-source-id="querySuggestions"]'
               )
@@ -55,70 +60,68 @@ const AlgoliaAutocomplete = () => {
     })
     const popularPlugin = createQuerySuggestionsPlugin({
       searchClient,
-      indexName: 'products_query_suggestions', // reuse the same index
+      indexName: 'products_query_suggestions',
       getSearchParams() {
-        console.log('[PopularPlugin] getSearchParams')
         return {
           query: '',
           hitsPerPage: 6,
         }
       },
       transformSource({ source }) {
-        console.log('[PopularPlugin] transformSource called with source:', source)
-
         return {
           ...source,
           sourceId: 'popularPlugin',
           getItemInputValue({ item }) {
-            console.log('[PopularPlugin] getItemInputValue:', item)
             return item.query
           },
           onSelect({ setIsOpen }) {
-            console.log('[PopularPlugin] onSelect triggered')
             setIsOpen(true)
           },
           templates: {
-            header({ Fragment }) {
-              console.log('[PopularPlugin] Rendering header template')
+            header() {
+              // Prevent server-side execution
+              if (typeof window === 'undefined') return ''
 
-              const popularSearchTitle = document.querySelector(
+              const container = document.querySelector(
                 '[data-autocomplete-source-id="popularPlugin"]'
               )
+              const alreadyHasHeader = container?.querySelector('.aa-popular-header')
 
-              if (
-                popularSearchTitle &&
-                !popularSearchTitle.querySelector('.aa-suggestion-header')
-              ) {
+              if (container && !alreadyHasHeader) {
                 const header = document.createElement('div')
-                header.className = 'aa-suggestion-header'
-                header.innerHTML = '<h4>Popular Searches</h4>'
-                popularSearchTitle.prepend(header)
+                header.className = 'aa-popular-header'
+
+                const heading = document.createElement('h4')
+                heading.textContent = 'Popular Searches'
+
+                header.appendChild(heading)
+                container.prepend(header)
               }
 
               return ''
             },
+
             item({ item }: { item: any }) {
-              const popularId = item.__autocomplete_id
-              const partialPopularId = `popularPlugin-item-${popularId}`
-              console.log('[PopularPlugin] popularId:', popularId)
-              console.log(
-                '[PopularPlugin] partialPopularId selector:',
-                `[id*='${partialPopularId}']`
+              const wrapper = document.createElement('div')
+              wrapper.className = 'aa-ItemWrapper'
+              wrapper.id = `popularPlugin-item-${item.__autocomplete_id}`
+              const title = document.createElement('div')
+              title.className = 'aa-ItemContentTitle'
+              title.textContent = item.query
+
+              wrapper.appendChild(title)
+
+              // Safe selection even with Algolia's autocomplete prefix
+              const el = document.querySelector(
+                `[id*="popularPlugin-item-${item.__autocomplete_id}"]`
               )
-
-              const html = `
-                <div class="algolia-popular-searches"><div class="aa-ItemWrapper" id="${partialPopularId}">
-                  <div class="aa-ItemContentTitle">${item.query}</div>
-                </div></div>
-              `
-
-              // Optional DOM patching if you need it
-              const el = document.querySelector(`[id*='${partialPopularId}']`)
               if (el) {
-                el.innerHTML = html
+                // You can modify the inner content of the matched element if needed
+                el.innerHTML = ''
+                el.appendChild(title.cloneNode(true))
               }
 
-              return html
+              return ''
             },
           },
         }
@@ -127,7 +130,9 @@ const AlgoliaAutocomplete = () => {
 
     const search = autocomplete({
       container: containerRef.current,
+      placeholder: 'SEARCH',
       openOnFocus: true,
+      insights: true,
       plugins: [querySuggestionsPlugin, popularPlugin],
 
       getSources: async ({ query }) => {
@@ -157,11 +162,17 @@ const AlgoliaAutocomplete = () => {
               const productResults = results.find((r: any) => r.index === 'products')
               return (productResults as any)?.hits || []
             },
-            getItemInputValue({ item }: { item: any }) {
+            /*getItemInputValue({ item }: { item: any }) {
               return item.product_name || ''
+            },*/
+            getItemInputValue({ item }: { item: any; query: string }) {
+              return query
             },
+
             templates: {
               header() {
+                // Prevent server-side execution
+                if (typeof window === 'undefined') return ''
                 const wrapper = document.querySelector('[data-autocomplete-source-id="products"]')
                 if (wrapper && !wrapper.querySelector('.aa-products-header')) {
                   const header = document.createElement('div')
@@ -171,6 +182,8 @@ const AlgoliaAutocomplete = () => {
                 }
               },
               item({ item }: { item: any }) {
+                // Prevent server-side execution
+                if (typeof window === 'undefined') return ''
                 const productDiv = document.createElement('div')
                 productDiv.className = 'aa-ItemWrapper'
 
@@ -233,12 +246,13 @@ const AlgoliaAutocomplete = () => {
                     footerEl.className = 'aa-SourceFooter'
                     wrapper.appendChild(footerEl)
                   }
-
-                  footerEl.innerHTML = `
+                  if (totalHits > 4) {
+                    footerEl.innerHTML = `
                     <a class="aa-products-see-all" href="https://www.fortislife.com/products">
                       See All Products (${totalHits})
                     </a>
                   `
+                  }
 
                   return footerEl
                 }
@@ -253,11 +267,16 @@ const AlgoliaAutocomplete = () => {
               const builderResults = results.find((r: any) => r.index === 'builder-page')
               return (builderResults as any)?.hits || []
             },
-            getItemInputValue({ item }: { item: any }) {
+            /*getItemInputValue({ item }: { item: any }) {
               return item.data?.title || ''
+            },*/
+            getItemInputValue({ item }: { item: any; query: string }) {
+              return query
             },
             templates: {
               header() {
+                // Prevent server-side execution
+                if (typeof window === 'undefined') return ''
                 const builderTitle = document.querySelector(
                   '[data-autocomplete-source-id="builder-page"]'
                 )
@@ -269,6 +288,8 @@ const AlgoliaAutocomplete = () => {
                 }
               },
               item({ item }: { item: any }) {
+                // Prevent server-side execution
+                if (typeof window === 'undefined') return ''
                 const div = document.createElement('div')
                 div.className = 'aa-ItemWrapper'
 
@@ -321,7 +342,7 @@ const AlgoliaAutocomplete = () => {
 
                 let totalHits = 0
                 if (articleResults && 'nbHits' in articleResults) {
-                  totalHits = articleResults.nbHits
+                  totalHits = Number(articleResults.nbHits) // Coerce to number
                 }
 
                 if (articleWrapper) {
@@ -332,11 +353,17 @@ const AlgoliaAutocomplete = () => {
                     articleWrapper.appendChild(articlefooterEl)
                   }
 
-                  articlefooterEl.innerHTML = `
-                    <a class="aa-builder-see-all" href="https://www.fortislife.com/products/resources">
-                      See All <span>(${totalHits})</span>
-                    </a>
-                  `
+                  //console.log("nbHits value:", totalHits, "Condition result:", totalHits > 3);
+
+                  if (typeof totalHits === 'number' && totalHits > 3) {
+                    articlefooterEl.innerHTML = `
+                      <a class="aa-builder-see-all" href="https://www.fortislife.com/resources">
+                        See All 
+                      </a>
+                    `
+                  } else {
+                    articlefooterEl.innerHTML = ''
+                  }
 
                   return articlefooterEl
                 }
