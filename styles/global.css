@@ -433,7 +433,8 @@ body {
 [data-autocomplete-source-id='products'] .aa-products-header,
 [data-autocomplete-source-id='builder-page'] .aa-builder-header,
 [data-autocomplete-source-id='popularPlugin'] .aa-popular-header,
-[data-autocomplete-source-id='querySuggestions'] .aa-suggestion-header {
+[data-autocomplete-source-id='querySuggestions'] .aa-suggestion-header,
+[data-autocomplete-source-id='quickAccessPlugin'] .aa-quickAccess-header {
   display: block;
 }
 [data-autocomplete-source-id='products'] .aa-builder-header,
@@ -447,7 +448,10 @@ body {
 [data-autocomplete-source-id='popularPlugin'] .aa-suggestion-header,
 [data-autocomplete-source-id='querySuggestions'] .aa-products-header,
 [data-autocomplete-source-id='querySuggestions'] .aa-builder-header,
-[data-autocomplete-source-id='querySuggestions'] .aa-popular-header {
+[data-autocomplete-source-id='querySuggestions'] .aa-popular-header,
+[data-autocomplete-source-id='quickAccessPlugin'] .aa-products-header,
+[data-autocomplete-source-id='quickAccessPlugin'] .aa-builder-header,
+[data-autocomplete-source-id='quickAccessPlugin'] .aa-popular-header {
   display: none;
 }
 

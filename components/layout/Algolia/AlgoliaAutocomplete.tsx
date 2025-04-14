@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react'
 
-import { autocomplete } from '@algolia/autocomplete-js'
+import { autocomplete, getAlgoliaResults, AutocompletePlugin } from '@algolia/autocomplete-js'
 import { createQuerySuggestionsPlugin } from '@algolia/autocomplete-plugin-query-suggestions'
 import algoliasearch from 'algoliasearch'
 import '@algolia/autocomplete-theme-classic'
@@ -11,6 +11,13 @@ import fortisLogo from '@/assets/fortisLogo.png'
 import resourceTypeArr from '@/components/common/ResourceTypeArr'
 
 const h = React.createElement
+
+type QuickAccessHit = {
+  cssStyle: string
+  iconURL: string
+  targetURL: string
+  title: string
+}
 
 const appId = 'YQAIETZ5F1'
 const apiKey = 'c2cc99ace97599deaf1606dba442f9ae'
@@ -21,6 +28,98 @@ const AlgoliaAutocomplete = () => {
 
   useEffect(() => {
     if (!containerRef.current) return
+
+    /// quick access plugin
+    const quickAccessPlugin: AutocompletePlugin<QuickAccessHit, void> = {
+      getSources({ query }) {
+        // Show Quick Access only when there's no search query
+        if (query) return []
+
+        return [
+          {
+            sourceId: 'quickAccessPlugin',
+            getItems() {
+              return getAlgoliaResults<QuickAccessHit>({
+                searchClient,
+                queries: [
+                  {
+                    indexName: 'products_query_suggestions',
+                    query,
+                    params: {
+                      hitsPerPage: 0,
+                      ruleContexts: ['autocomplete'],
+                    },
+                  },
+                ],
+                transformResponse({ results }) {
+                  console.log(' Raw Results:', results)
+                  const items = (results as any[])?.[0]?.userData[0].sections || []
+                  console.log('🔍 userData:', items)
+                  return items
+                },
+              })
+            },
+            templates: {
+              header() {
+                // Prevent server-side execution
+                if (typeof window === 'undefined') return ''
+
+                const container = document.querySelector(
+                  '[data-autocomplete-source-id="quickAccessPlugin"]'
+                )
+                const alreadyHasHeader = container?.querySelector('.aa-quickAccess-header')
+
+                if (container && !alreadyHasHeader) {
+                  const header = document.createElement('div')
+                  header.className = 'aa-quickAccess-header'
+
+                  const heading = document.createElement('h4')
+                  heading.textContent = 'Explore Fortis'
+
+                  header.appendChild(heading)
+                  container.prepend(header)
+                }
+
+                return ''
+              },
+
+              item({ item }: { item: QuickAccessHit }) {
+                const li = document.createElement('li')
+                li.className = 'aa-Item' // The class that Algolia Autocomplete expects
+
+                // Set the content directly within the <li> using innerHTML
+                li.textContent = `
+                  <a href="${
+                    item.targetURL || '#'
+                  }" class="aa-ItemLink aa-QuickAccessItem aa-QuickAccessItem--${
+                  item.cssStyle || 'default'
+                }">
+                    <div class="aa-ItemContent" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                      ${
+                        item.iconURL
+                          ? `
+                        <div class="aa-ItemPicture">
+                          <img src="${item.iconURL}" alt="${item.title}" />
+                        </div>
+                      `
+                          : ''
+                      }
+                      <div class="aa-ItemContentBody">
+                        <div class="aa-ItemContentTitle">${item.title}</div>
+                      </div>
+                    </div>
+                  </a>
+                `
+
+                return ''
+              },
+            },
+          },
+        ]
+      },
+    }
+
+    ////
 
     const querySuggestionsPlugin = createQuerySuggestionsPlugin({
       searchClient,
@@ -128,12 +227,12 @@ const AlgoliaAutocomplete = () => {
       },
     })
 
-    const search = autocomplete({
+    const search = autocomplete<QuickAccessHit>({
       container: containerRef.current,
       placeholder: 'SEARCH',
       openOnFocus: true,
-      insights: true,
-      plugins: [querySuggestionsPlugin, popularPlugin],
+      insights: false,
+      plugins: [querySuggestionsPlugin, popularPlugin, quickAccessPlugin],
 
       getSources: async ({ query }) => {
         const sources: any[] = []
@@ -162,9 +261,6 @@ const AlgoliaAutocomplete = () => {
               const productResults = results.find((r: any) => r.index === 'products')
               return (productResults as any)?.hits || []
             },
-            /*getItemInputValue({ item }: { item: any }) {
-              return item.product_name || ''
-            },*/
             getItemInputValue({ item }: { item: any; query: string }) {
               return query
             },
@@ -267,9 +363,6 @@ const AlgoliaAutocomplete = () => {
               const builderResults = results.find((r: any) => r.index === 'builder-page')
               return (builderResults as any)?.hits || []
             },
-            /*getItemInputValue({ item }: { item: any }) {
-              return item.data?.title || ''
-            },*/
             getItemInputValue({ item }: { item: any; query: string }) {
               return query
             },
@@ -377,6 +470,30 @@ const AlgoliaAutocomplete = () => {
         return sources
       },
     })
+
+    /////////////////////
+    // 👇 Fix for paste issue start
+    const input = containerRef.current.querySelector('input')
+
+    if (input) {
+      // Adding event listener for 'paste'
+      input.addEventListener('paste', () => {
+        // Wait for the pasted value to be applied and trigger input event
+        setTimeout(() => {
+          input.dispatchEvent(new Event('input', { bubbles: true }))
+        }, 10) // Wait for value to be pasted before triggering input
+      })
+
+      // You can add other events like 'cut', 'drop', etc. if needed.
+      ;['change', 'cut', 'drop'].forEach((eventName) => {
+        input.addEventListener(eventName, () => {
+          setTimeout(() => {
+            input.dispatchEvent(new Event('input', { bubbles: true }))
+          }, 10)
+        })
+      })
+    }
+    ////  Fix for paste issue end
 
     return () => search.destroy()
   }, [])
