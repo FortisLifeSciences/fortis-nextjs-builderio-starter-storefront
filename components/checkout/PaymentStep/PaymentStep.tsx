@@ -200,6 +200,7 @@ const PaymentStep = (props: PaymentStepProps) => {
   const [isBillingDataUpdated, setIsBillingDataUpdated] = useState<boolean>(false)
   const [isAddressSavedToAccount, setIsAddressSavedToAccount] = useState<boolean>(true)
   const [isNewAddressAdded, setIsNewAddressAdded] = useState<boolean>(false)
+  const [isSaving, setIsSaving] = useState<boolean>(false)
 
   const userAccountId = useMemo(() => user?.id ?? 0, [user?.id])
 
@@ -567,6 +568,7 @@ const PaymentStep = (props: PaymentStepProps) => {
 
   const handleSaveNewPaymentMethod = async () => {
     setValidateForm(true)
+    setIsSaving(true)
   }
 
   const handleInitialCardDetailsLoad = () => {
@@ -578,6 +580,9 @@ const PaymentStep = (props: PaymentStepProps) => {
     const accountPaymentDetails =
       userGetters.getSavedCardsAndBillingDetails(cardCollection, addressCollection) || []
 
+    // console.log(":_:_:addressCollection:_:_:", addressCollection)
+    // console.log("-----:accountPaymentDetails:-----", accountPaymentDetails)
+
     // find default payment details from server data
     const defaultCard = userGetters.getDefaultPaymentBillingMethod(accountPaymentDetails)
 
@@ -588,6 +593,22 @@ const PaymentStep = (props: PaymentStepProps) => {
     if (checkoutPaymentWithNewStatus?.paymentType === PaymentType.CREDITCARD) {
       const cardDetails = checkoutPaymentWithNewStatus?.billingInfo?.card
       const billingAddress = checkoutPaymentWithNewStatus?.billingInfo?.billingContact
+      // console.log(":_____:billingAddress:_____:", billingAddress)
+      const matchingAddressInCollection = addressCollection?.items?.find(
+        (address) => address?.id === billingAddress?.id
+      )
+      if (matchingAddressInCollection) {
+        // console.log("matchingAddressInCollection", matchingAddressInCollection);
+        // Compare and add missing details to the copied billing address
+        if (
+          matchingAddressInCollection?.companyOrOrganization &&
+          billingAddress && // Ensure billingAddress exists
+          !billingAddress.companyOrOrganization // Use direct property access now
+        ) {
+          billingAddress.companyOrOrganization = matchingAddressInCollection.companyOrOrganization
+        }
+      }
+      // console.log("billingAddress", billingAddress)
       Boolean(
         !accountPaymentDetails?.length ||
           !accountPaymentDetails?.some(
@@ -617,7 +638,7 @@ const PaymentStep = (props: PaymentStepProps) => {
         selectedCardRadio === '' &&
         setSelectedCardRadio(defaultCard.cardInfo?.id as string)
     }
-
+    // console.log(":-----:accountPaymentDetails:-----:", accountPaymentDetails)
     if (accountPaymentDetails?.length) {
       setCardOptions(accountPaymentDetails)
     }
@@ -651,6 +672,7 @@ const PaymentStep = (props: PaymentStepProps) => {
       setIsAddingNewPayment(false)
     }
     if (!isAddingNewPayment) {
+      // console.log("billingFormAddress", billingFormAddress)
       setCardOptions([
         ...cardOptions,
         {
@@ -1091,13 +1113,13 @@ const PaymentStep = (props: PaymentStepProps) => {
   }, [stepStatus])
 
   useEffect(() => {
-    if (cardFormDetails.isCardDetailsValidated) {
+    if (cardFormDetails.isCardDetailsValidated || isValidPurchaseOrder) {
       selectedBillingAddressId && setIsValidBillingAddress(true)
       handleBilingAddressSelect(String(selectedBillingAddressId))
     } else {
       null
     }
-  }, [cardFormDetails.isCardDetailsValidated])
+  }, [cardFormDetails.isCardDetailsValidated, isValidPurchaseOrder])
 
   const isAddPaymentMethodButtonDisabled = () => {
     return !(
@@ -1204,37 +1226,6 @@ const PaymentStep = (props: PaymentStepProps) => {
                                   name: cardGetters.getCardId(card?.cardInfo),
                                   label: (
                                     <>
-                                      {/* <PaymentBillingCard
-                                        showAddress={selectedCardRadio === card?.cardInfo?.id}
-                                        pageType={PageType.CHECKOUT}
-                                        cardNumberPart={cardGetters.getCardNumberPart(
-                                          card?.cardInfo
-                                        )}
-                                        expireMonth={cardGetters.getExpireMonth(card?.cardInfo)}
-                                        expireYear={cardGetters.getExpireYear(card?.cardInfo)}
-                                        paymentType={cardGetters.getPaymentType(card?.cardInfo)}
-                                        cardType={cardGetters
-                                          .getCardType(card?.cardInfo)
-                                          ?.toUpperCase()}
-                                        firstName={
-                                          card?.billingAddressInfo?.contact?.firstName as string
-                                        }
-                                        lastNameOrSurname={
-                                          card?.billingAddressInfo?.contact
-                                            ?.lastNameOrSurname as string
-                                        }
-                                        companyOrOrganization={
-                                          card?.billingAddressInfo?.contact
-                                            ?.companyOrOrganization as string
-                                        }
-                                        address1={addressGetters.getAddress1(address)}
-                                        address2={addressGetters.getAddress2(address)}
-                                        cityOrTown={addressGetters.getCityOrTown(address)}
-                                        postalOrZipCode={addressGetters.getPostalOrZipCode(address)}
-                                        stateOrProvince={addressGetters.getStateOrProvince(address)}
-                                        countryCode={addressGetters.getCountryCode(address)}
-                                      /> */}
-
                                       <Box
                                         width={'100%'}
                                         maxWidth={873}
@@ -1298,21 +1289,6 @@ const PaymentStep = (props: PaymentStepProps) => {
                                                             errors?.cvv
                                                               ?.message as unknown as string
                                                           }
-                                                          // commented due to bug tickets
-                                                          // icon={
-                                                          //   <Box
-                                                          //     pr={1}
-                                                          //     pt={1}
-                                                          //     sx={{ cursor: 'pointer' }}
-                                                          //   >
-                                                          //     <Tooltip
-                                                          //       title={t('cvv-tooltip-text')}
-                                                          //       placement="top"
-                                                          //     >
-                                                          //       <Help color="disabled" />
-                                                          //     </Tooltip>
-                                                          //   </Box>
-                                                          // }
                                                         />
                                                       )
                                                     }}
@@ -1375,7 +1351,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                         )}
                       </Stack>
                     ) : null}
-                    {shouldShowPreviouslySavedPaymentsForPurchaseOrder ? (
+                    {/* {shouldShowPreviouslySavedPaymentsForPurchaseOrder ? (
                       <Stack gap={2} width="100%" data-testid="saved-payment-methods">
                         {savedPaymentBillingDetailsForPurchaseOrder ? (
                           <Box pl={2}>
@@ -1425,7 +1401,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                           </Typography>
                         )}
                       </Stack>
-                    ) : null}
+                    ) : null} */}
                     {shouldShowCardForm ? (
                       <>
                         <StyledHeadings
@@ -1483,7 +1459,9 @@ const PaymentStep = (props: PaymentStepProps) => {
                         validateForm={validateForm}
                         purchaseOrderPaymentTerms={customerPurchaseOrderPaymentTerms}
                         onSavePurchaseData={handlePurchaseOrderFormData}
-                        onFormStatusChange={handlePurchaseOrderFormValidDetails}
+                        onFormStatusChange={(status) => {
+                          handlePurchaseOrderFormValidDetails(status)
+                        }}
                       />
                     ) : null}
 
@@ -1803,7 +1781,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                           <Button
                             variant="contained"
                             color="primary"
-                            {...(isAddPaymentMethodButtonDisabled() && { disabled: true })}
+                            disabled={isSaving || isAddPaymentMethodButtonDisabled()}
                             onClick={handleSaveNewPaymentMethod}
                             sx={{
                               width: 'auto',
