@@ -629,9 +629,9 @@ body {
     grid-template-columns: auto;
     display: block;
   }
-  .aa-PanelLayout.aa-Panel--scrollable > section:nth-child(1) {
+  /* .aa-PanelLayout.aa-Panel--scrollable > section:nth-child(1) {
     display: block;
-  }
+  } */
   .aa-PanelLayout.aa-Panel--scrollable
     > section[data-autocomplete-source-id='querySuggestions']
     + section[data-autocomplete-source-id='popularPlugin'] {
@@ -643,9 +643,9 @@ body {
   [data-autocomplete-source-id='products'] .aa-Source {
     display: block;
   }
-  .aa-PanelLayout.aa-Panel--scrollable > section:nth-child(4) {
+  /* .aa-PanelLayout.aa-Panel--scrollable > section:nth-child(4) {
     display: block;
-  }
+  } */
   .aa-DetachedSearchButton {
     border: none;
   }
