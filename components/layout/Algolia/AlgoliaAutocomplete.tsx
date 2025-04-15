@@ -205,21 +205,21 @@ const AlgoliaAutocomplete = () => {
                 const showNewTag = item.new_product
 
                 productDiv.innerHTML = `
-                  <div class="aa-CustomCard">
-                    ${
-                      showNewTag
-                        ? `<div class="aa-NewTag" style="background-image: url('/NewTag.svg');"></div>`
-                        : ''
-                    }
-                    <a href="${link}" class="aa-CardImageLink" target="_blank" rel="noopener noreferrer">
-                      <img src="${imageSrc}" alt="Product" class="aa-CardImage" />
+                    <a href="${link}"  target="_blank" rel="noopener noreferrer" class="aa-CustomCard">
+                      ${
+                        showNewTag
+                          ? `<div class="aa-NewTag" style="background-image: url('/NewTag.svg');"></div>`
+                          : ''
+                      }
+                      <span class="aa-CardImageLink">
+                        <img src="${imageSrc}" alt="Product" class="aa-CardImage" />
+                      </span>
+                      <p class="aa-CardBrand">${brand}</p>
+                      <span class="aa-CardTitle">
+                        ${name || title}
+                      </span>
+                      <p class="aa-CardSku">${sku || ''}</p>
                     </a>
-                    <p class="aa-CardBrand">${brand}</p>
-                    <a href="${link}" class="aa-CardTitle" target="_blank" rel="noopener noreferrer">
-                      ${name || title}
-                    </a>
-                    <p class="aa-CardSku">${sku || ''}</p>
-                  </div>
                 `
 
                 const itemProductId = item.__autocomplete_id
