@@ -16,7 +16,7 @@ import {
 } from 'react-instantsearch-dom'
 
 import { ProductHit } from '@/components/product'
-import { productIndex, searchClient } from '@/lib/api/util/algilia'
+import { productIndex, searchClient } from '@/lib/api/util/algolia'
 import type { MetaData, PageWithMetaData } from '@/lib/types'
 
 import type {
