@@ -1,26 +1,24 @@
 import { useEffect, useRef, useState, PropsWithChildren } from 'react'
 
 import { BuilderComponent, builder } from '@builder.io/react'
+import algoliasearch from 'algoliasearch'
 import getConfig from 'next/config'
 import ErrorPage from 'next/error'
 import { useRouter } from 'next/router'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import {
+  InstantSearch,
+  SearchBox,
+  RefinementList,
+  Hits,
+  Pagination,
+  Configure,
+} from 'react-instantsearch-dom'
 
-import { ProductListingTemplate } from '@/components/page-templates'
-import { useGetSearchedProducts } from '@/hooks'
-import { getCategoryTree, productSearch } from '@/lib/api/operations'
-import { productSearchGetters, facetGetters } from '@/lib/getters'
-import { categoryTreeSearchByCode, buildCategoryPath, uiHelpers } from '@/lib/helpers'
-import type { CategorySearchParams, MetaData, PageWithMetaData } from '@/lib/types'
+import { ProductHit } from '@/components/product'
+import { productIndex, searchClient } from '@/lib/api/util/algilia'
+import type { MetaData, PageWithMetaData } from '@/lib/types'
 
-import type {
-  PrCategory,
-  ProductSearchResult,
-  Facet,
-  Product,
-  FacetValue,
-  Maybe,
-} from '@/lib/gql/types'
 import type {
   GetStaticPathsResult,
   GetStaticPropsContext,
@@ -29,51 +27,39 @@ import type {
 } from 'next'
 
 interface CategoryPageType extends PageWithMetaData {
-  results: ProductSearchResult
-  categoriesTree?: PrCategory[]
   seoFriendlyUrl?: string
   categoryCode?: string
   section?: any
-  category: { categories: PrCategory[] }
 }
 
 const { publicRuntimeConfig } = getConfig()
 const apiKey = publicRuntimeConfig?.builderIO?.apiKey
-const { getCategoryLink } = uiHelpers()
+
 builder.init(apiKey)
 
-function getMetaData(category: PrCategory): MetaData {
+function getMetaData(data: any): MetaData {
   return {
-    title: category?.content?.metaTagTitle || null,
-    description: category?.content?.metaTagDescription || null,
-    keywords: category?.content?.metaTagKeywords || null,
-    canonicalUrl: getCategoryLink(category?.categoryCode || '') || null,
+    title: data?.title || null,
+    description: data?.description || null,
+    keywords: data?.metaTagKeywords || null,
+    canonicalUrl: null,
     robots: null,
   }
 }
 
-export async function getStaticPaths(): Promise<GetStaticPathsResult> {
-  const categoriesTree = (await getCategoryTree()) || []
-  const getCategoryPaths = (category: Maybe<PrCategory>, categoryPaths: any[] = []) => {
-    if (category?.isDisplayed) {
-      categoryPaths.push(buildCategoryPath(category))
-    }
-    const { childrenCategories = [] } = category as PrCategory
-    if (childrenCategories) {
-      for (const child of childrenCategories) {
-        getCategoryPaths(child, categoryPaths)
-      }
-    }
-    return categoryPaths
-  }
-  const { serverRuntimeConfig } = getConfig()
-  const { staticPathsMaxSize } = serverRuntimeConfig?.pageConfig?.productListing || {}
-  const maxPathsToGenerate = parseInt(staticPathsMaxSize)
-  let paths = categoriesTree.flatMap((c: PrCategory) => getCategoryPaths(c, []))
-  if (maxPathsToGenerate && paths.length > maxPathsToGenerate) {
-    paths = paths.slice(0, maxPathsToGenerate)
-  }
-  console.log('paths', paths)
+export async function getStaticPaths() {
+  const response = await productIndex.search('', {
+    facets: ['category_pages'],
+  })
+
+  const categories = response?.facets?.category_pages
+
+  const paths = categories
+    ? Object.keys(categories).map((categoryCode) => ({
+        params: { categoryCode },
+      }))
+    : []
+
   return { paths, fallback: 'blocking' }
 }
 
@@ -83,20 +69,6 @@ export async function getStaticProps(
   const { locale, params } = context
   const { publicRuntimeConfig } = getConfig()
   const { categoryCode } = params as { categoryCode: string }
-  console.log('categorycode', categoryCode)
-  const categoriesTree = await getCategoryTree()
-  const category = await categoryTreeSearchByCode({ categoryCode }, categoriesTree)
-  console.log('category', category)
-  if (!category) {
-    return { notFound: true }
-  }
-  const pageSize = publicRuntimeConfig.productListing.pageSize
-  const response = await productSearch({
-    pageSize,
-    categoryCode,
-    ...params,
-  } as unknown as CategorySearchParams)
-
   const categoryTopSection = publicRuntimeConfig?.builderIO?.modelKeys?.categoryTopSection || ''
   const builderSection = await builder
     .get(categoryTopSection, {
@@ -104,15 +76,10 @@ export async function getStaticProps(
     })
     .promise()
 
-  // .get(categoryTopSection, { userAttributes: { slug: `category-${categoryCode}` } })
-
   return {
     props: {
-      results: response?.data?.products || [],
-      categoriesTree,
-      category: { categories: [category] },
       categoryCode,
-      metaData: getMetaData(category),
+      metaData: getMetaData(builderSection?.data),
       section: builderSection || null,
       ...(await serverSideTranslations(locale as string, ['common'])),
     } as CategoryPageType,
@@ -125,126 +92,70 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
   const { publicRuntimeConfig } = getConfig()
   const { categoryCode } = router.query
   const code = props.categoryCode || categoryCode
-
-  const [searchParams, setSearchParams] = useState<CategorySearchParams>({
-    categoryCode: code,
-  } as unknown as CategorySearchParams)
-
-  useEffect(() => {
-    setSearchParams({
-      categoryCode: code,
-      ...router.query,
-    } as unknown as CategorySearchParams)
-  }, [router.query, code])
-
-  const {
-    data: productSearchResult,
-    isFetching,
-    isError,
-  } = useGetSearchedProducts(
-    {
-      ...searchParams,
-      pageSize: searchParams.pageSize || publicRuntimeConfig.productListing.pageSize,
-    },
-    props.results
-  )
-
-  if (isError) {
-    return <ErrorPage statusCode={404} />
-  }
-
-  const breadcrumbs = facetGetters.getBreadcrumbs(props.category)
-
-  const facetList = productSearchResult?.facets as Facet[]
-  const products = productSearchResult?.items as Product[]
-
-  const categoryFacet = productSearchGetters.getCategoryFacet(productSearchResult, code)
-  const appliedFilters = facetGetters.getSelectedFacets(productSearchResult?.facets as Facet[])
-
-  const categoryPageHeading = categoryFacet.header
-    ? categoryFacet.header
-    : breadcrumbs.length > 0
-    ? breadcrumbs[breadcrumbs.length - 1]?.text
-    : categoryFacet.header
-
-  const sortingValues = facetGetters.getSortOptions(
-    {
-      ...productSearchResult,
-      input: { sort: router.query?.sort as string },
-    },
-    publicRuntimeConfig.productListing.sortOptions
-  )
-
-  const changeSorting = (sort: string) => {
-    router.push(
-      {
-        pathname: router?.pathname,
-        query: {
-          categoryCode: code,
-          ...router.query,
-          sort,
-        },
-      },
-      undefined,
-      { scroll: false, shallow: true }
-    )
-  }
-
-  // For using Pagination, use this
-  // const changePagination = (value: any) => {
-  //   router.push(
-  //     {
-  //       pathname: router?.pathname,
-  //       query: {
-  //         categoryCode: code,
-  //         ...router.query,
-  //         ...value,
-  //       },
-  //     },
-  //     undefined
-  //   )
-  // }
-
-  // When InfiniteScroll is needed, use this.
-  const handleInfiniteScroll = () => {
-    const pageSize = productSearchResult?.pageSize + publicRuntimeConfig.productListing.pageSize
-    router.push(
-      {
-        pathname: router?.pathname,
-        query: {
-          ...router.query,
-          pageSize,
-        },
-      },
-      undefined,
-      { scroll: false, shallow: true }
-    )
-  }
-
   return (
     <>
-      <ProductListingTemplate
-        // productListingHeader={categoryPageHeading as string}
-        categoryFacet={categoryFacet}
-        facetList={facetList}
-        sortingValues={sortingValues}
-        products={products}
-        totalResults={productSearchResult?.totalCount}
-        pageSize={productSearchResult?.pageSize}
-        pageCount={productSearchResult?.pageCount}
-        startIndex={productSearchResult?.startIndex}
-        breadCrumbsList={breadcrumbs}
-        isLoading={isFetching}
-        appliedFilters={appliedFilters as FacetValue[]}
-        onSortItemSelection={changeSorting}
-        // onPaginationChange={changePagination}
-        onInfiniteScroll={handleInfiniteScroll}
-      >
-        <BuilderComponent
-          model={publicRuntimeConfig?.builderIO?.modelKeys?.categoryTopSection}
-          content={props.section}
-        />
-      </ProductListingTemplate>
+      <BuilderComponent
+        model={publicRuntimeConfig?.builderIO?.modelKeys?.categoryTopSection}
+        content={props.section}
+      />
+
+      <InstantSearch searchClient={searchClient} indexName="products">
+        <Configure hitsPerPage={12} filters={`category_pages:${code}`} />
+        <div style={{ display: 'flex' }}>
+          {/* Left Column – Filters */}
+          <div style={{ width: '250px', padding: '20px', borderRight: '1px solid #ddd' }}>
+            <h3>Filters</h3>
+            {/* {facetKeys.map((facetKey) => (
+              <div key={facetKey} style={{ marginBottom: '20px' }}>
+                <h4
+                  style={{ cursor: 'pointer', marginBottom: '10px' }}
+                  onClick={() => toggleFacet(facetKey)}
+                >
+                  {getFacetLabel(facetKey)}
+                </h4>
+                {expandedFacets[facetKey] && (
+                  <RefinementList
+                    attribute={facetKey}
+                    showMore={true}
+                    limit={6}
+                    transformItems={(items: RefinementListItem[]) =>
+                      items.map((item) => ({
+                        ...item,
+                        label: item.label,
+                      }))
+                    }
+                  />
+                )}
+              </div>
+            ))} */}
+          </div>
+
+          {/* Right Column – Results */}
+          <div style={{ flex: 1, padding: '20px' }}>
+            <h1>Category: {categoryCode}</h1>
+
+            {/* Optional: Add a search box */}
+            {/* <SearchBox /> */}
+            <div>
+              {/* <button
+                  onClick={() => setViewMode('list')}
+                  disabled={viewMode === 'list'}
+                  style={{ marginRight: 8 }}
+                >
+                  Grid
+                </button>
+                <button onClick={() => setViewMode('grid')} disabled={viewMode === 'grid'}>
+                  List
+                </button> */}
+            </div>
+            <div>
+              <Hits hitComponent={ProductHit} />
+            </div>
+
+            <Pagination />
+          </div>
+        </div>
+      </InstantSearch>
     </>
   )
 }
