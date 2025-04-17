@@ -284,26 +284,40 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
 
     if (orderAttr) {
       // Updating Order Attribute
-      await updateOrderAttributes.mutateAsync({
-        orderId: checkout?.id as string,
-        orderAttributeInput: [
-          {
-            fullyQualifiedName: orderAttributeFQN,
-            values: [value],
-          },
-        ],
-      })
+      if (value === '' || value === null) {
+        await updateOrderAttributes.mutateAsync({
+          orderId: checkout?.id as string,
+          orderAttributeInput: [
+            {
+              fullyQualifiedName: orderAttributeFQN,
+              values: [],
+            },
+          ],
+        })
+      } else {
+        await updateOrderAttributes.mutateAsync({
+          orderId: checkout?.id as string,
+          orderAttributeInput: [
+            {
+              fullyQualifiedName: orderAttributeFQN,
+              values: [value],
+            },
+          ],
+        })
+      }
     } else {
       // Adding Order Attribute
-      await createOrderAttributes.mutateAsync({
-        orderId: checkout?.id as string,
-        orderAttributeInput: [
-          {
-            fullyQualifiedName: orderAttributeFQN,
-            values: [value],
-          },
-        ],
-      })
+      if (value !== '' && value !== null) {
+        await createOrderAttributes.mutateAsync({
+          orderId: checkout?.id as string,
+          orderAttributeInput: [
+            {
+              fullyQualifiedName: orderAttributeFQN,
+              values: [value],
+            },
+          ],
+        })
+      }
     }
   }
 
@@ -312,10 +326,14 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       updateFortisOrderAttribute('tenant~b2bAccountName', customerAccount?.companyOrOrganization)
     }
 
-    if (fedExAccountNumber && fedExAccountNumber.length === 9) {
-      updateFortisOrderAttribute('tenant~customerFedexAccountNumber', fedExAccountNumber)
+    if (isOtherShippingMethod) {
+      updateFortisOrderAttribute('tenant~customerFedexAccountNumber', '')
+    } else {
+      if (fedExAccountNumber && fedExAccountNumber.length === 9) {
+        updateFortisOrderAttribute('tenant~customerFedexAccountNumber', fedExAccountNumber)
+      }
     }
-  }, [customerAccount?.companyOrOrganization, fedExAccountNumber])
+  }, [customerAccount?.companyOrOrganization, fedExAccountNumber, isOtherShippingMethod])
 
   const handleFexExAccountShipping = async (
     customerAccount: CustomerAccount,
