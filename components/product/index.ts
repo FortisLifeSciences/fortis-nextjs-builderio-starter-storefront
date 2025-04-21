@@ -10,4 +10,5 @@ export { default as ProductVariantSizeSelector } from './ProductVariantSizeSelec
 export { default as ProductQuickViewDialog } from './ProductQuickViewModal/ProductQuickViewDialog'
 export { default as ProductCardListView } from './ProductCardListView/ProductCardListView'
 export { default as ProductRecentDocuments } from './ProductRecentDocuments/ProductRecentDocuments'
-export { default as ProductHit } from './ProductHit/ProductHit'
+export { default as ProductHitListView } from './ProductHit/ProductHitListView'
+export { default as ProductHitGridView } from './ProductHit/ProductHitGridView'

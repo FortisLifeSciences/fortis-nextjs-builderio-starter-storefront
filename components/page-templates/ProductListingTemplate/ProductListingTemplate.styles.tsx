@@ -170,7 +170,7 @@ export const PLPStyles = {
   plpGrid: {
     width: {
       xs: '100%',
-      md: '80%',
+      md: '100%',
     },
   },
 }

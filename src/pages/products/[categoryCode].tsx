@@ -1,6 +1,20 @@
-import { useEffect, useRef, useState, PropsWithChildren } from 'react'
+import React, { useState, useEffect, useRef, PropsWithChildren } from 'react'
 
 import { BuilderComponent, builder } from '@builder.io/react'
+import Add from '@mui/icons-material/Add'
+import Apps from '@mui/icons-material/Apps'
+import ReorderRounded from '@mui/icons-material/ReorderRounded'
+import {
+  Grid,
+  MenuItem,
+  Box,
+  Button,
+  Link,
+  Typography,
+  Breadcrumbs,
+  Stack,
+  useMediaQuery,
+} from '@mui/material'
 import algoliasearch from 'algoliasearch'
 import getConfig from 'next/config'
 import ErrorPage from 'next/error'
@@ -13,9 +27,11 @@ import {
   Hits,
   Pagination,
   Configure,
-} from 'react-instantsearch-dom'
+} from 'react-instantsearch'
 
-import { ProductHit } from '@/components/product'
+import { PLPStyles } from '@/components/page-templates/ProductListingTemplate/ProductListingTemplate.styles'
+import { ProductHitListView, ProductHitGridView } from '@/components/product'
+import { ProductCard } from '@/components/product'
 import { productIndex, searchClient } from '@/lib/api/util/algolia'
 import type { MetaData, PageWithMetaData } from '@/lib/types'
 
@@ -92,6 +108,10 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
   const { publicRuntimeConfig } = getConfig()
   const { categoryCode } = router.query
   const code = props.categoryCode || categoryCode
+  const isMobile = useMediaQuery('(max-width:600px)')
+
+  const [isListView, setIsListView] = useState<boolean>(true)
+
   return (
     <>
       <BuilderComponent
@@ -131,29 +151,56 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
           </div>
 
           {/* Right Column – Results */}
-          <div style={{ flex: 1, padding: '20px' }}>
+          <Box sx={{ flex: 1, padding: '20px' }}>
             <h1>Category: {categoryCode}</h1>
 
             {/* Optional: Add a search box */}
-            {/* <SearchBox /> */}
-            <div>
-              {/* <button
-                  onClick={() => setViewMode('list')}
-                  disabled={viewMode === 'list'}
-                  style={{ marginRight: 8 }}
-                >
-                  Grid
-                </button>
-                <button onClick={() => setViewMode('grid')} disabled={viewMode === 'grid'}>
-                  List
-                </button> */}
-            </div>
-            <div>
-              <Hits hitComponent={ProductHit} />
-            </div>
+            <Box id="product-listing-section" sx={{ ...PLPStyles.plpGrid }}>
+              <Box sx={{ ...PLPStyles.navBar }}>
+                <Box sx={{ ...PLPStyles.navBarMain }}>
+                  <Box sx={{ ...PLPStyles.navBarView }}>
+                    <Box
+                      onClick={() => setIsListView(true)}
+                      title="List View"
+                      sx={{ cursor: 'pointer' }}
+                      tabIndex={0}
+                    >
+                      <ReorderRounded fontSize="medium" {...(isListView && { color: 'primary' })} />
+                    </Box>
+                    <Box
+                      onClick={() => setIsListView(false)}
+                      title="Grid View"
+                      sx={{ cursor: 'pointer' }}
+                      tabIndex={0}
+                    >
+                      <Apps fontSize="medium" {...(!isListView && { color: 'primary' })} />
+                    </Box>
+                  </Box>
+
+                  <Box sx={{ ...PLPStyles.navBarSort }}>
+                    <Box sx={{ ...PLPStyles.filterBy }}></Box>
+                  </Box>
+                </Box>
+              </Box>
+              <Box>
+                {isMobile ? (
+                  <Box className="product-grid-view">
+                    <Hits hitComponent={ProductHitGridView} />
+                  </Box>
+                ) : isListView ? (
+                  <Box className="product-list-view">
+                    <Hits hitComponent={ProductHitListView} />
+                  </Box>
+                ) : (
+                  <Box className="product-grid-view">
+                    <Hits hitComponent={ProductHitGridView} />
+                  </Box>
+                )}
+              </Box>
+            </Box>
 
             <Pagination />
-          </div>
+          </Box>
         </div>
       </InstantSearch>
     </>
