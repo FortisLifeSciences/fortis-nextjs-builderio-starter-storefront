@@ -13,10 +13,11 @@ import resourceTypeArr from '@/components/common/ResourceTypeArr'
 const h = React.createElement
 
 type QuickAccessHit = {
-  cssStyle: string
-  iconURL: string
-  targetURL: string
   title: string
+  targetURL: string
+  iconURL?: string
+  cssStyle?: string
+  __autocomplete_id: string
 }
 
 const appId = 'YQAIETZ5F1'
@@ -30,7 +31,7 @@ const AlgoliaAutocomplete = () => {
     if (!containerRef.current) return
 
     /// quick access plugin
-    const quickAccessPlugin: AutocompletePlugin<QuickAccessHit, void> = {
+    const quickAccessPlugin: AutocompletePlugin<QuickAccessHit, unknown> = {
       getSources({ query }) {
         // Show Quick Access only when there's no search query
         if (query) return []
@@ -46,19 +47,24 @@ const AlgoliaAutocomplete = () => {
                     indexName: 'products_query_suggestions',
                     query,
                     params: {
-                      hitsPerPage: 0,
+                      hitsPerPage: 0, // we’re using userData only
                       ruleContexts: ['autocomplete'],
                     },
                   },
                 ],
                 transformResponse({ results }) {
-                  console.log(' Raw Results:', results)
-                  const items = (results as any[])?.[0]?.userData[0].sections || []
-                  console.log('🔍 userData:', items)
-                  return items
+                  const userDataSections = results
+                    .map((result) => {
+                      const sectionItems = (result as any)?.userData?.[0]?.sections
+                      return Array.isArray(sectionItems) ? sectionItems : []
+                    })
+                    .flat()
+
+                  return [userDataSections] // ✅ Wrap in array to match QuickAccessHit[][]
                 },
               })
             },
+
             templates: {
               header() {
                 // Prevent server-side execution
@@ -82,34 +88,41 @@ const AlgoliaAutocomplete = () => {
 
                 return ''
               },
-
               item({ item }: { item: QuickAccessHit }) {
-                const li = document.createElement('li')
-                li.className = 'aa-Item' // The class that Algolia Autocomplete expects
+                if (typeof window === 'undefined') return ''
 
-                // Set the content directly within the <li> using innerHTML
-                li.textContent = `
-                  <a href="${
-                    item.targetURL || '#'
-                  }" class="aa-ItemLink aa-QuickAccessItem aa-QuickAccessItem--${
-                  item.cssStyle || 'default'
-                }">
-                    <div class="aa-ItemContent" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                      ${
-                        item.iconURL
-                          ? `
-                        <div class="aa-ItemPicture">
-                          <img src="${item.iconURL}" alt="${item.title}" />
-                        </div>
-                      `
-                          : ''
-                      }
-                      <div class="aa-ItemContentBody">
-                        <div class="aa-ItemContentTitle">${item.title}</div>
-                      </div>
-                    </div>
+                const wrapper = document.createElement('a')
+                wrapper.className = `aa-ItemWrapper ${item.cssStyle || ''}`
+                wrapper.id = `quickAccessPlugin-item-${item.__autocomplete_id}`
+                wrapper.href = item.targetURL || '#'
+                wrapper.setAttribute('role', 'link')
+                // Optional: map camelCase values to kebab-case class names
+                const cssStyleClassMap: Record<string, string> = {
+                  darkPurple: 'dark-purple',
+                  lightPurple: 'light-purple',
+                  lightGrey: 'light-grey',
+                }
+
+                const extraClass = item.cssStyle ? cssStyleClassMap[item.cssStyle] || '' : ''
+
+                const iconHTML = item.iconURL
+                  ? `<img class="aa-ItemIcon" src="${item.iconURL}" alt="${item.title || ''}" />`
+                  : ''
+
+                wrapper.innerHTML = `
+                  <a class="aa-ItemContent ${extraClass}" href="${item.targetURL}">
+                    ${iconHTML}
+                    <div class="aa-ItemContentTitle">${item.title}</div>
                   </a>
                 `
+
+                // Optional: Replace content in already existing DOM node
+                const el = document.querySelector(
+                  `[id*="quickAccessPlugin-item-${item.__autocomplete_id}"]`
+                )
+                if (el) {
+                  el.innerHTML = wrapper.innerHTML
+                }
 
                 return ''
               },
@@ -119,7 +132,7 @@ const AlgoliaAutocomplete = () => {
       },
     }
 
-    ////
+    ///////////////
 
     const querySuggestionsPlugin = createQuerySuggestionsPlugin({
       searchClient,

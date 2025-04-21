@@ -424,7 +424,8 @@ body {
 .aa-products-header h4,
 .aa-suggestion-header h4,
 .aa-popular-header h4,
-.aa-builder-header h4 {
+.aa-builder-header h4,
+.aa-quickAccess-header h4 {
   font-size: 16px;
   font-weight: 500;
   margin-bottom: 10px;
@@ -620,4 +621,54 @@ body {
   padding: 7px 12px;
   color: #30299a;
   width: auto;
+}
+/*** quick access plugin css  ****/
+[data-autocomplete-source-id='quickAccessPlugin'] .aa-List {
+  display: flex;
+  gap: 10px;
+}
+[data-autocomplete-source-id='quickAccessPlugin'] .aa-ItemWrapper {
+  margin: 0 10px;
+  border: 2px solid transparent;
+}
+
+[data-autocomplete-source-id='quickAccessPlugin'] .aa-ItemContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 200px;
+  height: 350px;
+  display: flex;
+  justify-content: center;
+  text-decoration: none;
+}
+
+[data-autocomplete-source-id='quickAccessPlugin'] .aa-ItemIcon {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 16px;
+  border: none;
+  box-shadow: none;
+  background: none;
+}
+
+[data-autocomplete-source-id='quickAccessPlugin'] .aa-ItemContentTitle {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Color variants */
+[data-autocomplete-source-id='quickAccessPlugin'] .light-grey {
+  background-color: #ededed;
+  color: #30299a;
+}
+
+[data-autocomplete-source-id='quickAccessPlugin'] .light-purple {
+  background-color: #e3e2ff;
+  color: #30299a;
+}
+
+[data-autocomplete-source-id='quickAccessPlugin'] .dark-purple {
+  background-color: #30299a;
+  color: #fff;
 }
