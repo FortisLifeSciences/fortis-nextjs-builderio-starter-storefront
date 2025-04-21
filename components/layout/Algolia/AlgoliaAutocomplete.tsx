@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react'
 
-import { autocomplete } from '@algolia/autocomplete-js'
+import { autocomplete, getAlgoliaResults, AutocompletePlugin } from '@algolia/autocomplete-js'
 import { createQuerySuggestionsPlugin } from '@algolia/autocomplete-plugin-query-suggestions'
 import algoliasearch from 'algoliasearch'
 import '@algolia/autocomplete-theme-classic'
@@ -11,6 +11,14 @@ import fortisLogo from '@/assets/fortisLogo.png'
 import resourceTypeArr from '@/components/common/ResourceTypeArr'
 
 const h = React.createElement
+
+type QuickAccessHit = {
+  title: string
+  targetURL: string
+  iconURL?: string
+  cssStyle?: string
+  __autocomplete_id: string
+}
 
 const appId = 'YQAIETZ5F1'
 const apiKey = 'c2cc99ace97599deaf1606dba442f9ae'
@@ -21,6 +29,110 @@ const AlgoliaAutocomplete = () => {
 
   useEffect(() => {
     if (!containerRef.current) return
+
+    /// quick access plugin
+    const quickAccessPlugin: AutocompletePlugin<QuickAccessHit, unknown> = {
+      getSources({ query }) {
+        // Show Quick Access only when there's no search query
+        if (query) return []
+
+        return [
+          {
+            sourceId: 'quickAccessPlugin',
+            getItems() {
+              return getAlgoliaResults<QuickAccessHit>({
+                searchClient,
+                queries: [
+                  {
+                    indexName: 'products_query_suggestions',
+                    query,
+                    params: {
+                      hitsPerPage: 0, // we’re using userData only
+                      ruleContexts: ['autocomplete'],
+                    },
+                  },
+                ],
+                transformResponse({ results }) {
+                  const userDataSections = results
+                    .map((result) => {
+                      const sectionItems = (result as any)?.userData?.[0]?.sections
+                      return Array.isArray(sectionItems) ? sectionItems : []
+                    })
+                    .flat()
+
+                  return [userDataSections] // ✅ Wrap in array to match QuickAccessHit[][]
+                },
+              })
+            },
+
+            templates: {
+              header() {
+                // Prevent server-side execution
+                if (typeof window === 'undefined') return ''
+
+                const container = document.querySelector(
+                  '[data-autocomplete-source-id="quickAccessPlugin"]'
+                )
+                const alreadyHasHeader = container?.querySelector('.aa-quickAccess-header')
+
+                if (container && !alreadyHasHeader) {
+                  const header = document.createElement('div')
+                  header.className = 'aa-quickAccess-header'
+
+                  const heading = document.createElement('h4')
+                  heading.textContent = 'Explore Fortis'
+
+                  header.appendChild(heading)
+                  container.prepend(header)
+                }
+
+                return ''
+              },
+              item({ item }: { item: QuickAccessHit }) {
+                if (typeof window === 'undefined') return ''
+
+                const wrapper = document.createElement('a')
+                wrapper.className = `aa-ItemWrapper ${item.cssStyle || ''}`
+                wrapper.id = `quickAccessPlugin-item-${item.__autocomplete_id}`
+                wrapper.href = item.targetURL || '#'
+                wrapper.setAttribute('role', 'link')
+                // Optional: map camelCase values to kebab-case class names
+                const cssStyleClassMap: Record<string, string> = {
+                  darkPurple: 'dark-purple',
+                  lightPurple: 'light-purple',
+                  lightGrey: 'light-grey',
+                }
+
+                const extraClass = item.cssStyle ? cssStyleClassMap[item.cssStyle] || '' : ''
+
+                const iconHTML = item.iconURL
+                  ? `<img class="aa-ItemIcon" src="${item.iconURL}" alt="${item.title || ''}" />`
+                  : ''
+
+                wrapper.innerHTML = `
+                  <a class="aa-ItemContent ${extraClass}" href="${item.targetURL}">
+                    ${iconHTML}
+                    <div class="aa-ItemContentTitle">${item.title}</div>
+                  </a>
+                `
+
+                // Optional: Replace content in already existing DOM node
+                const el = document.querySelector(
+                  `[id*="quickAccessPlugin-item-${item.__autocomplete_id}"]`
+                )
+                if (el) {
+                  el.innerHTML = wrapper.innerHTML
+                }
+
+                return ''
+              },
+            },
+          },
+        ]
+      },
+    }
+
+    ///////////////
 
     const querySuggestionsPlugin = createQuerySuggestionsPlugin({
       searchClient,
@@ -128,12 +240,12 @@ const AlgoliaAutocomplete = () => {
       },
     })
 
-    const search = autocomplete({
+    const search = autocomplete<QuickAccessHit>({
       container: containerRef.current,
       placeholder: 'SEARCH',
       openOnFocus: true,
-      insights: true,
-      plugins: [querySuggestionsPlugin, popularPlugin],
+      insights: false,
+      plugins: [querySuggestionsPlugin, popularPlugin, quickAccessPlugin],
 
       getSources: async ({ query }) => {
         const sources: any[] = []
@@ -162,9 +274,6 @@ const AlgoliaAutocomplete = () => {
               const productResults = results.find((r: any) => r.index === 'products')
               return (productResults as any)?.hits || []
             },
-            /*getItemInputValue({ item }: { item: any }) {
-              return item.product_name || ''
-            },*/
             getItemInputValue({ item }: { item: any; query: string }) {
               return query
             },
@@ -267,9 +376,6 @@ const AlgoliaAutocomplete = () => {
               const builderResults = results.find((r: any) => r.index === 'builder-page')
               return (builderResults as any)?.hits || []
             },
-            /*getItemInputValue({ item }: { item: any }) {
-              return item.data?.title || ''
-            },*/
             getItemInputValue({ item }: { item: any; query: string }) {
               return query
             },
@@ -377,6 +483,30 @@ const AlgoliaAutocomplete = () => {
         return sources
       },
     })
+
+    /////////////////////
+    // 👇 Fix for paste issue start
+    const input = containerRef.current.querySelector('input')
+
+    if (input) {
+      // Adding event listener for 'paste'
+      input.addEventListener('paste', () => {
+        // Wait for the pasted value to be applied and trigger input event
+        setTimeout(() => {
+          input.dispatchEvent(new Event('input', { bubbles: true }))
+        }, 10) // Wait for value to be pasted before triggering input
+      })
+
+      // You can add other events like 'cut', 'drop', etc. if needed.
+      ;['change', 'cut', 'drop'].forEach((eventName) => {
+        input.addEventListener(eventName, () => {
+          setTimeout(() => {
+            input.dispatchEvent(new Event('input', { bubbles: true }))
+          }, 10)
+        })
+      })
+    }
+    ////  Fix for paste issue end
 
     return () => search.destroy()
   }, [])
