@@ -437,7 +437,8 @@ body {
 .aa-products-header h4,
 .aa-suggestion-header h4,
 .aa-popular-header h4,
-.aa-builder-header h4 {
+.aa-builder-header h4,
+.aa-quickAccess-header h4 {
   font-size: 16px;
   font-weight: 500;
   margin-bottom: 10px;
@@ -446,7 +447,8 @@ body {
 [data-autocomplete-source-id='products'] .aa-products-header,
 [data-autocomplete-source-id='builder-page'] .aa-builder-header,
 [data-autocomplete-source-id='popularPlugin'] .aa-popular-header,
-[data-autocomplete-source-id='querySuggestions'] .aa-suggestion-header {
+[data-autocomplete-source-id='querySuggestions'] .aa-suggestion-header,
+[data-autocomplete-source-id='quickAccessPlugin'] .aa-quickAccess-header {
   display: block;
 }
 [data-autocomplete-source-id='products'] .aa-builder-header,
@@ -460,7 +462,10 @@ body {
 [data-autocomplete-source-id='popularPlugin'] .aa-suggestion-header,
 [data-autocomplete-source-id='querySuggestions'] .aa-products-header,
 [data-autocomplete-source-id='querySuggestions'] .aa-builder-header,
-[data-autocomplete-source-id='querySuggestions'] .aa-popular-header {
+[data-autocomplete-source-id='querySuggestions'] .aa-popular-header,
+[data-autocomplete-source-id='quickAccessPlugin'] .aa-products-header,
+[data-autocomplete-source-id='quickAccessPlugin'] .aa-builder-header,
+[data-autocomplete-source-id='quickAccessPlugin'] .aa-popular-header {
   display: none;
 }
 
@@ -755,4 +760,50 @@ body {
   .aa-DetachedSearchButtonQuery {
     display: none;
   }
+}
+
+/*** quick access plugin css  ****/
+[data-autocomplete-source-id='quickAccessPlugin'] .aa-List {
+  display: flex;
+  gap: 10px;
+}
+[data-autocomplete-source-id='quickAccessPlugin'] .aa-ItemWrapper {
+  margin: 0 10px;
+  border: 2px solid transparent;
+}
+[data-autocomplete-source-id='quickAccessPlugin'] .aa-ItemContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 200px;
+  height: 350px;
+  display: flex;
+  justify-content: center;
+  text-decoration: none;
+}
+[data-autocomplete-source-id='quickAccessPlugin'] .aa-ItemIcon {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 16px;
+  border: none;
+  box-shadow: none;
+  background: none;
+}
+[data-autocomplete-source-id='quickAccessPlugin'] .aa-ItemContentTitle {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+}
+/* Color variants */
+[data-autocomplete-source-id='quickAccessPlugin'] .light-grey {
+  background-color: #ededed;
+  color: #30299a;
+}
+[data-autocomplete-source-id='quickAccessPlugin'] .light-purple {
+  background-color: #e3e2ff;
+  color: #30299a;
+}
+[data-autocomplete-source-id='quickAccessPlugin'] .dark-purple {
+  background-color: #30299a;
+  color: #fff;
 }
