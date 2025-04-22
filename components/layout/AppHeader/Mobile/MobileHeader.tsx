@@ -7,7 +7,7 @@ import { useTranslation } from 'next-i18next'
 
 import fortisLogo from '@/assets/fortisLogo.png'
 import { HeaderAction, KiboLogo } from '@/components/common'
-import { HamburgerIcon, CartIcon } from '@/components/layout'
+import { HamburgerIcon, CartIcon, AlgoliaAutocomplete } from '@/components/layout'
 import { useHeaderContext } from '@/context'
 
 interface MobileHeaderProps {
@@ -54,15 +54,16 @@ const MobileHeader = ({ children, hideIcons = false }: MobileHeaderProps) => {
           data-testid="mobile-header"
           sx={{ ...MobileHeaderStyles.container, display: hideIcons ? 'none' : 'inherit' }}
         >
-          <Grid item xs={1.5} sx={MobileHeaderStyles.item}>
-            <HeaderAction
+          <Grid item xs={1.5} sx={{ ...MobileHeaderStyles.item, overflow: 'auto' }}>
+            {/* <HeaderAction
               title={t('search')}
               icon={SearchIcon}
               iconFontSize={'medium'}
               mobileIconColor="#30299A"
               onClick={() => toggleMobileSearchPortal()}
               data-testid="mobile-header-search-icon"
-            />
+            /> */}
+            <AlgoliaAutocomplete />
           </Grid>
           <Grid item xs={1.5} sx={MobileHeaderStyles.item}>
             <CartIcon size="medium" mobileIconColor="black" data-testid="mobile-header-cart-icon" />

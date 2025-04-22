@@ -166,10 +166,10 @@ const KiboHeader = (props: KiboHeaderProps) => {
               minHeight={'80px'} //According to designs
               sx={{ display: { xs: 'block', md: 'none' }, px: 1, mt: 1, padding: '18px' }}
             >
-              <SearchSuggestions
+              {/* <SearchSuggestions
                 isViewSearchPortal={isMobileSearchPortalVisible}
                 onEnterSearch={() => toggleMobileSearchPortal()}
-              />
+              /> */}
             </Box>
           </Collapse>
           <HamburgerMenu
