@@ -17,6 +17,7 @@ export const ProductCardStyles = {
     textDecoration: 'none',
     width: 260,
     maxWidth: 260,
+    height: 345,
     boxShadow: 'none',
     cursor: 'pointer',
     borderRadius: '0px 0px 25px 0px',
