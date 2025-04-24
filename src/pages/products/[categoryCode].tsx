@@ -30,6 +30,7 @@ import {
   useClearRefinements,
   useCurrentRefinements,
   Hits,
+  Pagination,
 } from 'react-instantsearch-hooks-web'
 
 import { PLPStyles } from '@/components/page-templates/ProductListingTemplate/ProductListingTemplate.styles'
@@ -372,8 +373,9 @@ const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facet
             )}
           </Box>
         </Box>
-        <Box sx={{ textAlign: 'center', marginTop: 2 }}>
-          <Box sx={{ ...PLPStyles.productResults, color: 'grey.900', margin: '56px 0 12px 0' }}>
+        <Box className="AlgoliaPagination" sx={{ textAlign: 'center', marginTop: 2 }}>
+          <Pagination />
+          {/* <Box sx={{ ...PLPStyles.productResults, color: 'grey.900', margin: '56px 0 12px 0' }}>
             {t('products-to-show', {
               m: `${hits.length}`,
               n: `${results?.nbHits ?? 0}`,
@@ -390,7 +392,7 @@ const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facet
                 {t('show-more')}
               </Button>
             </Box>
-          )}
+          )} */}
         </Box>
       </Box>
     </div>
