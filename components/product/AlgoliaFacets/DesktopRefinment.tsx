@@ -31,7 +31,7 @@ const DesktopRefinement = () => {
   return (
     <Box
       sx={{
-        display: { xs: 'none', sm: 'flex' },
+        display: 'flex',
         flexWrap: 'wrap',
         alignItems: 'center',
         gap: 1,
