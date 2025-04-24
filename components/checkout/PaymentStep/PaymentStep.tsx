@@ -200,6 +200,7 @@ const PaymentStep = (props: PaymentStepProps) => {
   const [isBillingDataUpdated, setIsBillingDataUpdated] = useState<boolean>(false)
   const [isAddressSavedToAccount, setIsAddressSavedToAccount] = useState<boolean>(true)
   const [isNewAddressAdded, setIsNewAddressAdded] = useState<boolean>(false)
+  const [isSaving, setIsSaving] = useState<boolean>(false)
 
   const userAccountId = useMemo(() => user?.id ?? 0, [user?.id])
 
@@ -567,6 +568,7 @@ const PaymentStep = (props: PaymentStepProps) => {
 
   const handleSaveNewPaymentMethod = async () => {
     setValidateForm(true)
+    setIsSaving(true)
   }
 
   const handleInitialCardDetailsLoad = () => {
@@ -1091,13 +1093,13 @@ const PaymentStep = (props: PaymentStepProps) => {
   }, [stepStatus])
 
   useEffect(() => {
-    if (cardFormDetails.isCardDetailsValidated) {
+    if (cardFormDetails.isCardDetailsValidated || isValidPurchaseOrder) {
       selectedBillingAddressId && setIsValidBillingAddress(true)
       handleBilingAddressSelect(String(selectedBillingAddressId))
     } else {
       null
     }
-  }, [cardFormDetails.isCardDetailsValidated])
+  }, [cardFormDetails.isCardDetailsValidated, isValidPurchaseOrder])
 
   const isAddPaymentMethodButtonDisabled = () => {
     return !(
@@ -1375,7 +1377,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                         )}
                       </Stack>
                     ) : null}
-                    {shouldShowPreviouslySavedPaymentsForPurchaseOrder ? (
+                    {/* {shouldShowPreviouslySavedPaymentsForPurchaseOrder ? (
                       <Stack gap={2} width="100%" data-testid="saved-payment-methods">
                         {savedPaymentBillingDetailsForPurchaseOrder ? (
                           <Box pl={2}>
@@ -1425,7 +1427,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                           </Typography>
                         )}
                       </Stack>
-                    ) : null}
+                    ) : null} */}
                     {shouldShowCardForm ? (
                       <>
                         <StyledHeadings
@@ -1483,7 +1485,9 @@ const PaymentStep = (props: PaymentStepProps) => {
                         validateForm={validateForm}
                         purchaseOrderPaymentTerms={customerPurchaseOrderPaymentTerms}
                         onSavePurchaseData={handlePurchaseOrderFormData}
-                        onFormStatusChange={handlePurchaseOrderFormValidDetails}
+                        onFormStatusChange={(status) => {
+                          handlePurchaseOrderFormValidDetails(status)
+                        }}
                       />
                     ) : null}
 
@@ -1803,7 +1807,7 @@ const PaymentStep = (props: PaymentStepProps) => {
                           <Button
                             variant="contained"
                             color="primary"
-                            {...(isAddPaymentMethodButtonDisabled() && { disabled: true })}
+                            disabled={isSaving || isAddPaymentMethodButtonDisabled()}
                             onClick={handleSaveNewPaymentMethod}
                             sx={{
                               width: 'auto',
