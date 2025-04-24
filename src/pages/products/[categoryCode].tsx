@@ -125,10 +125,7 @@ export async function getStaticProps(
 
 const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facets: any }) => {
   const infiniteHits = useInfiniteHits<BaseHit>(),
-    hits = infiniteHits.hits,
     results = infiniteHits.results,
-    isLast = (infiniteHits as any).isLast,
-    showMore = (infiniteHits as any).showMore,
     isMobile = useMediaQuery('(max-width:600px)')
   const [isListView, setIsListView] = useState<boolean>(true)
   const { t } = useTranslation('common')
@@ -147,12 +144,6 @@ const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facet
     hitsPerPage: 15,
     filters: `category_pages:${categoryCode}`,
   } as any)
-
-  const handleLoadMore = useCallback(() => {
-    if (!isLast) {
-      showMore()
-    }
-  }, [isLast, showMore])
 
   const toggleFacet = (attribute: string) => {
     expandedFacetsRef.current[attribute] = !expandedFacetsRef.current[attribute]
@@ -313,57 +304,6 @@ const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facet
             </Box>
           </Box>
           <Box className={isListView ? 'product-list-view' : 'product-grid-view'}>
-            {/* {isMobile ? (
-              <Grid container sx={{ flexWrap: 'wrap', rowGap: 2 }}>
-                {hits.map((hit) => (
-                  <Grid
-                    key={hit.objectID}
-                    item
-                    display={'flex'}
-                    justifyContent={'center'}
-                    lg={isListView ? 12 : 4}
-                    md={isListView ? 12 : 4}
-                    sm={isListView ? 12 : 4}
-                    xs={isListView ? 12 : 6}
-                  >
-                    <ProductHitGridView hit={hit as any} />
-                  </Grid>
-                ))}
-              </Grid>
-            ) : (
-              <Grid container sx={{ flexWrap: 'wrap', rowGap: 2 }}>
-                {hits.map((hit) =>
-                  isListView ? (
-                    <Grid
-                      key={hit.objectID}
-                      item
-                      display={'flex'}
-                      justifyContent={'center'}
-                      lg={isListView ? 12 : 4}
-                      md={isListView ? 12 : 4}
-                      sm={isListView ? 12 : 4}
-                      xs={isListView ? 12 : 6}
-                    >
-                      <ProductHitListView key={hit.objectID} hit={hit as any} />
-                    </Grid>
-                  ) : (
-                    <Grid
-                      key={hit.objectID}
-                      item
-                      display={'flex'}
-                      justifyContent={'center'}
-                      lg={isListView ? 12 : 4}
-                      md={isListView ? 12 : 4}
-                      sm={isListView ? 12 : 4}
-                      xs={isListView ? 12 : 6}
-                    >
-                      <ProductHitGridView key={hit.objectID} hit={hit as any} />
-                    </Grid>
-                  )
-                )}
-              </Grid>
-            )} */}
-
             {isMobile ? (
               <Hits hitComponent={ProductHitGridView} />
             ) : isListView ? (
@@ -375,24 +315,6 @@ const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facet
         </Box>
         <Box className="AlgoliaPagination" sx={{ textAlign: 'center', marginTop: 2 }}>
           <Pagination />
-          {/* <Box sx={{ ...PLPStyles.productResults, color: 'grey.900', margin: '56px 0 12px 0' }}>
-            {t('products-to-show', {
-              m: `${hits.length}`,
-              n: `${results?.nbHits ?? 0}`,
-            })}
-          </Box>
-          {!isLast && (
-            <Box sx={{ ...PLPStyles.productResults }}>
-              <Button
-                onClick={handleLoadMore}
-                id="show-more-button"
-                sx={{ ...PLPStyles.showMoreButton }}
-                variant="outlined"
-              >
-                {t('show-more')}
-              </Button>
-            </Box>
-          )} */}
         </Box>
       </Box>
     </div>
