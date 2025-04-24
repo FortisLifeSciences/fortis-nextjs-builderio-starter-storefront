@@ -109,7 +109,6 @@ const pdpBrandLogos: Record<string, string> = {
 }
 
 const ProductHitListView = ({ hit }: { hit: Product }): JSX.Element => {
-  console.log('hit', hit)
   const imageHeight = 180
   const placeholderImageUrl = DefaultImage,
     kiboImagesData = hit?.product_images,
