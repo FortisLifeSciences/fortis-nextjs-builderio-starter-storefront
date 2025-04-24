@@ -204,8 +204,6 @@ const PaymentStep = (props: PaymentStepProps) => {
 
   const userAccountId = useMemo(() => user?.id ?? 0, [user?.id])
 
-  const userAccountId = useMemo(() => user?.id ?? 0, [user?.id])
-
   const newPaymentTypes = paymentTypes
     .map((paymentType: PaymentsType) =>
       paymentType.id === PaymentType.CREDITCARD ||
