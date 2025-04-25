@@ -189,6 +189,7 @@ export const billingContactFragment = /* GraphQL */ `
     firstName
     middleNameOrInitial
     lastNameOrSurname
+    companyOrOrganization
     email
     address {
       address1

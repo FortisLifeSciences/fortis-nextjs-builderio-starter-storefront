@@ -121,7 +121,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       const attributeDetails = await entityResponse.json()
       // console.log("attributeDetails", attributeDetails)
       setFedExAccountNumber(
-        attributeDetails?.data?.values[0] ? attributeDetails?.data?.values[0] : ''
+        attributeDetails?.data?.values?.[0] ? attributeDetails?.data?.values?.[0] : ''
       )
     }
     fetchSettings()
