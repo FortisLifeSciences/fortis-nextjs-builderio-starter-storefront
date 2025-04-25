@@ -36,6 +36,7 @@ import {
 import { PLPStyles } from '@/components/page-templates/ProductListingTemplate/ProductListingTemplate.styles'
 import { ProductHitListView, ProductHitGridView } from '@/components/product'
 import CustomRefinementList from '@/components/product/AlgoliaFacets/CustomRefinementList'
+import CustomSortBy from '@/components/product/AlgoliaFacets/CustomSortBy'
 import DesktopRefinement from '@/components/product/AlgoliaFacets/DesktopRefinment'
 import { productIndex, searchClient } from '@/lib/api/util/algolia'
 import { getFacetLabel } from '@/lib/helpers/facetMapping'
@@ -162,7 +163,11 @@ const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facet
     const isExpanded = !!expandedFacetsRef.current[attribute]
 
     return (
-      <Box className="ais-Panel" style={{ cursor: 'pointer', borderBottom: '1px solid #000' }}>
+      <Box
+        className="ais-Panel"
+        style={{ cursor: 'pointer', borderBottom: '1px solid #000' }}
+        sx={{ ...PLPStyles.Facetpanel }}
+      >
         <Box
           className="ais-Panel-header"
           onClick={() => toggleFacet(attribute)}
@@ -198,14 +203,14 @@ const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facet
           },
         }}
       >
-        <Button
+        {/* <Button
           onClick={() => setIsFilterOpen(!isFilterOpen)}
           variant="outlined"
           endIcon={<Add fontSize="small" />}
           sx={{ ...PLPStyles.filterByButton, width: '50%' }}
         >
           Filter By
-        </Button>
+        </Button> */}
       </Box>
       {/* Left Column – Filters */}
       {/* <div
@@ -226,7 +231,7 @@ const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facet
             sm: '17%',
           },
           padding: {
-            xs: isFilterOpen ? '20px' : '0',
+            xs: '0',
             sm: '20px 0',
           },
           overflow: 'hidden',
@@ -251,10 +256,14 @@ const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facet
             xs: isFilterOpen ? 3 : 0,
             sm: 0,
           },
+          ...PLPStyles.FacetSection,
         }}
       >
-        <Box sx={{ flex: 1, overflowY: 'auto', paddingRight: '8px' }}>
-          <Box>
+        <Box
+          sx={{ flex: 1, overflowY: 'auto', ...PLPStyles.FacetsContainer }}
+          className="FacetsContainer"
+        >
+          <Box className="FacetsInnerContainer" sx={{ ...PLPStyles.FacetsInnerContainer }}>
             <DynamicWidgets fallbackComponent={FallbackComponent} />
           </Box>
         </Box>
@@ -267,7 +276,7 @@ const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facet
       {/* </div> */}
 
       {/* Right Column – Results */}
-      <Box sx={{ flex: 1, padding: '20px' }} id="productHitsView">
+      <Box sx={{ flex: 1, padding: { xs: '0', md: '20px' } }} id="productHitsView">
         <Box id="product-listing-section" sx={{ ...PLPStyles.plpGrid }}>
           <Box sx={{ ...PLPStyles.navBar }}>
             <Box sx={{ ...PLPStyles.navBarMain }}>
@@ -291,7 +300,22 @@ const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facet
               </Box>
 
               <Box sx={{ ...PLPStyles.navBarSort }}>
-                <Box sx={{ ...PLPStyles.filterBy }}></Box>
+                <Box sx={{ ...PLPStyles.sorting }}>
+                  <Typography component="span" sx={{ ...PLPStyles.navBarLabel }}>
+                    {t('sort')}
+                  </Typography>
+                  <CustomSortBy />
+                </Box>
+                <Box sx={{ ...PLPStyles.filterBy }}>
+                  <Button
+                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                    variant="outlined"
+                    endIcon={<Add fontSize="small" />}
+                    sx={{ ...PLPStyles.filterByButton }}
+                  >
+                    Filter By
+                  </Button>
+                </Box>
               </Box>
             </Box>
           </Box>

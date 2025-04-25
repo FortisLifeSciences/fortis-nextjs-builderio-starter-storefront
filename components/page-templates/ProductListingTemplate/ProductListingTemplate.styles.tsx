@@ -173,4 +173,26 @@ export const PLPStyles = {
       md: '100%',
     },
   },
+  FacetSection: {
+    left: {
+      xs: '0',
+    },
+  },
+  FacetsContainer: {
+    paddingRight: {
+      xs: '0',
+      md: '8px',
+    },
+  },
+  FacetsInnerContainer: {
+    padding: {
+      xs: '20px 0',
+      md: '0',
+    },
+  },
+  Facetpanel: {
+    padding: {
+      xs: '0 20px',
+    },
+  },
 }
