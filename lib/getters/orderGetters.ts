@@ -335,6 +335,7 @@ const getPaymentBillingDetails = (data?: CustomerContact | CrContact) => {
     firstName: addressGetters.getFirstName(data),
     lastNameOrSurname: addressGetters.getLastNameOrSurname(data),
     address: addressGetters.getAddress(data?.address as CuAddress | CrAddress | null),
+    companyOrOrganization: data?.companyOrOrganization as string | null,
     phoneNumbers: addressGetters.getPhoneNumbers(data),
     email: addressGetters.getEmail(data),
     id: addressGetters.getContactId(data),
