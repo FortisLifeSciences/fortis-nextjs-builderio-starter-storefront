@@ -861,6 +861,11 @@ body {
 }
 .product-grid-view .ais-Hits-list {
   display: grid;
+  @media (max-width: 640px) {
+    justify-content: center;
+    justify-items: center;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 1rem;
   list-style: none;

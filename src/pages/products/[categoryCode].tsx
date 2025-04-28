@@ -276,7 +276,7 @@ const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facet
       {/* </div> */}
 
       {/* Right Column – Results */}
-      <Box sx={{ flex: 1, padding: { xs: '0', md: '20px' } }} id="productHitsView">
+      <Box sx={{ flex: 1, padding: { xs: '0', md: '20px 0 20px 20px' } }} id="productHitsView">
         <Box id="product-listing-section" sx={{ ...PLPStyles.plpGrid }}>
           <Box sx={{ ...PLPStyles.navBar }}>
             <Box sx={{ ...PLPStyles.navBarMain }}>
