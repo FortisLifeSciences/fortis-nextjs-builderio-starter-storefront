@@ -305,15 +305,15 @@ const MyHitsComponent = ({
       </Box>
 
       {/* Right Column – Results */}
-      <Box
-        sx={{
-          flex: 1,
-          padding: { xs: '0', md: '20px' },
+      <Box 
+        sx={{ 
+          flex: 1,  
           display: {
             xs: isFilterOpen ? 'none' : 'block',
             md: 'block',
-          },
-        }}
+          }, 
+          padding: { xs: '0', md: '20px 0 20px 20px' } 
+        }} 
         id="productHitsView"
       >
         <Box id="product-listing-section" sx={{ ...PLPStyles.plpGrid }}>
