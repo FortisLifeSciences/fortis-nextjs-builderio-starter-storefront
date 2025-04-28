@@ -760,6 +760,9 @@ body {
   .aa-DetachedSearchButtonQuery {
     display: none;
   }
+  .ais-Panel-header span {
+    font-size: 14px;
+  }
 }
 
 /*** quick access plugin css  ****/
