@@ -1,11 +1,25 @@
-import { Add, CheckBox, CheckBoxOutlineBlank, Remove } from '@mui/icons-material'
-import { Button, Checkbox, FormControlLabel, SxProps } from '@mui/material'
-import { Theme } from '@mui/material/styles'
+import { useState } from 'react'
+
+import { Add, ArrowForwardIos, CheckBox, CheckBoxOutlineBlank, Remove } from '@mui/icons-material'
+import {
+  Button,
+  Checkbox,
+  FormControlLabel,
+  InputAdornment,
+  TextField,
+  useMediaQuery,
+  SxProps,
+  Box,
+  Typography,
+} from '@mui/material'
+import { Theme, useTheme } from '@mui/material/styles'
 import { useRefinementList } from 'react-instantsearch-hooks-web'
+
+interface CustomRefinementListProps {
+  attribute: string
+  searchableAttributes: string[]
+}
 const style = {
-  stack: {
-    width: '100%',
-  },
   formControlLabel: {
     width: '100%',
     fontSize: (theme: Theme) => theme.typography.body2,
@@ -15,60 +29,150 @@ const style = {
       lineHeight: 'normal',
     },
   } as SxProps<Theme> | undefined,
-  formLabel: {
-    typography: 'body2',
-    color: 'text.primary',
-  },
   viewMore: {
     textTransform: 'capitalize',
     color: 'text.primary',
     pl: 0,
   },
+  searchInput: {
+    marginBottom: '8px',
+    width: '100%',
+    '& input': {
+      padding: '8px',
+      fontSize: '14px',
+      height: '32px',
+      borderRadius: '4px',
+      width: '100%',
+      margin: '16px 0',
+      borderBottom: 'none',
+    },
+  },
 }
 
-function CustomRefinementList({ attribute }: { attribute: string }) {
-  const { items, refine, isShowingMore, canToggleShowMore, toggleShowMore } = useRefinementList({
-    attribute,
-    showMore: true,
-    limit: 6,
-  })
-  const isHtml = (str: string) => {
-    if (!str) return ''
-    const tempElement = document.createElement('div')
-    tempElement.innerHTML = str
-    return tempElement.textContent as string
+function CustomRefinementList({ attribute, searchableAttributes }: CustomRefinementListProps) {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+
+  const isSearchable =
+    isMobile && Array.isArray(searchableAttributes) && searchableAttributes.includes(attribute)
+
+  const { items, refine, isShowingMore, canToggleShowMore, toggleShowMore, searchForItems } =
+    useRefinementList({
+      attribute,
+      showMore: true,
+      limit: 6,
+    })
+
+  const [query, setQuery] = useState('')
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setQuery(value)
+    searchForItems?.(value)
   }
 
   return (
     <div>
+      {/* Search Input (Mobile only) */}
+      {isMobile && isSearchable && (
+        <TextField
+          value={query}
+          onChange={handleSearch}
+          placeholder="Begin typing..."
+          variant="standard"
+          size="small"
+          fullWidth
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <ArrowForwardIos fontSize="small" sx={{ color: 'rgb(90, 72, 251)' }} />
+              </InputAdornment>
+            ),
+            disableUnderline: true, // remove default underline
+            sx: {
+              borderBottom: '1px solid',
+              borderColor: 'rgb(90, 72, 251)',
+              paddingBottom: '4px',
+            },
+          }}
+          sx={{
+            marginBottom: '8px',
+            width: '100%',
+            '& input': {
+              padding: '8px 0',
+              fontSize: '18px',
+              fontWeight: 500,
+              color: 'rgb(48, 41, 154)',
+              '&::placeholder': {
+                color: 'text.secondary',
+              },
+            },
+            '& .MuiInput-root': {
+              '&:before, &:after': {
+                display: 'none',
+              },
+              '&:hover:not(.Mui-disabled):before': {
+                display: 'none',
+              },
+            },
+          }}
+        />
+      )}
+
+      {/* Facet Items */}
       {items.map((item) => (
-        <FormControlLabel
+        <Box
           key={item.label}
-          sx={{ ...style.formControlLabel }}
-          control={
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+          sx={{ width: '100%' }}
+        >
+          {/* <Box display="flex" alignItems="center" flex="1">
             <Checkbox
               icon={<CheckBoxOutlineBlank />}
               checkedIcon={<CheckBox />}
               checked={item.isRefined}
+              onChange={() => refine(item.value)}
               size="small"
               inputProps={{
-                'aria-label': isHtml(item.label),
+                'aria-label': isMobile
+                  ? `${item.label} (${item.count})`
+                  : item.label,
               }}
-              onChange={() => refine(item.value)}
             />
-          }
-          //label={`${item.label} (${item.count})`}
-          label={`${item.label}`}
-        />
+            <Typography variant="body2" fontSize={'16px'}>{item.label}</Typography>
+          </Box> */}
+          <FormControlLabel
+            control={
+              <Checkbox
+                icon={<CheckBoxOutlineBlank />}
+                checkedIcon={<CheckBox />}
+                checked={item.isRefined}
+                onChange={() => refine(item.value)}
+                size="small"
+                inputProps={{
+                  'aria-label': isMobile ? `${item.label} (${item.count})` : item.label,
+                }}
+              />
+            }
+            label={item.label}
+            sx={style.formControlLabel}
+          />
+
+          {/* Count on mobile only */}
+          {isMobile && (
+            <Typography variant="body2" color="text.primary" fontSize={'16px'}>
+              ({item.count})
+            </Typography>
+          )}
+        </Box>
       ))}
+
       {canToggleShowMore && (
         <Button
           onClick={toggleShowMore}
-          style={{ marginTop: '8px', fontSize: '1rem' }}
           variant="text"
-          name={isShowingMore ? 'View Less' : 'View More'}
-          aria-label={isShowingMore ? 'View Less' : 'View More'}
-          sx={{ ...style.viewMore }}
+          sx={{ ...style.viewMore, marginTop: '8px', fontSize: '16px' }}
           startIcon={isShowingMore ? <Remove fontSize="small" /> : <Add fontSize="small" />}
         >
           {isShowingMore ? 'View Less' : 'View More'}

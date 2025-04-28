@@ -22,8 +22,6 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import {
   InstantSearch,
-  SearchBox,
-  RefinementList,
   useInfiniteHits,
   useConfigure,
   DynamicWidgets,
@@ -33,12 +31,13 @@ import {
   Pagination,
 } from 'react-instantsearch-hooks-web'
 
+import { FullWidthDivider } from '@/components/common'
 import { PLPStyles } from '@/components/page-templates/ProductListingTemplate/ProductListingTemplate.styles'
 import { ProductHitListView, ProductHitGridView } from '@/components/product'
 import CustomRefinementList from '@/components/product/AlgoliaFacets/CustomRefinementList'
 import CustomSortBy from '@/components/product/AlgoliaFacets/CustomSortBy'
 import DesktopRefinement from '@/components/product/AlgoliaFacets/DesktopRefinment'
-import { productIndex, searchClient } from '@/lib/api/util/algolia'
+import { getStaticSearchableFacets, productIndex, searchClient } from '@/lib/api/util/algolia'
 import { getFacetLabel } from '@/lib/helpers/facetMapping'
 import type { MetaData, PageWithMetaData } from '@/lib/types'
 
@@ -55,6 +54,7 @@ interface CategoryPageType extends PageWithMetaData {
   categoryCode?: string
   section?: any
   facets: Record<string, any>
+  searchableAttributes: any
 }
 
 interface RefinementListItem {
@@ -111,6 +111,7 @@ export async function getStaticProps(
     filters: `category_pages:${categoryCode}`,
     facets: ['*'],
   })
+  const searchableAttributes = getStaticSearchableFacets()
 
   return {
     props: {
@@ -119,12 +120,21 @@ export async function getStaticProps(
       section: builderSection || null,
       ...(await serverSideTranslations(locale as string, ['common'])),
       facets,
+      searchableAttributes,
     } as CategoryPageType,
     revalidate: 60,
   }
 }
 
-const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facets: any }) => {
+const MyHitsComponent = ({
+  categoryCode,
+  facets,
+  searchableAttributes,
+}: {
+  categoryCode: string
+  facets: any
+  searchableAttributes: any
+}) => {
   const infiniteHits = useInfiniteHits<BaseHit>(),
     results = infiniteHits.results,
     isMobile = useMediaQuery('(max-width:600px)')
@@ -140,7 +150,7 @@ const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facet
   const facetKeys = Object.keys(algoliaFacets || {})
   const expandedFacetsRef = useRef<{ [key: string]: boolean }>({})
   const [, forceUpdate] = useState(0) // manual trigger
-
+  const categoryCodeVal = categoryCode
   useConfigure({
     hitsPerPage: 15,
     filters: `category_pages:${categoryCode}`,
@@ -170,7 +180,11 @@ const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facet
       >
         <Box
           className="ais-Panel-header"
-          onClick={() => toggleFacet(attribute)}
+          onClick={(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+            toggleFacet(attribute)
+          }}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -181,14 +195,17 @@ const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facet
           }}
         >
           <span>{getFacetLabel(attribute)}</span>
-          <span>{isExpanded ? <ExpandLess /> : <ExpandMore />}</span>
+          <span style={{ color: 'rgba(0, 0, 0, 0.54)' }}>
+            {isExpanded ? <ExpandLess /> : <ExpandMore />}
+          </span>
         </Box>
 
-        {isExpanded && (
-          <div className="ais-Panel-body" style={{ padding: '8px 0' }}>
-            <CustomRefinementList attribute={attribute} />
-          </div>
-        )}
+        <div
+          className="ais-Panel-body"
+          style={{ padding: '8px 0', display: isExpanded ? 'block' : 'none' }}
+        >
+          <CustomRefinementList attribute={attribute} searchableAttributes={searchableAttributes} />
+        </div>
       </Box>
     )
   }
@@ -202,24 +219,9 @@ const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facet
             sm: 'none',
           },
         }}
-      >
-        {/* <Button
-          onClick={() => setIsFilterOpen(!isFilterOpen)}
-          variant="outlined"
-          endIcon={<Add fontSize="small" />}
-          sx={{ ...PLPStyles.filterByButton, width: '50%' }}
-        >
-          Filter By
-        </Button> */}
-      </Box>
+      ></Box>
       {/* Left Column – Filters */}
-      {/* <div
-        style={{
-          width: isMobile ? '100%' : '250px',
-          padding: '20px',
-          borderRight: isMobile ? 'none' : '1px solid #ddd',
-        }}
-      > */}
+
       <Box
         className="FacetSection"
         id="facetView"
@@ -249,7 +251,7 @@ const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facet
             sm: 'auto',
           },
           height: {
-            xs: '100vh',
+            xs: 'auto',
             sm: 'auto',
           },
           boxShadow: {
@@ -263,20 +265,57 @@ const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facet
           sx={{ flex: 1, overflowY: 'auto', ...PLPStyles.FacetsContainer }}
           className="FacetsContainer"
         >
-          <Box className="FacetsInnerContainer" sx={{ ...PLPStyles.FacetsInnerContainer }}>
-            <DynamicWidgets fallbackComponent={FallbackComponent} />
-          </Box>
+          {!isMobile && (
+            <Box className="FacetsInnerContainer" sx={{ ...PLPStyles.FacetsInnerContainer }}>
+              <DynamicWidgets fallbackComponent={FallbackComponent} />
+            </Box>
+          )}
+          {isMobile && (
+            // <Box className="FacetsInnerContainer" sx={{ ...PLPStyles.FacetsInnerContainer }}>
+            //   <DynamicWidgets fallbackComponent={FallbackComponent} />
+            // </Box>
+            <Box sx={{ display: { md: 'none' } }}>
+              <FullWidthDivider />
+              <Box sx={{ ...PLPStyles.navBarMainMobile }}>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  sx={{ textTransform: 'capitalize' }}
+                  onClick={onFilterByClose}
+                >
+                  Hide Filters
+                </Button>
+                <Box sx={{ ...PLPStyles.upperTotal }}>
+                  {t('no-of-products', { count: results?.nbHits ?? 0 })}
+                </Box>
+              </Box>
+              <FullWidthDivider />
+              <DynamicWidgets fallbackComponent={FallbackComponent} />
+              {isFilterOpen && (
+                <Box sx={{ mt: 'auto', ...PLPStyles.filterByMobileButtons }}>
+                  <FilterControls onClose={onFilterByClose} />
+                </Box>
+              )}
+              <Box sx={{ ...PLPStyles.lowerTotal }}>
+                {results?.nbHits && <Box>{t('results', { count: results?.nbHits ?? 0 })}</Box>}
+              </Box>
+            </Box>
+          )}
         </Box>
-        {isFilterOpen && (
-          <Box sx={{ mt: 'auto' }}>
-            <FilterControls onClose={onFilterByClose} />
-          </Box>
-        )}
       </Box>
-      {/* </div> */}
 
       {/* Right Column – Results */}
-      <Box sx={{ flex: 1, padding: { xs: '0', md: '20px' } }} id="productHitsView">
+      <Box
+        sx={{
+          flex: 1,
+          padding: { xs: '0', md: '20px' },
+          display: {
+            xs: isFilterOpen ? 'none' : 'block',
+            md: 'block',
+          },
+        }}
+        id="productHitsView"
+      >
         <Box id="product-listing-section" sx={{ ...PLPStyles.plpGrid }}>
           <Box sx={{ ...PLPStyles.navBar }}>
             <Box sx={{ ...PLPStyles.navBarMain }}>
@@ -350,7 +389,7 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
   const { publicRuntimeConfig } = getConfig()
   const categoryCode = (props.categoryCode as string) || (router.query.categoryCode as string)
   const facets = props.facets
-
+  const searchableAttributes = props.searchableAttributes
   return (
     <>
       <BuilderComponent
@@ -359,7 +398,11 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
       />
 
       <InstantSearch searchClient={searchClient} indexName="products">
-        <MyHitsComponent categoryCode={categoryCode} facets={facets} />
+        <MyHitsComponent
+          categoryCode={categoryCode}
+          facets={facets}
+          searchableAttributes={searchableAttributes}
+        />
       </InstantSearch>
     </>
   )
@@ -376,8 +419,8 @@ const FilterControls = ({ onClose }: { onClose: () => void }) => {
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-around',
-        padding: '1rem',
-        borderTop: '1px solid #ddd',
+        padding: '0 1rem 1rem 1rem',
+        //borderTop: '1px solid #ddd',
         backgroundColor: '#fff',
       }}
     >
@@ -393,7 +436,7 @@ const FilterControls = ({ onClose }: { onClose: () => void }) => {
       <Button
         variant="contained"
         color="primary"
-        sx={{ textTransform: 'capitalize' }}
+        sx={{ textTransform: 'capitalize', backgroundColor: 'rgb(76, 71, 196)' }}
         onClick={onClose}
       >
         {t('view-results')}
