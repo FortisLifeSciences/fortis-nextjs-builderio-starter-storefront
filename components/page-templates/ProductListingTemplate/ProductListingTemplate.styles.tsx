@@ -192,7 +192,34 @@ export const PLPStyles = {
   },
   Facetpanel: {
     padding: {
-      xs: '0 20px',
+      xs: '0 32px',
+      md: '0',
+      lg: '0',
     },
+  },
+  lowerTotal: {
+    display: 'flex',
+    justifyContent: 'center',
+    typography: 'body2',
+    color: 'text.primary',
+    fontWeight: 'bold',
+  },
+  navBarMainMobile: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: '1rem 2rem',
+  },
+  upperTotal: {
+    typography: 'body2',
+    color: 'grey.600',
+    whiteSpace: 'nowrap',
+  },
+  filterByMobileButtons: {
+    //display: 'flex',
+    //justifyContent: 'space-evenly',
+    boxShadow: 0,
+    margin: '1rem 0',
   },
 }
