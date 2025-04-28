@@ -6,6 +6,7 @@ import { autocomplete, getAlgoliaResults, AutocompletePlugin } from '@algolia/au
 import { createQuerySuggestionsPlugin } from '@algolia/autocomplete-plugin-query-suggestions'
 import algoliasearch from 'algoliasearch'
 import '@algolia/autocomplete-theme-classic'
+import { useRouter } from 'next/router'
 
 import fortisLogo from '@/assets/fortisLogo.png'
 import resourceTypeArr from '@/components/common/ResourceTypeArr'
@@ -26,6 +27,12 @@ const searchClient = algoliasearch(appId, apiKey)
 
 const AlgoliaAutocomplete = () => {
   const containerRef = useRef<HTMLDivElement | null>(null)
+
+  //redirect to search page
+  const router = useRouter()
+  const handleEnterSearch = (value: string) => {
+    router.push({ pathname: '/search', query: { query: value } }) // 👈 updated
+  }
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -171,8 +178,14 @@ const AlgoliaAutocomplete = () => {
           getItemInputValue({ item }) {
             return item.query
           },
-          onSelect({ setIsOpen }) {
+          /*onSelect({ setIsOpen }) {
             setIsOpen(true)
+          },*/
+          onSelect({ item, setIsOpen }) {
+            if (typeof window !== 'undefined') {
+              router.push({ pathname: '/search', query: { query: item.query } })
+              setIsOpen(true)
+            }
           },
           templates: {
             header() {
@@ -231,6 +244,9 @@ const AlgoliaAutocomplete = () => {
       openOnFocus: true,
       insights: true,
       plugins: [querySuggestionsPlugin, popularPlugin, quickAccessPlugin],
+      onSubmit({ state }) {
+        handleEnterSearch(state.query) // 👈 This runs on enter
+      },
 
       getSources: async ({ query }) => {
         const sources: any[] = []
@@ -406,10 +422,6 @@ const AlgoliaAutocomplete = () => {
                 const resourceTypeObj = resourceTypeArr.find(
                   (data) => data.resourceType === resourceType
                 )
-
-                // Log for debugging
-                console.log(`Resource Type for "${title}":`, resourceTypeObj?.resourceType)
-                console.log(`Resource Value for "${title}":`, resourceTypeObj?.value)
 
                 const iconHTML = `<span class="material-symbols-outlined">${
                   resourceTypeObj?.value || resourceType

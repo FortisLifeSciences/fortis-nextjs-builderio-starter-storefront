@@ -1,19 +1,38 @@
 import { useEffect, useState } from 'react'
 
+import algoliasearch from 'algoliasearch/lite'
+import 'swiper/css'
+import 'swiper/css/navigation'
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
-import { ProductListingTemplate } from '@/components/page-templates'
+import ResourceSearchSliders from '@/components/layout/Algolia/ResourceSearchSliders'
 import { useGetSearchedProducts } from '@/hooks'
 import { productSearch } from '@/lib/api/operations'
-import { facetGetters, productSearchGetters } from '@/lib/getters'
 import type { CategorySearchParams, MetaData, PageWithMetaData } from '@/lib/types'
 
-import type { Facet, FacetValue, Product, ProductSearchResult } from '@/lib/gql/types'
+import type { ProductSearchResult } from '@/lib/gql/types'
+import type { SearchResponse } from '@algolia/client-search'
 import type { NextPage, GetServerSidePropsContext, GetServerSideProps, NextApiRequest } from 'next'
 
+const searchClient = algoliasearch('YQAIETZ5F1', 'c2cc99ace97599deaf1606dba442f9ae')
+
+type BuilderPageHit = {
+  objectID: string
+  data?: {
+    title?: string
+    image?: string
+    description?: string
+    contentType?: string
+    resourceType?: string
+    resourceCategory?: string
+  }
+  meta?: {
+    lastPreviewUrl?: string
+  }
+}
 interface SearchPageType extends PageWithMetaData {
   results: ProductSearchResult
 }
@@ -39,7 +58,7 @@ export const getServerSideProps: GetServerSideProps = async (
     } as CategorySearchParams,
     context.req as NextApiRequest
   )
-  const { locale, res } = context
+  const { locale } = context
 
   return {
     props: {
@@ -57,6 +76,26 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
     router.query as unknown as CategorySearchParams
   )
 
+  const [manualSearchResults, setManualSearchResults] = useState<SearchResponse<unknown>[] | null>(
+    null
+  )
+
+  const searchQuery = router?.query?.query || ''
+  console.log('searchQuery:', searchQuery)
+
+  useEffect(() => {
+    if (!searchQuery && router.query.search && !router.query.query) {
+      const { search, ...rest } = router.query
+      router.replace({
+        pathname: router.pathname,
+        query: {
+          ...rest,
+          query: search,
+        },
+      })
+    }
+  }, [router.query, router])
+
   const { data: searchPageResults, isFetching } = useGetSearchedProducts(
     {
       ...searchParams,
@@ -65,89 +104,90 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
     props.results
   )
 
-  const breadcrumbs = [{ text: 'Home', link: '/' }]
-  const searchPageHeading = router?.query?.search
+  const breadcrumbs = [{ text: 'Home > Search Results', link: '/' }]
+  const searchPageHeading = searchQuery
     ? t('search-results', {
         m: `${searchPageResults?.totalCount || 0}`,
-        n: `"${router?.query?.search}"`,
+        n: `"${searchQuery}"`,
       })
     : breadcrumbs[breadcrumbs.length - 1].text
 
-  const facetList = searchPageResults?.facets as Facet[]
-  const products = searchPageResults?.items as Product[]
-  const appliedFilters = facetGetters.getSelectedFacets(searchPageResults?.facets as Facet[])
-  const sortingValues = facetGetters.getSortOptions(
-    {
-      ...searchPageResults,
-      input: { sort: router.query?.sort as string },
-    },
-    publicRuntimeConfig.productListing.sortOptions
-  )
-  const categoryFacet = productSearchGetters.getCategoryFacet(searchPageResults, '')
-
-  const changeSorting = (sort: string) => {
-    router.push(
-      {
-        pathname: router?.pathname,
-        query: {
-          ...router.query,
-          sort,
-        },
-      },
-      undefined,
-      { scroll: false, shallow: true }
-    )
-  }
-
-  const changePagination = (value: any) => {
-    router.push({
-      pathname: router?.pathname,
-      query: {
-        ...router.query,
-        ...value,
-      },
-    })
-  }
-
   useEffect(() => {
-    setSearchParams(router.query as unknown as CategorySearchParams)
-  }, [router.query])
+    if (searchQuery) {
+      const query = Array.isArray(searchQuery) ? searchQuery.join(' ') : searchQuery
 
-  // When InfiniteScroll is needed, use this.
-  const handleInfiniteScroll = () => {
-    const pageSize = searchPageResults?.pageSize + publicRuntimeConfig.productListing.pageSize
-    router.push(
-      {
-        pathname: router?.pathname,
-        query: {
-          ...router.query,
-          pageSize,
-        },
-      },
-      undefined,
-      { scroll: false, shallow: true }
-    )
-  }
+      searchClient
+        .search([
+          {
+            indexName: 'builder-page',
+            params: {
+              query,
+            },
+          },
+          {
+            indexName: 'products',
+            params: {
+              query,
+              hitsPerPage: 10,
+            },
+          },
+        ])
+        .then((res) => {
+          console.log('Manual multi-index search results:', res)
+          const filteredResults = res.results.filter(
+            (result) => (result as SearchResponse<unknown>).hits !== undefined
+          )
+          setManualSearchResults(filteredResults as SearchResponse<unknown>[])
+        })
+        .catch((err) => {
+          console.error('Search error:', err)
+        })
+    } else {
+      setManualSearchResults(null)
+    }
+  }, [searchQuery, searchClient])
 
   return (
     <>
-      <ProductListingTemplate
-        productListingHeader={searchPageHeading as string}
-        categoryFacet={categoryFacet}
-        facetList={facetList}
-        sortingValues={sortingValues}
-        products={products}
-        totalResults={searchPageResults?.totalCount}
-        pageSize={searchPageResults?.pageSize}
-        pageCount={searchPageResults?.pageCount}
-        startIndex={searchPageResults?.startIndex}
-        breadCrumbsList={breadcrumbs}
-        isLoading={isFetching}
-        appliedFilters={appliedFilters as FacetValue[]}
-        onSortItemSelection={changeSorting}
-        // onPaginationChange={changePagination}
-        onInfiniteScroll={handleInfiniteScroll}
-      />
+      {/* Manual Search Results Display */}
+      {manualSearchResults === null ? (
+        <p> Loading search results...</p>
+      ) : (
+        manualSearchResults.map((result, index) => {
+          if (result.index === 'builder-page') {
+            const hits = result.hits as BuilderPageHit[]
+            const resourceHits = hits
+              .filter((hit) => hit.data?.contentType === 'Resource')
+              .slice(0, 10)
+            const nonResourceHits = hits
+              .filter((hit) => hit.data?.contentType !== 'Resource')
+              .slice(0, 10)
+
+            return (
+              <ResourceSearchSliders
+                key={index}
+                nonResourceHits={nonResourceHits}
+                resourceHits={resourceHits}
+                query={result.query || ''}
+                index={index}
+              />
+            )
+          }
+
+          return (
+            <div key={index} style={{ marginBottom: '2rem' }}>
+              <h4>Index: {result.index}</h4>
+              <ul>
+                {result.hits.slice(0, 10).map((hit: any, i: number) => (
+                  <li key={`prod-${i}`}>
+                    <strong>{hit.product_name || 'No title'}</strong>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
+        })
+      )}
     </>
   )
 }
