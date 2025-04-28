@@ -15,7 +15,12 @@ export const ProductCardStyles = {
     padding: '0.625rem',
     backgroundColor: 'secondary.light',
     textDecoration: 'none',
-    width: 260,
+    '@media (min-width: 1024px)': {
+      width: 260,
+    },
+    '@media (max-width: 1023px)': {
+      minWidth: '230px',
+    },
     maxWidth: 260,
     height: 345,
     boxShadow: 'none',
