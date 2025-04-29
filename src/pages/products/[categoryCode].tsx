@@ -262,7 +262,7 @@ const MyHitsComponent = ({
         }}
       >
         <Box
-          sx={{ flex: 1, overflowY: 'auto', ...PLPStyles.FacetsContainer }}
+          sx={{ flex: 1, overflow: 'hidden', ...PLPStyles.FacetsContainer }}
           className="FacetsContainer"
         >
           {!isMobile && (
