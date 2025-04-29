@@ -12,3 +12,5 @@ export { default as ProductCardListView } from './ProductCardListView/ProductCar
 export { default as ProductRecentDocuments } from './ProductRecentDocuments/ProductRecentDocuments'
 export { default as ProductHitListView } from './ProductHit/ProductHitListView'
 export { default as ProductHitGridView } from './ProductHit/ProductHitGridView'
+export { default as ResourceHitListView } from './ProductHit/ResourceHitListView'
+export { default as ResourceHitGridView } from './ProductHit/ResourceHitGridView'
