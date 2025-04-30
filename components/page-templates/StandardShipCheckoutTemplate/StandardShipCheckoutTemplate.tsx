@@ -156,7 +156,7 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
       const orderPayments = orderGetters.getNewOrderPayments(order as CrOrder)
       await createOrder.mutateAsync(order)
       if (orderPayments[0]?.billingInfo?.card?.isCardInfoSaved === false) {
-        const address = {
+        const address: any = {
           ...orderPayments[0].billingInfo.billingContact.address,
           contact: {
             ...orderPayments[0].billingInfo.billingContact,
