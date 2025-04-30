@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, PropsWithChildren, useCallback } from 'react'
 
-import { BuilderComponent, builder } from '@builder.io/react'
 import { Add, ExpandLess, ExpandMore } from '@mui/icons-material'
 import Apps from '@mui/icons-material/Apps'
 import ReorderRounded from '@mui/icons-material/ReorderRounded'
@@ -15,15 +14,10 @@ import {
   Stack,
   useMediaQuery,
 } from '@mui/material'
-import algoliasearch from 'algoliasearch'
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import {
-  InstantSearch,
-  SearchBox,
-  RefinementList,
   useInfiniteHits,
   useConfigure,
   DynamicWidgets,
@@ -31,7 +25,6 @@ import {
   useCurrentRefinements,
   Hits,
   Pagination,
-  Configure,
 } from 'react-instantsearch-hooks-web'
 
 import { PLPStyles } from '@/components/page-templates/ProductListingTemplate/ProductListingTemplate.styles'
@@ -39,98 +32,44 @@ import { ResourceHitListView, ResourceHitGridView } from '@/components/product'
 import CustomRefinementList from '@/components/product/AlgoliaFacets/CustomRefinementList'
 import CustomSortBy from '@/components/product/AlgoliaFacets/CustomSortBy'
 import DesktopRefinement from '@/components/product/AlgoliaFacets/DesktopRefinment'
-import { productIndex, searchClient } from '@/lib/api/util/algolia'
 import { getFacetLabel } from '@/lib/helpers/facetMapping'
-import type { MetaData, PageWithMetaData } from '@/lib/types'
 
 import type { BaseHit } from 'instantsearch.js'
-import type {
-  GetStaticPathsResult,
-  GetStaticPropsContext,
-  GetStaticPropsResult,
-  NextPage,
-} from 'next'
 
-interface CategoryPageType extends PageWithMetaData {
-  seoFriendlyUrl?: string
-  categoryCode?: string
-  section?: any
-  facets: Record<string, any>
-}
-
-interface RefinementListItem {
-  label: string
-  value: string
-  count: number
-  isRefined: boolean
-}
-
-const { publicRuntimeConfig } = getConfig()
-const apiKey = publicRuntimeConfig?.builderIO?.apiKey
-
-builder.init(apiKey)
-
-function getMetaData(data: any): MetaData {
-  return {
-    title: data?.title || null,
-    description: data?.description || null,
-    keywords: data?.metaTagKeywords || null,
-    canonicalUrl: null,
-    robots: null,
-  }
-}
-
-export async function getStaticPaths() {
-  const response = await productIndex.search('', {
-    facets: ['category_url'],
-  })
-  const categories = response?.facets?.category_url
-
-  const paths = categories
-    ? Object.keys(categories).map((categoryCode) => ({
-        params: { categoryCode },
-      }))
-    : []
-
-  return { paths, fallback: 'blocking' }
-}
-
-export async function getStaticProps(
-  context: GetStaticPropsContext
-): Promise<GetStaticPropsResult<CategoryPageType>> {
-  const { locale, params } = context
-  const { publicRuntimeConfig } = getConfig()
-  const { categoryCode } = params as { categoryCode: string }
-  console.log('categoryCode', categoryCode)
-  const categoryTopSection = publicRuntimeConfig?.builderIO?.modelKeys?.categoryTopSection || ''
-  const builderSection = await builder
-    .get(categoryTopSection, {
-      userAttributes: { slug: `resources-${categoryCode}`, urlPath: `/resources/${categoryCode}` },
-    })
-    .promise()
-  const { hits: products, facets } = await productIndex.search('', {
-    filters: `category_url:"resources/${categoryCode}"`,
-    facets: ['*'],
-  })
-
-  return {
-    props: {
-      categoryCode,
-      metaData: getMetaData(builderSection?.data),
-      section: builderSection || null,
-      ...(await serverSideTranslations(locale as string, ['common'])),
-      facets,
-    } as CategoryPageType,
-    revalidate: 60,
-  }
-}
-
-const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facets: any }) => {
+const ResourcesHitComponent = ({ categoryCode, facets }: { categoryCode: string; facets: any }) => {
   const infiniteHits = useInfiniteHits<BaseHit>(),
     results = infiniteHits.results,
     isMobile = useMediaQuery('(max-width:600px)')
   const [isListView, setIsListView] = useState<boolean>(true)
   const { t } = useTranslation('common')
+
+  useEffect(() => {
+    if (!isListView) {
+      const syncHeights = () => {
+        const elements = document.querySelectorAll('.resourceCardGrid')
+        let maxHeight = 0
+
+        elements.forEach((el) => {
+          ;(el as HTMLElement).style.height = 'auto'
+          const height = (el as HTMLElement).offsetHeight
+          maxHeight = Math.max(maxHeight, height)
+        })
+
+        elements.forEach((el) => {
+          ;(el as HTMLElement).style.height = `${maxHeight}px`
+        })
+      }
+
+      // Wait for layout
+      const raf = requestAnimationFrame(syncHeights)
+      window.addEventListener('resize', syncHeights)
+
+      return () => {
+        cancelAnimationFrame(raf)
+        window.removeEventListener('resize', syncHeights)
+      }
+    }
+  }, [results, isListView])
 
   // const [expandedFacets, setExpandedFacets] = useState<{ [key: string]: boolean }>({})
   // const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -141,11 +80,6 @@ const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facet
   const facetKeys = Object.keys(algoliaFacets || {})
   const expandedFacetsRef = useRef<{ [key: string]: boolean }>({})
   const [, forceUpdate] = useState(0) // manual trigger
-
-  // useConfigure({
-  //   hitsPerPage: 15,
-  //   filters: `category_url:"resources/${categoryCode}"`,
-  // } as any)
 
   const toggleFacet = (attribute: string) => {
     expandedFacetsRef.current[attribute] = !expandedFacetsRef.current[attribute]
@@ -330,11 +264,11 @@ const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facet
           </Box>
           <Box className={isListView ? 'product-list-view' : 'product-grid-view'}>
             {isMobile ? (
-              <Hits hitComponent={ResourceHitListView} />
+              <Hits hitComponent={ResourceHitGridView} />
             ) : isListView ? (
               <Hits hitComponent={ResourceHitListView} />
             ) : (
-              <Hits hitComponent={ResourceHitListView} />
+              <Hits hitComponent={ResourceHitGridView} />
             )}
           </Box>
         </Box>
@@ -346,32 +280,6 @@ const MyHitsComponent = ({ categoryCode, facets }: { categoryCode: string; facet
   )
 }
 
-const CategoryPage: NextPage<CategoryPageType> = (props) => {
-  const router = useRouter()
-  const { publicRuntimeConfig } = getConfig()
-  const categoryCode = (props.categoryCode as string) || (router.query.categoryCode as string)
-  const facets = props.facets
-
-  console.log(' categoryCode :::::', categoryCode)
-
-  return (
-    <>
-      <BuilderComponent
-        model={publicRuntimeConfig?.builderIO?.modelKeys?.categoryTopSection}
-        content={props.section}
-      />
-
-      <InstantSearch searchClient={searchClient} indexName="builder-page">
-        {/* <MyHitsComponent categoryCode={categoryCode} facets={facets} /> */}
-        <Configure
-          {...({ hitsPerPage: 12, filters: `category_url:"resources/${categoryCode}"` } as any)}
-        />
-        <MyHitsComponent categoryCode={categoryCode} facets={facets} />
-      </InstantSearch>
-    </>
-  )
-}
-// Create a subcomponent that uses the hooks
 const FilterControls = ({ onClose }: { onClose: () => void }) => {
   const { t } = useTranslation('common')
   const { refine: clearFilters } = useClearRefinements()
@@ -409,4 +317,4 @@ const FilterControls = ({ onClose }: { onClose: () => void }) => {
   )
 }
 
-export default CategoryPage
+export default ResourcesHitComponent
