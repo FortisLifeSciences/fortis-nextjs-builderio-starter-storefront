@@ -50,13 +50,15 @@ const ResourcesHitComponent = ({ categoryCode, facets }: { categoryCode: string;
         let maxHeight = 0
 
         elements.forEach((el) => {
-          ;(el as HTMLElement).style.height = 'auto'
-          const height = (el as HTMLElement).offsetHeight
+          const element = el as HTMLElement
+          element.style.height = 'auto'
+          const height = element.offsetHeight
           maxHeight = Math.max(maxHeight, height)
         })
 
         elements.forEach((el) => {
-          ;(el as HTMLElement).style.height = `${maxHeight}px`
+          const element = el as HTMLElement
+          element.style.height = `${maxHeight}px`
         })
       }
 

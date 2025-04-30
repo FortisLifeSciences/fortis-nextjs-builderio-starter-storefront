@@ -102,7 +102,6 @@ const pdpBrandLogos: Record<string, string> = {
 }
 
 const ProductHitListView = ({ hit }: { hit: Resources }): JSX.Element => {
-  console.log('hit.data', hit)
   const imageHeight = 180,
     placeholderImageUrl = DefaultImage,
     title = hit?.data?.title,
