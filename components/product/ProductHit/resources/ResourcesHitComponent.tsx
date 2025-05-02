@@ -36,6 +36,13 @@ import { getFacetLabel } from '@/lib/helpers/facetMapping'
 
 import type { BaseHit } from 'instantsearch.js'
 
+interface RefinementListItem {
+  label: string
+  value: string
+  count: number
+  isRefined: boolean
+}
+
 const ResourcesHitComponent = ({ categoryCode, facets }: { categoryCode: string; facets: any }) => {
   const infiniteHits = useInfiniteHits<BaseHit>(),
     results = infiniteHits.results,
@@ -123,7 +130,7 @@ const ResourcesHitComponent = ({ categoryCode, facets }: { categoryCode: string;
 
         {isExpanded && (
           <div className="ais-Panel-body" style={{ padding: '8px 0' }}>
-            <CustomRefinementList attribute={attribute} />
+            <CustomRefinementList attribute={attribute} searchableAttributes={[]} />
           </div>
         )}
       </Box>
