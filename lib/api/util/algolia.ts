@@ -13,4 +13,9 @@ const ALGOLIA_INDEX_NAME = 'products'
 const searchClient = algoliasearch(ALGOLIA_APP_ID, ALGOLIA_SEARCH_KEY)
 const productIndex = searchClient.initIndex(ALGOLIA_INDEX_NAME)
 
+// Fallback list of searchable attributes
+export const getStaticSearchableFacets = (): string[] => {
+  return ['conjugate', 'host', 'reactivity']
+}
+
 export { productIndex, searchClient }

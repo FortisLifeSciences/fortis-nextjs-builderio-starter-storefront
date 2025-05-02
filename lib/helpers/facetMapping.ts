@@ -5,60 +5,72 @@ export type FacetLabelMapping = {
 
 export const facetLabelMapping: FacetLabelMapping[] = [
   {
+    facetValue: 'applications',
+    label: 'Application',
+  },
+  {
     facetValue: 'brand',
     label: 'Brand',
   },
   {
-    facetValue: 'reactivity',
-    label: 'Reactivity',
-  },
-  {
-    facetValue: 'applications',
-    label: 'Applications',
-  },
-  {
-    facetValue: 'product_type',
-    label: 'Product Type',
-  },
-  {
-    facetValue: 'formulation',
-    label: 'Formulation',
-  },
-  {
-    facetValue: 'platforms',
-    label: 'Platforms',
+    facetValue: 'clonality',
+    label: 'Clonality',
   },
   {
     facetValue: 'conjugate',
     label: 'Conjugate',
   },
   {
-    facetValue: 'assay_range',
-    label: 'Assay Range',
+    facetValue: 'format',
+    label: 'Format',
   },
   {
-    facetValue: 'sample_type',
-    label: 'Sample Type',
-  },
-  {
-    facetValue: 'detection_method',
-    label: 'Detection Method',
+    facetValue: 'formulation',
+    label: 'Formulation',
   },
   {
     facetValue: 'host',
     label: 'Host',
   },
   {
-    facetValue: 'format',
-    label: 'Format',
-  },
-  {
     facetValue: 'immunogen',
     label: 'Immunogen',
   },
   {
-    facetValue: 'clonality',
-    label: 'Clonality',
+    facetValue: 'platform',
+    label: 'Platform',
+  },
+  {
+    facetValue: 'product_type',
+    label: 'Product Type',
+  },
+  {
+    facetValue: 'reactivity',
+    label: 'Reactivity',
+  },
+  {
+    facetValue: 'target',
+    label: 'Target',
+  },
+  {
+    facetValue: 'reactivity',
+    label: 'Reactivity',
+  },
+  {
+    facetValue: 'related_gene_info.research_areas_facet',
+    label: 'Research Area',
+  },
+  {
+    facetValue: 'data.researchAreas',
+    label: 'Research Area',
+  },
+  {
+    facetValue: 'data.resourceCategory',
+    label: 'Resource Category',
+  },
+  {
+    facetValue: 'data.resourceType',
+    label: 'Research Type',
   },
   {
     facetValue: 'data.resourceCategory',
