@@ -60,6 +60,14 @@ export const facetLabelMapping: FacetLabelMapping[] = [
     facetValue: 'clonality',
     label: 'Clonality',
   },
+  {
+    facetValue: 'data.resourceCategory',
+    label: 'Resource Category',
+  },
+  {
+    facetValue: 'data.resourceType',
+    label: 'Resource Type',
+  },
 ]
 
 export const getFacetLabel = (facetValue: string): string => {

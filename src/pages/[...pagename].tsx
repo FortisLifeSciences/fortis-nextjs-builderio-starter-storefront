@@ -46,26 +46,15 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     pagename = pathnameArr
   }
 
-  console.log('pagename', pagename)
-  // let resourcesPage = false
-  // let categoryCode
-  // if(pathnameArr?.length === 2){
-  //   categoryCode = pathnameArr?.[1]
-  //   resourcesPage = true
-  // } else if( pathnameArr?.length === 1 && pathnameArr?.[0] === 'resources') {
-  //   categoryCode = 'resources'
-  //   resourcesPage = true
-  // }
-
   let resourcesPage = false
-  let categoryCode = null
+  let resourceCategoryCode = null
 
   if (Array.isArray(pathnameArr)) {
     if (pathnameArr.length === 2 && pathnameArr[0] === 'resources') {
-      categoryCode = pathnameArr[1]
+      resourceCategoryCode = pathnameArr[1]
       resourcesPage = true
     } else if (pathnameArr.length === 1 && pathnameArr[0] === 'resources') {
-      categoryCode = 'resources'
+      resourceCategoryCode = 'resources'
       resourcesPage = true
     }
   }
@@ -73,38 +62,42 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const categoriesTree: CategoryTreeResponse = await getCategoryTree()
   const categoryTopSection = publicRuntimeConfig?.builderIO?.modelKeys?.categoryTopSection || ''
 
-  const section = await builder
-    .get(categoryTopSection, {
-      userAttributes: {
-        slug: `resources-${categoryCode}`,
-        urlPath: `/${pagename}`,
-      },
-    })
-    .toPromise()
-
+  let section = []
   let products = []
   let facets = null
+  let page = []
 
-  if (resourcesPage && categoryCode) {
+  if (resourcesPage && resourceCategoryCode) {
     const result = await productIndex.search('', {
-      filters: `category_url:"resources${categoryCode !== 'resources' ? `/${categoryCode}` : ''}"`,
+      filters: `category_url:"resources${
+        resourceCategoryCode !== 'resources' ? `/${resourceCategoryCode}` : ''
+      }"`,
       facets: ['*'],
     })
     products = result.hits
     facets = result.facets
+
+    section = await builder
+      .get(categoryTopSection, {
+        userAttributes: {
+          slug: `resources-${resourceCategoryCode}`,
+          urlPath: `/${pagename}`,
+        },
+      })
+      .toPromise()
+  } else {
+    page = await builder
+      .get(publicRuntimeConfig?.builderIO?.modelKeys?.defaultPage, {
+        userAttributes: {
+          urlPath: `"/"${pagename}`,
+        },
+      })
+      .toPromise()
+
+    if (!page) {
+      return { notFound: true } // This will render `pages/404.tsx`
+    }
   }
-
-  const page = await builder
-    .get(publicRuntimeConfig?.builderIO?.modelKeys?.defaultPage, {
-      userAttributes: {
-        urlPath: `"/"${pagename}`,
-      },
-    })
-    .toPromise()
-
-  // if (!page) {
-  //   return { notFound: true } // This will render `pages/404.tsx`
-  // }
 
   return {
     props: {
@@ -113,7 +106,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       categoriesTree,
       section: section || null,
       resourcesPage: resourcesPage,
-      categoryCode: categoryCode || null,
+      resourceCategoryCode: resourceCategoryCode || null,
       facets: facets || null,
       ...(await serverSideTranslations(locale as string, ['common'])),
     },
@@ -121,10 +114,14 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 }
 
 const Page = (props: any) => {
-  const { page, resourcesPage, section, categoryCode, facets } = props
-  const noIndex = page?.data?.noIndex || false
+  const { page, resourcesPage, section, resourceCategoryCode, facets } = props
+  const noIndex = page?.data?.noIndex
+    ? page?.data?.noIndex
+    : section?.data?.noIndex
+    ? section?.data?.noIndex
+    : false
 
-  if (resourcesPage && categoryCode) {
+  if (resourcesPage && resourceCategoryCode) {
     return (
       <>
         <Head>{noIndex && <meta name="robots" content="noindex,nofollow" />}</Head>
@@ -135,13 +132,15 @@ const Page = (props: any) => {
         <InstantSearch searchClient={searchClient} indexName="builder-page">
           <Configure
             {...({
-              hitsPerPage: 12,
+              hitsPerPage: 15,
               filters: `category_url:"${
-                categoryCode === 'resources' ? 'resources' : `resources/${categoryCode}`
+                resourceCategoryCode === 'resources'
+                  ? 'resources'
+                  : `resources/${resourceCategoryCode}`
               }"`,
             } as any)}
           />
-          <ResourcesHitComponent categoryCode={categoryCode} facets={facets} />
+          <ResourcesHitComponent categoryCode={resourceCategoryCode} facets={facets} />
         </InstantSearch>
       </>
     )

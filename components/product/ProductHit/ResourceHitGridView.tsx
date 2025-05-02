@@ -58,7 +58,8 @@ const ResourceHitGridView = ({ hit }: { hit: Resources }): JSX.Element => {
     resourceType = hit?.data?.resourceType,
     productDescription = hit?.data?.description,
     resourceCategory = hit?.data?.resourceCategory,
-    truncatedTitle = title && title.length > 30 ? `${title.substring(0, 30)}` : title
+    truncatedTitle = title && title.length > 30 ? `${title.substring(0, 30)}` : title,
+    resourceImage = hit?.data?.image ? hit?.data?.image : placeholderImageUrl
 
   return (
     <>
@@ -132,15 +133,15 @@ const ResourceHitGridView = ({ hit }: { hit: Resources }): JSX.Element => {
                     height: imageHeight,
                     zIndex: 1,
                     position: 'relative',
+                    display: 'flex',
+                    justifyContent: 'center',
                   }}
                 >
                   <KiboImage
-                    src={placeholderImageUrl}
-                    alt={truncatedTitle}
-                    fill
-                    quality={100}
-                    sizes="(max-width: 240px) 240px, 240px"
+                    src={resourceImage}
+                    alt={truncatedTitle || 'no-image-alt'}
                     style={{ objectFit: 'contain' }}
+                    sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     data-testid="product-image"
                   />
                 </CardMedia>

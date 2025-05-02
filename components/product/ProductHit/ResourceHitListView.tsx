@@ -108,14 +108,12 @@ const ProductHitListView = ({ hit }: { hit: Resources }): JSX.Element => {
     resourceType = hit?.data?.resourceType,
     productDescription = hit?.data?.description,
     resourceCategory = hit?.data?.resourceCategory,
-    truncatedTitle = title && title.length > 30 ? `${title.substring(0, 30)}` : title
+    truncatedTitle = title && title.length > 30 ? `${title.substring(0, 30)}` : title,
+    resourceImage = hit?.data?.image ? hit?.data?.image : placeholderImageUrl
 
   return (
     <>
-      <Box
-        sx={{ ...ProductCardStyles.main, marginBottom: '20px' }}
-        // data-id={hit.plp_catalog_number}
-      >
+      <Box sx={{ ...ProductCardStyles.main, marginBottom: '20px' }}>
         <Link
           href={hit?.query[0]?.value}
           passHref
@@ -139,37 +137,13 @@ const ProductHitListView = ({ hit }: { hit: Resources }): JSX.Element => {
                   },
                 }}
               >
-                {resourceType ? (
-                  resourceTypeArr.map((data) => {
-                    return data.resourceType === resourceType ? (
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          // right: '10px',
-                          // top: '12px',
-                          zIndex: 2,
-                          // width: '42px',
-                          // height: '42px',
-                          color: 'primary.main',
-                        }}
-                      >
-                        <span className="material-symbols-outlined" style={{ fontSize: '180px' }}>
-                          {data.value}
-                        </span>
-                      </Box>
-                    ) : (
-                      ''
-                    )
-                  })
-                ) : (
-                  <KiboImage
-                    src={placeholderImageUrl}
-                    alt={truncatedTitle || 'no-image-alt'}
-                    style={{ objectFit: 'contain' }}
-                    sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    data-testid="product-image"
-                  />
-                )}
+                <KiboImage
+                  src={resourceImage}
+                  alt={truncatedTitle || 'no-image-alt'}
+                  style={{ objectFit: 'contain' }}
+                  sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  data-testid="product-image"
+                />
               </CardMedia>
               <Box flexDirection="column" m={1} width="75%" className="product-info">
                 <Box display="flex" alignItems="center" width="100%" mb={'20px'}>
@@ -189,7 +163,7 @@ const ProductHitListView = ({ hit }: { hit: Resources }): JSX.Element => {
                         return data.resourceType === resourceType ? (
                           <Box
                             sx={{
-                              position: 'absolute',
+                              // position: 'absolute',
                               right: '10px',
                               top: '12px',
                               zIndex: 2,
