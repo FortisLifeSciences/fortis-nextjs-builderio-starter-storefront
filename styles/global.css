@@ -865,6 +865,16 @@ body {
 
 .product-list-view .ais-Hits-list {
   list-style: none;
+
+  @media (max-width: 640px) {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+  }
+}
+
+.product-list-view .ais-Hits-list .ais-Hits-item {
+  margin-bottom: 20px;
 }
 .product-grid-view {
   @media (min-width: 640px) {

@@ -2,10 +2,16 @@ import { BuilderComponent, builder } from '@builder.io/react'
 import '@builder.io/widgets'
 import getConfig from 'next/config'
 import Head from 'next/head'
+import { useRouter } from 'next/router'
+import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import { InstantSearch, Configure } from 'react-instantsearch-hooks-web'
 
+import ResourcesHitComponent from '@/components/product/ProductHit/resources/ResourcesHitComponent'
 import getCategoryTree from '@/lib/api/operations/get-category-tree'
+import { productIndex, searchClient } from '@/lib/api/util/algolia'
 import type { CategoryTreeResponse } from '@/lib/types'
+import type { MetaData, PageWithMetaData } from '@/lib/types'
 
 import type { GetServerSidePropsContext } from 'next'
 
@@ -14,10 +20,24 @@ const apiKey = publicRuntimeConfig?.builderIO?.apiKey
 
 builder.init(apiKey)
 
+function getMetaData(data: any): MetaData {
+  return {
+    title: data?.title || null,
+    description: data?.description || null,
+    keywords: data?.metaTagKeywords || null,
+    canonicalUrl: null,
+    robots: null,
+  }
+}
+
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const { locale } = context
 
   const pathnameArr = context.params?.pagename
+
+  console.log('pathnameArr', pathnameArr)
+
+  console.log('pathnameArr', pathnameArr?.length)
 
   let pagename
   if (Array.isArray(pathnameArr) && pathnameArr?.length > 1) {
@@ -26,32 +46,106 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     pagename = pathnameArr
   }
 
+  let resourcesPage = false
+  let resourceCategoryCode = null
+
+  if (Array.isArray(pathnameArr)) {
+    if (pathnameArr.length === 2 && pathnameArr[0] === 'resources') {
+      resourceCategoryCode = pathnameArr[1]
+      resourcesPage = true
+    } else if (pathnameArr.length === 1 && pathnameArr[0] === 'resources') {
+      resourceCategoryCode = 'resources'
+      resourcesPage = true
+    }
+  }
+
   const categoriesTree: CategoryTreeResponse = await getCategoryTree()
+  const categoryTopSection = publicRuntimeConfig?.builderIO?.modelKeys?.categoryTopSection || ''
 
-  const page = await builder
-    .get(publicRuntimeConfig?.builderIO?.modelKeys?.defaultPage, {
-      userAttributes: {
-        urlPath: `/${pagename}`,
-      },
+  let section = []
+  let products = []
+  let facets = null
+  let page = []
+
+  if (resourcesPage && resourceCategoryCode) {
+    const result = await productIndex.search('', {
+      filters: `category_url:"resources${
+        resourceCategoryCode !== 'resources' ? `/${resourceCategoryCode}` : ''
+      }"`,
+      facets: ['*'],
     })
-    .toPromise()
+    products = result.hits
+    facets = result.facets
 
-  if (!page) {
-    return { notFound: true } // This will render `pages/404.tsx`
+    section = await builder
+      .get(categoryTopSection, {
+        userAttributes: {
+          slug: `resources-${resourceCategoryCode}`,
+          urlPath: `/${pagename}`,
+        },
+      })
+      .toPromise()
+  } else {
+    page = await builder
+      .get(publicRuntimeConfig?.builderIO?.modelKeys?.defaultPage, {
+        userAttributes: {
+          urlPath: `"/"${pagename}`,
+        },
+      })
+      .toPromise()
+
+    if (!page) {
+      return { notFound: true } // This will render `pages/404.tsx`
+    }
   }
 
   return {
     props: {
       page: page || null,
+      metaData: getMetaData(section?.data) || null,
       categoriesTree,
+      section: section || null,
+      resourcesPage: resourcesPage,
+      resourceCategoryCode: resourceCategoryCode || null,
+      facets: facets || null,
       ...(await serverSideTranslations(locale as string, ['common'])),
     },
   }
 }
 
 const Page = (props: any) => {
-  const { page } = props
-  const noIndex = page?.data?.noIndex || false
+  const { page, resourcesPage, section, resourceCategoryCode, facets } = props
+  const noIndex = page?.data?.noIndex
+    ? page?.data?.noIndex
+    : section?.data?.noIndex
+    ? section?.data?.noIndex
+    : false
+
+  if (resourcesPage && resourceCategoryCode) {
+    return (
+      <>
+        <Head>{noIndex && <meta name="robots" content="noindex,nofollow" />}</Head>
+        <BuilderComponent
+          model={publicRuntimeConfig?.builderIO?.modelKeys?.categoryTopSection}
+          content={section}
+        />
+        <InstantSearch searchClient={searchClient} indexName="builder-page">
+          <Configure
+            {...({
+              hitsPerPage: 15,
+              filters: `category_url:"${
+                resourceCategoryCode === 'resources'
+                  ? 'resources'
+                  : `resources/${resourceCategoryCode}`
+              }"`,
+            } as any)}
+          />
+          <ResourcesHitComponent categoryCode={resourceCategoryCode} facets={facets} />
+        </InstantSearch>
+      </>
+    )
+  }
+
   return (
     <>
       <Head>{noIndex && <meta name="robots" content="noindex,nofollow" />}</Head>

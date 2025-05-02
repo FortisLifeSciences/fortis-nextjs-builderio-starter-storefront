@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, PropsWithChildren, useCallback } from 'react'
 
-import { BuilderComponent, builder } from '@builder.io/react'
 import { Add, ExpandLess, ExpandMore } from '@mui/icons-material'
 import Apps from '@mui/icons-material/Apps'
 import ReorderRounded from '@mui/icons-material/ReorderRounded'
@@ -15,13 +14,10 @@ import {
   Stack,
   useMediaQuery,
 } from '@mui/material'
-import algoliasearch from 'algoliasearch'
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import {
-  InstantSearch,
   useInfiniteHits,
   useConfigure,
   DynamicWidgets,
@@ -31,31 +27,14 @@ import {
   Pagination,
 } from 'react-instantsearch-hooks-web'
 
-import { FullWidthDivider } from '@/components/common'
 import { PLPStyles } from '@/components/page-templates/ProductListingTemplate/ProductListingTemplate.styles'
-import { ProductHitListView, ProductHitGridView } from '@/components/product'
+import { ResourceHitListView, ResourceHitGridView } from '@/components/product'
 import CustomRefinementList from '@/components/product/AlgoliaFacets/CustomRefinementList'
 import CustomSortBy from '@/components/product/AlgoliaFacets/CustomSortBy'
 import DesktopRefinement from '@/components/product/AlgoliaFacets/DesktopRefinment'
-import { getStaticSearchableFacets, productIndex, searchClient } from '@/lib/api/util/algolia'
 import { getFacetLabel } from '@/lib/helpers/facetMapping'
-import type { MetaData, PageWithMetaData } from '@/lib/types'
 
 import type { BaseHit } from 'instantsearch.js'
-import type {
-  GetStaticPathsResult,
-  GetStaticPropsContext,
-  GetStaticPropsResult,
-  NextPage,
-} from 'next'
-
-interface CategoryPageType extends PageWithMetaData {
-  seoFriendlyUrl?: string
-  categoryCode?: string
-  section?: any
-  facets: Record<string, any>
-  searchableAttributes: any
-}
 
 interface RefinementListItem {
   label: string
@@ -64,82 +43,42 @@ interface RefinementListItem {
   isRefined: boolean
 }
 
-const { publicRuntimeConfig } = getConfig()
-const apiKey = publicRuntimeConfig?.builderIO?.apiKey
-
-builder.init(apiKey)
-
-function getMetaData(data: any): MetaData {
-  return {
-    title: data?.title || null,
-    description: data?.description || null,
-    keywords: data?.metaTagKeywords || null,
-    canonicalUrl: null,
-    robots: null,
-  }
-}
-
-export async function getStaticPaths() {
-  const response = await productIndex.search('', {
-    facets: ['category_pages'],
-  })
-
-  const categories = response?.facets?.category_pages
-
-  const paths = categories
-    ? Object.keys(categories).map((categoryCode) => ({
-        params: { categoryCode },
-      }))
-    : []
-
-  return { paths, fallback: 'blocking' }
-}
-
-export async function getStaticProps(
-  context: GetStaticPropsContext
-): Promise<GetStaticPropsResult<CategoryPageType>> {
-  const { locale, params } = context
-  const { publicRuntimeConfig } = getConfig()
-  const { categoryCode } = params as { categoryCode: string }
-  const categoryTopSection = publicRuntimeConfig?.builderIO?.modelKeys?.categoryTopSection || ''
-  const builderSection = await builder
-    .get(categoryTopSection, {
-      userAttributes: { slug: `category-${categoryCode}`, urlPath: `/products/${categoryCode}` },
-    })
-    .promise()
-  const { hits: products, facets } = await productIndex.search('', {
-    filters: `category_pages:${categoryCode}`,
-    facets: ['*'],
-  })
-  const searchableAttributes = getStaticSearchableFacets()
-
-  return {
-    props: {
-      categoryCode,
-      metaData: getMetaData(builderSection?.data),
-      section: builderSection || null,
-      ...(await serverSideTranslations(locale as string, ['common'])),
-      facets,
-      searchableAttributes,
-    } as CategoryPageType,
-    revalidate: 60,
-  }
-}
-
-const MyHitsComponent = ({
-  categoryCode,
-  facets,
-  searchableAttributes,
-}: {
-  categoryCode: string
-  facets: any
-  searchableAttributes: any
-}) => {
+const ResourcesHitComponent = ({ categoryCode, facets }: { categoryCode: string; facets: any }) => {
   const infiniteHits = useInfiniteHits<BaseHit>(),
     results = infiniteHits.results,
     isMobile = useMediaQuery('(max-width:600px)')
   const [isListView, setIsListView] = useState<boolean>(true)
   const { t } = useTranslation('common')
+
+  useEffect(() => {
+    if (!isListView) {
+      const syncHeights = () => {
+        const elements = document.querySelectorAll('.resourceCardGrid')
+        let maxHeight = 0
+
+        elements.forEach((el) => {
+          const element = el as HTMLElement
+          element.style.height = 'auto'
+          const height = element.offsetHeight
+          maxHeight = Math.max(maxHeight, height)
+        })
+
+        elements.forEach((el) => {
+          const element = el as HTMLElement
+          element.style.height = `${maxHeight}px`
+        })
+      }
+
+      // Wait for layout
+      const raf = requestAnimationFrame(syncHeights)
+      window.addEventListener('resize', syncHeights)
+
+      return () => {
+        cancelAnimationFrame(raf)
+        window.removeEventListener('resize', syncHeights)
+      }
+    }
+  }, [results, isListView])
 
   // const [expandedFacets, setExpandedFacets] = useState<{ [key: string]: boolean }>({})
   // const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -150,11 +89,6 @@ const MyHitsComponent = ({
   const facetKeys = Object.keys(algoliaFacets || {})
   const expandedFacetsRef = useRef<{ [key: string]: boolean }>({})
   const [, forceUpdate] = useState(0) // manual trigger
-  const categoryCodeVal = categoryCode
-  useConfigure({
-    hitsPerPage: 15,
-    filters: `category_pages:${categoryCode}`,
-  } as any)
 
   const toggleFacet = (attribute: string) => {
     expandedFacetsRef.current[attribute] = !expandedFacetsRef.current[attribute]
@@ -180,11 +114,7 @@ const MyHitsComponent = ({
       >
         <Box
           className="ais-Panel-header"
-          onClick={(e) => {
-            e.stopPropagation()
-            e.preventDefault()
-            toggleFacet(attribute)
-          }}
+          onClick={() => toggleFacet(attribute)}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -195,17 +125,14 @@ const MyHitsComponent = ({
           }}
         >
           <span>{getFacetLabel(attribute)}</span>
-          <span style={{ color: 'rgba(0, 0, 0, 0.54)' }}>
-            {isExpanded ? <ExpandLess /> : <ExpandMore />}
-          </span>
+          <span>{isExpanded ? <ExpandLess /> : <ExpandMore />}</span>
         </Box>
 
-        <div
-          className="ais-Panel-body"
-          style={{ padding: '8px 0', display: isExpanded ? 'block' : 'none' }}
-        >
-          <CustomRefinementList attribute={attribute} searchableAttributes={searchableAttributes} />
-        </div>
+        {isExpanded && (
+          <div className="ais-Panel-body" style={{ padding: '8px 0' }}>
+            <CustomRefinementList attribute={attribute} searchableAttributes={[]} />
+          </div>
+        )}
       </Box>
     )
   }
@@ -219,9 +146,24 @@ const MyHitsComponent = ({
             sm: 'none',
           },
         }}
-      ></Box>
+      >
+        {/* <Button
+          onClick={() => setIsFilterOpen(!isFilterOpen)}
+          variant="outlined"
+          endIcon={<Add fontSize="small" />}
+          sx={{ ...PLPStyles.filterByButton, width: '50%' }}
+        >
+          Filter By
+        </Button> */}
+      </Box>
       {/* Left Column – Filters */}
-
+      {/* <div
+        style={{
+          width: isMobile ? '100%' : '250px',
+          padding: '20px',
+          borderRight: isMobile ? 'none' : '1px solid #ddd',
+        }}
+      > */}
       <Box
         className="FacetSection"
         id="facetView"
@@ -251,7 +193,7 @@ const MyHitsComponent = ({
             sm: 'auto',
           },
           height: {
-            xs: 'auto',
+            xs: '100vh',
             sm: 'auto',
           },
           boxShadow: {
@@ -262,60 +204,23 @@ const MyHitsComponent = ({
         }}
       >
         <Box
-          sx={{ flex: 1, overflow: 'hidden', ...PLPStyles.FacetsContainer }}
+          sx={{ flex: 1, overflowY: 'auto', ...PLPStyles.FacetsContainer }}
           className="FacetsContainer"
         >
-          {!isMobile && (
-            <Box className="FacetsInnerContainer" sx={{ ...PLPStyles.FacetsInnerContainer }}>
-              <DynamicWidgets fallbackComponent={FallbackComponent} />
-            </Box>
-          )}
-          {isMobile && (
-            // <Box className="FacetsInnerContainer" sx={{ ...PLPStyles.FacetsInnerContainer }}>
-            //   <DynamicWidgets fallbackComponent={FallbackComponent} />
-            // </Box>
-            <Box sx={{ display: { md: 'none' } }}>
-              <FullWidthDivider />
-              <Box sx={{ ...PLPStyles.navBarMainMobile }}>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  sx={{ textTransform: 'capitalize' }}
-                  onClick={onFilterByClose}
-                >
-                  Hide Filters
-                </Button>
-                <Box sx={{ ...PLPStyles.upperTotal }}>
-                  {t('no-of-products', { count: results?.nbHits ?? 0 })}
-                </Box>
-              </Box>
-              <FullWidthDivider />
-              <DynamicWidgets fallbackComponent={FallbackComponent} />
-              {isFilterOpen && (
-                <Box sx={{ mt: 'auto', ...PLPStyles.filterByMobileButtons }}>
-                  <FilterControls onClose={onFilterByClose} />
-                </Box>
-              )}
-              <Box sx={{ ...PLPStyles.lowerTotal }}>
-                {results?.nbHits && <Box>{t('results', { count: results?.nbHits ?? 0 })}</Box>}
-              </Box>
-            </Box>
-          )}
+          <Box className="FacetsInnerContainer" sx={{ ...PLPStyles.FacetsInnerContainer }}>
+            <DynamicWidgets fallbackComponent={FallbackComponent} />
+          </Box>
         </Box>
+        {isFilterOpen && (
+          <Box sx={{ mt: 'auto' }}>
+            <FilterControls onClose={onFilterByClose} />
+          </Box>
+        )}
       </Box>
+      {/* </div> */}
 
       {/* Right Column – Results */}
-      <Box
-        sx={{
-          flex: 1,
-          display: {
-            xs: isFilterOpen ? 'none' : 'block',
-            md: 'block',
-          },
-          padding: { xs: '0', md: '20px 0 20px 20px' },
-        }}
-        id="productHitsView"
-      >
+      <Box sx={{ flex: 1, padding: { xs: '0', md: '20px 0 20px 20px' } }} id="productHitsView">
         <Box id="product-listing-section" sx={{ ...PLPStyles.plpGrid }}>
           <Box sx={{ ...PLPStyles.navBar }}>
             <Box sx={{ ...PLPStyles.navBarMain }}>
@@ -368,11 +273,11 @@ const MyHitsComponent = ({
           </Box>
           <Box className={isListView ? 'product-list-view' : 'product-grid-view'}>
             {isMobile ? (
-              <Hits hitComponent={ProductHitGridView} />
+              <Hits hitComponent={ResourceHitGridView} />
             ) : isListView ? (
-              <Hits hitComponent={ProductHitListView} />
+              <Hits hitComponent={ResourceHitListView} />
             ) : (
-              <Hits hitComponent={ProductHitGridView} />
+              <Hits hitComponent={ResourceHitGridView} />
             )}
           </Box>
         </Box>
@@ -384,30 +289,6 @@ const MyHitsComponent = ({
   )
 }
 
-const CategoryPage: NextPage<CategoryPageType> = (props) => {
-  const router = useRouter()
-  const { publicRuntimeConfig } = getConfig()
-  const categoryCode = (props.categoryCode as string) || (router.query.categoryCode as string)
-  const facets = props.facets
-  const searchableAttributes = props.searchableAttributes
-  return (
-    <>
-      <BuilderComponent
-        model={publicRuntimeConfig?.builderIO?.modelKeys?.categoryTopSection}
-        content={props.section}
-      />
-
-      <InstantSearch searchClient={searchClient} indexName="products">
-        <MyHitsComponent
-          categoryCode={categoryCode}
-          facets={facets}
-          searchableAttributes={searchableAttributes}
-        />
-      </InstantSearch>
-    </>
-  )
-}
-// Create a subcomponent that uses the hooks
 const FilterControls = ({ onClose }: { onClose: () => void }) => {
   const { t } = useTranslation('common')
   const { refine: clearFilters } = useClearRefinements()
@@ -419,8 +300,8 @@ const FilterControls = ({ onClose }: { onClose: () => void }) => {
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-around',
-        padding: '0 1rem 1rem 1rem',
-        //borderTop: '1px solid #ddd',
+        padding: '1rem',
+        borderTop: '1px solid #ddd',
         backgroundColor: '#fff',
       }}
     >
@@ -436,7 +317,7 @@ const FilterControls = ({ onClose }: { onClose: () => void }) => {
       <Button
         variant="contained"
         color="primary"
-        sx={{ textTransform: 'capitalize', backgroundColor: 'rgb(76, 71, 196)' }}
+        sx={{ textTransform: 'capitalize' }}
         onClick={onClose}
       >
         {t('view-results')}
@@ -445,4 +326,4 @@ const FilterControls = ({ onClose }: { onClose: () => void }) => {
   )
 }
 
-export default CategoryPage
+export default ResourcesHitComponent

@@ -170,7 +170,10 @@ const ResourceProductCardGridView = (props: ProductCardProps) => {
                         ...ProductCardStyles.resourceIcon,
                       }}
                     >
-                      <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ fontSize: '24px', color: '#fff' }}
+                      >
                         {data.value}
                       </span>
                     </Box>
