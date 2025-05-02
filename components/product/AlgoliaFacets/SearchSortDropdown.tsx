@@ -1,5 +1,6 @@
-import { Box, FormControl, MenuItem, Select, SelectChangeEvent } from '@mui/material'
 import { useEffect, useState } from 'react'
+
+import { Box, FormControl, MenuItem, Select, SelectChangeEvent } from '@mui/material'
 
 interface Props {
   sortIndex: string
