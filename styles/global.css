@@ -919,15 +919,21 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
+  gap: 10px;
   list-style: none;
   padding: 0;
   margin: 0;
-  font-family: 'Poppins';
 }
 
 .AlgoliaPagination .ais-Pagination-link {
   color: #30299a;
+  font-family: 'Poppins';
+  font-size: 18px;
+  border: none;
+  background: none;
+  padding: 3px;
+  cursor: pointer;
+  font-weight: 300;
 }
 
 .AlgoliaPagination .ais-Pagination-link :hover {
@@ -938,8 +944,117 @@ body {
   font-size: 18px;
   color: #4c47c4;
 }
-.AlgoliaPagination .ais-Pagination-item--selected {
+.AlgoliaPagination .ais-Pagination-item--selected,
+.AlgoliaPagination .ais-Pagination-item--selected .ais-Pagination-link {
   padding: 3px;
   font-weight: 500;
+  color: #30299a;
+}
+/** search page css **/
+.rightSearchContainer .AvailableProducts {
+  padding-bottom: 8px;
+  margin-top: 1.5rem;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  font-family: Poppins;
+  white-space: nowrap;
   color: #020027;
+  font-style: normal;
+  text-align: right;
+}
+.rightSearchContainer .product-grid-view {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.rightSearchContainer .product-grid-view .productviewstructure {
+  flex: 1 1 calc(33.333% - 16px);
+  box-sizing: border-box;
+}
+.rightSearchContainer .AlgoliaPagination {
+  margin-top: 30px;
+}
+.searchProductsTitle {
+  font-weight: 500;
+  font-size: 40px;
+  color: #30299a;
+  font-family: 'Poppins';
+}
+.searchListingContainer {
+  display: flex;
+  font-size: 16px;
+  font-family: 'Poppins';
+  width: 100%;
+}
+.searchListingContainer .rightSearchContainer {
+  width: 83%;
+}
+
+.searchListingContainer .facetContainer {
+  width: 17%;
+  padding: 20px 0;
+  background-color: transparent;
+  position: static;
+  z-index: auto;
+  height: auto;
+  box-shadow: none;
+}
+
+.gridListViewContainer {
+  display: flex;
+  justify-content: space-between;
+}
+
+.gridListViewContainer .sortDropdownContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+.sortDropdownContainer span {
+  color: #020027;
+  white-space: noWrap;
+  margin-right: 10px;
+  font-family: Poppins;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px;
+  padding: 8px 0;
+}
+.sortDropdownContainer .sortDropdown {
+  color: #020027;
+  white-space: noWrap;
+  margin-right: 10px;
+  font-family: Poppins;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px;
+  min-height: 1.4375em;
+}
+.sortDropdown .MuiMenuItem-root,
+.sortSearchItem {
+  padding: 6px 16px !important;
+  font-size: 14px !important;
+  color: #020027 !important;
+  transition: background-color 0.3s ease !important;
+  font-weight: 400 !important;
+  line-height: 24px !important;
+}
+
+.sortDropdown .MuiSelect-icon {
+  color: #020027;
+}
+.sortDropdown fieldset {
+  min-width: 120px;
+  top: 0;
+  border: 2px solid #020027;
+}
+.sortDropdown legend {
+  display: none;
+}
+.sortWrapper {
+  display: flex;
+  flex-direction: row;
 }

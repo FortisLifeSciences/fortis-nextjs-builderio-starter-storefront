@@ -203,7 +203,7 @@ const ProductHitListView = ({ hit }: { hit: Product }): JSX.Element => {
                   >
                     {sliceValue ? variantProductName : title}
                   </Typography>
-                  {brandImages[brand.toLowerCase()] && (
+                  {typeof brand === 'string' && brandImages[brand.toLowerCase()] && (
                     <Box sx={ProductCardStyles.brandLogoContainer}>
                       <Box
                         component="img"
