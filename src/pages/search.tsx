@@ -85,6 +85,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
   const router = useRouter()
   const sortFromQuery = typeof router.query.sort === 'string' ? router.query.sort : 'products'
   const [sortIndex, setSortIndex] = useState(sortFromQuery)
+  const isMobile = useMediaQuery('(max-width:600px)')
   const [isListView, setIsListView] = useState(true)
   const [pagination, setPagination] = useState({
     productsPage: 0,
@@ -237,15 +238,19 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
                   <div className="AvailableProducts">{result.nbHits} Products</div>
 
                   <Box className={isListView ? 'product-list-view' : 'product-grid-view'}>
-                    {result.hits.slice(0, 10).map((hit: any, i: number) => (
-                      <div className="productviewstructure" key={i}>
-                        {isListView ? (
-                          <ProductHitListView hit={hit} />
-                        ) : (
-                          <ProductHitGridView hit={hit} />
-                        )}
-                      </div>
-                    ))}
+                    <div className="productviewstructure">
+                      {result.hits.slice(0, 10).map((hit: any, i: number) => (
+                        <div className="productviewlistItem" key={i}>
+                          {isMobile ? (
+                            <ProductHitGridView hit={hit} />
+                          ) : isListView ? (
+                            <ProductHitListView hit={hit} />
+                          ) : (
+                            <ProductHitGridView hit={hit} />
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </Box>
                   {/* pagination */}
                   <AlgoliaPagination

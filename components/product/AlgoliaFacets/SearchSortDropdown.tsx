@@ -7,6 +7,11 @@ interface Props {
   onChangeSort: (value: string) => void
 }
 
+const options = [
+  { value: 'products', label: 'Relevance' },
+  { value: 'products_relevance', label: 'Featured' },
+]
+
 const ManualSortDropdown = ({ sortIndex, onChangeSort }: Props) => {
   const [selectedSort, setSelectedSort] = useState(sortIndex)
 
@@ -22,22 +27,55 @@ const ManualSortDropdown = ({ sortIndex, onChangeSort }: Props) => {
 
   return (
     <Box className="sortDropdownContainer">
-      <FormControl className="sortWrapper" fullWidth size="small" sx={{ minWidth: 120 }}>
+      <FormControl
+        className="sortWrapper"
+        fullWidth
+        size="small"
+        sx={{ minWidth: 120 }}
+        variant="outlined"
+      >
         <span>Sort: </span>
         <Select
-          className="sortDropdown"
+          aria-label="Sort"
           value={selectedSort}
           onChange={handleChange}
           size="small"
           displayEmpty
-          inputProps={{ 'aria-label': 'Sort' }}
+          sx={{
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            borderColor: '#ccc',
+            borderRadius: '5px',
+            fontSize: '14px !important',
+            height: '32px',
+            color: '#2B2B2B',
+            fontFamily: 'Poppins',
+            fontStyle: 'normal',
+            fontWeight: '400',
+            lineHeight: '20px',
+            padding: '4.5px 12px',
+          }}
+          inputProps={{
+            id: 'custom-sort-by',
+            'aria-label': 'Sort',
+          }}
         >
-          <MenuItem className="sortSearchItem" value="products">
-            Relevance
-          </MenuItem>
-          <MenuItem className="sortSearchItem" value="products_relevance">
-            Featured
-          </MenuItem>
+          {options.map((option) => (
+            <MenuItem
+              key={option.value}
+              value={option.value}
+              sx={{
+                color: '#2B2B2B',
+                fontFamily: 'Poppins',
+                fontSize: '14px',
+                fontStyle: 'normal',
+                fontWeight: '400',
+                lineHeight: '20px',
+              }}
+            >
+              {option.label}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
     </Box>
