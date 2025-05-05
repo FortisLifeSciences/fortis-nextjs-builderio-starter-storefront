@@ -973,12 +973,12 @@ body {
   font-style: normal;
   text-align: right;
 }
-.rightSearchContainer .product-grid-view {
+/*.rightSearchContainer .product-grid-view {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
 }
-/*.rightSearchContainer .product-grid-view .productviewstructure {
+.rightSearchContainer .product-grid-view .productviewstructure {
   flex: 1 1 calc(33.333% - 16px);
   box-sizing: border-box;
 }*/
