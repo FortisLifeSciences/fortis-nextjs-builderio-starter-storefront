@@ -43,13 +43,18 @@ const QuantityTextField = ({ quantity, handleCustomQuantity }: QuantityInputProp
 
   const handleQuantityOnBlur = () => {
     if (itemQuantity !== '' && itemQuantity !== quantity) {
-      handleCustomQuantity(Number(itemQuantity))
-    } else setItemQuantity(quantity)
+      if (typeof handleCustomQuantity === 'function') {
+        handleCustomQuantity(Number(itemQuantity))
+      }
+    } else {
+      setItemQuantity(quantity)
+    }
   }
 
   return (
     <TextField
       name="quantity"
+      autoComplete="off"
       onChange={handleQuantityChange}
       onBlur={handleQuantityOnBlur}
       value={itemQuantity}
@@ -71,7 +76,7 @@ const QuantityTextField = ({ quantity, handleCustomQuantity }: QuantityInputProp
           backgroundColor: '#ffffff',
         },
       }}
-      sx={{ width: '35px', height: '24px', borderRadius: '3px' }}
+      sx={{ width: '50px', height: '24px', borderRadius: '3px' }}
     />
   )
 }
