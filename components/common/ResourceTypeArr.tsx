@@ -36,6 +36,22 @@ const resourceTypeArr: ResourceType[] = [
     resourceType: 'ApplicationNote',
     value: 'note_stack',
   },
+  {
+    resourceType: 'Podcast',
+    value: 'podcasts',
+  },
+  {
+    resourceType: 'CaseStudy',
+    value: 'data_thresholding',
+  },
+  {
+    resourceType: 'Application',
+    value: 'summarize',
+  },
+  {
+    resourceType: 'Guide',
+    value: 'dataset',
+  },
 ]
 
 export default resourceTypeArr
