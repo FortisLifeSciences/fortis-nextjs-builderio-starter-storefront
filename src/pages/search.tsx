@@ -20,6 +20,7 @@ import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
+import KiboBreadcrumbs from '@/components/core/Breadcrumbs/KiboBreadcrumbs'
 import ResourceSearchSliders from '@/components/layout/Algolia/ResourceSearchSliders'
 import { ProductHitListView, ProductHitGridView } from '@/components/product'
 import AlgoliaPagination from '@/components/product/AlgoliaFacets/AlgoliaPagination'
@@ -124,7 +125,11 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
     },
     props.results
   )
-  const breadcrumbs = [{ text: 'Home > Search Results', link: '/' }]
+  const breadcrumbs = [
+    { text: 'Home', link: '/' },
+    { text: 'Search Results', link: router.asPath },
+  ]
+  //const breadcrumbs = [{ text: 'Home > Search Results', link: '/' }]
   const searchPageHeading = searchQuery
     ? t('search-results', {
         m: `${searchPageResults?.totalCount || 0}`,
@@ -168,6 +173,8 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
   }, [searchQuery, sortIndex, pagination.productsPage])
   return (
     <>
+      <KiboBreadcrumbs breadcrumbs={breadcrumbs} />
+
       {/* Manual Search Results Display */}
       {manualSearchResults === null ? (
         <p> Loading search results...</p>
