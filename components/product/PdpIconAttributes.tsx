@@ -28,7 +28,7 @@ const styles = {
     textDecoration: 'none',
     display: 'inline',
     '&:hover': {
-      borderBottom: 'none',
+      borderBottomColor: 'transparent',
     },
   },
 }
