@@ -998,9 +998,11 @@ body {
   margin-bottom: 25px;
 }
 .rightSearchContainer .product-list-view .productviewstructure {
-  display: grid;
-  align-items: center;
-  justify-content: center;
+  @media (max-width: 680px) {
+    display: grid;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 .rightSearchContainer
