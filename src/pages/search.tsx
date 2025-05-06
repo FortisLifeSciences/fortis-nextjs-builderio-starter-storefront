@@ -148,6 +148,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
               query,
               hitsPerPage: 9,
               page: pagination.productsPage, // ← add page here
+              facets: ['*'],
             },
           },
         ])
@@ -204,37 +205,41 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
                   {/* List and grid View */}
 
                   {/* toggle grid and list view */}
+
                   <div className="gridListViewContainer">
-                    <Box
-                      className="switchListAndGrid"
-                      sx={{ display: 'flex', margin: '1rem 0 0 1rem' }}
-                    >
+                    {!isMobile && (
                       <Box
-                        onClick={() => setIsListView(true)}
-                        title="List View"
-                        sx={{ cursor: 'pointer' }}
-                        tabIndex={0}
+                        className="switchListAndGrid"
+                        sx={{ display: 'flex', margin: '1rem 0 0 1rem' }}
                       >
-                        <ReorderRounded
-                          fontSize="medium"
-                          {...(isListView && { color: 'primary' })}
-                        />
+                        <Box
+                          onClick={() => setIsListView(true)}
+                          title="List View"
+                          sx={{ cursor: 'pointer' }}
+                          tabIndex={0}
+                        >
+                          <ReorderRounded
+                            fontSize="medium"
+                            {...(isListView && { color: 'primary' })}
+                          />
+                        </Box>
+                        <Box
+                          onClick={() => setIsListView(false)}
+                          title="Grid View"
+                          sx={{ cursor: 'pointer' }}
+                          tabIndex={0}
+                        >
+                          <Apps fontSize="medium" {...(!isListView && { color: 'primary' })} />
+                        </Box>
                       </Box>
-                      <Box
-                        onClick={() => setIsListView(false)}
-                        title="Grid View"
-                        sx={{ cursor: 'pointer' }}
-                        tabIndex={0}
-                      >
-                        <Apps fontSize="medium" {...(!isListView && { color: 'primary' })} />
-                      </Box>
-                    </Box>
+                    )}
                     {/* Custom sort for search start */}
 
                     <ManualSortDropdown sortIndex={sortIndex} onChangeSort={setSortIndex} />
 
                     {/* Custom sort for search end */}
                   </div>
+
                   <div className="AvailableProducts">{result.nbHits} Products</div>
 
                   <Box className={isListView ? 'product-list-view' : 'product-grid-view'}>

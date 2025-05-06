@@ -1,12 +1,12 @@
 /* SearchResultsDisplay.module.css */
 
 .resourceSection {
-  margin-bottom: 2rem;
+  margin-bottom: 50px;
 }
 
 .nonResourceSection {
   margin-top: 2rem;
-  margin-bottom: 25px;
+  margin-bottom: 50px;
 }
 
 .sectionTitle {
@@ -14,6 +14,10 @@
   font-size: 40px;
   color: #30299a;
   font-weight: 500;
+  line-height: 2.625rem;
+  @media (max-width: 680px) {
+    font-size: 30px;
+  }
 }
 
 .swiperContainer {
@@ -112,6 +116,9 @@
   transform: translateY(-50%);
   z-index: 10;
   padding: 0 !important; /* Override MUI padding */
+}
+.resourceSection .swiperButton {
+  top: 36%;
 }
 .swiperButton:hover {
   background-color: transparent !important;
