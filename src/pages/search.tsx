@@ -151,7 +151,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
             indexName: sortIndex,
             params: {
               query,
-              hitsPerPage: 9,
+              hitsPerPage: 15,
               page: pagination.productsPage, // ← add page here
               facets: ['*'],
             },
@@ -251,7 +251,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
 
                   <Box className={isListView ? 'product-list-view' : 'product-grid-view'}>
                     <div className="productviewstructure">
-                      {result.hits.slice(0, 10).map((hit: any, i: number) => (
+                      {result.hits.slice(0, 16).map((hit: any, i: number) => (
                         <div className="productviewlistItem" key={i}>
                           {isMobile ? (
                             <ProductHitGridView hit={hit} />
