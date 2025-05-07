@@ -210,6 +210,13 @@ const MyHitsComponent = ({
     )
   }
 
+  const handlePaginationClick = () => {
+    const facetElement = document.querySelector('.FacetSection')
+    if (facetElement) {
+      facetElement.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
   return (
     <div style={{ display: isMobile ? 'block' : 'flex', fontSize: '16px', fontFamily: 'Poppins' }}>
       <Box
@@ -377,7 +384,7 @@ const MyHitsComponent = ({
           </Box>
         </Box>
         <Box className="AlgoliaPagination" sx={{ textAlign: 'center', marginTop: 2 }}>
-          <Pagination />
+          <Pagination onClick={handlePaginationClick} />
         </Box>
       </Box>
     </div>
