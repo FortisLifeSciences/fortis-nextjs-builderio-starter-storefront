@@ -454,15 +454,19 @@ body {
 [data-autocomplete-source-id='products'] .aa-builder-header,
 [data-autocomplete-source-id='products'] .aa-popular-header,
 [data-autocomplete-source-id='products'] .aa-suggestion-header,
+[data-autocomplete-source-id='products'] .aa-quickAccess-header,
 [data-autocomplete-source-id='builder-page'] .aa-products-header,
 [data-autocomplete-source-id='builder-page'] .aa-popular-header,
 [data-autocomplete-source-id='builder-page'] .aa-suggestion-header,
+[data-autocomplete-source-id='builder-page'] .aa-quickAccess-header,
 [data-autocomplete-source-id='popularPlugin'] .aa-products-header,
 [data-autocomplete-source-id='popularPlugin'] .aa-builder-header,
 [data-autocomplete-source-id='popularPlugin'] .aa-suggestion-header,
+[data-autocomplete-source-id='popularPlugin'] .aa-quickAccess-header,
 [data-autocomplete-source-id='querySuggestions'] .aa-products-header,
 [data-autocomplete-source-id='querySuggestions'] .aa-builder-header,
 [data-autocomplete-source-id='querySuggestions'] .aa-popular-header,
+[data-autocomplete-source-id='querySuggestions'] .aa-quickAccess-header,
 [data-autocomplete-source-id='quickAccessPlugin'] .aa-products-header,
 [data-autocomplete-source-id='quickAccessPlugin'] .aa-builder-header,
 [data-autocomplete-source-id='quickAccessPlugin'] .aa-popular-header {
@@ -925,15 +929,21 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
+  gap: 10px;
   list-style: none;
   padding: 0;
   margin: 0;
-  font-family: 'Poppins';
 }
 
 .AlgoliaPagination .ais-Pagination-link {
   color: #30299a;
+  font-family: 'Poppins';
+  font-size: 18px;
+  border: none;
+  background: none;
+  padding: 3px;
+  cursor: pointer;
+  font-weight: 300;
 }
 
 .AlgoliaPagination .ais-Pagination-link :hover {
@@ -944,8 +954,183 @@ body {
   font-size: 18px;
   color: #4c47c4;
 }
-.AlgoliaPagination .ais-Pagination-item--selected {
+.AlgoliaPagination .ais-Pagination-item--selected,
+.AlgoliaPagination .ais-Pagination-item--selected .ais-Pagination-link {
   padding: 3px;
   font-weight: 500;
+  color: #30299a;
+}
+/** search page css **/
+.rightSearchContainer .AvailableProducts {
+  padding-bottom: 8px;
+  margin-top: 1.5rem;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  font-family: Poppins;
+  white-space: nowrap;
   color: #020027;
+  font-style: normal;
+  text-align: right;
+}
+.rightSearchContainer .product-grid-view .productviewstructure {
+  display: grid;
+  @media (max-width: 640px) {
+    justify-content: center;
+    justify-items: center;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+  @media (max-width: 1040px) and (min-width: 641px) {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.rightSearchContainer .product-grid-view .productviewstructure .productviewlistItem {
+  margin-bottom: 25px;
+}
+
+.rightSearchContainer .product-list-view .productviewstructure .productviewlistItem {
+  margin-bottom: 25px;
+}
+.rightSearchContainer .product-list-view .productviewstructure {
+  @media (max-width: 680px) {
+    display: grid;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.rightSearchContainer
+  .product-grid-view
+  .productviewstructure
+  .productviewlistItem:nth-child(3n + 1) {
+  @media (max-width: 680px) {
+    justify-self: center;
+  }
+  @media (min-width: 1028px) {
+    justify-self: start;
+  }
+}
+.rightSearchContainer
+  .product-grid-view
+  .productviewstructure
+  .productviewlistItem:nth-child(3n + 2) {
+  @media (min-width: 1028px) {
+    justify-self: center;
+  }
+  @media (max-width: 680px) {
+    justify-self: center;
+  }
+}
+.rightSearchContainer
+  .product-grid-view
+  .productviewstructure
+  .productviewlistItem:nth-child(3n + 3) {
+  @media (min-width: 1028px) {
+    justify-self: end;
+  }
+  @media (max-width: 680px) {
+    justify-self: center;
+  }
+}
+.rightSearchContainer .AlgoliaPagination {
+  margin-top: 30px;
+}
+.searchProductsTitle {
+  font-weight: 500;
+  font-size: 40px;
+  color: #30299a;
+  font-family: 'Poppins';
+  line-height: 2.625rem;
+  @media (max-width: 680px) {
+    font-size: 30px;
+  }
+}
+.searchListingContainer {
+  display: flex;
+  font-size: 16px;
+  font-family: 'Poppins';
+  width: 100%;
+}
+.searchListingContainer .rightSearchContainer {
+  width: 83%;
+  @media (max-width: 680px) {
+    width: 100%;
+  }
+}
+.searchListingContainer .facetContainer {
+  width: 17%;
+  padding: 20px 0;
+  background-color: transparent;
+  position: static;
+  z-index: auto;
+  height: auto;
+  box-shadow: none;
+  @media (max-width: 680px) {
+    width: 0%;
+  }
+}
+
+.gridListViewContainer {
+  display: flex;
+  justify-content: space-between;
+}
+
+.gridListViewContainer .sortDropdownContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+.sortDropdownContainer span {
+  color: #020027;
+  white-space: noWrap;
+  margin-right: 10px;
+  font-family: Poppins;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px;
+  padding: 3px 0;
+  @media (max-width: 680px) {
+    display: none;
+  }
+}
+.sortDropdownContainer .sortDropdown {
+  color: #020027;
+  white-space: noWrap;
+  margin-right: 10px;
+  font-family: Poppins;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px;
+  min-height: 1.4375em;
+}
+.sortDropdown .MuiMenuItem-root,
+.sortSearchItem {
+  padding: 6px 16px !important;
+  font-size: 14px !important;
+  color: #020027 !important;
+  transition: background-color 0.3s ease !important;
+  font-weight: 400 !important;
+  line-height: 24px !important;
+}
+
+.sortDropdown .MuiSelect-icon {
+  color: #020027;
+}
+.sortDropdownContainer fieldset {
+  border: none;
+}
+.sortDropdown legend {
+  display: none;
+}
+.sortWrapper {
+  display: flex;
+  flex-direction: row !important;
 }

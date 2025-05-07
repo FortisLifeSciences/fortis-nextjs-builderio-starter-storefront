@@ -1,0 +1,145 @@
+/* SearchResultsDisplay.module.css */
+
+.resourceSection {
+  margin-bottom: 50px;
+}
+
+.nonResourceSection {
+  margin-top: 2rem;
+  margin-bottom: 50px;
+}
+
+.sectionTitle {
+  font-family: 'poppins';
+  font-size: 40px;
+  color: #30299a;
+  font-weight: 500;
+  line-height: 2.625rem;
+  @media (max-width: 680px) {
+    font-size: 30px;
+  }
+}
+
+.swiperContainer {
+  position: relative;
+}
+
+.swiperWrapper {
+  width: auto;
+  margin: 0 40px;
+}
+
+.swiperSlide {
+  padding: 10px;
+  box-sizing: border-box;
+  border: 1px solid #e3e2ff;
+  border-radius: 0 0 25px 0;
+  min-height: 350px;
+  position: relative;
+  transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.swiperSlide:hover {
+  box-shadow: rgba(11, 32, 61, 0.07) 0px 2px 16px 4px;
+  border-color: rgb(76, 71, 196);
+}
+
+.link {
+  display: block;
+}
+
+.imageContainer {
+  height: 150px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.image {
+  vertical-align: middle;
+  max-height: 150px;
+  width: 100%;
+  height: auto;
+}
+
+.resourceCategory {
+  font-size: 14px;
+  color: #020027;
+  font-family: 'Poppins';
+  font-weight: 300;
+}
+
+.resourceTitle {
+  font-size: 16px;
+  color: #2b2b2b;
+  font-family: 'Poppins';
+  font-weight: 500;
+}
+
+.viewButton {
+  background-color: rgb(76, 71, 196) !important; /* Use !important to override MUI styles */
+  font-size: 1.5rem !important;
+  padding: 8px !important;
+  overflow: visible !important;
+  color: #ffffff !important;
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 25px 0 !important;
+  position: absolute !important;
+  right: -1px !important;
+  bottom: 0 !important;
+  display: none !important;
+}
+
+.swiperSlide:hover .viewButton {
+  display: block !important;
+}
+.resourceTypeIcon {
+  font-size: 24px;
+  background-color: #30299a;
+  color: #ffffff;
+  width: 46px;
+  height: 46px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.swiperButton {
+  position: absolute !important;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  padding: 0 !important; /* Override MUI padding */
+}
+.resourceSection .swiperButton {
+  top: 36%;
+}
+.swiperButton:hover {
+  background-color: transparent !important;
+}
+.swiperButton svg {
+  font-size: 50px;
+}
+
+.swiperButtonPrev {
+  left: 0;
+}
+
+.swiperButtonNext {
+  right: -15px;
+}
+
+.swiperButtonDisabled {
+  pointer-events: none;
+  color: #ededed !important; /* Override MUI color */
+}
+
+.swiperButtonEnabled {
+  color: #30299a !important; /* Override MUI color */
+}
