@@ -251,7 +251,7 @@ const ResourcesHitComponent = ({ categoryCode, facets }: { categoryCode: string;
               </Box>
 
               <Box sx={{ ...PLPStyles.navBarSort }}>
-                <Box sx={{ ...PLPStyles.sorting }}>
+                <Box sx={{ ...PLPStyles.sorting, justifyContent: 'end' }}>
                   <Typography component="span" sx={{ ...PLPStyles.navBarLabel }}>
                     {t('sort')}
                   </Typography>
