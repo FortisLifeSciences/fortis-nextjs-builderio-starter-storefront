@@ -163,6 +163,8 @@ const CategoryNestedNavigation = (props: CategoryNestedNavigationProps) => {
 
   const gotoContact = () => {
     router.push('/contact-us')
+    setParentCategory(null)
+    onCloseMenu(true)
   }
   return (
     <>
