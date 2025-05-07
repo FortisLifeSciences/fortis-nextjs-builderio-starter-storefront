@@ -396,6 +396,14 @@ body {
 [data-autocomplete-source-id='querySuggestions'] .aa-ItemIcon {
   color: #30299a;
 }
+[data-autocomplete-source-id='querySuggestions'] .aa-List .aa-Item[aria-selected='true'] {
+  background: #e3e2ff;
+}
+[data-autocomplete-source-id='popularPlugin'] .aa-List .aa-Item[aria-selected='true'],
+[data-autocomplete-source-id='products'] .aa-List .aa-Item[aria-selected='true'],
+[data-autocomplete-source-id='builder-page'] .aa-List .aa-Item[aria-selected='true'] {
+  background: none;
+}
 [data-autocomplete-source-id='querySuggestions'] .aa-ItemContentTitle mark {
   color: #30299a;
   font-weight: 500;
