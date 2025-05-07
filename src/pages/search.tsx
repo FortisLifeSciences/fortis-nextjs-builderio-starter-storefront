@@ -129,7 +129,14 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
     { text: 'Home', link: '/' },
     { text: 'Search Results', link: router.asPath },
   ]
-  //const breadcrumbs = [{ text: 'Home > Search Results', link: '/' }]
+  // Scroll to results when pagination changes
+  const handlePaginationClick = () => {
+    const container = document.querySelector('.searchProductsTitle')
+    if (container) {
+      container.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
   const searchPageHeading = searchQuery
     ? t('search-results', {
         m: `${searchPageResults?.totalCount || 0}`,
@@ -268,9 +275,10 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
                   <AlgoliaPagination
                     currentPage={result.page}
                     totalPages={result.nbPages}
-                    onPageChange={(page) =>
+                    onPageChange={(page) => {
                       setPagination((prev) => ({ ...prev, productsPage: page }))
-                    }
+                      handlePaginationClick() // scroll to rightSearchContainer
+                    }}
                   />
                   {/* pagination end */}
                 </div>
