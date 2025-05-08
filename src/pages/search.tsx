@@ -376,6 +376,10 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
                       xs: isFilterOpen ? 'none' : 'block',
                       md: 'block',
                     },
+                    padding: {
+                      xs: '0',
+                      md: '2px 0px 20px 20px',
+                    },
                   }}
                 >
                   {/* List and grid View */}
