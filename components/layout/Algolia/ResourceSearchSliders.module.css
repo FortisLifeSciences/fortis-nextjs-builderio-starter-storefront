@@ -97,7 +97,8 @@
 .swiperSlide:hover .viewButton {
   display: block !important;
 }
-.resourceTypeIcon {
+.resourceTypeIcon,
+.material-symbols-outlined {
   font-size: 24px;
   background-color: #30299a;
   color: #ffffff;
