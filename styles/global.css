@@ -378,7 +378,7 @@ body {
   border-radius: 4px;
 }
 .aa-Panel {
-  position: absolute;
+  position: fixed;
   top: 33px !important;
   left: 50% !important;
   transform: translateX(-50%);
@@ -723,7 +723,8 @@ body {
   }
   [data-autocomplete-source-id='popularPlugin'] .aa-List,
   [data-autocomplete-source-id='products'] .aa-List,
-  [data-autocomplete-source-id='builder-page'] .aa-List {
+  [data-autocomplete-source-id='builder-page'] .aa-List,
+  [data-autocomplete-source-id='quickAccessPlugin'] .aa-List {
     flex-wrap: nowrap;
     scroll-snap-type: x;
     overflow-x: scroll;
