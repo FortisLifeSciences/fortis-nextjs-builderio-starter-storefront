@@ -70,7 +70,7 @@ export const facetLabelMapping: FacetLabelMapping[] = [
   },
   {
     facetValue: 'data.resourceType',
-    label: 'Research Type',
+    label: 'Resource Type',
   },
 ]
 
