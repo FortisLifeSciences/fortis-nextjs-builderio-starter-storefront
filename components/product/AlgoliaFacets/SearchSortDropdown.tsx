@@ -44,7 +44,7 @@ const ManualSortDropdown = ({ sortIndex, onChangeSort }: Props) => {
           sx={{
             borderWidth: '1px',
             borderStyle: 'solid',
-            borderColor: '#ccc',
+            //borderColor: '#ccc',
             borderRadius: '5px',
             fontSize: '14px !important',
             height: '32px',

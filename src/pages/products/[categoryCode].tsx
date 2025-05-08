@@ -278,9 +278,6 @@ const MyHitsComponent = ({
             </Box>
           )}
           {isMobile && (
-            // <Box className="FacetsInnerContainer" sx={{ ...PLPStyles.FacetsInnerContainer }}>
-            //   <DynamicWidgets fallbackComponent={FallbackComponent} />
-            // </Box>
             <Box sx={{ display: { md: 'none' } }}>
               <FullWidthDivider />
               <Box sx={{ ...PLPStyles.navBarMainMobile }}>

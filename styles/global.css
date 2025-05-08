@@ -1109,6 +1109,9 @@ body {
   display: flex;
   justify-content: flex-end;
   margin-top: 1rem;
+  @media (max-width: 680px) {
+    margin-top: 0;
+  }
 }
 .sortDropdownContainer span {
   color: #020027;
