@@ -6,6 +6,7 @@ import { autocomplete, getAlgoliaResults, AutocompletePlugin } from '@algolia/au
 import { createQuerySuggestionsPlugin } from '@algolia/autocomplete-plugin-query-suggestions'
 import algoliasearch from 'algoliasearch'
 import '@algolia/autocomplete-theme-classic'
+import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 
 import fortisLogo from '@/assets/fortisLogo.png'
@@ -21,8 +22,9 @@ type QuickAccessHit = {
   __autocomplete_id: string
 }
 
-const appId = 'YQAIETZ5F1'
-const apiKey = 'c2cc99ace97599deaf1606dba442f9ae'
+const { publicRuntimeConfig } = getConfig()
+const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || publicRuntimeConfig?.ALGOLIA_APP_ID
+const apiKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || publicRuntimeConfig?.ALGOLIA_SEARCH_KEY
 const searchClient = algoliasearch(appId, apiKey)
 
 const AlgoliaAutocomplete = () => {
