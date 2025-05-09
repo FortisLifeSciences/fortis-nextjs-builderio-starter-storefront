@@ -279,11 +279,21 @@ const LoginDialog = (props: any) => {
   }
 
   const handleLogin = (params: LoginData) => {
-    if (isCartCheckout) {
-      login(params, onLoginSuccess)
-    } else {
-      login(params, closeModal)
+    const cameFromResetPassword =
+      typeof window !== 'undefined' && sessionStorage.getItem('fromResetPassword') === 'true'
+    const onSuccess = () => {
+      if (cameFromResetPassword) {
+        sessionStorage.removeItem('fromResetPassword')
+        closeModal() // 👈 close the modal first
+        router.replace('/cart')
+      } else if (onLoginSuccess) {
+        onLoginSuccess()
+      } else {
+        closeModal()
+      }
     }
+
+    login(params, onSuccess)
   }
 
   return (

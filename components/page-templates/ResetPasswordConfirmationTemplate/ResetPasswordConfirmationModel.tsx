@@ -60,6 +60,7 @@ const ResetPasswordConfirmationModal = () => {
   const { showModal, closeModal } = useModalContext()
 
   const gotoLogin = () => {
+    sessionStorage.setItem('fromResetPassword', 'true')
     showModal({ Component: LoginDialog })
   }
 

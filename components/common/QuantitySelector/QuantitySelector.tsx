@@ -55,6 +55,7 @@ const QuantityTextField = ({ quantity, minQty, handleCustomQuantity }: QuantityI
   return (
     <TextField
       name="quantity"
+      autoComplete="off"
       onChange={handleQuantityChange}
       onBlur={handleQuantityOnBlur}
       value={itemQuantity}
@@ -76,7 +77,7 @@ const QuantityTextField = ({ quantity, minQty, handleCustomQuantity }: QuantityI
           backgroundColor: '#ffffff',
         },
       }}
-      sx={{ width: '35px', height: '24px', borderRadius: '3px' }}
+      sx={{ width: '50px', height: '24px', borderRadius: '3px' }}
     />
   )
 }
