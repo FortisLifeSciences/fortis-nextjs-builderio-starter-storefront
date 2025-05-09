@@ -89,6 +89,7 @@ const ManualFacetBlock = ({
             <Box
               display="flex"
               alignItems="center"
+              className="ais-Panel-header"
               justifyContent="space-between"
               sx={{ cursor: 'pointer' }}
               onClick={() => toggleSection(facet)}
@@ -101,7 +102,7 @@ const ManualFacetBlock = ({
                 padding: '8px 0',
               }}
             >
-              <Typography variant="h6">{getFacetLabel(facet)}</Typography>
+              <span>{getFacetLabel(facet)}</span>
               <span style={{ color: 'rgba(0, 0, 0, 0.54)' }}>
                 {isSectionExpanded ? <ExpandLess /> : <ExpandMore />}
               </span>
