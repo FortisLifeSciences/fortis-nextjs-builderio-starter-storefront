@@ -12,8 +12,8 @@ import { Navigation } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/react'
 
 import styles from './ResourceSearchSliders.module.css' // Import the CSS module
-import fortisLogo from '@/assets/fortisLogo.png'
 import resourceTypeArr from '@/components/common/ResourceTypeArr'
+import DefaultImage from '@/public/noImage.png'
 
 import type { StaticImageData } from 'next/image'
 
@@ -117,10 +117,10 @@ const ResourceSearchSliders: React.FC<Props> = ({
                   >
                     <span className={styles.imageContainer}>
                       <Image
-                        src={hit.data?.image || (fortisLogo as StaticImageData).src}
+                        src={hit.data?.image || (DefaultImage as StaticImageData).src}
                         alt={hit.data?.title || 'Learning resource'}
-                        width={(fortisLogo as StaticImageData).width}
-                        height={(fortisLogo as StaticImageData).height}
+                        width={(DefaultImage as StaticImageData).width}
+                        height={(DefaultImage as StaticImageData).height}
                         className={styles.image}
                       />
                     </span>
@@ -193,10 +193,10 @@ const ResourceSearchSliders: React.FC<Props> = ({
                   >
                     <span className={styles.imageContainer}>
                       <Image
-                        src={hit.data?.image || (fortisLogo as StaticImageData).src}
+                        src={hit.data?.image || (DefaultImage as StaticImageData).src}
                         alt={hit.data?.title || 'Learning resource'}
-                        width={(fortisLogo as StaticImageData).width}
-                        height={(fortisLogo as StaticImageData).height}
+                        width={(DefaultImage as StaticImageData).width}
+                        height={(DefaultImage as StaticImageData).height}
                         className={styles.image}
                       />
                     </span>

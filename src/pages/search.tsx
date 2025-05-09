@@ -276,202 +276,212 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
           return (
             <>
               {/* Search summary title */}
-              <h1 className="searchProductsTitle">
-                {`${result.nbHits} Products for "${result.query}"`}
-              </h1>
+              {result.nbHits > 0 && (
+                <>
+                  <h1 className="searchProductsTitle">
+                    {`${result.nbHits} Products for "${result.query}"`}
+                  </h1>
 
-              <div className="searchListingContainer">
-                <Box
-                  className="FacetSection"
-                  id="facetView"
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column', // Make vertical layout
-                    width: {
-                      xs: isFilterOpen ? '100%' : '0',
-                      sm: '17%',
-                    },
-                    padding: {
-                      xs: '0',
-                      sm: '20px 0',
-                    },
-                    overflow: 'hidden',
-                    transition: 'all 0.3s ease',
-                    backgroundColor: {
-                      xs: '#fff',
-                      sm: 'transparent',
-                    },
-                    position: {
-                      xs: 'absolute',
-                      sm: 'static',
-                    },
-                    zIndex: {
-                      xs: 1200,
-                      sm: 'auto',
-                    },
-                    height: {
-                      xs: 'auto',
-                      sm: 'auto',
-                    },
-                    boxShadow: {
-                      xs: isFilterOpen ? 3 : 0,
-                      sm: 0,
-                    },
-                    ...PLPStyles.FacetSection,
-                  }}
-                >
-                  {!isMobile && (
-                    <ManualFacetBlock
-                      facets={orderedFacets}
-                      facetValues={availableFacets}
-                      selectedFilters={selectedFilters}
-                      onFilterChange={handleFilterChange}
-                    />
-                  )}
-                  {isMobile && (
-                    <Box sx={{ display: { md: 'none' } }}>
-                      <Box sx={{ ...PLPStyles.navBarMainMobile }}>
-                        <Button
-                          variant="contained"
-                          color="secondary"
-                          sx={{ textTransform: 'capitalize' }}
-                          onClick={onFilterByClose}
-                        >
-                          Hide Filters
-                        </Button>
-                        <Box sx={{ ...PLPStyles.upperTotal }}>
+                  <div className="searchListingContainer">
+                    <Box
+                      className="FacetSection"
+                      id="facetView"
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column', // Make vertical layout
+                        width: {
+                          xs: isFilterOpen ? '100%' : '0',
+                          sm: '17%',
+                        },
+                        padding: {
+                          xs: '0',
+                          sm: '20px 0',
+                        },
+                        overflow: 'hidden',
+                        transition: 'all 0.3s ease',
+                        backgroundColor: {
+                          xs: '#fff',
+                          sm: 'transparent',
+                        },
+                        position: {
+                          xs: 'absolute',
+                          sm: 'static',
+                        },
+                        zIndex: {
+                          xs: 1200,
+                          sm: 'auto',
+                        },
+                        height: {
+                          xs: 'auto',
+                          sm: 'auto',
+                        },
+                        boxShadow: {
+                          xs: isFilterOpen ? 3 : 0,
+                          sm: 0,
+                        },
+                        ...PLPStyles.FacetSection,
+                      }}
+                    >
+                      {!isMobile && (
+                        <ManualFacetBlock
+                          facets={orderedFacets}
+                          facetValues={availableFacets}
+                          selectedFilters={selectedFilters}
+                          onFilterChange={handleFilterChange}
+                        />
+                      )}
+                      {isMobile && (
+                        <Box sx={{ display: { md: 'none' } }}>
+                          <Box sx={{ ...PLPStyles.navBarMainMobile }}>
+                            <Button
+                              variant="contained"
+                              color="secondary"
+                              sx={{ textTransform: 'capitalize' }}
+                              onClick={onFilterByClose}
+                            >
+                              Hide Filters
+                            </Button>
+                            <Box sx={{ ...PLPStyles.upperTotal }}>
+                              {t('no-of-products', { count: result?.nbHits ?? 0 })}
+                            </Box>
+                          </Box>
+                          <FullWidthDivider />
+                          <ManualFacetBlock
+                            facets={orderedFacets} // This is an array like ['brand', 'category']
+                            facetValues={availableFacets} // This is the object with counts
+                            selectedFilters={selectedFilters}
+                            onFilterChange={handleFilterChange}
+                          />
+                          {isFilterOpen && (
+                            <Box sx={{ mt: 'auto', ...PLPStyles.filterByMobileButtons }}>
+                              <ManualFilterControls
+                                onClear={handleClearAllFilters}
+                                onClose={onFilterByClose}
+                                disabled={Object.keys(selectedFilters).length === 0}
+                              />
+                            </Box>
+                          )}
+                          <Box sx={{ ...PLPStyles.lowerTotal }}>
+                            {result?.nbHits && (
+                              <Box>{t('results', { count: result?.nbHits ?? 0 })}</Box>
+                            )}
+                          </Box>
+                        </Box>
+                      )}
+                    </Box>
+
+                    <Box
+                      className="rightSearchContainer"
+                      id="search-listing-section"
+                      sx={{
+                        display: {
+                          xs: isFilterOpen ? 'none' : 'block',
+                          md: 'block',
+                        },
+                        padding: {
+                          xs: '0',
+                          md: '2px 0px 20px 20px',
+                        },
+                      }}
+                    >
+                      {/* List and grid View */}
+
+                      {/* toggle grid and list view */}
+
+                      <div className="gridListViewContainer">
+                        <Box sx={{ ...PLPStyles.navBarMain }}>
+                          {!isMobile && (
+                            <Box
+                              className="switchListAndGrid"
+                              sx={{ display: 'flex', margin: '1rem 0 0 1rem' }}
+                            >
+                              <Box
+                                onClick={() => setIsListView(true)}
+                                title="List View"
+                                sx={{ cursor: 'pointer' }}
+                                tabIndex={0}
+                              >
+                                <ReorderRounded
+                                  fontSize="medium"
+                                  {...(isListView && { color: 'primary' })}
+                                />
+                              </Box>
+                              <Box
+                                onClick={() => setIsListView(false)}
+                                title="Grid View"
+                                sx={{ cursor: 'pointer' }}
+                                tabIndex={0}
+                              >
+                                <Apps
+                                  fontSize="medium"
+                                  {...(!isListView && { color: 'primary' })}
+                                />
+                              </Box>
+                            </Box>
+                          )}
+                          {/* Custom sort for search start */}
+                          <Box sx={{ ...PLPStyles.navBarSort }}>
+                            <Box sx={{ ...PLPStyles.sorting }}>
+                              <ManualSortDropdown
+                                sortIndex={sortIndex}
+                                onChangeSort={setSortIndex}
+                              />
+                            </Box>
+                            <Box sx={{ ...PLPStyles.filterBy }}>
+                              <Button
+                                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                variant="outlined"
+                                endIcon={<Add fontSize="small" />}
+                                sx={{ ...PLPStyles.filterByButton }}
+                              >
+                                Filter By
+                              </Button>
+                            </Box>
+                          </Box>
+                        </Box>
+                        {/* Custom sort for search end */}
+                      </div>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Box sx={{ display: 'flex', margin: '1rem 0 0 1rem' }}>
+                          <SelectedFiltersChips
+                            selectedFilters={selectedFilters}
+                            onFilterRemove={handleRemoveFilter}
+                            onClearAll={handleClearAllFilters}
+                          />
+                        </Box>
+                        <Box sx={{ ...PLPStyles.totalResults }} pb={1}>
                           {t('no-of-products', { count: result?.nbHits ?? 0 })}
                         </Box>
                       </Box>
-                      <FullWidthDivider />
-                      <ManualFacetBlock
-                        facets={orderedFacets} // This is an array like ['brand', 'category']
-                        facetValues={availableFacets} // This is the object with counts
-                        selectedFilters={selectedFilters}
-                        onFilterChange={handleFilterChange}
-                      />
-                      {isFilterOpen && (
-                        <Box sx={{ mt: 'auto', ...PLPStyles.filterByMobileButtons }}>
-                          <ManualFilterControls
-                            onClear={handleClearAllFilters}
-                            onClose={onFilterByClose}
-                            disabled={Object.keys(selectedFilters).length === 0}
-                          />
-                        </Box>
-                      )}
-                      <Box sx={{ ...PLPStyles.lowerTotal }}>
-                        {result?.nbHits && (
-                          <Box>{t('results', { count: result?.nbHits ?? 0 })}</Box>
-                        )}
-                      </Box>
-                    </Box>
-                  )}
-                </Box>
-
-                <Box
-                  className="rightSearchContainer"
-                  id="search-listing-section"
-                  sx={{
-                    display: {
-                      xs: isFilterOpen ? 'none' : 'block',
-                      md: 'block',
-                    },
-                    padding: {
-                      xs: '0',
-                      md: '2px 0px 20px 20px',
-                    },
-                  }}
-                >
-                  {/* List and grid View */}
-
-                  {/* toggle grid and list view */}
-
-                  <div className="gridListViewContainer">
-                    <Box sx={{ ...PLPStyles.navBarMain }}>
-                      {!isMobile && (
-                        <Box
-                          className="switchListAndGrid"
-                          sx={{ display: 'flex', margin: '1rem 0 0 1rem' }}
-                        >
-                          <Box
-                            onClick={() => setIsListView(true)}
-                            title="List View"
-                            sx={{ cursor: 'pointer' }}
-                            tabIndex={0}
-                          >
-                            <ReorderRounded
-                              fontSize="medium"
-                              {...(isListView && { color: 'primary' })}
-                            />
-                          </Box>
-                          <Box
-                            onClick={() => setIsListView(false)}
-                            title="Grid View"
-                            sx={{ cursor: 'pointer' }}
-                            tabIndex={0}
-                          >
-                            <Apps fontSize="medium" {...(!isListView && { color: 'primary' })} />
-                          </Box>
-                        </Box>
-                      )}
-                      {/* Custom sort for search start */}
-                      <Box sx={{ ...PLPStyles.navBarSort }}>
-                        <Box sx={{ ...PLPStyles.sorting }}>
-                          <ManualSortDropdown sortIndex={sortIndex} onChangeSort={setSortIndex} />
-                        </Box>
-                        <Box sx={{ ...PLPStyles.filterBy }}>
-                          <Button
-                            onClick={() => setIsFilterOpen(!isFilterOpen)}
-                            variant="outlined"
-                            endIcon={<Add fontSize="small" />}
-                            sx={{ ...PLPStyles.filterByButton }}
-                          >
-                            Filter By
-                          </Button>
-                        </Box>
-                      </Box>
-                    </Box>
-                    {/* Custom sort for search end */}
-                  </div>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Box sx={{ display: 'flex', margin: '1rem 0 0 1rem' }}>
-                      <SelectedFiltersChips
-                        selectedFilters={selectedFilters}
-                        onFilterRemove={handleRemoveFilter}
-                        onClearAll={handleClearAllFilters}
-                      />
-                    </Box>
-                    <Box sx={{ ...PLPStyles.totalResults }} pb={1}>
-                      {t('no-of-products', { count: result?.nbHits ?? 0 })}
-                    </Box>
-                  </Box>
-                  <Box className={isListView ? 'product-list-view' : 'product-grid-view'}>
-                    <div className="productviewstructure">
-                      {result.hits.slice(0, 16).map((hit: any, i: number) => (
-                        <div className="productviewlistItem" key={i}>
-                          {isMobile ? (
-                            <ProductHitGridView hit={hit} />
-                          ) : isListView ? (
-                            <ProductHitListView hit={hit} />
-                          ) : (
-                            <ProductHitGridView hit={hit} />
-                          )}
+                      <Box className={isListView ? 'product-list-view' : 'product-grid-view'}>
+                        <div className="productviewstructure">
+                          {result.hits.slice(0, 16).map((hit: any, i: number) => (
+                            <div className="productviewlistItem" key={i}>
+                              {isMobile ? (
+                                <ProductHitGridView hit={hit} />
+                              ) : isListView ? (
+                                <ProductHitListView hit={hit} />
+                              ) : (
+                                <ProductHitGridView hit={hit} />
+                              )}
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  </Box>
-                  {/* pagination */}
-                  <AlgoliaPagination
-                    currentPage={result.page}
-                    totalPages={result.nbPages}
-                    onPageChange={(page) => {
-                      setPagination((prev) => ({ ...prev, productsPage: page }))
-                      handlePaginationClick() // scroll to rightSearchContainer
-                    }}
-                  />
-                  {/* pagination end */}
-                </Box>
-              </div>
+                      </Box>
+                      {/* pagination */}
+                      <AlgoliaPagination
+                        currentPage={result.page}
+                        totalPages={result.nbPages}
+                        onPageChange={(page) => {
+                          setPagination((prev) => ({ ...prev, productsPage: page }))
+                          handlePaginationClick() // scroll to rightSearchContainer
+                        }}
+                      />
+                      {/* pagination end */}
+                    </Box>
+                  </div>
+                </>
+              )}
             </>
           )
         })

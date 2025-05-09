@@ -61,7 +61,7 @@
 .image {
   vertical-align: middle;
   max-height: 150px;
-  width: 100%;
+  width: auto;
   height: auto;
 }
 
