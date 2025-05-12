@@ -32,12 +32,7 @@ function getMetaData(data: any): MetaData {
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const { locale } = context
-
   const pathnameArr = context.params?.pagename
-
-  console.log('pathnameArr', pathnameArr)
-
-  console.log('pathnameArr', pathnameArr?.length)
 
   let pagename
   if (Array.isArray(pathnameArr) && pathnameArr?.length > 1) {
@@ -48,13 +43,20 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   let resourcesPage = false
   let resourceCategoryCode = null
+  const pathLength = pathnameArr?.length
 
   if (Array.isArray(pathnameArr)) {
-    if (pathnameArr.length === 2 && pathnameArr[0] === 'resources') {
+    if (pathLength === 2 && pathnameArr[0] === 'resources') {
       resourceCategoryCode = pathnameArr[1]
       resourcesPage = true
-    } else if (pathnameArr.length === 1 && pathnameArr[0] === 'resources') {
-      resourceCategoryCode = 'resources'
+    } else if (
+      pathLength === 1 &&
+      (pathnameArr[0] === 'resources' ||
+        pathnameArr[0] === 'protocols' ||
+        pathnameArr[0] === 'services' ||
+        pathnameArr[0] === 'general')
+    ) {
+      resourceCategoryCode = pathnameArr[0]
       resourcesPage = true
     }
   }
@@ -63,14 +65,18 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const categoryTopSection = publicRuntimeConfig?.builderIO?.modelKeys?.categoryTopSection || ''
 
   let section = []
-  let products = []
-  let facets = null
-  let page = []
+  let page
+  let products
+  let facets
 
   if (resourcesPage && resourceCategoryCode) {
     const result = await productIndex.search('', {
-      filters: `category_url:"resources${
-        resourceCategoryCode !== 'resources' ? `/${resourceCategoryCode}` : ''
+      filters: `category_url:"${
+        pathLength === 1
+          ? resourceCategoryCode
+          : pathnameArr?.[0] === 'resources'
+          ? `resources/${resourceCategoryCode}`
+          : ''
       }"`,
       facets: ['*'],
     })
@@ -80,7 +86,10 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     section = await builder
       .get(categoryTopSection, {
         userAttributes: {
-          slug: `resources-${resourceCategoryCode}`,
+          slug:
+            pathnameArr?.[0] === 'resources'
+              ? `resources-${resourceCategoryCode}`
+              : `${resourceCategoryCode}`,
           urlPath: `/${pagename}`,
         },
       })
@@ -89,7 +98,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     page = await builder
       .get(publicRuntimeConfig?.builderIO?.modelKeys?.defaultPage, {
         userAttributes: {
-          urlPath: `"/"${pagename}`,
+          urlPath: `/${pagename}`,
         },
       })
       .toPromise()
@@ -103,18 +112,21 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     props: {
       page: page || null,
       metaData: getMetaData(section?.data) || null,
-      categoriesTree,
+      categoriesTree: categoriesTree || null,
       section: section || null,
       resourcesPage: resourcesPage,
       resourceCategoryCode: resourceCategoryCode || null,
       facets: facets || null,
+      pathLength,
+      urlFirstPart: pathnameArr?.[0] || null,
       ...(await serverSideTranslations(locale as string, ['common'])),
     },
   }
 }
 
 const Page = (props: any) => {
-  const { page, resourcesPage, section, resourceCategoryCode, facets } = props
+  const { page, resourcesPage, section, resourceCategoryCode, facets, pathLength, urlFirstPart } =
+    props
   const noIndex = page?.data?.noIndex
     ? page?.data?.noIndex
     : section?.data?.noIndex
@@ -134,9 +146,11 @@ const Page = (props: any) => {
             {...({
               hitsPerPage: 15,
               filters: `category_url:"${
-                resourceCategoryCode === 'resources'
-                  ? 'resources'
-                  : `resources/${resourceCategoryCode}`
+                pathLength === 1
+                  ? resourceCategoryCode
+                  : urlFirstPart === 'resources'
+                  ? `resources/${resourceCategoryCode}`
+                  : ''
               }"`,
             } as any)}
           />

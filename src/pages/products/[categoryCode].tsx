@@ -210,6 +210,13 @@ const MyHitsComponent = ({
     )
   }
 
+  const handlePaginationClick = () => {
+    const facetElement = document.querySelector('.FacetSection')
+    if (facetElement) {
+      facetElement.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
   return (
     <div style={{ display: isMobile ? 'block' : 'flex', fontSize: '16px', fontFamily: 'Poppins' }}>
       <Box
@@ -271,9 +278,6 @@ const MyHitsComponent = ({
             </Box>
           )}
           {isMobile && (
-            // <Box className="FacetsInnerContainer" sx={{ ...PLPStyles.FacetsInnerContainer }}>
-            //   <DynamicWidgets fallbackComponent={FallbackComponent} />
-            // </Box>
             <Box sx={{ display: { md: 'none' } }}>
               <FullWidthDivider />
               <Box sx={{ ...PLPStyles.navBarMainMobile }}>
@@ -305,15 +309,15 @@ const MyHitsComponent = ({
       </Box>
 
       {/* Right Column – Results */}
-      <Box 
-        sx={{ 
-          flex: 1,  
+      <Box
+        sx={{
+          flex: 1,
           display: {
             xs: isFilterOpen ? 'none' : 'block',
             md: 'block',
-          }, 
-          padding: { xs: '0', md: '20px 0 20px 20px' } 
-        }} 
+          },
+          padding: { xs: '0', md: '20px 0 20px 20px' },
+        }}
         id="productHitsView"
       >
         <Box id="product-listing-section" sx={{ ...PLPStyles.plpGrid }}>
@@ -377,7 +381,7 @@ const MyHitsComponent = ({
           </Box>
         </Box>
         <Box className="AlgoliaPagination" sx={{ textAlign: 'center', marginTop: 2 }}>
-          <Pagination />
+          <Pagination onClick={handlePaginationClick} />
         </Box>
       </Box>
     </div>

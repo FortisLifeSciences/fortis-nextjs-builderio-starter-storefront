@@ -145,7 +145,7 @@ const ProductHitListView = ({ hit }: { hit: Resources }): JSX.Element => {
                   data-testid="product-image"
                 />
               </CardMedia>
-              <Box flexDirection="column" m={1} width="75%" className="product-info">
+              <Box flexDirection="column" m={1} width="80%" className="product-info">
                 <Box display="flex" alignItems="center" width="100%" mb={'20px'}>
                   <Typography
                     variant="body2"
