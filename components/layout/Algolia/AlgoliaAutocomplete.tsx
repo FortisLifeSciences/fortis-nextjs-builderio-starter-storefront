@@ -262,6 +262,8 @@ const AlgoliaAutocomplete = () => {
       },
     })
 
+    let justRedirected = false
+
     const search = autocomplete<QuickAccessHit>({
       container: containerRef.current,
       placeholder: 'SEARCH',
@@ -269,7 +271,28 @@ const AlgoliaAutocomplete = () => {
       insights: true,
       plugins: [querySuggestionsPlugin, popularPlugin, quickAccessPlugin],
       onSubmit({ state }) {
+        justRedirected = true
         handleEnterSearch(state.query) // 👈 This runs on enter
+      },
+      shouldPanelOpen({ state }) {
+        if (justRedirected) {
+          return false // Prevent panel opening just after redirect
+        }
+        // Default behavior: open if there are items
+        return state.collections.some((collection) => collection.items.length > 0)
+      },
+      onStateChange({ state }) {
+        const input = document.querySelector('#autocomplete input')
+        if (input) {
+          // Reset the redirect flag on actual user focus
+          input.addEventListener(
+            'focus',
+            () => {
+              justRedirected = false
+            },
+            { once: true }
+          )
+        }
       },
 
       getSources: async ({ query }) => {
