@@ -11,6 +11,13 @@ import { useRouter } from 'next/router'
 
 import fortisLogo from '@/assets/fortisLogo.png'
 import resourceTypeArr from '@/components/common/ResourceTypeArr'
+import abcoreLogo from '@/public/BrandLogos/abcore_logo.png'
+import aristaLogo from '@/public/BrandLogos/arista_logo.png'
+import bethylLogo from '@/public/BrandLogos/bethyl_logo.png'
+import empiricalLogo from '@/public/BrandLogos/empirical_logo.png'
+import nanocomposixLogo from '@/public/BrandLogos/nanocomposix_logo.png'
+import vectorLogo from '@/public/BrandLogos/vector_logo.png'
+import DefaultImage from '@/public/noImage.png'
 
 const h = React.createElement
 
@@ -20,6 +27,18 @@ type QuickAccessHit = {
   iconURL?: string
   cssStyle?: string
   __autocomplete_id: string
+}
+
+const brandLogos: Record<string, string> = {
+  abcore: abcoreLogo.src,
+  arista: aristaLogo.src,
+  bethyl: bethylLogo.src,
+  empirical: empiricalLogo.src,
+  nanocomposix: nanocomposixLogo.src,
+  vector: vectorLogo.src,
+  fortis: fortisLogo.src,
+  // fallback for brands not in the list
+  default: DefaultImage.src,
 }
 
 const { publicRuntimeConfig } = getConfig()
@@ -280,9 +299,6 @@ const AlgoliaAutocomplete = () => {
               const productResults = results.find((r: any) => r.index === 'products')
               return (productResults as any)?.hits || []
             },
-            /*getItemInputValue({ item }: { item: any }) {
-              return item.product_name || ''
-            },*/
             getItemInputValue({ item }: { item: any; query: string }) {
               return query
             },
@@ -313,11 +329,25 @@ const AlgoliaAutocomplete = () => {
                     ? item.name
                     : 'Untitled'
 
+                const rawBrandCode = item.brand_code || item.brand || ''
+                const normalizedBrand = rawBrandCode.toLowerCase().trim()
+
+                const fallbackImage = brandLogos[normalizedBrand] || brandLogos.default
+
                 const imageSrc = item.product_images?.[0]
                   ? `https://cdn-tp1.mozu.com/31165-m1/cms/files/${item.product_images[0]}`
-                  : fortisLogo.src
+                  : fallbackImage
 
-                const brand = item.brand || ''
+                console.log('Product:', {
+                  rawBrand: rawBrandCode,
+                  normalizedBrand,
+                  imageUsed: imageSrc,
+                  foundLogo: brandLogos[normalizedBrand] ? true : false,
+                  knownBrands: Object.keys(brandLogos),
+                })
+
+                const brand = (item.brand || '').toLowerCase()
+
                 const name = item.slice_product ? item.product_name_variant : item.product_name
                 const sku = item.slice_product ? item.sku : item.plp_catalog_number
                 const showNewTag = item.new_product
