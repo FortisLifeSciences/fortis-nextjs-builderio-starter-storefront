@@ -690,6 +690,7 @@ body {
   .aa-Panel {
     width: auto !important;
     top: 0 !important;
+    position: relative !important;
   }
   .aa-PanelLayout.aa-Panel--scrollable {
     grid-template-columns: auto;

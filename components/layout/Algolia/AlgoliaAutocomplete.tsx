@@ -138,6 +138,12 @@ const AlgoliaAutocomplete = () => {
         return {
           ...source,
           sourceId: 'querySuggestions',
+          onSelect({ item, setIsOpen }) {
+            if (typeof window !== 'undefined') {
+              router.push({ pathname: '/search', query: { query: item.query } })
+              setIsOpen(true)
+            }
+          },
           templates: {
             ...source.templates,
             header() {
@@ -180,9 +186,6 @@ const AlgoliaAutocomplete = () => {
           getItemInputValue({ item }) {
             return item.query
           },
-          /*onSelect({ setIsOpen }) {
-            setIsOpen(true)
-          },*/
           onSelect({ item, setIsOpen }) {
             if (typeof window !== 'undefined') {
               router.push({ pathname: '/search', query: { query: item.query } })
