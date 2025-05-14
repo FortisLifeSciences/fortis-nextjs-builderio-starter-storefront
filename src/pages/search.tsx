@@ -72,17 +72,17 @@ function getMetaData(): MetaData {
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const response = await productSearch(
+  /*const response = await productSearch(
     {
       pageSize: publicRuntimeConfig.productListing.pageSize,
       ...context.query,
     } as CategorySearchParams,
     context.req as NextApiRequest
-  )
+  )*/
   const { locale } = context
   return {
     props: {
-      results: response?.data?.products || [],
+      //results: response?.data?.products || [],
       metaData: getMetaData(),
       ...(await serverSideTranslations(locale as string, ['common'])),
     },
@@ -126,13 +126,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
       })
     }
   }, [router.query, router])
-  const { data: searchPageResults, isFetching } = useGetSearchedProducts(
-    {
-      ...searchParams,
-      pageSize: searchParams.pageSize || publicRuntimeConfig.productListing.pageSize,
-    },
-    props.results
-  )
+
   const breadcrumbs = [
     { text: 'Home', link: '/' },
     { text: 'Search Results', link: router.asPath },
@@ -144,13 +138,6 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
       container.scrollIntoView({ behavior: 'smooth' })
     }
   }
-
-  const searchPageHeading = searchQuery
-    ? t('search-results', {
-        m: `${searchPageResults?.totalCount || 0}`,
-        n: `"${searchQuery}"`,
-      })
-    : breadcrumbs[breadcrumbs.length - 1].text
 
   const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({})
   const [orderedFacets, setOrderedFacets] = useState<string[]>([])

@@ -11,7 +11,7 @@ import Image from 'next/image'
 import { Navigation } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/react'
 
-import styles from './ResourceSearchSliders.module.css' // Import the CSS module
+import styles from './ResourceSearchSliders.module.css'
 import resourceTypeArr from '@/components/common/ResourceTypeArr'
 import DefaultImage from '@/public/noImage.png'
 
@@ -45,12 +45,10 @@ const ResourceSearchSliders: React.FC<Props> = ({
   query,
   index,
 }) => {
-  // State and Refs for the Resource Swiper
   const resourceSwiperRef = useRef<any>(null)
   const [resourceBeginningState, setResourceBeginningState] = useState<boolean>(true)
   const [resourceEndState, setResourceEndState] = useState<boolean>(false)
 
-  // State and Refs for the Non-Resource Swiper
   const nonResourceSwiperRef = useRef<any>(null)
   const [nonResourceBeginningState, setNonResourceBeginningState] = useState<boolean>(true)
   const [nonResourceEndState, setNonResourceEndState] = useState<boolean>(false)
@@ -65,6 +63,16 @@ const ResourceSearchSliders: React.FC<Props> = ({
     if (isMobile) return 1
     return 4
   }
+
+  const showNonResourceArrows =
+    (isDesktop && nonResourceHits.length > 4) ||
+    (isTablet && nonResourceHits.length > 3) ||
+    (isMobile && nonResourceHits.length > 1)
+
+  const showResourceArrows =
+    (isDesktop && resourceHits.length > 4) ||
+    (isTablet && resourceHits.length > 3) ||
+    (isMobile && resourceHits.length > 1)
 
   const handleResourceSwiperInit = (swiper: any) => {
     resourceSwiperRef.current = swiper
@@ -134,34 +142,28 @@ const ResourceSearchSliders: React.FC<Props> = ({
                 </SwiperSlide>
               ))}
             </Swiper>
-            {nonResourceBeginningState !== undefined && (
-              <>
-                <IconButton
-                  className={`custom-prev-non-resource-${index} ${styles.swiperButton} ${
-                    styles.swiperButtonPrev
-                  } ${
-                    nonResourceBeginningState
-                      ? styles.swiperButtonDisabled
-                      : styles.swiperButtonEnabled
-                  }`}
-                  aria-label="Previous slide"
-                  onClick={() => nonResourceSwiperRef.current?.slidePrev()}
-                >
-                  <ArrowBackIos />
-                </IconButton>
-                <IconButton
-                  className={`custom-next-non-resource-${index} ${styles.swiperButton} ${
-                    styles.swiperButtonNext
-                  } ${
-                    nonResourceEndState ? styles.swiperButtonDisabled : styles.swiperButtonEnabled
-                  }`}
-                  aria-label="Next slide"
-                  onClick={() => nonResourceSwiperRef.current?.slideNext()}
-                >
-                  <ArrowForwardIos />
-                </IconButton>
-              </>
-            )}
+            <IconButton
+              className={`custom-prev-non-resource-${index} ${styles.swiperButton} ${
+                styles.swiperButtonPrev
+              } ${
+                nonResourceBeginningState ? styles.swiperButtonDisabled : styles.swiperButtonEnabled
+              } ${!showNonResourceArrows ? styles.hidden : ''}`}
+              aria-label="Previous slide"
+              onClick={() => nonResourceSwiperRef.current?.slidePrev()}
+            >
+              <ArrowBackIos />
+            </IconButton>
+            <IconButton
+              className={`custom-next-non-resource-${index} ${styles.swiperButton} ${
+                styles.swiperButtonNext
+              } ${nonResourceEndState ? styles.swiperButtonDisabled : styles.swiperButtonEnabled} ${
+                !showNonResourceArrows ? styles.hidden : ''
+              }`}
+              aria-label="Next slide"
+              onClick={() => nonResourceSwiperRef.current?.slideNext()}
+            >
+              <ArrowForwardIos />
+            </IconButton>
           </div>
         </div>
       )}
@@ -241,32 +243,28 @@ const ResourceSearchSliders: React.FC<Props> = ({
                 </SwiperSlide>
               ))}
             </Swiper>
-            {resourceBeginningState !== undefined && (
-              <>
-                <IconButton
-                  className={`custom-prev-resource-${index} ${styles.swiperButton} ${
-                    styles.swiperButtonPrev
-                  } ${
-                    resourceBeginningState
-                      ? styles.swiperButtonDisabled
-                      : styles.swiperButtonEnabled
-                  }`}
-                  aria-label="Previous slide"
-                  onClick={() => resourceSwiperRef.current?.slidePrev()}
-                >
-                  <ArrowBackIos />
-                </IconButton>
-                <IconButton
-                  className={`custom-next-resource-${index} ${styles.swiperButton} ${
-                    styles.swiperButtonNext
-                  } ${resourceEndState ? styles.swiperButtonDisabled : styles.swiperButtonEnabled}`}
-                  aria-label="Next slide"
-                  onClick={() => resourceSwiperRef.current?.slideNext()}
-                >
-                  <ArrowForwardIos />
-                </IconButton>
-              </>
-            )}
+            <IconButton
+              className={`custom-prev-resource-${index} ${styles.swiperButton} ${
+                styles.swiperButtonPrev
+              } ${
+                resourceBeginningState ? styles.swiperButtonDisabled : styles.swiperButtonEnabled
+              } ${!showResourceArrows ? styles.hidden : ''}`}
+              aria-label="Previous slide"
+              onClick={() => resourceSwiperRef.current?.slidePrev()}
+            >
+              <ArrowBackIos />
+            </IconButton>
+            <IconButton
+              className={`custom-next-resource-${index} ${styles.swiperButton} ${
+                styles.swiperButtonNext
+              } ${resourceEndState ? styles.swiperButtonDisabled : styles.swiperButtonEnabled} ${
+                !showResourceArrows ? styles.hidden : ''
+              }`}
+              aria-label="Next slide"
+              onClick={() => resourceSwiperRef.current?.slideNext()}
+            >
+              <ArrowForwardIos />
+            </IconButton>
           </div>
         </div>
       )}
