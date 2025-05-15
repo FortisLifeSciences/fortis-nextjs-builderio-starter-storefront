@@ -169,7 +169,7 @@ const ManualFacetBlock = ({
                     label={value}
                     sx={{
                       width: '100%',
-                      fontSize: theme.typography.body2,
+                      fontSize: theme.typography.body2.fontSize,
                       '& .MuiFormControlLabel-label': {
                         fontSize: '14px',
                         fontWeight: 300,
