@@ -202,7 +202,7 @@ const MyHitsComponent = ({
 
         <div
           className="ais-Panel-body"
-          style={{ padding: '8px 0', display: isExpanded ? 'block' : 'none' }}
+          style={{ padding: '0px 0px 8px 0px', display: isExpanded ? 'block' : 'none' }}
         >
           <CustomRefinementList attribute={attribute} searchableAttributes={searchableAttributes} />
         </div>
@@ -237,7 +237,7 @@ const MyHitsComponent = ({
           flexDirection: 'column', // Make vertical layout
           width: {
             xs: isFilterOpen ? '100%' : '0',
-            sm: '17%',
+            sm: '20%',
           },
           padding: {
             xs: '0',
