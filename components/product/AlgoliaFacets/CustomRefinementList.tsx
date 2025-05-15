@@ -99,7 +99,7 @@ function CustomRefinementList({ attribute, searchableAttributes }: CustomRefinem
             width: '100%',
             '& input': {
               padding: '8px 0',
-              fontSize: '18px',
+              fontSize: '14px',
               fontWeight: 500,
               color: 'rgb(48, 41, 154)',
               '&::placeholder': {

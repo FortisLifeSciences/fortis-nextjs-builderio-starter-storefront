@@ -278,7 +278,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
                         flexDirection: 'column', // Make vertical layout
                         width: {
                           xs: isFilterOpen ? '100%' : '0',
-                          sm: '17%',
+                          sm: '20%',
                         },
                         padding: {
                           xs: '0',

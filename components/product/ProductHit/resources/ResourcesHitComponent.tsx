@@ -179,7 +179,7 @@ const ResourcesHitComponent = ({ categoryCode, facets }: { categoryCode: string;
           flexDirection: 'column', // Make vertical layout
           width: {
             xs: isFilterOpen ? '100%' : '0',
-            sm: '17%',
+            sm: '20%',
           },
           padding: {
             xs: '0',

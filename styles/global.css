@@ -1072,6 +1072,7 @@ body {
   color: #30299a;
   font-family: 'Poppins';
   line-height: 2.625rem;
+  margin-top: 25px;
   @media (max-width: 680px) {
     font-size: 30px;
   }
@@ -1161,4 +1162,11 @@ body {
 .sortWrapper {
   display: flex;
   flex-direction: row !important;
+}
+.FacetsInnerContainer .ais-Panel .ais-Panel-body {
+  padding: 0px 0px 8px 0px !important;
+}
+
+.FacetsInnerContainer .ais-Panel .ais-Panel-body span {
+  font-size: 14px !important;
 }
