@@ -4,17 +4,7 @@ import { BuilderComponent, builder } from '@builder.io/react'
 import { Add, ExpandLess, ExpandMore } from '@mui/icons-material'
 import Apps from '@mui/icons-material/Apps'
 import ReorderRounded from '@mui/icons-material/ReorderRounded'
-import {
-  Grid,
-  MenuItem,
-  Box,
-  Button,
-  Link,
-  Typography,
-  Breadcrumbs,
-  Stack,
-  useMediaQuery,
-} from '@mui/material'
+import { Box, Button, Typography, useMediaQuery } from '@mui/material'
 import algoliasearch from 'algoliasearch'
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
