@@ -418,11 +418,24 @@ const AlgoliaAutocomplete = () => {
                     wrapper.appendChild(footerEl)
                   }
                   if (totalHits > 4) {
+                    //   footerEl.innerHTML = `
+                    //   <a class="aa-products-see-all" href="https://www.fortislife.com/products">
+                    //     See All Products (${totalHits})
+                    //   </a>
+                    // `
+                    const encodedQuery = encodeURIComponent(query)
                     footerEl.innerHTML = `
-                    <a class="aa-products-see-all" href="https://www.fortislife.com/products">
-                      See All Products (${totalHits})
-                    </a>
-                  `
+                      <a href="/search?query=${encodedQuery}" class="aa-products-see-all">
+                        See All Products (${totalHits})
+                      </a>
+                    `
+
+                    footerEl
+                      .querySelector('.aa-products-see-all')
+                      ?.addEventListener('click', (e) => {
+                        e.preventDefault()
+                        router.push({ pathname: '/search', query: { query } })
+                      })
                   }
 
                   return footerEl
@@ -533,11 +546,24 @@ const AlgoliaAutocomplete = () => {
                   //console.log("nbHits value:", totalHits, "Condition result:", totalHits > 3);
 
                   if (typeof totalHits === 'number' && totalHits > 3) {
+                    // articlefooterEl.innerHTML = `
+                    //   <a class="aa-builder-see-all" href="https://www.fortislife.com/resources">
+                    //     See All
+                    //   </a>
+                    // `
+                    const encodedQuery = encodeURIComponent(query)
                     articlefooterEl.innerHTML = `
-                      <a class="aa-builder-see-all" href="https://www.fortislife.com/resources">
-                        See All 
+                      <a href="/search?query=${encodedQuery}" class="aa-builder-see-all">
+                        See All
                       </a>
                     `
+
+                    articlefooterEl
+                      .querySelector('.aa-builder-see-all')
+                      ?.addEventListener('click', (e) => {
+                        e.preventDefault()
+                        router.push({ pathname: '/search', query: { query } })
+                      })
                   } else {
                     articlefooterEl.innerHTML = ''
                   }
