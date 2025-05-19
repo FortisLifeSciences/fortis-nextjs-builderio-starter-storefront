@@ -207,6 +207,11 @@ const MyHitsComponent = ({
     }
   }
 
+  const sortingOptions = [
+    { label: 'Relevance', value: 'products' },
+    { label: 'Featured', value: 'products_relevance' },
+  ]
+
   return (
     <div style={{ display: isMobile ? 'block' : 'flex', fontSize: '16px', fontFamily: 'Poppins' }}>
       <Box
@@ -337,7 +342,7 @@ const MyHitsComponent = ({
                   <Typography component="span" sx={{ ...PLPStyles.navBarLabel }}>
                     {t('sort')}
                   </Typography>
-                  <CustomSortBy />
+                  <CustomSortBy items={sortingOptions} />
                 </Box>
                 <Box sx={{ ...PLPStyles.filterBy }}>
                   <Button

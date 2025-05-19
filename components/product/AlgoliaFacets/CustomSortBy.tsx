@@ -1,15 +1,20 @@
 import React from 'react'
 
-import { Box, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from '@mui/material'
+import { Box, FormControl, MenuItem, Select, SelectChangeEvent } from '@mui/material'
 import { useSortBy } from 'react-instantsearch-hooks-web'
 
-const CustomSortBy = () => {
+interface SortItem {
+  label: string
+  value: string
+}
+
+interface CustomSortByProps {
+  items: SortItem[]
+}
+
+const CustomSortBy: React.FC<CustomSortByProps> = ({ items }) => {
   const { options, currentRefinement, refine } = useSortBy({
-    items: [
-      { label: 'Relevance', value: 'products' },
-      { label: 'Featured', value: 'products_relevance' },
-      // Add more replicas if needed
-    ],
+    items,
   })
 
   const handleChange = (event: SelectChangeEvent) => {

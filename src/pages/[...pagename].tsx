@@ -2,8 +2,6 @@ import { BuilderComponent, builder } from '@builder.io/react'
 import '@builder.io/widgets'
 import getConfig from 'next/config'
 import Head from 'next/head'
-import { useRouter } from 'next/router'
-import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { InstantSearch, Configure } from 'react-instantsearch-hooks-web'
 
@@ -11,7 +9,7 @@ import ResourcesHitComponent from '@/components/product/ProductHit/resources/Res
 import getCategoryTree from '@/lib/api/operations/get-category-tree'
 import { productIndex, searchClient } from '@/lib/api/util/algolia'
 import type { CategoryTreeResponse } from '@/lib/types'
-import type { MetaData, PageWithMetaData } from '@/lib/types'
+import type { MetaData } from '@/lib/types'
 
 import type { GetServerSidePropsContext } from 'next'
 
@@ -141,7 +139,7 @@ const Page = (props: any) => {
           model={publicRuntimeConfig?.builderIO?.modelKeys?.categoryTopSection}
           content={section}
         />
-        <InstantSearch searchClient={searchClient} indexName="builder-page">
+        <InstantSearch searchClient={searchClient} indexName="builder-page_newest-first">
           <Configure
             {...({
               hitsPerPage: 15,
