@@ -45,10 +45,6 @@ export const facetLabelMapping: FacetLabelMapping[] = [
     label: 'Product Type',
   },
   {
-    facetValue: 'reactivity',
-    label: 'Reactivity',
-  },
-  {
     facetValue: 'target',
     label: 'Target',
   },
@@ -71,6 +67,10 @@ export const facetLabelMapping: FacetLabelMapping[] = [
   {
     facetValue: 'data.resourceType',
     label: 'Resource Type',
+  },
+  {
+    facetValue: 'data.applications',
+    label: 'Application',
   },
 ]
 
