@@ -268,6 +268,9 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
         </Box>
       ) : manualSearchResults === null ? (
         <div>
+          <h1 className="searchProductsTitle">
+            {`Search Input Box is empty. Please enter a search term.`}
+          </h1>
           <BuilderComponent
             model={publicRuntimeConfig?.builderIO?.modelKeys?.emptyProductSearchResults}
             content={page}
