@@ -583,7 +583,7 @@ const AlgoliaAutocomplete = () => {
 
     /////////////////////
     // 👇 Fix for paste issue start
-    const input = containerRef.current.querySelector('input')
+    /*const input = containerRef.current.querySelector('input')
     if (input) {
       // Adding event listener for 'paste'
       input.addEventListener('paste', () => {
@@ -600,7 +600,7 @@ const AlgoliaAutocomplete = () => {
           }, 10)
         })
       })
-    }
+    }*/
     ////  Fix for paste issue end
 
     return () => search.destroy()
