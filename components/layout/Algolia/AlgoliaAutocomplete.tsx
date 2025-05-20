@@ -57,7 +57,7 @@ const AlgoliaAutocomplete = () => {
 
   useEffect(() => {
     if (!containerRef.current) return
-
+    let justRedirected = false
     /// quick access plugin
     const quickAccessPlugin: AutocompletePlugin<QuickAccessHit, unknown> = {
       getSources({ query }) {
@@ -146,7 +146,7 @@ const AlgoliaAutocomplete = () => {
       },
     }
     ///////////////quick access plugin end
-
+    //query suggestion plugin start
     const querySuggestionsPlugin = createQuerySuggestionsPlugin({
       searchClient,
       indexName: 'products_query_suggestions',
@@ -159,8 +159,10 @@ const AlgoliaAutocomplete = () => {
           sourceId: 'querySuggestions',
           onSelect({ item, setIsOpen }) {
             if (typeof window !== 'undefined') {
-              router.push({ pathname: '/search', query: { query: item.query } })
-              setIsOpen(true)
+              justRedirected = true
+              handleEnterSearch(item.query)
+              //router.push({ pathname: '/search', query: { query: item.query } })
+              //setIsOpen(true)
             }
           },
           templates: {
@@ -189,6 +191,8 @@ const AlgoliaAutocomplete = () => {
         }
       },
     })
+    //query suggestion plugin end
+    //popular plugin start
     const popularPlugin = createQuerySuggestionsPlugin({
       searchClient,
       indexName: 'products_query_suggestions',
@@ -207,8 +211,10 @@ const AlgoliaAutocomplete = () => {
           },
           onSelect({ item, setIsOpen }) {
             if (typeof window !== 'undefined') {
-              router.push({ pathname: '/search', query: { query: item.query } })
-              setIsOpen(true)
+              justRedirected = true
+              handleEnterSearch(item.query)
+              //router.push({ pathname: '/search', query: { query: item.query } })
+              //setIsOpen(true)
             }
           },
           templates: {
@@ -261,8 +267,7 @@ const AlgoliaAutocomplete = () => {
         }
       },
     })
-
-    let justRedirected = false
+    //popular plugin end
 
     const search = autocomplete<QuickAccessHit>({
       container: containerRef.current,
