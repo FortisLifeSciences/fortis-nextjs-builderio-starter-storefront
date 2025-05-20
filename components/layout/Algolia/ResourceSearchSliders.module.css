@@ -145,3 +145,6 @@
 .swiperButtonEnabled {
   color: #30299a !important; /* Override MUI color */
 }
+.hidden {
+  display: none !important;
+}

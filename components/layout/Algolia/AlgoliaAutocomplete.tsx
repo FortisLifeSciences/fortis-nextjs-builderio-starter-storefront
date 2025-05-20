@@ -11,6 +11,13 @@ import { useRouter } from 'next/router'
 
 import fortisLogo from '@/assets/fortisLogo.png'
 import resourceTypeArr from '@/components/common/ResourceTypeArr'
+import abcoreLogo from '@/public/BrandLogos/abcore_logo.png'
+import aristaLogo from '@/public/BrandLogos/arista_logo.png'
+import bethylLogo from '@/public/BrandLogos/bethyl_logo.png'
+import empiricalLogo from '@/public/BrandLogos/empirical_logo.png'
+import nanocomposixLogo from '@/public/BrandLogos/nanocomposix_logo.png'
+import vectorLogo from '@/public/BrandLogos/vector_logo.png'
+import DefaultImage from '@/public/noImage.png'
 
 const h = React.createElement
 
@@ -20,6 +27,18 @@ type QuickAccessHit = {
   iconURL?: string
   cssStyle?: string
   __autocomplete_id: string
+}
+
+const brandLogos: Record<string, string> = {
+  abcore: abcoreLogo.src,
+  arista: aristaLogo.src,
+  bethyl: bethylLogo.src,
+  empirical: empiricalLogo.src,
+  nanocomposix: nanocomposixLogo.src,
+  vector: vectorLogo.src,
+  fortis: fortisLogo.src,
+  // fallback for brands not in the list
+  default: DefaultImage.src,
 }
 
 const { publicRuntimeConfig } = getConfig()
@@ -38,7 +57,7 @@ const AlgoliaAutocomplete = () => {
 
   useEffect(() => {
     if (!containerRef.current) return
-
+    let justRedirected = false
     /// quick access plugin
     const quickAccessPlugin: AutocompletePlugin<QuickAccessHit, unknown> = {
       getSources({ query }) {
@@ -127,7 +146,7 @@ const AlgoliaAutocomplete = () => {
       },
     }
     ///////////////quick access plugin end
-
+    //query suggestion plugin start
     const querySuggestionsPlugin = createQuerySuggestionsPlugin({
       searchClient,
       indexName: 'products_query_suggestions',
@@ -138,6 +157,14 @@ const AlgoliaAutocomplete = () => {
         return {
           ...source,
           sourceId: 'querySuggestions',
+          onSelect({ item, setIsOpen }) {
+            if (typeof window !== 'undefined') {
+              justRedirected = true
+              handleEnterSearch(item.query)
+              //router.push({ pathname: '/search', query: { query: item.query } })
+              //setIsOpen(true)
+            }
+          },
           templates: {
             ...source.templates,
             header() {
@@ -164,6 +191,8 @@ const AlgoliaAutocomplete = () => {
         }
       },
     })
+    //query suggestion plugin end
+    //popular plugin start
     const popularPlugin = createQuerySuggestionsPlugin({
       searchClient,
       indexName: 'products_query_suggestions',
@@ -180,13 +209,12 @@ const AlgoliaAutocomplete = () => {
           getItemInputValue({ item }) {
             return item.query
           },
-          /*onSelect({ setIsOpen }) {
-            setIsOpen(true)
-          },*/
           onSelect({ item, setIsOpen }) {
             if (typeof window !== 'undefined') {
-              router.push({ pathname: '/search', query: { query: item.query } })
-              setIsOpen(true)
+              justRedirected = true
+              handleEnterSearch(item.query)
+              //router.push({ pathname: '/search', query: { query: item.query } })
+              //setIsOpen(true)
             }
           },
           templates: {
@@ -239,6 +267,7 @@ const AlgoliaAutocomplete = () => {
         }
       },
     })
+    //popular plugin end
 
     const search = autocomplete<QuickAccessHit>({
       container: containerRef.current,
@@ -247,7 +276,28 @@ const AlgoliaAutocomplete = () => {
       insights: true,
       plugins: [querySuggestionsPlugin, popularPlugin, quickAccessPlugin],
       onSubmit({ state }) {
+        justRedirected = true
         handleEnterSearch(state.query) // 👈 This runs on enter
+      },
+      shouldPanelOpen({ state }) {
+        if (justRedirected) {
+          return false // Prevent panel opening just after redirect
+        }
+        // Default behavior: open if there are items
+        return state.collections.some((collection) => collection.items.length > 0)
+      },
+      onStateChange({ state }) {
+        const input = document.querySelector('#autocomplete input')
+        if (input) {
+          // Reset the redirect flag on actual user focus
+          input.addEventListener(
+            'focus',
+            () => {
+              justRedirected = false
+            },
+            { once: true }
+          )
+        }
       },
 
       getSources: async ({ query }) => {
@@ -277,9 +327,6 @@ const AlgoliaAutocomplete = () => {
               const productResults = results.find((r: any) => r.index === 'products')
               return (productResults as any)?.hits || []
             },
-            /*getItemInputValue({ item }: { item: any }) {
-              return item.product_name || ''
-            },*/
             getItemInputValue({ item }: { item: any; query: string }) {
               return query
             },
@@ -310,11 +357,25 @@ const AlgoliaAutocomplete = () => {
                     ? item.name
                     : 'Untitled'
 
+                const rawBrandCode = item.brand_code || item.brand || ''
+                const normalizedBrand = rawBrandCode.toLowerCase().trim()
+
+                const fallbackImage = brandLogos[normalizedBrand] || brandLogos.default
+
                 const imageSrc = item.product_images?.[0]
                   ? `https://cdn-tp1.mozu.com/31165-m1/cms/files/${item.product_images[0]}`
-                  : fortisLogo.src
+                  : fallbackImage
 
-                const brand = item.brand || ''
+                console.log('Product:', {
+                  rawBrand: rawBrandCode,
+                  normalizedBrand,
+                  imageUsed: imageSrc,
+                  foundLogo: brandLogos[normalizedBrand] ? true : false,
+                  knownBrands: Object.keys(brandLogos),
+                })
+
+                const brand = (item.brand || '').toLowerCase()
+
                 const name = item.slice_product ? item.product_name_variant : item.product_name
                 const sku = item.slice_product ? item.sku : item.plp_catalog_number
                 const showNewTag = item.new_product
@@ -362,11 +423,24 @@ const AlgoliaAutocomplete = () => {
                     wrapper.appendChild(footerEl)
                   }
                   if (totalHits > 4) {
+                    //   footerEl.innerHTML = `
+                    //   <a class="aa-products-see-all" href="https://www.fortislife.com/products">
+                    //     See All Products (${totalHits})
+                    //   </a>
+                    // `
+                    const encodedQuery = encodeURIComponent(query)
                     footerEl.innerHTML = `
-                    <a class="aa-products-see-all" href="https://www.fortislife.com/products">
-                      See All Products (${totalHits})
-                    </a>
-                  `
+                      <a href="/search?query=${encodedQuery}" class="aa-products-see-all">
+                        See All Products (${totalHits})
+                      </a>
+                    `
+
+                    footerEl
+                      .querySelector('.aa-products-see-all')
+                      ?.addEventListener('click', (e) => {
+                        e.preventDefault()
+                        router.push({ pathname: '/search', query: { query } })
+                      })
                   }
 
                   return footerEl
@@ -477,11 +551,24 @@ const AlgoliaAutocomplete = () => {
                   //console.log("nbHits value:", totalHits, "Condition result:", totalHits > 3);
 
                   if (typeof totalHits === 'number' && totalHits > 3) {
+                    // articlefooterEl.innerHTML = `
+                    //   <a class="aa-builder-see-all" href="https://www.fortislife.com/resources">
+                    //     See All
+                    //   </a>
+                    // `
+                    const encodedQuery = encodeURIComponent(query)
                     articlefooterEl.innerHTML = `
-                      <a class="aa-builder-see-all" href="https://www.fortislife.com/resources">
-                        See All 
+                      <a href="/search?query=${encodedQuery}" class="aa-builder-see-all">
+                        See All
                       </a>
                     `
+
+                    articlefooterEl
+                      .querySelector('.aa-builder-see-all')
+                      ?.addEventListener('click', (e) => {
+                        e.preventDefault()
+                        router.push({ pathname: '/search', query: { query } })
+                      })
                   } else {
                     articlefooterEl.innerHTML = ''
                   }
@@ -501,7 +588,7 @@ const AlgoliaAutocomplete = () => {
 
     /////////////////////
     // 👇 Fix for paste issue start
-    const input = containerRef.current.querySelector('input')
+    /*const input = containerRef.current.querySelector('input')
     if (input) {
       // Adding event listener for 'paste'
       input.addEventListener('paste', () => {
@@ -518,7 +605,7 @@ const AlgoliaAutocomplete = () => {
           }, 10)
         })
       })
-    }
+    }*/
     ////  Fix for paste issue end
 
     return () => search.destroy()

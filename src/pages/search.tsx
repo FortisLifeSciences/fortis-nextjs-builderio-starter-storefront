@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 
+import { BuilderComponent, builder } from '@builder.io/react'
+import '@builder.io/widgets'
 import { Add, Apps, ReorderRounded } from '@mui/icons-material'
 import {
   Grid,
@@ -12,6 +14,7 @@ import {
   Stack,
   useMediaQuery,
 } from '@mui/material'
+import { CircularProgress } from '@mui/material'
 import algoliasearch from 'algoliasearch/lite'
 import 'swiper/css'
 import 'swiper/css/navigation'
@@ -39,6 +42,9 @@ import type { SearchResponse } from '@algolia/client-search'
 import type { NextPage, GetServerSidePropsContext, GetServerSideProps, NextApiRequest } from 'next'
 
 const { publicRuntimeConfig } = getConfig()
+const apiKey = publicRuntimeConfig?.builderIO?.apiKey
+
+builder.init(apiKey)
 const ALGOLIA_APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || publicRuntimeConfig?.ALGOLIA_APP_ID
 const ALGOLIA_SEARCH_KEY =
   process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || publicRuntimeConfig?.ALGOLIA_SEARCH_KEY
@@ -58,7 +64,8 @@ type BuilderPageHit = {
   }
 }
 interface SearchPageType extends PageWithMetaData {
-  results: ProductSearchResult
+  results?: ProductSearchResult
+  page?: any
 }
 function getMetaData(): MetaData {
   return {
@@ -72,17 +79,27 @@ function getMetaData(): MetaData {
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const response = await productSearch(
+  /*const response = await productSearch(
     {
       pageSize: publicRuntimeConfig.productListing.pageSize,
       ...context.query,
     } as CategorySearchParams,
     context.req as NextApiRequest
-  )
+  )*/
   const { locale } = context
+
+  const page = await builder
+    .get(publicRuntimeConfig?.builderIO?.modelKeys?.emptyProductSearchResults, {
+      userAttributes: {
+        urlPath: `/search`,
+      },
+    })
+    .toPromise()
+
   return {
     props: {
-      results: response?.data?.products || [],
+      //results: response?.data?.products || [],
+      page: page || null,
       metaData: getMetaData(),
       ...(await serverSideTranslations(locale as string, ['common'])),
     },
@@ -90,6 +107,7 @@ export const getServerSideProps: GetServerSideProps = async (
 }
 
 const SearchPage: NextPage<SearchPageType> = (props) => {
+  const { page } = props
   const { t } = useTranslation('common')
   const router = useRouter()
   const sortFromQuery = typeof router.query.sort === 'string' ? router.query.sort : 'products'
@@ -126,13 +144,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
       })
     }
   }, [router.query, router])
-  const { data: searchPageResults, isFetching } = useGetSearchedProducts(
-    {
-      ...searchParams,
-      pageSize: searchParams.pageSize || publicRuntimeConfig.productListing.pageSize,
-    },
-    props.results
-  )
+
   const breadcrumbs = [
     { text: 'Home', link: '/' },
     { text: 'Search Results', link: router.asPath },
@@ -145,19 +157,14 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
     }
   }
 
-  const searchPageHeading = searchQuery
-    ? t('search-results', {
-        m: `${searchPageResults?.totalCount || 0}`,
-        n: `"${searchQuery}"`,
-      })
-    : breadcrumbs[breadcrumbs.length - 1].text
-
   const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({})
   const [orderedFacets, setOrderedFacets] = useState<string[]>([])
   const [availableFacets, setAvailableFacets] = useState<Record<string, Record<string, number>>>({})
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    setLoading(true)
     if (searchQuery) {
       const query = Array.isArray(searchQuery) ? searchQuery.join(' ') : searchQuery
       const filters = Object.entries(selectedFilters)
@@ -199,12 +206,14 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
           setOrderedFacets(ordered)
           setAvailableFacets(facets || {})
           setManualSearchResults(filteredResults as SearchResponse<unknown>[])
+          setLoading(false)
         })
         .catch((err) => {
           console.error('Search error:', err)
         })
     } else {
       setManualSearchResults(null)
+      setLoading(false)
     }
   }, [searchQuery, sortIndex, pagination.productsPage, selectedFilters])
 
@@ -251,8 +260,22 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
       <KiboBreadcrumbs breadcrumbs={breadcrumbs} />
 
       {/* Manual Search Results Display */}
-      {manualSearchResults === null ? (
-        <p> Loading search results...</p>
+      {loading === true ? (
+        <Box
+          sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}
+        >
+          <CircularProgress />
+        </Box>
+      ) : manualSearchResults === null ? (
+        <div>
+          <h1 className="searchProductsTitle">
+            {`Search Input Box is empty. Please enter a search term.`}
+          </h1>
+          <BuilderComponent
+            model={publicRuntimeConfig?.builderIO?.modelKeys?.emptyProductSearchResults}
+            content={page}
+          />
+        </div>
       ) : (
         manualSearchResults.map((result, index) => {
           if (result.index === 'builder-page') {
@@ -276,7 +299,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
           return (
             <>
               {/* Search summary title */}
-              {result.nbHits > 0 && (
+              {result.nbHits > 0 ? (
                 <>
                   <h1 className="searchProductsTitle">
                     {`${result.nbHits} Products for "${result.query}"`}
@@ -291,7 +314,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
                         flexDirection: 'column', // Make vertical layout
                         width: {
                           xs: isFilterOpen ? '100%' : '0',
-                          sm: '17%',
+                          sm: '20%',
                         },
                         padding: {
                           xs: '0',
@@ -481,6 +504,16 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
                     </Box>
                   </div>
                 </>
+              ) : (
+                <Box>
+                  <h1 className="searchProductsTitle">
+                    {`${result.nbHits} Products for "${result.query}"`}
+                  </h1>
+                  <BuilderComponent
+                    model={publicRuntimeConfig?.builderIO?.modelKeys?.emptyProductSearchResults}
+                    content={page}
+                  />
+                </Box>
               )}
             </>
           )

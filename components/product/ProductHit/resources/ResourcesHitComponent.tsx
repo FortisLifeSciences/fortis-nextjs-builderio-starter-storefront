@@ -144,6 +144,12 @@ const ResourcesHitComponent = ({ categoryCode, facets }: { categoryCode: string;
     }
   }
 
+  const sortingOptions = [
+    { label: 'Newest', value: 'builder-page_newest-first' },
+    { label: 'Oldest', value: 'builder-page_oldest-first' },
+    { label: 'Alphabetical', value: 'builder-page_alpha' },
+  ]
+
   return (
     <div style={{ display: isMobile ? 'block' : 'flex', fontSize: '16px', fontFamily: 'Poppins' }}>
       <Box
@@ -179,7 +185,7 @@ const ResourcesHitComponent = ({ categoryCode, facets }: { categoryCode: string;
           flexDirection: 'column', // Make vertical layout
           width: {
             xs: isFilterOpen ? '100%' : '0',
-            sm: '17%',
+            sm: '20%',
           },
           padding: {
             xs: '0',
@@ -255,7 +261,7 @@ const ResourcesHitComponent = ({ categoryCode, facets }: { categoryCode: string;
                   <Typography component="span" sx={{ ...PLPStyles.navBarLabel }}>
                     {t('sort')}
                   </Typography>
-                  <CustomSortBy />
+                  <CustomSortBy items={sortingOptions} />
                 </Box>
                 <Box sx={{ ...PLPStyles.filterBy }}>
                   <Button

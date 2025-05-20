@@ -4,17 +4,7 @@ import { BuilderComponent, builder } from '@builder.io/react'
 import { Add, ExpandLess, ExpandMore } from '@mui/icons-material'
 import Apps from '@mui/icons-material/Apps'
 import ReorderRounded from '@mui/icons-material/ReorderRounded'
-import {
-  Grid,
-  MenuItem,
-  Box,
-  Button,
-  Link,
-  Typography,
-  Breadcrumbs,
-  Stack,
-  useMediaQuery,
-} from '@mui/material'
+import { Box, Button, Typography, useMediaQuery } from '@mui/material'
 import algoliasearch from 'algoliasearch'
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
@@ -202,7 +192,7 @@ const MyHitsComponent = ({
 
         <div
           className="ais-Panel-body"
-          style={{ padding: '8px 0', display: isExpanded ? 'block' : 'none' }}
+          style={{ padding: '0px 0px 8px 0px', display: isExpanded ? 'block' : 'none' }}
         >
           <CustomRefinementList attribute={attribute} searchableAttributes={searchableAttributes} />
         </div>
@@ -216,6 +206,11 @@ const MyHitsComponent = ({
       facetElement.scrollIntoView({ behavior: 'smooth' })
     }
   }
+
+  const sortingOptions = [
+    { label: 'Relevance', value: 'products' },
+    { label: 'Featured', value: 'products_relevance' },
+  ]
 
   return (
     <div style={{ display: isMobile ? 'block' : 'flex', fontSize: '16px', fontFamily: 'Poppins' }}>
@@ -237,7 +232,7 @@ const MyHitsComponent = ({
           flexDirection: 'column', // Make vertical layout
           width: {
             xs: isFilterOpen ? '100%' : '0',
-            sm: '17%',
+            sm: '20%',
           },
           padding: {
             xs: '0',
@@ -347,7 +342,7 @@ const MyHitsComponent = ({
                   <Typography component="span" sx={{ ...PLPStyles.navBarLabel }}>
                     {t('sort')}
                   </Typography>
-                  <CustomSortBy />
+                  <CustomSortBy items={sortingOptions} />
                 </Box>
                 <Box sx={{ ...PLPStyles.filterBy }}>
                   <Button

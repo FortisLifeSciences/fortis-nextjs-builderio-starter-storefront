@@ -135,7 +135,7 @@ const ManualFacetBlock = ({
                     marginBottom: '8px',
                     width: '100%',
                     '& input': {
-                      padding: '8px 0',
+                      padding: '0px 0px 8px 0px',
                       fontSize: '18px',
                       fontWeight: 500,
                       color: 'rgb(48, 41, 154)',
@@ -169,9 +169,9 @@ const ManualFacetBlock = ({
                     label={value}
                     sx={{
                       width: '100%',
-                      fontSize: theme.typography.body2,
+                      fontSize: theme.typography.body2.fontSize,
                       '& .MuiFormControlLabel-label': {
-                        fontSize: '16px',
+                        fontSize: '14px',
                         fontWeight: 300,
                       },
                     }}

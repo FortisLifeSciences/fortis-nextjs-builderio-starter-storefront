@@ -522,6 +522,7 @@ module.exports = {
         categoryTopSection: 'category-section',
         cartEmptySection: 'cart-empty-content-section',
         PDPCustomAndBulkDisplaySection: 'pdp-custom-and-bulk-display-section',
+        emptyProductSearchResults: 'empty-product-search-results',
       },
     },
     inventorySettings: {
