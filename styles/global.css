@@ -446,11 +446,12 @@ body {
 .aa-suggestion-header h4,
 .aa-popular-header h4,
 .aa-builder-header h4,
-.aa-quickAccess-header h4 {
+.aa-quickAccess-header h4,
+.aa-SourceHeader h4 {
   font-size: 16px;
   font-weight: 500;
-  margin-bottom: 10px;
   color: #020027;
+  margin: 0 0 15px;
 }
 [data-autocomplete-source-id='products'] .aa-products-header,
 [data-autocomplete-source-id='builder-page'] .aa-builder-header,
@@ -542,7 +543,7 @@ body {
 }
 [data-autocomplete-source-id='builder-page'] .aa-SourceHeader {
   width: 100%;
-  padding: 10px;
+  padding: 0;
   box-sizing: border-box;
 }
 
