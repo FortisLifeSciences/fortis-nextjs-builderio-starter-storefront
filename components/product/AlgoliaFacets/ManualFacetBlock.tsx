@@ -176,11 +176,9 @@ const ManualFacetBlock = ({
                       },
                     }}
                   />
-                  {isMobile && (
-                    <Typography variant="body2" fontSize={'16px'}>
-                      ({count})
-                    </Typography>
-                  )}
+                  <Typography variant="body2" fontSize={'16px'}>
+                    ({count})
+                  </Typography>
                 </Box>
               ))}
 
