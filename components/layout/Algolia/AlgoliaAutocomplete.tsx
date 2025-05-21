@@ -298,10 +298,10 @@ const AlgoliaAutocomplete = () => {
             },
             footer({ state, html }: { state: any; html: any }) {
               const totalHits = state.context.productHits
-
+              const encodedQuery = encodeURIComponent(query)
               if (totalHits > 4) {
                 return html`
-                  <a class="aa-products-see-all" href="/search?query=${state.query}">
+                  <a class="aa-products-see-all" href="/search?query=${encodedQuery}">
                     See All Products (${totalHits})
                   </a>
                 `
@@ -374,12 +374,10 @@ const AlgoliaAutocomplete = () => {
             },
             footer({ state, html }: { state: any; html: any }) {
               const totalHits = state.context.pageHits
+              const encodedQuery = encodeURIComponent(query)
 
               if (typeof totalHits === 'number' && totalHits > 3) {
-                return html`<a
-                  class="aa-builder-see-all"
-                  href="https://www.fortislife.com/resources"
-                >
+                return html`<a class="aa-builder-see-all" href="/search?query=${encodedQuery}">
                   See All
                 </a>`
               } else {
