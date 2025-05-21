@@ -452,6 +452,8 @@ body {
   font-weight: 500;
   color: #020027;
   margin: 0 0 15px;
+  line-height: 20px;
+  padding: 0;
 }
 [data-autocomplete-source-id='products'] .aa-products-header,
 [data-autocomplete-source-id='builder-page'] .aa-builder-header,
@@ -545,6 +547,8 @@ body {
   width: 100%;
   padding: 0;
   box-sizing: border-box;
+  margin: 0;
+  line-height: 18px;
 }
 
 [data-autocomplete-source-id='builder-page'] .aa-List {
@@ -564,7 +568,7 @@ body {
   padding: 10px;
   display: block;
   position: absolute;
-  top: 75px;
+  bottom: 60px;
   right: 0;
 }
 
