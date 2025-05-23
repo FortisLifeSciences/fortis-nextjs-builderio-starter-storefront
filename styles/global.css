@@ -568,8 +568,14 @@ body {
   padding: 10px;
   display: block;
   position: absolute;
-  bottom: 60px;
+  top: 50%;
+  transform: translateY(-50%);
   right: 0;
+}
+
+section[data-autocomplete-source-id='builder-page'] {
+  position: relative;
+  height: 150px;
 }
 
 /** ****Builder section end **/

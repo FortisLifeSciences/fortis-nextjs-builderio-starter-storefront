@@ -353,11 +353,12 @@ const AlgoliaAutocomplete = () => {
 
               const image = item.data && item.data.image
               const resourceTypeIcon = resourceTypeArr.find(
-                (data) => data.resourceType === item.data && item.data.resourceType
+                (data) => data.resourceType === item?.data?.resourceType
               )
+
               const iconHTML = resourceTypeIcon
                 ? html`<span class="material-symbols-outlined">${resourceTypeIcon.value}</span>`
-                : html`<span class="material-symbols-outlined"></span>`
+                : html`<span class="material-symbols-outlined">description</span>`
 
               return html`<div class="aa-itemWrapper">
                 <div class="aa-ItemContent">
