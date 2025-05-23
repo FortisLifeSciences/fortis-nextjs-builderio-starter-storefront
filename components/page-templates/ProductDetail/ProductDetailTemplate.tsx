@@ -216,6 +216,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     getCurrentProduct,
   } = props
   const [updatedProduct, setUpdatedProduct] = useState(product)
+  const [minQuantity, setMinQuantity] = useState(1)
   const { t } = useTranslation('common')
   const isDigitalFulfillment = product.fulfillmentTypesSupported?.some(
     (type) => type === FulfillmentOptionsConstant.DIGITAL
@@ -398,6 +399,31 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     },
     locationInventory
   )
+
+  useEffect(() => {
+    const fetchPriceList = async () => {
+      try {
+        const response = await fetch('/api/user/priceListRep', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ variationProductCode }),
+        })
+
+        const result = await response.json()
+        setMinQuantity(result?.minQty)
+        if (result?.minQty) setQuantity(result?.minQty)
+        else setQuantity(1)
+      } catch (error) {
+        console.error('Error calling price list API:', error)
+      }
+    }
+
+    if (variationProductCode) {
+      fetchPriceList()
+    }
+  }, [variationProductCode])
 
   const isValidForAddToCart = () => {
     if (purchaseType === PurchaseTypes.SUBSCRIPTION) {
@@ -1067,10 +1093,12 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                       >
                         <QuantitySelector
                           label="Quantity"
-                          quantity={quantity}
+                          quantity={quantity >= minQuantity ? quantity : minQuantity}
+                          minQty={minQuantity}
                           {...(maxQuantity ? { maxQuantity } : {})}
                           onIncrease={() => setQuantity((prevQuantity) => Number(prevQuantity) + 1)}
                           onDecrease={() => setQuantity((prevQuantity) => Number(prevQuantity) - 1)}
+                          onQuantityUpdate={(qty: any) => setQuantity(qty)}
                         />
                       </Box>
                       <LoadingButton
