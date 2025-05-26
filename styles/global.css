@@ -275,7 +275,8 @@ body {
   box-shadow: none;
   outline: none;
 }
-.aa-Autocomplete .aa-Form:focus {
+.aa-Autocomplete .aa-Form:focus,
+#autocomplete .aa-Form:focus-within {
   outline: none !important;
   box-shadow: none !important;
 }

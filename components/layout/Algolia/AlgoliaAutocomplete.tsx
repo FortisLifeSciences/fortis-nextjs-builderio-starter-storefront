@@ -280,7 +280,7 @@ const AlgoliaAutocomplete = () => {
               const showNewTag = item.new_product
 
               return html`<div class="aa-ItemWrapper">
-                <a href="${link}" target="_blank" rel="noopener noreferrer" class="aa-CustomCard">
+                <a href="${link}" target="_self" rel="noopener noreferrer" class="aa-CustomCard">
                   ${showNewTag
                     ? html`<div
                         class="aa-NewTag"
@@ -367,7 +367,7 @@ const AlgoliaAutocomplete = () => {
                       ? html`<img src="${image}" alt="${title}" class="aa-ItemImage" />`
                       : iconHTML}
                   </div>
-                  <a class="aa-ItemTitle" href="${link}" target="_blank" rel="noopener noreferrer">
+                  <a class="aa-ItemTitle" href="${link}" target="_self" rel="noopener noreferrer">
                     ${title.split(' | ')[0]}
                   </a>
                 </div>
