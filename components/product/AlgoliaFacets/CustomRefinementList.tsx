@@ -151,7 +151,7 @@ function CustomRefinementList({ attribute, searchableAttributes }: CustomRefinem
                 onChange={() => refine(item.value)}
                 size="small"
                 inputProps={{
-                  'aria-label': isMobile ? `${item.label} (${item.count})` : item.label,
+                  'aria-label': `${item.label} (${item.count})`,
                 }}
               />
             }
@@ -159,12 +159,10 @@ function CustomRefinementList({ attribute, searchableAttributes }: CustomRefinem
             sx={style.formControlLabel}
           />
 
-          {/* Count on mobile only */}
-          {isMobile && (
-            <Typography variant="body2" color="text.primary" fontSize={'16px'}>
-              ({item.count})
-            </Typography>
-          )}
+          {/* Count */}
+          <Typography variant="body2" color="text.primary" fontSize={'16px'}>
+            ({item.count})
+          </Typography>
         </Box>
       ))}
 

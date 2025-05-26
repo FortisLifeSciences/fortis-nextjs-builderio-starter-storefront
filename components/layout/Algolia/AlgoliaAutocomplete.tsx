@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react'
 
-import { autocomplete, getAlgoliaResults, AutocompletePlugin } from '@algolia/autocomplete-js'
+import { autocomplete, getAlgoliaResults } from '@algolia/autocomplete-js'
 import { createQuerySuggestionsPlugin } from '@algolia/autocomplete-plugin-query-suggestions'
 import algoliasearch from 'algoliasearch'
 import '@algolia/autocomplete-theme-classic'
@@ -20,6 +20,7 @@ import vectorLogo from '@/public/BrandLogos/vector_logo.png'
 import DefaultImage from '@/public/noImage.png'
 
 const h = React.createElement
+import type { AutocompletePlugin, AutocompleteSource } from '@algolia/autocomplete-js'
 
 type QuickAccessHit = {
   title: string
@@ -27,6 +28,16 @@ type QuickAccessHit = {
   iconURL?: string
   cssStyle?: string
   __autocomplete_id: string
+}
+type CssStyle = 'darkPurple' | 'lightPurple' | 'lightGrey'
+
+interface QuickAccessItem {
+  title: string
+  targetURL?: string
+  cssStyle?: CssStyle
+  iconURL?: string
+  __autocomplete_id?: string
+  [key: string]: unknown // 👈 add this line
 }
 
 const brandLogos: Record<string, string> = {
@@ -58,95 +69,86 @@ const AlgoliaAutocomplete = () => {
   useEffect(() => {
     if (!containerRef.current) return
     let justRedirected = false
-    /// quick access plugin
-    const quickAccessPlugin: AutocompletePlugin<QuickAccessHit, unknown> = {
+
+    /// quick access plugin start
+    const quickAccessPlugin: AutocompletePlugin<any, any> = {
       getSources({ query }) {
-        // Show Quick Access only when there's no search query
         if (query) return []
-        return [
-          {
-            sourceId: 'quickAccessPlugin',
-            getItems() {
-              return getAlgoliaResults<QuickAccessHit>({
-                searchClient,
-                queries: [
-                  {
-                    indexName: 'products_query_suggestions',
-                    query,
-                    params: {
-                      hitsPerPage: 0, // we’re using userData only
-                      ruleContexts: ['autocomplete'],
-                    },
+
+        const source: AutocompleteSource<QuickAccessItem> = {
+          sourceId: 'quickAccessPlugin',
+          getItems() {
+            return getAlgoliaResults({
+              searchClient,
+              queries: [
+                {
+                  indexName: 'products_query_suggestions',
+                  query,
+                  params: {
+                    hitsPerPage: 0, // we’re using userData only
+                    ruleContexts: ['autocomplete'],
                   },
-                ],
-                transformResponse({ results }) {
-                  const userDataSections = results
-                    .map((result) => {
-                      const sectionItems = (result as any)?.userData?.[0]?.sections
-                      return Array.isArray(sectionItems) ? sectionItems : []
-                    })
-                    .flat()
-                  return [userDataSections] // ✅ Wrap in array to match QuickAccessHit[][]
                 },
-              })
+              ],
+              transformResponse({ results }) {
+                const userDataSections = results
+                  .map((result) => {
+                    if ('userData' in result && result.userData && result.userData[0]) {
+                      const sectionItems = result.userData[0].sections
+                      return Array.isArray(sectionItems) ? sectionItems : []
+                    } else {
+                      return []
+                    }
+                  })
+                  .flat()
+
+                return [userDataSections]
+              },
+            })
+          },
+          templates: {
+            header({ html }: { html: any }) {
+              return html`<div class="aa-quickAccess-header">
+                <h4>Explore Fortis</h4>
+              </div>`
             },
-            templates: {
-              header() {
-                // Prevent server-side execution
-                if (typeof window === 'undefined') return ''
-                const container = document.querySelector(
-                  '[data-autocomplete-source-id="quickAccessPlugin"]'
-                )
-                const alreadyHasHeader = container?.querySelector('.aa-quickAccess-header')
-                if (container && !alreadyHasHeader) {
-                  const header = document.createElement('div')
-                  header.className = 'aa-quickAccess-header'
-                  const heading = document.createElement('h4')
-                  heading.textContent = 'Explore Fortis'
-                  header.appendChild(heading)
-                  container.prepend(header)
-                }
-                return ''
-              },
-              item({ item }: { item: QuickAccessHit }) {
-                if (typeof window === 'undefined') return ''
-                const wrapper = document.createElement('a')
-                wrapper.className = `aa-ItemWrapper ${item.cssStyle || ''}`
-                wrapper.id = `quickAccessPlugin-item-${item.__autocomplete_id}`
-                wrapper.href = item.targetURL || '#'
-                wrapper.setAttribute('role', 'link')
-                // Optional: map camelCase values to kebab-case class names
-                const cssStyleClassMap: Record<string, string> = {
-                  darkPurple: 'dark-purple',
-                  lightPurple: 'light-purple',
-                  lightGrey: 'light-grey',
-                }
-                const extraClass = item.cssStyle ? cssStyleClassMap[item.cssStyle] || '' : ''
-                const iconHTML = item.iconURL
-                  ? `<img class="aa-ItemIcon" src="${item.iconURL}" alt="${item.title || ''}" />`
+            item({ item, html }: { item: any; html: any }) {
+              const cssStyleClassMap: Record<CssStyle, string> = {
+                darkPurple: 'dark-purple',
+                lightPurple: 'light-purple',
+                lightGrey: 'light-grey',
+              }
+
+              const extraClass =
+                item.cssStyle && item.cssStyle in cssStyleClassMap
+                  ? cssStyleClassMap[item.cssStyle as CssStyle]
                   : ''
-                wrapper.innerHTML = `
-                  <a class="aa-ItemContent ${extraClass}" href="${item.targetURL}">
-                    ${iconHTML}
-                    <div class="aa-ItemContentTitle">${item.title}</div>
-                  </a>
-                `
-                // Optional: Replace content in already existing DOM node
-                const el = document.querySelector(
-                  `[id*="quickAccessPlugin-item-${item.__autocomplete_id}"]`
-                )
-                if (el) {
-                  el.innerHTML = wrapper.innerHTML
-                }
-                return ''
-              },
+
+              const iconHTML = item.iconURL
+                ? html`<img class="aa-ItemIcon" src="${item.iconURL}" alt="${item.title || ''}" />`
+                : ''
+
+              return html`<a
+                class="aa-item-wrapper ${extraClass}"
+                id="quickAccessPlugin-item-${item.__autocomplete_id}"
+                href="${item.targetURL || '#'}"
+                role="link"
+              >
+                <div class="aa-ItemContent">
+                  ${iconHTML}
+                  <div class="aa-ItemContentTitle">${item.title}</div>
+                </div>
+              </a>`
             },
           },
-        ]
+        }
+
+        return [source]
       },
     }
     ///////////////quick access plugin end
-    //query suggestion plugin start
+
+    ///query suggestion plugin start
     const querySuggestionsPlugin = createQuerySuggestionsPlugin({
       searchClient,
       indexName: 'products_query_suggestions',
@@ -161,38 +163,20 @@ const AlgoliaAutocomplete = () => {
             if (typeof window !== 'undefined') {
               justRedirected = true
               handleEnterSearch(item.query)
-              //router.push({ pathname: '/search', query: { query: item.query } })
-              //setIsOpen(true)
             }
           },
           templates: {
             ...source.templates,
-            header() {
-              // Prevent server-side execution
-              if (typeof window === 'undefined') return ''
-
-              const querySuggestionsTitle = document.querySelector(
-                '[data-autocomplete-source-id="querySuggestions"]'
-              )
-
-              if (
-                querySuggestionsTitle &&
-                !querySuggestionsTitle.querySelector('.aa-suggestion-header')
-              ) {
-                const header = document.createElement('div')
-                header.className = 'aa-suggestion-header'
-                header.innerHTML = '<h4>Suggestions</h4>'
-                querySuggestionsTitle.prepend(header)
-              }
-
-              return ''
+            header({ html }) {
+              return html`<h4>Suggestions</h4>`
             },
           },
         }
       },
     })
-    //query suggestion plugin end
-    //popular plugin start
+    ///query suggestion plugin end
+
+    ///popular plugin start
     const popularPlugin = createQuerySuggestionsPlugin({
       searchClient,
       indexName: 'products_query_suggestions',
@@ -213,61 +197,201 @@ const AlgoliaAutocomplete = () => {
             if (typeof window !== 'undefined') {
               justRedirected = true
               handleEnterSearch(item.query)
-              //router.push({ pathname: '/search', query: { query: item.query } })
-              //setIsOpen(true)
             }
           },
           templates: {
-            header() {
-              // Prevent server-side execution
-              if (typeof window === 'undefined') return ''
-
-              const container = document.querySelector(
-                '[data-autocomplete-source-id="popularPlugin"]'
-              )
-              const alreadyHasHeader = container?.querySelector('.aa-popular-header')
-
-              if (container && !alreadyHasHeader) {
-                const header = document.createElement('div')
-                header.className = 'aa-popular-header'
-
-                const heading = document.createElement('h4')
-                heading.textContent = 'Popular Searches'
-
-                header.appendChild(heading)
-                container.prepend(header)
-              }
-
-              return ''
+            header({ html }) {
+              return html`<h4>Popular Searches</h4>`
             },
-
-            item({ item }: { item: any }) {
-              const wrapper = document.createElement('div')
-              wrapper.className = 'aa-ItemWrapper'
-              wrapper.id = `popularPlugin-item-${item.__autocomplete_id}`
-              const title = document.createElement('div')
-              title.className = 'aa-ItemContentTitle'
-              title.textContent = item.query
-
-              wrapper.appendChild(title)
-
-              // Safe selection even with Algolia's autocomplete prefix
-              const el = document.querySelector(
-                `[id*="popularPlugin-item-${item.__autocomplete_id}"]`
-              )
-              if (el) {
-                // You can modify the inner content of the matched element if needed
-                el.innerHTML = ''
-                el.appendChild(title.cloneNode(true))
-              }
-
-              return ''
+            item({ item, html }: { item: any; html: any }) {
+              return html`<div
+                class="aa-itemWrapper"
+                id="popularPlugin-item-${item.__autocomplete_id}"
+              >
+                <div class="aa-ItemContentTitle">${item.query}</div>
+              </div>`
             },
           },
         }
       },
     })
-    //popular plugin end
+    ///popular plugin end
+
+    ///getsources function start
+    const getSourcesForAlgolia = ({
+      query,
+      searchClient,
+    }: {
+      query: string
+      searchClient: any
+    }) => {
+      const sources: any[] = []
+
+      if (query.length < 2) return sources
+
+      sources.push(
+        // Products source
+        {
+          sourceId: 'products',
+          getItems({ setContext }: { setContext: (context: any) => void }) {
+            return getAlgoliaResults({
+              searchClient,
+              queries: [
+                {
+                  indexName: 'products',
+                  query,
+                  params: { hitsPerPage: 4 },
+                },
+              ],
+              transformResponse({ results, hits }) {
+                if ('nbHits' in results[0]) {
+                  setContext({
+                    productHits: results[0].nbHits,
+                  })
+                }
+                return hits
+              },
+            })
+          },
+          getItemInputValue(query: string) {
+            return query
+          },
+          templates: {
+            header({ html }: { html: any }) {
+              return html`<h4>Products</h4>`
+            },
+            item({ item, html }: { item: any; html: any }) {
+              const link = (item && item.product_url) || '#'
+              const title =
+                typeof item && item.product_name === 'string'
+                  ? item.product_name.split(' | ')[0]
+                  : typeof item.name === 'string'
+                  ? item.name
+                  : 'Untitled'
+
+              const imageSrc =
+                item.product_images && item.product_images[0]
+                  ? `https://cdn-tp1.mozu.com/31165-m1/cms/files/${item.product_images[0]}`
+                  : fortisLogo.src
+
+              const brand = item.brand || ''
+              const name = item.slice_product ? item.product_name_variant : item.product_name
+              const sku = item.slice_product ? item.sku : item.plp_catalog_number
+              const showNewTag = item.new_product
+
+              return html`<div class="aa-ItemWrapper">
+                <a href="${link}" target="_blank" rel="noopener noreferrer" class="aa-CustomCard">
+                  ${showNewTag
+                    ? html`<div
+                        class="aa-NewTag"
+                        style="background-image: url('/NewTag.svg');"
+                      ></div>`
+                    : ''}
+                  <span class="aa-CardImageLink">
+                    <img src="${imageSrc}" alt="Product" class="aa-CardImage" />
+                  </span>
+                  <p class="aa-CardBrand">${brand}</p>
+                  <span class="aa-CardTitle"> ${name || title} </span>
+                  <p class="aa-CardSku">${sku || ''}</p>
+                </a>
+              </div>`
+            },
+            footer({ state, html }: { state: any; html: any }) {
+              const totalHits = state.context.productHits
+              const encodedQuery = encodeURIComponent(query)
+              if (totalHits > 4) {
+                return html`
+                  <a class="aa-products-see-all" href="/search?query=${encodedQuery}">
+                    See All Products (${totalHits})
+                  </a>
+                `
+              } else {
+                return ''
+              }
+            },
+          },
+        },
+
+        // Builder Page Source
+        {
+          sourceId: 'builder-page',
+          getItems({ setContext }: { setContext: (context: any) => void }) {
+            return getAlgoliaResults({
+              searchClient,
+              queries: [
+                {
+                  indexName: 'builder-page',
+                  query,
+                  params: { hitsPerPage: 3 },
+                },
+              ],
+              transformResponse({ results, hits }) {
+                if ('nbHits' in results[0]) {
+                  setContext({
+                    pageHits: results[0].nbHits,
+                  })
+                }
+                return hits
+              },
+            })
+          },
+          getItemInputValue(query: string) {
+            return query
+          },
+          templates: {
+            header({ html }: { html: any }) {
+              return html`<h4>More from Fortis</h4>`
+            },
+            item({ item, html }: { item: any; html: any }) {
+              const link = (item.meta && item.meta.lastPreviewUrl) || '#'
+              const title =
+                typeof (item.data && item.data.title) === 'string'
+                  ? item.data.title.split(' | ')[0]
+                  : typeof item.name === 'string'
+                  ? item.name
+                  : 'Untitled'
+
+              const image = item.data && item.data.image
+              const resourceTypeIcon = resourceTypeArr.find(
+                (data) => data.resourceType === item?.data?.resourceType
+              )
+
+              const iconHTML = resourceTypeIcon
+                ? html`<span class="material-symbols-outlined">${resourceTypeIcon.value}</span>`
+                : html`<span class="material-symbols-outlined">description</span>`
+
+              return html`<div class="aa-itemWrapper">
+                <div class="aa-ItemContent">
+                  <div class="aa-ItemImageWrapper">
+                    ${image
+                      ? html`<img src="${image}" alt="${title}" class="aa-ItemImage" />`
+                      : iconHTML}
+                  </div>
+                  <a class="aa-ItemTitle" href="${link}" target="_blank" rel="noopener noreferrer">
+                    ${title.split(' | ')[0]}
+                  </a>
+                </div>
+              </div>`
+            },
+            footer({ state, html }: { state: any; html: any }) {
+              const totalHits = state.context.pageHits
+              const encodedQuery = encodeURIComponent(query)
+
+              if (typeof totalHits === 'number' && totalHits > 3) {
+                return html`<a class="aa-builder-see-all" href="/search?query=${encodedQuery}">
+                  See All
+                </a>`
+              } else {
+                return ''
+              }
+            },
+          },
+        }
+      )
+
+      return sources
+    }
+    ///getsources function end
 
     const search = autocomplete<QuickAccessHit>({
       container: containerRef.current,
@@ -299,315 +423,8 @@ const AlgoliaAutocomplete = () => {
           )
         }
       },
-
-      getSources: async ({ query }) => {
-        const sources: any[] = []
-        // Only fetch products and builder-page if query length >= 2
-        if (query.length < 2) return sources
-
-        const searchRequests = [
-          {
-            indexName: 'products',
-            query,
-            params: { hitsPerPage: 4 },
-          },
-          {
-            indexName: 'builder-page',
-            query,
-            params: { hitsPerPage: 3 },
-          },
-        ]
-
-        const { results } = await searchClient.search(searchRequests)
-
-        sources.push(
-          {
-            sourceId: 'products',
-            getItems() {
-              const productResults = results.find((r: any) => r.index === 'products')
-              return (productResults as any)?.hits || []
-            },
-            getItemInputValue({ item }: { item: any; query: string }) {
-              return query
-            },
-
-            templates: {
-              header() {
-                // Prevent server-side execution
-                if (typeof window === 'undefined') return ''
-                const wrapper = document.querySelector('[data-autocomplete-source-id="products"]')
-                if (wrapper && !wrapper.querySelector('.aa-products-header')) {
-                  const header = document.createElement('div')
-                  header.className = 'aa-products-header'
-                  header.innerHTML = '<h4>Products</h4>'
-                  wrapper.prepend(header)
-                }
-              },
-              item({ item }: { item: any }) {
-                // Prevent server-side execution
-                if (typeof window === 'undefined') return ''
-                const productDiv = document.createElement('div')
-                productDiv.className = 'aa-ItemWrapper'
-
-                const link = item?.product_url || '#'
-                const title =
-                  typeof item?.product_name === 'string'
-                    ? item.product_name.split(' | ')[0]
-                    : typeof item.name === 'string'
-                    ? item.name
-                    : 'Untitled'
-
-                const rawBrandCode = item.brand_code || item.brand || ''
-                const normalizedBrand = rawBrandCode.toLowerCase().trim()
-
-                const fallbackImage = brandLogos[normalizedBrand] || brandLogos.default
-
-                const imageSrc = item.product_images?.[0]
-                  ? `https://cdn-tp1.mozu.com/31165-m1/cms/files/${item.product_images[0]}`
-                  : fallbackImage
-
-                console.log('Product:', {
-                  rawBrand: rawBrandCode,
-                  normalizedBrand,
-                  imageUsed: imageSrc,
-                  foundLogo: brandLogos[normalizedBrand] ? true : false,
-                  knownBrands: Object.keys(brandLogos),
-                })
-
-                const brand = (item.brand || '').toLowerCase()
-
-                const name = item.slice_product ? item.product_name_variant : item.product_name
-                const sku = item.slice_product ? item.sku : item.plp_catalog_number
-                const showNewTag = item.new_product
-
-                productDiv.innerHTML = `
-                    <a href="${link}"  target="_self" rel="noopener noreferrer" class="aa-CustomCard">
-                      ${
-                        showNewTag
-                          ? `<div class="aa-NewTag" style="background-image: url('/NewTag.svg');"></div>`
-                          : ''
-                      }
-                      <span class="aa-CardImageLink">
-                        <img src="${imageSrc}" alt="Product" class="aa-CardImage" />
-                      </span>
-                      <p class="aa-CardBrand">${brand}</p>
-                      <span class="aa-CardTitle">
-                        ${name || title}
-                      </span>
-                      <p class="aa-CardSku">${sku || ''}</p>
-                    </a>
-                `
-
-                const itemProductId = item.__autocomplete_id
-                const partialproductId = `products-item-${itemProductId}`
-                const el = document.querySelector(`[id*='${partialproductId}']`)
-                if (el && productDiv) {
-                  el.innerHTML = productDiv.innerHTML
-                }
-
-                return productDiv
-              },
-              footer() {
-                const wrapper = document.querySelector('[data-autocomplete-source-id="products"]')
-                const productResults = results.find((r: any) => r.index === 'products')
-                let totalHits = 0
-                if (productResults && 'nbHits' in productResults) {
-                  totalHits = productResults.nbHits
-                }
-
-                if (wrapper) {
-                  let footerEl = wrapper.querySelector('.aa-SourceFooter')
-                  if (!footerEl) {
-                    footerEl = document.createElement('div')
-                    footerEl.className = 'aa-SourceFooter'
-                    wrapper.appendChild(footerEl)
-                  }
-                  if (totalHits > 4) {
-                    //   footerEl.innerHTML = `
-                    //   <a class="aa-products-see-all" href="https://www.fortislife.com/products">
-                    //     See All Products (${totalHits})
-                    //   </a>
-                    // `
-                    const encodedQuery = encodeURIComponent(query)
-                    footerEl.innerHTML = `
-                      <a href="/search?query=${encodedQuery}" class="aa-products-see-all">
-                        See All Products (${totalHits})
-                      </a>
-                    `
-
-                    footerEl
-                      .querySelector('.aa-products-see-all')
-                      ?.addEventListener('click', (e) => {
-                        e.preventDefault()
-                        router.push({ pathname: '/search', query: { query } })
-                      })
-                  }
-
-                  return footerEl
-                }
-
-                return null
-              },
-            },
-          },
-          {
-            sourceId: 'builder-page',
-            getItems() {
-              const builderResults = results.find((r: any) => r.index === 'builder-page')
-              return (builderResults as any)?.hits || []
-            },
-            /*getItemInputValue({ item }: { item: any }) {
-              return item.data?.title || ''
-            },*/
-            getItemInputValue({ item }: { item: any; query: string }) {
-              return query
-            },
-            templates: {
-              header() {
-                // Prevent server-side execution
-                if (typeof window === 'undefined') return ''
-                const builderTitle = document.querySelector(
-                  '[data-autocomplete-source-id="builder-page"]'
-                )
-                if (builderTitle && !builderTitle.querySelector('.aa-builder-header')) {
-                  const header = document.createElement('div')
-                  header.className = 'aa-builder-header'
-                  header.innerHTML = '<h4>More from Fortis</h4>'
-                  builderTitle.prepend(header)
-                }
-              },
-              item({ item }: { item: any }) {
-                if (typeof window === 'undefined') return ''
-                const div = document.createElement('div')
-                div.className = 'aa-ItemWrapper'
-
-                const link = item.meta?.lastPreviewUrl || '#'
-                const title =
-                  typeof item.data?.title === 'string'
-                    ? item.data.title.split(' | ')[0]
-                    : typeof item.name === 'string'
-                    ? item.name
-                    : 'Untitled'
-
-                const image = item.data?.image
-
-                // Default resource type to 'Whitepaper' if not present
-                const resourceType = item.data?.resourceType || 'Whitepaper'
-
-                // Try to get resourceType object from the array
-                const resourceTypeObj = resourceTypeArr.find(
-                  (data) => data.resourceType === resourceType
-                )
-
-                const iconHTML = `<span class="material-symbols-outlined">${
-                  resourceTypeObj?.value || resourceType
-                }</span>`
-
-                div.innerHTML = `
-                  <div class="aa-ItemContent">
-                    <div class="aa-ItemImageWrapper">
-                      ${
-                        image
-                          ? `<img src="${image}" alt="${title}" class="aa-ItemImage" />`
-                          : iconHTML
-                      }
-                    </div>
-                    <a class="aa-ItemTitle" href="${link}" target="_self" rel="noopener noreferrer">
-                      ${title}
-                    </a>
-                  </div>
-                `
-
-                const itemId = item.__autocomplete_id
-                const partialId = `builder-page-item-${itemId}`
-                const el = document.querySelector(`[id*='${partialId}']`)
-
-                if (el && div) {
-                  el.innerHTML = div.innerHTML
-                }
-
-                return div
-              },
-
-              footer() {
-                const articleWrapper = document.querySelector(
-                  '[data-autocomplete-source-id="builder-page"]'
-                )
-                const articleResults = results.find((r: any) => r.index === 'builder-page')
-
-                let totalHits = 0
-                if (articleResults && 'nbHits' in articleResults) {
-                  totalHits = Number(articleResults.nbHits) // Coerce to number
-                }
-
-                if (articleWrapper) {
-                  let articlefooterEl = articleWrapper.querySelector('.aa-SourceFooter')
-                  if (!articlefooterEl) {
-                    articlefooterEl = document.createElement('div')
-                    articlefooterEl.className = 'aa-SourceFooter'
-                    articleWrapper.appendChild(articlefooterEl)
-                  }
-
-                  //console.log("nbHits value:", totalHits, "Condition result:", totalHits > 3);
-
-                  if (typeof totalHits === 'number' && totalHits > 3) {
-                    // articlefooterEl.innerHTML = `
-                    //   <a class="aa-builder-see-all" href="https://www.fortislife.com/resources">
-                    //     See All
-                    //   </a>
-                    // `
-                    const encodedQuery = encodeURIComponent(query)
-                    articlefooterEl.innerHTML = `
-                      <a href="/search?query=${encodedQuery}" class="aa-builder-see-all">
-                        See All
-                      </a>
-                    `
-
-                    articlefooterEl
-                      .querySelector('.aa-builder-see-all')
-                      ?.addEventListener('click', (e) => {
-                        e.preventDefault()
-                        router.push({ pathname: '/search', query: { query } })
-                      })
-                  } else {
-                    articlefooterEl.innerHTML = ''
-                  }
-
-                  return articlefooterEl
-                }
-
-                return null
-              },
-            },
-          }
-        )
-
-        return sources
-      },
+      getSources: ({ query }) => getSourcesForAlgolia({ query, searchClient }),
     })
-
-    /////////////////////
-    // 👇 Fix for paste issue start
-    /*const input = containerRef.current.querySelector('input')
-    if (input) {
-      // Adding event listener for 'paste'
-      input.addEventListener('paste', () => {
-        // Wait for the pasted value to be applied and trigger input event
-        setTimeout(() => {
-          input.dispatchEvent(new Event('input', { bubbles: true }))
-        }, 10) // Wait for value to be pasted before triggering input
-      })
-      // You can add other events like 'cut', 'drop', etc. if needed.
-      ;['change', 'cut', 'drop'].forEach((eventName) => {
-        input.addEventListener(eventName, () => {
-          setTimeout(() => {
-            input.dispatchEvent(new Event('input', { bubbles: true }))
-          }, 10)
-        })
-      })
-    }*/
-    ////  Fix for paste issue end
-
     return () => search.destroy()
   }, [])
 
