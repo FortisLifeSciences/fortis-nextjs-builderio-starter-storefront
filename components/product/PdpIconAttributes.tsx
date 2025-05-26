@@ -28,7 +28,7 @@ const styles = {
     textDecoration: 'none',
     display: 'inline',
     '&:hover': {
-      borderBottom: 'none',
+      borderBottomColor: 'transparent',
     },
   },
 }
@@ -63,6 +63,7 @@ const PdpIconAttributes = (props: any) => {
         // gap: '10px', // Spacing between items
         marginTop: '10px',
         marginLeft: '10px',
+        height: '25px',
         '@media (max-width: 1200px)': {
           gridTemplateColumns: 'repeat(3, 1fr)', // 2 columns for medium screens
         },

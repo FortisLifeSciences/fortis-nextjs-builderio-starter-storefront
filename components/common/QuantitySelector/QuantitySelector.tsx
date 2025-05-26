@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from 'react'
+import React, { ChangeEvent, useEffect, useState } from 'react'
 
 import Add from '@mui/icons-material/Add'
 import Remove from '@mui/icons-material/Remove'
@@ -8,6 +8,7 @@ import { useTranslation } from 'next-i18next'
 // Interface
 interface QuantitySelectorProps {
   quantity: number
+  minQty?: number
   label?: string
   maxQuantity?: number
   onIncrease?: () => void
@@ -17,6 +18,7 @@ interface QuantitySelectorProps {
 
 interface QuantityInputProps {
   quantity: number
+  minQty: number
   handleCustomQuantity?: any
 }
 
@@ -31,25 +33,29 @@ const styles = {
   },
 }
 
-const QuantityTextField = ({ quantity, handleCustomQuantity }: QuantityInputProps) => {
+const QuantityTextField = ({ quantity, minQty, handleCustomQuantity }: QuantityInputProps) => {
   const [itemQuantity, setItemQuantity] = useState<number | string>(quantity)
 
   const handleQuantityChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const newQuantity = Number(e.target.value)
-    if ((!Number.isNaN(newQuantity) && newQuantity > 0) || e.target.value === '') {
-      setItemQuantity(e.target.value)
-    }
+    setItemQuantity(e.target.value)
   }
 
   const handleQuantityOnBlur = () => {
-    if (itemQuantity !== '' && itemQuantity !== quantity) {
-      handleCustomQuantity(Number(itemQuantity))
-    } else setItemQuantity(quantity)
+    const numericQty = Number(itemQuantity)
+    if (itemQuantity === '' || Number.isNaN(numericQty) || numericQty < minQty) {
+      setItemQuantity(minQty)
+      if (typeof handleCustomQuantity === 'function') {
+        handleCustomQuantity(minQty)
+      }
+    } else if (numericQty !== quantity && typeof handleCustomQuantity === 'function') {
+      handleCustomQuantity(numericQty)
+    }
   }
 
   return (
     <TextField
       name="quantity"
+      autoComplete="off"
       onChange={handleQuantityChange}
       onBlur={handleQuantityOnBlur}
       value={itemQuantity}
@@ -71,14 +77,14 @@ const QuantityTextField = ({ quantity, handleCustomQuantity }: QuantityInputProp
           backgroundColor: '#ffffff',
         },
       }}
-      sx={{ width: '35px', height: '24px', borderRadius: '3px' }}
+      sx={{ width: '50px', height: '24px', borderRadius: '3px' }}
     />
   )
 }
 
 // Component
 const QuantitySelector = (props: QuantitySelectorProps) => {
-  const { quantity, label, maxQuantity, onIncrease, onDecrease, onQuantityUpdate } = props
+  const { quantity, minQty, label, maxQuantity, onIncrease, onDecrease, onQuantityUpdate } = props
   const { t } = useTranslation('common')
 
   return (
@@ -102,7 +108,7 @@ const QuantitySelector = (props: QuantitySelectorProps) => {
 
       <IconButton
         onClick={onDecrease}
-        disabled={quantity === 1 ? true : false}
+        disabled={quantity === minQty ? true : false}
         sx={{
           ...styles.iconButton,
           ...(quantity === 1 && {
@@ -123,6 +129,7 @@ const QuantitySelector = (props: QuantitySelectorProps) => {
       <QuantityTextField
         key={quantity + 'quantity-text-field'}
         quantity={quantity}
+        minQty={minQty ? minQty : 1}
         handleCustomQuantity={onQuantityUpdate}
       />
 
