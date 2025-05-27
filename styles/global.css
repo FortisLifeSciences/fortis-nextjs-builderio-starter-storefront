@@ -274,6 +274,7 @@ body {
   align-items: center;
   box-shadow: none;
   outline: none;
+  left: 76px;
 }
 .aa-Autocomplete .aa-Form:focus,
 #autocomplete .aa-Form:focus-within {
@@ -294,13 +295,16 @@ body {
 }
 
 .aa-Autocomplete .aa-Input {
-  width: 543px !important;
+  width: 496px !important;
   box-shadow: none !important;
   height: 22px;
   background-color: #fff;
   color: #020027;
   border-radius: 9px !important;
   border: none;
+  font-size: 14px;
+  font-weight: 400;
+  padding: 5px;
 }
 .aa-Autocomplete .aa-Input:focus {
   outline: none !important;
