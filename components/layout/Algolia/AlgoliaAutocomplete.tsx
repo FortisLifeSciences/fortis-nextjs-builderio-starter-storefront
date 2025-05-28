@@ -268,12 +268,21 @@ const AlgoliaAutocomplete = () => {
                   : typeof item.name === 'string'
                   ? item.name
                   : 'Untitled'
-
-              const imageSrc =
-                item.product_images && item.product_images[0]
-                  ? `https://cdn-tp1.mozu.com/31165-m1/cms/files/${item.product_images[0]}`
-                  : fortisLogo.src
-
+              ////
+              const rawBrandCode = item.brand_code || item.brand || ''
+              const normalizedBrand = rawBrandCode.toLowerCase().trim()
+              const fallbackImage = brandLogos[normalizedBrand] || brandLogos.default
+              const imageSrc = item.product_images?.[0]
+                ? `https://cdn-tp1.mozu.com/31165-m1/cms/files/${item.product_images[0]}`
+                : fallbackImage
+              /*console.log('Product:', {
+                  rawBrand: rawBrandCode,
+                  normalizedBrand,
+                  imageUsed: imageSrc,
+                  foundLogo: brandLogos[normalizedBrand] ? true : false,
+                  knownBrands: Object.keys(brandLogos),
+                })*/
+              ////
               const brand = item.brand || ''
               const name = item.slice_product ? item.product_name_variant : item.product_name
               const sku = item.slice_product ? item.sku : item.plp_catalog_number

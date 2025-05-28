@@ -29,7 +29,6 @@ const AlgoliaSearch = ({ placeholderText = 'SEARCH' }) => {
 
     try {
       const searchResults = await fetchAlgoliaResults(queryValue)
-      console.log('All data', searchResults)
       setResults(searchResults)
     } catch (error) {
       console.error('Error fetching Algolia results:', error)

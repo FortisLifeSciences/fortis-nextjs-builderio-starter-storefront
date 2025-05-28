@@ -161,6 +161,11 @@ const CategoryNestedNavigation = (props: CategoryNestedNavigationProps) => {
     }
   }, [menuContent])
 
+  const gotoContact = () => {
+    router.push('/contact-us')
+    setParentCategory(null)
+    onCloseMenu(true)
+  }
   return (
     <>
       <Box
@@ -291,7 +296,7 @@ const CategoryNestedNavigation = (props: CategoryNestedNavigationProps) => {
         {children && subHeader.label === initialSubHeader.label && (
           <>
             <Divider variant="middle" sx={{ paddingTop: '12px', marginBottom: '16px' }} />
-            <ListItemButton sx={styles.listContent}>
+            <ListItemButton sx={styles.listContent} onClick={gotoContact}>
               <ListItemText
                 primary={
                   <Typography variant="body2" sx={styles.directLinks} color="primary">
