@@ -164,13 +164,17 @@ const ResourceProductCardGridView = (props: ProductCardProps) => {
               {isResourceType &&
                 resourceTypeName &&
                 resourceTypeArr.map((data) => {
-                  return data.resourceType === resourceType?.value ? (
+                  return data.resourceType === resourceType?.value ||
+                    data.value === resourceType?.value ? (
                     <Box
                       sx={{
                         ...ProductCardStyles.resourceIcon,
                       }}
                     >
-                      <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ fontSize: '24px', color: '#fff' }}
+                      >
                         {data.value}
                       </span>
                     </Box>

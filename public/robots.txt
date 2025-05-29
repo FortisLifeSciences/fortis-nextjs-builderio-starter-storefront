@@ -1,20 +1,13 @@
-#robots.txt for https://www.fortislife.com/ updated 2025-02-13T09:04:29.215Z  
+#robots.txt for https://www.fortislife.com/ updated 2025-02-24T09:04:29.215Z
 
 
 # Googlebot
 User-agent: Googlebot
-Disallow: /
-
-# PowerMapper
-User-agent: PowerMapper
 Allow: /
 
 # *
 User-agent: *
 Allow: /
-
-# *
-User-agent: *
 Disallow: /admin*
 Disallow: /cart*
 Disallow: /checkout*
@@ -38,11 +31,7 @@ Allow: /
 
 # Baiduspider
 User-agent: Baiduspider
-Disallow: /
-
-# *
-User-agent: *
-Disallow: /*
+Allow: /
 
 # *
 User-agent: *
