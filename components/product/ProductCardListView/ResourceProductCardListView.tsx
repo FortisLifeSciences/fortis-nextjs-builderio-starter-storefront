@@ -205,8 +205,6 @@ const ResourceProductCardListView = (props: ProductCardListViewProps) => {
                   </Typography>
                   {isResourceType && resourceTypeName
                     ? resourceTypeArr.map((data) => {
-                        console.log('resourceType?.value', resourceType?.value)
-                        console.log('data.resourceType', data.resourceType)
                         return data.resourceType === resourceType?.value ||
                           data.value === resourceType?.value ? (
                           <Box
