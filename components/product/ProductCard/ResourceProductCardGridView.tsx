@@ -164,7 +164,8 @@ const ResourceProductCardGridView = (props: ProductCardProps) => {
               {isResourceType &&
                 resourceTypeName &&
                 resourceTypeArr.map((data) => {
-                  return data.resourceType === resourceType?.value ? (
+                  return data.resourceType === resourceType?.value ||
+                    data.value === resourceType?.value ? (
                     <Box
                       sx={{
                         ...ProductCardStyles.resourceIcon,
