@@ -17,6 +17,7 @@ import {
   MobileHeader,
   NavigationBar,
   SearchSuggestions,
+  AlgoliaAutocomplete,
 } from '@/components/layout'
 import { useAuthContext, useHeaderContext, useModalContext } from '@/context'
 import { useCreateCustomerB2bAccountMutation } from '@/hooks'
@@ -55,6 +56,7 @@ const HeaderActionArea = (props: HeaderActionAreaProps) => {
           justifyContent: 'space-between',
         }}
       >
+        {/*
         {showSearchBarInLargeHeader && (
           <Box sx={headerActionAreaStyles.searchSuggestionsWrapper} data-testid="Search-container">
             <SearchSuggestions
@@ -63,6 +65,10 @@ const HeaderActionArea = (props: HeaderActionAreaProps) => {
             />
           </Box>
         )}
+          */}
+
+        {/* Algolia Autocomplete render */}
+        {showSearchBarInLargeHeader && <AlgoliaAutocomplete />}
 
         <Box display="flex" flex={1} justifyContent={'flex-end'} gap={2}>
           <Box
@@ -160,10 +166,10 @@ const KiboHeader = (props: KiboHeaderProps) => {
               minHeight={'80px'} //According to designs
               sx={{ display: { xs: 'block', md: 'none' }, px: 1, mt: 1, padding: '18px' }}
             >
-              <SearchSuggestions
+              {/* <SearchSuggestions
                 isViewSearchPortal={isMobileSearchPortalVisible}
                 onEnterSearch={() => toggleMobileSearchPortal()}
-              />
+              /> */}
             </Box>
           </Collapse>
           <HamburgerMenu

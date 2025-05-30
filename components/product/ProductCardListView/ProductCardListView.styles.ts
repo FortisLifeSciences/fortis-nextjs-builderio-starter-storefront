@@ -1,6 +1,6 @@
 export const ProductCardStyles = {
   main: {
-    width: '100%',
+    // width: '100%',
     '& a': {
       textDecoration: 'none',
     },
