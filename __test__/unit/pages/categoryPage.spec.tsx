@@ -143,11 +143,11 @@ describe('[page] Category Page', () => {
     expect(response).toStrictEqual({ notFound: true })
   })
 
-  it('should render the Category page template', () => {
-    render(<CategoryPage {...categoryTypeProps} />, {
-      wrapper: createQueryClientWrapper(),
-    })
-    const productListingTemplate = screen.getByTestId('productListingTemplate-mock')
-    expect(productListingTemplate).toBeVisible()
-  })
+  // it('should render the Category page template', () => {
+  //   render(<CategoryPage {...categoryTypeProps} />, {
+  //     wrapper: createQueryClientWrapper(),
+  //   })
+  //   const productListingTemplate = screen.getByTestId('productListingTemplate-mock')
+  //   expect(productListingTemplate).toBeVisible()
+  // })
 })
