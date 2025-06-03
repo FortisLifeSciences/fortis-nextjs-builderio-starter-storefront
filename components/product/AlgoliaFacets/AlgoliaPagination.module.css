@@ -1,0 +1,39 @@
+/* algoliaPagination.module.css */
+
+.AlgoliaPagination {
+  background: none;
+  text-align: center;
+  margin-top: 16px;
+}
+
+.AlgoliaPagination .AisPPaginationList {
+  font-family: 'Poppins';
+  font-size: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.AlgoliaPagination .ais-Pagination-item .ais-Pagination-link {
+  color: #30299a;
+  background: none !important;
+  border: none !important;
+}
+
+.AlgoliaPagination .ais-Pagination-item .ais-Pagination-link:hover {
+  text-decoration: underline;
+  color: #30299a;
+}
+.AlgoliaPagination .ais-Pagination-item {
+  font-size: 18px;
+  color: #4c47c4;
+}
+.AlgoliaPagination .ais-Pagination-item.ais-Pagination-item--selected {
+  padding: 3px;
+  font-weight: 500;
+  color: #020027;
+}
