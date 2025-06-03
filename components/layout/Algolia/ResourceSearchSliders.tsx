@@ -119,7 +119,7 @@ const ResourceSearchSliders: React.FC<Props> = ({
                 <SwiperSlide key={`non-res-${index}-${i}`} className={styles.swiperSlide}>
                   <a
                     href={hit.meta?.lastPreviewUrl || '#'}
-                    target="_blank"
+                    target="_self"
                     rel="noopener noreferrer"
                     className={styles.link}
                   >
@@ -189,7 +189,7 @@ const ResourceSearchSliders: React.FC<Props> = ({
                 <SwiperSlide key={`res-${index}-${i}`} className={styles.swiperSlide}>
                   <a
                     href={hit.meta?.lastPreviewUrl || '#'}
-                    target="_blank"
+                    target="_self"
                     rel="noopener noreferrer"
                     className={styles.link}
                   >
