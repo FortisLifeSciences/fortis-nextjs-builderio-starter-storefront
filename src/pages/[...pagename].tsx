@@ -41,11 +41,19 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   let resourcesPage = false
   let resourceCategoryCode = null
+  let pCategory = null
   const pathLength = pathnameArr?.length
 
   if (Array.isArray(pathnameArr)) {
-    if (pathLength === 2 && pathnameArr[0] === 'resources') {
+    if (
+      pathLength === 2 &&
+      (pathnameArr[0] === 'resources' ||
+        pathnameArr[0] === 'protocols' ||
+        pathnameArr[0] === 'services' ||
+        pathnameArr[0] === 'general')
+    ) {
       resourceCategoryCode = pathnameArr[1]
+      pCategory = pathnameArr[0]
       resourcesPage = true
     } else if (
       pathLength === 1 &&
@@ -72,8 +80,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       filters: `category_url:"${
         pathLength === 1
           ? resourceCategoryCode
-          : pathnameArr?.[0] === 'resources'
-          ? `resources/${resourceCategoryCode}`
+          : pCategory !== null
+          ? `${pCategory}/${resourceCategoryCode}`
           : ''
       }"`,
       facets: ['*'],
@@ -85,8 +93,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       .get(categoryTopSection, {
         userAttributes: {
           slug:
-            pathnameArr?.[0] === 'resources'
-              ? `resources-${resourceCategoryCode}`
+            pCategory !== null && resourceCategoryCode
+              ? `${pCategory}-${resourceCategoryCode}`
               : `${resourceCategoryCode}`,
           urlPath: `/${pagename}`,
         },
@@ -114,6 +122,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       section: section || null,
       resourcesPage: resourcesPage,
       resourceCategoryCode: resourceCategoryCode || null,
+      pCategory: pCategory || null,
       facets: facets || null,
       pathLength,
       urlFirstPart: pathnameArr?.[0] || null,
@@ -123,8 +132,16 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 }
 
 const Page = (props: any) => {
-  const { page, resourcesPage, section, resourceCategoryCode, facets, pathLength, urlFirstPart } =
-    props
+  const {
+    page,
+    resourcesPage,
+    section,
+    resourceCategoryCode,
+    facets,
+    pathLength,
+    urlFirstPart,
+    pCategory,
+  } = props
   const noIndex = page?.data?.noIndex
     ? page?.data?.noIndex
     : section?.data?.noIndex
@@ -146,8 +163,8 @@ const Page = (props: any) => {
               filters: `category_url:"${
                 pathLength === 1
                   ? resourceCategoryCode
-                  : urlFirstPart === 'resources'
-                  ? `resources/${resourceCategoryCode}`
+                  : pCategory !== null
+                  ? `${pCategory}/${resourceCategoryCode}`
                   : ''
               }"`,
             } as any)}
