@@ -44,6 +44,15 @@ const CitationWidget: React.FC<CitationWidgetProps> = ({
     }
   }, [citeabProductCode])
 
+  useEffect(() => {
+    if (window.location.hash === '#citations') {
+      const section = document.getElementById('citation-document-section')
+      if (section) {
+        section.scrollIntoView({ behavior: 'smooth' })
+      }
+    }
+  }, [])
+
   // Return nothing if the script hasn't loaded or required props are not provided
   if (!citeabProductCode || !citationApiKey) {
     return null

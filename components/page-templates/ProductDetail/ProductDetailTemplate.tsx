@@ -791,6 +791,17 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
 
   const siteUrl = process.env.NEXT_PUBLIC_URL
 
+  useEffect(() => {
+    if (window.location.hash === '#citations') {
+      setTimeout(() => {
+        const section = document.getElementById('citation-document-section')
+        if (section) {
+          section.scrollIntoView({ behavior: 'smooth' })
+        }
+      }, 100)
+    }
+  }, [citationCountVariant])
+
   return (
     <Grid container>
       {!isQuickViewModal && (
