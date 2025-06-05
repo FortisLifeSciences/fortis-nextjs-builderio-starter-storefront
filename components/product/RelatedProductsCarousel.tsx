@@ -183,6 +183,20 @@ const RelatedProductsCarousel = (props: any) => {
                           >
                             {productName}
                           </Typography>
+                          <Typography
+                            variant="body2"
+                            gutterBottom
+                            fontWeight={400}
+                            className="productNameStyle"
+                            sx={{
+                              ...ProductCardStyles.productNameStyle,
+                              color: '#2B2B2B',
+                              fontSize: '14px',
+                              marginTop: '16px',
+                            }}
+                          >
+                            {productCode}
+                          </Typography>
                         </Box>
                         <IconButton
                           component="span"
