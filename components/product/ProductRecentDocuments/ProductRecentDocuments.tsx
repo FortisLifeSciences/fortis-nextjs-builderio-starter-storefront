@@ -74,6 +74,18 @@ const ProductRecentDocuments = (props: any) => {
     setFilteredDocuments(filterDocuments(showAllChecked))
   }, [showAllChecked, documents])
 
+  useEffect(() => {
+    if (window.location.hash === '#documents') {
+      // Use a timeout to ensure the DOM is ready
+      setTimeout(() => {
+        const section = document.getElementById('document-section')
+        if (section) {
+          section.scrollIntoView({ behavior: 'smooth' })
+        }
+      }, 100)
+    }
+  }, [])
+
   if (!filterDocuments.length) {
     return null
   }
