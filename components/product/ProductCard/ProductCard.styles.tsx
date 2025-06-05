@@ -22,7 +22,7 @@ export const ProductCardStyles = {
       minWidth: '230px',
     },
     maxWidth: 260,
-    height: 345,
+    height: 380,
     boxShadow: 'none',
     cursor: 'pointer',
     borderRadius: '0px 0px 25px 0px',
