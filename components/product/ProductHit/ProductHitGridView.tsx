@@ -182,6 +182,14 @@ const ProductHitGridView = ({ hit }: { hit: Product }): JSX.Element => {
                 >
                   {sliceValue ? variantProductName : title}
                 </Typography>
+                <Typography
+                  variant="body1"
+                  gutterBottom
+                  color="text.primary"
+                  sx={ProductCardStyles.brandLabel}
+                >
+                  {uniqueVal}
+                </Typography>
               </Box>
               <IconButton
                 component="span"
