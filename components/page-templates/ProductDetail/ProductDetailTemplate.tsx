@@ -796,7 +796,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
       setTimeout(() => {
         const section = document.getElementById('citation-document-section')
         if (section) {
-          section.scrollIntoView({ behavior: 'smooth' })
+          section.scrollIntoView({ behavior: 'smooth', block: 'center' })
         }
       }, 100)
     }
@@ -1376,6 +1376,9 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
           display={'flex'}
           flexDirection={'row'}
           key={keyVal}
+          sx={{
+            marginTop: '35px',
+          }}
         >
           <CitationWidget
             citeabProductCode={citeabProductCode}
