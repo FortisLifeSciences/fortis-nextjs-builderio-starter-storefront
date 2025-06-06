@@ -3,6 +3,10 @@ import { NextResponse, NextRequest } from 'next/server'
 
 const apiUrlStart = process.env.KIBO_API_HOST
 
+export const config = {
+  matcher: ['/cms/files/:path*'], // Match any path under /cms/files/
+}
+
 const checkIsAuthenticated = (req: NextRequest) => {
   const cookie = req.headers.get('cookie')
   const cookieValue = cookie?.split('kibo_at=')[1]
@@ -91,6 +95,14 @@ let cachedRedirects: { source: string; destination: string; permanent: boolean }
 let cachedRedirectsTimestamp: number | null = null
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl
+
+  // Handle CDN file redirects from /cms/files/* to Kibo CDN
+  if (pathname.startsWith('/cms/files/')) {
+    const relativePath = pathname.replace('/cms/files/', '')
+    const redirectUrl = `https://t31165-s51694.tp1.mozu.com/cms/files/${relativePath}`
+    return NextResponse.redirect(redirectUrl, 302)
+  }
+
   // Fetch redirects from Edge Config
   if (
     !(
