@@ -34,7 +34,7 @@ const AnnouncementBar = () => {
         announcements?.length ? (
           <>
             {announcements.map((item) => (
-              <BuilderComponent key={item.id} model="announcement-bar" content={item} />
+              <BuilderComponent key={item.id} model={announcementBars} content={item} />
             ))}
           </>
         ) : (
