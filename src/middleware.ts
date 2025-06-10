@@ -3,10 +3,6 @@ import { NextResponse, NextRequest } from 'next/server'
 
 const apiUrlStart = process.env.KIBO_API_HOST
 
-export const config = {
-  matcher: ['/cms/files/:path*'], // Match any path under /cms/files/
-}
-
 const checkIsAuthenticated = (req: NextRequest) => {
   const cookie = req.headers.get('cookie')
   const cookieValue = cookie?.split('kibo_at=')[1]
@@ -95,9 +91,10 @@ let cachedRedirects: { source: string; destination: string; permanent: boolean }
 let cachedRedirectsTimestamp: number | null = null
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl
-
+  const fullUrl = new URL(request.url)
+  const match = pathname.match(/^\/cms\/files\/(.+)/)
   // Handle CDN file redirects from /cms/files/* to Kibo CDN
-  if (pathname.startsWith('/cms/files/')) {
+  if ((fullUrl.hostname === 'www.fortislife.com' || pathname.startsWith('/cms/files/')) && match) {
     const relativePath = pathname.replace('/cms/files/', '')
     const redirectUrl = `https://t31165-s51694.tp1.mozu.com/cms/files/${relativePath}`
     return NextResponse.redirect(redirectUrl, 302)
