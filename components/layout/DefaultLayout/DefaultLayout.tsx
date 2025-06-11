@@ -7,7 +7,7 @@ import { HydrationBoundary } from '@tanstack/react-query'
 import creditCardType from 'credit-card-type'
 import Router from 'next/router'
 
-import { GlobalFetchingIndicator } from '@/components/common'
+import { AnnouncementBar, GlobalFetchingIndicator } from '@/components/common'
 import { Footer, FortisHeader, KiboHeader } from '@/components/layout'
 import {
   AuthContextProvider,
@@ -54,6 +54,7 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
             <HeaderContextProvider>
               <GlobalFetchingIndicator />
               <Stack sx={{ minHeight: '100vh' }}>
+                <AnnouncementBar />
                 {/* <KiboHeader
                   navLinks={[
                     {
