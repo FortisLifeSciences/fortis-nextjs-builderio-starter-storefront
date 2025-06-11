@@ -91,6 +91,11 @@ export async function getStaticProps(
           brand: (product?.properties?.find(
             (item: any) => item?.attributeFQN === publicRuntimeConfig.brandAttrName
           )).values[0],
+          pData: product,
+          plpCatalogNumber:
+            product?.properties?.find(
+              (item: any) => item?.attributeFQN?.toLowerCase() === 'tenant~plp-catalog-number'
+            )?.values?.[0]?.stringValue || '',
         }
         relatedProducts.push(productData)
       } else {
