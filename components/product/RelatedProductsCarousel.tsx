@@ -115,6 +115,7 @@ const RelatedProductsCarousel = (props: any) => {
               const imgUrl = productGetters.handleProtocolRelativeUrl(
                 data?.productImages[0]?.imageUrl as string
               )
+              const plpCatalogNumber = data?.plpCatalogNumber || ''
               const altText = productName
               const productUrl =
                 categoryCode !== undefined && seoFriendlyUrl
@@ -195,7 +196,7 @@ const RelatedProductsCarousel = (props: any) => {
                               marginTop: '16px',
                             }}
                           >
-                            {productCode}
+                            {plpCatalogNumber}
                           </Typography>
                         </Box>
                         <IconButton
