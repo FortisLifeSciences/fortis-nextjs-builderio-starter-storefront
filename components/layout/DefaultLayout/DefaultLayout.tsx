@@ -45,6 +45,33 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
       Router.events.off('routeChangeComplete', handleRouteChange)
     }
   }, [])
+
+  useEffect(() => {
+    const wrapper = document.getElementById('fixed-header-wrapper')
+    const content = document.getElementById('main-content')
+
+    const updateContentOffset = () => {
+      if (wrapper && content) {
+        const height = wrapper.getBoundingClientRect().height
+        content.style.marginTop = `${height}px`
+      }
+    }
+
+    if (wrapper) {
+      // ResizeObserver watches for any size changes in the wrapper
+      const observer = new ResizeObserver(() => {
+        updateContentOffset()
+      })
+
+      observer.observe(wrapper)
+      // Initial call
+      updateContentOffset()
+
+      return () => {
+        observer.disconnect()
+      }
+    }
+  }, [])
   return (
     <HydrationBoundary state={pageProps.dehydratedState}>
       <ThemeProvider theme={theme}>
@@ -54,7 +81,6 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
             <HeaderContextProvider>
               <GlobalFetchingIndicator />
               <Stack sx={{ minHeight: '100vh' }}>
-                <AnnouncementBar />
                 {/* <KiboHeader
                   navLinks={[
                     {
@@ -69,23 +95,36 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
                   categoriesTree={pageProps.categoriesTree || []}
                   isSticky={true}
                 /> */}
-                <FortisHeader
-                  navLinks={[
-                    {
-                      link: '/order-status',
-                      text: 'order-status',
-                    },
-                    {
-                      link: '/wishlist',
-                      text: 'wishlist',
-                    },
-                  ]}
-                  categoriesTree={pageProps.categoriesTree || []}
-                  isSticky={true}
-                />
+                <Stack
+                  id="fixed-header-wrapper"
+                  sx={{
+                    position: 'fixed',
+                    width: '100%',
+                    zIndex: 999,
+                  }}
+                >
+                  <AnnouncementBar />
+                  <FortisHeader
+                    navLinks={[
+                      {
+                        link: '/order-status',
+                        text: 'order-status',
+                      },
+                      {
+                        link: '/wishlist',
+                        text: 'wishlist',
+                      },
+                    ]}
+                    categoriesTree={pageProps.categoriesTree || []}
+                    isSticky={true}
+                  />
+                </Stack>
                 <DialogRoot />
                 <SnackbarRoot />
-                <Container sx={{ py: 2, flex: '1 0 auto', maxWidth: '1200px', px: { lg: 0 } }}>
+                <Container
+                  id="main-content"
+                  sx={{ py: 2, flex: '1 0 auto', maxWidth: '1200px', px: { lg: 0 } }}
+                >
                   {children}
                 </Container>
                 <Footer />
