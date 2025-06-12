@@ -80,7 +80,7 @@ const ProductRecentDocuments = (props: any) => {
       setTimeout(() => {
         const section = document.getElementById('document-section')
         if (section) {
-          section.scrollIntoView({ behavior: 'smooth' })
+          section.scrollIntoView({ behavior: 'smooth', block: 'center' })
         }
       }, 100)
     }
