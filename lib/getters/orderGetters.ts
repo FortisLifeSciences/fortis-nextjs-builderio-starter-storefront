@@ -89,7 +89,7 @@ const getSubtotal = (order: CrOrder | CrCart | Checkout): number =>
 const getDiscountedSubtotal = (order: CrOrder | CrCart): number => {
   if (order?.discountedSubtotal && order?.discountedSubtotal != order?.subtotal)
     return order?.discountedSubtotal
-  else return 0
+  else return order?.total || 0
 }
 
 const getOrderDiscounts = (order: CrOrder) =>

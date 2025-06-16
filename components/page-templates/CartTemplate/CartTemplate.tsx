@@ -314,7 +314,7 @@ const CartTemplate = (props: CartTemplateProps) => {
                 sx={{
                   bgcolor: 'grey.300',
                   width: '380px',
-                  height: '330px',
+                  height: 'auto',
                   flexShrink: '0',
                   padding: '20px',
                   boxShadow: 'none',
@@ -351,7 +351,7 @@ const CartTemplate = (props: CartTemplateProps) => {
                   <Typography variant="body2" sx={{ marginBottom: '25px' }}>
                     {t('shipping-tax-at-checkout')}
                   </Typography>
-
+                  <Box>{orderSummaryArgs?.promoComponent}</Box>
                   <Stack direction="column" gap={2} sx={{ alignItems: 'center' }}>
                     <LoadingButton
                       variant="contained"
@@ -388,7 +388,7 @@ const CartTemplate = (props: CartTemplateProps) => {
               </Card>
             </Box>
 
-            {/* <OrderSummary {...orderSummaryArgs}>
+            {/* <OrderSummary {...orderSummaryArgs}> 
               <Stack direction="column" gap={2}>
                 <LoadingButton
                   variant="contained"
@@ -402,7 +402,7 @@ const CartTemplate = (props: CartTemplateProps) => {
                   {t('go-to-checkout')}
                 </LoadingButton>
               </Stack>
-            </OrderSummary> */}
+             </OrderSummary> */}
           </Grid>
         </>
       )}

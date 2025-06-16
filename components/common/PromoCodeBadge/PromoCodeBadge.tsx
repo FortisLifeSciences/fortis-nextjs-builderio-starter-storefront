@@ -29,7 +29,22 @@ const styles = {
     minWidth: '10rem',
     mr: '0.5rem',
   },
-  buttonStyle: { width: '5rem', height: '2.20rem', marginTop: '1.5rem' },
+  buttonStyle: {
+    background: 'primary.main',
+    color: 'secondary.light',
+    fontFamily: 'Poppins',
+    fontSize: '16px',
+    fontWeight: '500',
+    border: 0,
+    borderRadius: '0 26px',
+    padding: '12px 30px',
+    height: '49px',
+    boxShadow: 'none',
+    '&:hover': {
+      backgroundColor: 'primary.light',
+      cursor: 'pointer',
+    },
+  },
 }
 
 const PromoCodeBadge = (props: PromoCodeBadgeProps) => {
@@ -71,7 +86,7 @@ const PromoCodeBadge = (props: PromoCodeBadgeProps) => {
   return (
     <>
       {isEdit && (
-        <Stack direction="row">
+        <Stack direction="row" display="flex" alignItems="center">
           <KiboTextBox
             name="promocode"
             label={couponLabel}
@@ -84,7 +99,7 @@ const PromoCodeBadge = (props: PromoCodeBadgeProps) => {
             data-testid="promo-input"
           />
           <Button
-            disabled={promo?.length > 0 ? false : true}
+            // disabled={promo?.length > 0 ? true : false}
             onClick={handleApplyCouponCode}
             sx={styles.buttonStyle}
             variant="contained"

@@ -64,7 +64,7 @@ const OrderPriceList = (props: OrderPriceListProps) => {
           <Price
             fontWeight="300"
             price={t('currency', {
-              val: discountedSubtotal ? discountedSubtotal?.toString() : subTotal?.toString(),
+              val: total ? total?.toString() : subTotal?.toString(),
             })}
           />
         </ListItem>
