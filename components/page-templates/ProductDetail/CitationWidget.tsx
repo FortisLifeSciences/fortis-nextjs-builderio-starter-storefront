@@ -48,7 +48,7 @@ const CitationWidget: React.FC<CitationWidgetProps> = ({
     if (window.location.hash === '#citations') {
       const section = document.getElementById('citation-document-section')
       if (section) {
-        section.scrollIntoView({ behavior: 'smooth' })
+        section.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }
     }
   }, [])
