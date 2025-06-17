@@ -227,7 +227,7 @@ const AlgoliaAutocomplete = () => {
     }) => {
       const sources: any[] = []
 
-      if (query.length < 2) return sources
+      if (query.length < 1) return sources
 
       sources.push(
         // Products source

@@ -210,6 +210,7 @@ const MyHitsComponent = ({
   const sortingOptions = [
     { label: 'Relevance', value: 'products' },
     { label: 'Featured', value: 'products_relevance' },
+    { label: 'Citation Count', value: 'products_citation_count' },
   ]
 
   return (
