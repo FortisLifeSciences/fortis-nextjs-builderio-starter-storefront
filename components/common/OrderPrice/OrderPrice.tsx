@@ -16,6 +16,7 @@ export interface OrderPriceProps<T extends CrCart | CrOrder | Checkout> {
   taxLabel?: string
   orderDetails: T
   isShippingTaxIncluded?: boolean
+  discountLabel?: string
   promoComponent?: ReactNode
 }
 
@@ -37,12 +38,13 @@ const OrderPrice = <T extends CrCart | CrOrder | Checkout>(props: OrderPriceProp
     totalLabel,
     handlingLabel,
     taxLabel,
-
+    discountLabel = 'Discount',
     promoComponent,
     isShippingTaxIncluded = true,
     orderDetails,
   } = props
 
+  const discountValue = orderGetters.getTotalDiscount(orderDetails)
   const total = orderGetters.getTotal(orderDetails)
   const subTotal = orderGetters.getSubtotal(orderDetails)
   const itemTaxTotal = orderGetters.getItemTaxTotal(orderDetails as CrOrder)
@@ -73,7 +75,7 @@ const OrderPrice = <T extends CrCart | CrOrder | Checkout>(props: OrderPriceProp
               title={subTotalLabel as string}
               total={lineItemSubtotal}
               subTotal={subTotal}
-              discountedSubtotal={discountedSubtotal}
+              discountedSubtotal={subTotal}
               taxTotal={itemTaxTotal}
             />
             <OrderPriceList
@@ -94,6 +96,13 @@ const OrderPrice = <T extends CrCart | CrOrder | Checkout>(props: OrderPriceProp
               subTotal={taxTotal}
               taxTotal={taxTotal}
             />
+            {discountValue > 0 && (
+              <OrderPriceList
+                title={discountLabel as string}
+                total={discountValue}
+                subTotal={discountValue}
+              />
+            )}
           </>
         )}
 

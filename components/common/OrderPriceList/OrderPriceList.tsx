@@ -8,9 +8,9 @@ import Price from '../Price/Price'
 
 interface OrderPriceListProps {
   title: string
-  total: number
-  subTotal: number
-  taxTotal: number
+  total?: number
+  subTotal?: number
+  taxTotal?: number
   discountedSubtotal?: number
   discounts?: any[]
 }
@@ -64,7 +64,7 @@ const OrderPriceList = (props: OrderPriceListProps) => {
           <Price
             fontWeight="300"
             price={t('currency', {
-              val: total ? total?.toString() : subTotal?.toString(),
+              val: discountedSubtotal ? discountedSubtotal?.toString() : subTotal?.toString(),
             })}
           />
         </ListItem>

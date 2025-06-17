@@ -66,6 +66,8 @@ const getCustomerFedexAccountNumber = (order: CrOrder) => {
     : null
 }
 
+const getTotalDiscount = (order: any): number => order?.discountTotal
+
 const getHandlingTotal = (order: CrOrder | CrCart | Checkout) => order?.handlingTotal || 0
 
 const getHandlingSubTotal = (order: CrOrder | CrCart | Checkout) => order?.handlingSubTotal || 0
@@ -467,4 +469,5 @@ export const orderGetters = {
   getDigitalItems,
   getShippingMethodName,
   getAllOrderItems,
+  getTotalDiscount,
 }
