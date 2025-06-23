@@ -77,6 +77,13 @@ export const cartDetails = /* GraphQL */ `
       }
       couponCode
     }
+    discountThresholdMessages {
+      message
+      showInCart
+      showOnCheckout
+      requiresCouponCode
+      discountId
+    }
     total
     subtotal
     discountedSubtotal

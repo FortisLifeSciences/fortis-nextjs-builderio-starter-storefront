@@ -67,6 +67,8 @@
   "estimated-order-total": "Estimated Order Total",
   "standard-shopping": "Standard Shipping",
   "currency": "{{val, currency(USD)}}",
+  "negative-currency": "-{{val}}",
+  "invalidPromoError": "is not valid for this order.",
   "count": "count",
   "cart-total": "{{cartTotalLabel}} of {{numberOfItems}}",
   "suggestions": "Suggestions",
