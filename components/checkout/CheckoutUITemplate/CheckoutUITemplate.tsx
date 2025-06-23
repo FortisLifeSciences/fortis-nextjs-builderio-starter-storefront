@@ -91,6 +91,9 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
         promoList={checkout?.couponCodes as string[]}
         promoError={!!promoError}
         helpText={promoError}
+        discountThresholdMessages={
+          checkout?.discountThresholdMessages ? checkout?.discountThresholdMessages : []
+        }
       />
     ),
   }

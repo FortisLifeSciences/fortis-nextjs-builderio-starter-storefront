@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 
 import CloseIcon from '@mui/icons-material/Close'
 import { Typography, Box, Button, Stack } from '@mui/material'
+import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
 import { KiboTextBox } from '@/components/common'
@@ -16,6 +17,7 @@ export interface PromoCodeBadgeProps {
   helpText?: string
   couponLabel?: string
   isEdit?: boolean
+  discountThresholdMessages?: any
 }
 const styles = {
   boxStyle: {
@@ -23,27 +25,13 @@ const styles = {
     mr: '0.5rem',
     px: '0.5rem',
     mb: '0.5rem',
-    backgroundColor: 'grey.500',
+    backgroundColor: 'success.main',
+    color: 'secondary.light',
+    borderRadius: '3px',
   },
   textBoxStyle: {
     minWidth: '10rem',
     mr: '0.5rem',
-  },
-  buttonStyle: {
-    background: 'primary.main',
-    color: 'secondary.light',
-    fontFamily: 'Poppins',
-    fontSize: '16px',
-    fontWeight: '500',
-    border: 0,
-    borderRadius: '0 26px',
-    padding: '12px 30px',
-    height: '49px',
-    boxShadow: 'none',
-    '&:hover': {
-      backgroundColor: 'primary.light',
-      cursor: 'pointer',
-    },
   },
 }
 
@@ -57,9 +45,13 @@ const PromoCodeBadge = (props: PromoCodeBadgeProps) => {
     helpText,
     couponLabel,
     isEdit = true,
+    discountThresholdMessages,
   } = props
   const [promo, setPromo] = useState<string>('')
   const [errorMessage, setErrorMessage] = useState<string | undefined>(helpText as string)
+  const router = useRouter()
+  const isCheckout = router.pathname === '/checkout/[checkoutId]'
+  const isCart = router.pathname === '/cart'
 
   const handleApplyCouponCode = () => {
     setErrorMessage('')
@@ -99,10 +91,19 @@ const PromoCodeBadge = (props: PromoCodeBadgeProps) => {
             data-testid="promo-input"
           />
           <Button
-            // disabled={promo?.length > 0 ? true : false}
             onClick={handleApplyCouponCode}
-            sx={styles.buttonStyle}
-            variant="contained"
+            sx={{
+              fontSize: '16px',
+              fontWeight: '500',
+              fontFamily: 'poppins',
+              lineHeight: '25px',
+              padding: '4px 12px',
+              textDecoration: 'underline',
+              '&:hover': {
+                background: 'none',
+              },
+            }}
+            variant="text"
             data-testid="promo-button"
           >
             {t('apply')}
@@ -111,8 +112,10 @@ const PromoCodeBadge = (props: PromoCodeBadgeProps) => {
       )}
       {promoList?.map((coupon: string) => (
         <Box key={coupon} data-testid="applied-coupon" component="div" sx={styles.boxStyle}>
-          <Stack direction="row" spacing={0.5} alignItems="center">
-            <Typography sx={{ textAlign: 'left' }}>{coupon}</Typography>
+          <Stack direction="row" spacing={0.5} alignItems="center" sx={{ minHeight: '30px' }}>
+            <Typography variant="body2" fontWeight="500" sx={{ textAlign: 'left' }}>
+              {coupon}
+            </Typography>
             {isEdit && (
               <CloseIcon
                 aria-label="remove-promo-code"
@@ -126,6 +129,28 @@ const PromoCodeBadge = (props: PromoCodeBadgeProps) => {
           </Stack>
         </Box>
       ))}
+      {discountThresholdMessages.length > 0 &&
+        discountThresholdMessages.map((item: any, i: number) =>
+          (isCheckout && item?.showOnCheckout) || (isCart && item?.showInCart) ? (
+            <Typography
+              key={i}
+              component="div"
+              variant="body2"
+              sx={{
+                marginTop: '20px',
+                '& a': {
+                  textDecoration: 'underline',
+                  color: 'primary.main',
+                },
+              }}
+              dangerouslySetInnerHTML={{
+                __html: item?.message ? item.message : '',
+              }}
+            />
+          ) : (
+            ''
+          )
+        )}
     </>
   )
 }

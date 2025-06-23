@@ -66,7 +66,23 @@ const getCustomerFedexAccountNumber = (order: CrOrder) => {
     : null
 }
 
-const getTotalDiscount = (order: any): number => order?.discountTotal
+const getTotalDiscount = (order: any): any[] => {
+  const handlingDiscounts = order?.handlingDiscounts || []
+  const shippingDiscounts = order?.shippingDiscounts || []
+
+  const result = shippingDiscounts.map((item: any, i: number) => {
+    const shippingImpact = item?.discount?.impact || 0
+    const couponCode = item?.discount?.couponCode || null
+    const handlingImpact = handlingDiscounts[i]?.impact || 0
+
+    return {
+      couponCode,
+      shippingDiscount: shippingImpact + handlingImpact,
+    }
+  })
+
+  return result
+}
 
 const getHandlingTotal = (order: CrOrder | CrCart | Checkout) => order?.handlingTotal || 0
 

@@ -19,6 +19,13 @@ const updateOrderCouponMutation = /* GraphQL */ `
       payments {
         ...checkoutPaymentFragment
       }
+      discountThresholdMessages {
+        message
+        showInCart
+        showOnCheckout
+        requiresCouponCode
+        discountId
+      }
     }
   }
   ${baseCheckoutFragment}
