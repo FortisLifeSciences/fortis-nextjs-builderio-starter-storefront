@@ -86,8 +86,20 @@ const PromoCodeBadge = (props: PromoCodeBadgeProps) => {
           <Button
             disabled={promo?.length > 0 ? false : true}
             onClick={handleApplyCouponCode}
-            sx={styles.buttonStyle}
-            variant="contained"
+            sx={{
+              fontSize: '16px',
+              fontWeight: '500',
+              fontFamily: 'poppins',
+              lineHeight: '25px',
+              padding: '4px 12px',
+              textDecoration: 'underline',
+              textUnderlineOffset: '2px',
+              textDecorationSkipInk: 'none',
+              '&:hover': {
+                background: 'none',
+              },
+            }}
+            variant="text"
             data-testid="promo-button"
           >
             {t('apply')}
