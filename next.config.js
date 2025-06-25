@@ -523,6 +523,7 @@ module.exports = {
         cartEmptySection: 'cart-empty-content-section',
         PDPCustomAndBulkDisplaySection: 'pdp-custom-and-bulk-display-section',
         emptyProductSearchResults: 'empty-product-search-results',
+        announcementBar: 'announcement-bar',
       },
     },
     inventorySettings: {

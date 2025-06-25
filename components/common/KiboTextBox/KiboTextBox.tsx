@@ -122,6 +122,12 @@ const KiboTextBox = (props: KiboTextBoxProps) => {
         id="helper-text"
         aria-errormessage={helperText}
         dangerouslySetInnerHTML={{ __html: helperText || '&nbsp;' }}
+        sx={{
+          fontSize: '16px',
+          fontFamily: 'poppins',
+          fontWeight: '400',
+          lineHeight: '25px',
+        }}
       />
     </FormControl>
   )

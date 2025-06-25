@@ -89,7 +89,7 @@ const CartTemplate = (props: CartTemplateProps) => {
         couponCode,
       })
       if (response?.invalidCoupons?.length) {
-        setPromoError(`<strong>${couponCode}</strong> ${response?.invalidCoupons[0]?.reason}`)
+        setPromoError(`<strong>${couponCode}</strong> ${t('invalidPromoError')}`)
       }
     } catch (err) {
       console.error(err)
@@ -183,6 +183,9 @@ const CartTemplate = (props: CartTemplateProps) => {
         promoList={cart?.couponCodes as string[]}
         promoError={!!promoError}
         helpText={promoError}
+        discountThresholdMessages={
+          cart?.discountThresholdMessages ? cart?.discountThresholdMessages : []
+        }
       />
     ),
   }
@@ -314,81 +317,120 @@ const CartTemplate = (props: CartTemplateProps) => {
                 sx={{
                   bgcolor: 'grey.300',
                   width: '380px',
-                  height: '330px',
+                  minHeight: '320px',
                   flexShrink: '0',
                   padding: '20px',
                   boxShadow: 'none',
                 }}
               >
-                <CardContent sx={{ padding: '0px' }}>
-                  <Typography variant="h3" color="gray.900" fontWeight="500" pt={0.5}>
+                <CardContent sx={{ padding: 0 }}>
+                  <Typography variant="h3" color="grey.900" fontWeight="500" mb="8px">
                     {orderSummaryArgs?.nameLabel}
                   </Typography>
-                  <Typography sx={{}} variant="body1" component="h4" color="grey.900">
-                    {orderSummaryArgs?.subTotalLabel}
-                  </Typography>
-                  <Divider />
+
                   <Box
                     sx={{
                       display: 'flex',
                       justifyContent: 'space-between',
-                      marginBottom: '25px',
+                      // marginBottom: '25px',
                     }}
                   >
-                    {orderSummaryArgs?.totalCount}
+                    <Typography
+                      sx={{}}
+                      variant="body1"
+                      component="h4"
+                      color="grey.900"
+                      lineHeight="35px"
+                    >
+                      {orderSummaryArgs?.subTotalLabel}
+                    </Typography>
                     <Price
                       variant="body1"
-                      fontWeight="normal"
+                      fontWeight="300"
                       price={t('currency', { val: subTotal })}
-                      salePrice={
-                        discountedSubtotal > 0 && discountedSubtotal !== subTotal
-                          ? t('currency', { val: discountedSubtotal })
-                          : ''
-                      }
                     />
                   </Box>
+                  {orderSummaryArgs?.orderDetails && (
+                    <Box>
+                      {orderSummaryArgs?.orderDetails?.orderDiscounts?.map((item, index) => {
+                        const formatted = new Intl.NumberFormat('en-US', {
+                          style: 'currency',
+                          currency: 'USD',
+                          signDisplay: 'never',
+                        }).format(Math.abs(item?.impact || 0))
+                        return (
+                          <Box
+                            key={index}
+                            sx={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              lineHeight: '35px',
+                            }}
+                          >
+                            <Typography variant="body1" lineHeight="35px" color="grey.900">
+                              {item?.couponCode}
+                            </Typography>
+                            <Price
+                              variant="body1"
+                              fontWeight="500"
+                              color="red.900"
+                              price={t('negative-currency', { val: formatted })}
+                            />
+                          </Box>
+                        )
+                      })}
+                    </Box>
+                  )}
 
-                  <Typography variant="body2" sx={{ marginBottom: '25px' }}>
+                  <Typography
+                    variant="body2"
+                    mb="12px"
+                    mt={
+                      Array.isArray(orderSummaryArgs?.orderDetails?.orderDiscounts) &&
+                      orderSummaryArgs.orderDetails.orderDiscounts.length > 0
+                        ? '12px'
+                        : '32px'
+                    }
+                  >
                     {t('shipping-tax-at-checkout')}
                   </Typography>
-
-                  <Stack direction="column" gap={2} sx={{ alignItems: 'center' }}>
-                    <LoadingButton
-                      variant="contained"
-                      name="goToCart"
-                      fullWidth
-                      onClick={handleForceLogin}
-                      loading={showLoadingButton}
-                      disabled={!cartItemCount || showLoadingButton}
-                      sx={{
-                        width: 'auto',
-                        backgroundColor: 'primary.main',
-                        color: 'secondary.light',
-                        textAlign: 'center',
-                        fontFamily: 'Poppins',
-                        fontSize: '16px',
-                        fontStyle: 'normal',
-                        fontWeight: '500',
-                        lineHeight: '24px',
-                        borderRadius: '0px 26px',
-                        border: '1px solid primary.main',
-                        padding: '12px 30px',
-                        '&:hover': {
-                          backgroundColor: 'primary.light',
-                          border: '1px solid primary.light',
-                        },
-                        marginLeft: '20px',
-                        boxShadow: 'none',
-                      }}
-                    >
-                      {t('checkout')}
-                    </LoadingButton>
-                  </Stack>
+                  <Box>{orderSummaryArgs?.promoComponent}</Box>
                 </CardContent>
               </Card>
+              <Stack direction="column" gap={2} mt="20px" sx={{ alignItems: 'center' }}>
+                <LoadingButton
+                  variant="contained"
+                  name="goToCart"
+                  fullWidth
+                  onClick={handleForceLogin}
+                  loading={showLoadingButton}
+                  disabled={!cartItemCount || showLoadingButton}
+                  sx={{
+                    width: 'auto',
+                    backgroundColor: 'primary.main',
+                    color: 'secondary.light',
+                    textAlign: 'center',
+                    fontFamily: 'Poppins',
+                    fontSize: '16px',
+                    fontStyle: 'normal',
+                    fontWeight: '500',
+                    lineHeight: '24px',
+                    borderRadius: '0px 26px',
+                    border: '1px solid primary.main',
+                    padding: '12px 30px',
+                    '&:hover': {
+                      backgroundColor: 'primary.light',
+                      border: '1px solid primary.light',
+                    },
+                    boxShadow: 'none',
+                  }}
+                >
+                  {t('checkout')}
+                </LoadingButton>
+              </Stack>
             </Box>
 
-            {/* <OrderSummary {...orderSummaryArgs}>
+            {/* <OrderSummary {...orderSummaryArgs}> 
               <Stack direction="column" gap={2}>
                 <LoadingButton
                   variant="contained"
@@ -402,7 +444,7 @@ const CartTemplate = (props: CartTemplateProps) => {
                   {t('go-to-checkout')}
                 </LoadingButton>
               </Stack>
-            </OrderSummary> */}
+             </OrderSummary> */}
           </Grid>
         </>
       )}
