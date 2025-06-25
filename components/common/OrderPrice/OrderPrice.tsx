@@ -14,7 +14,7 @@ export interface OrderPriceProps<T extends CrCart | CrOrder | Checkout> {
   totalLabel: string
   handlingLabel?: string
   taxLabel?: string
-  orderDetails: T
+  orderDetails: any
   isShippingTaxIncluded?: boolean
   promoComponent?: ReactNode
 }
@@ -37,12 +37,12 @@ const OrderPrice = <T extends CrCart | CrOrder | Checkout>(props: OrderPriceProp
     totalLabel,
     handlingLabel,
     taxLabel,
-
     promoComponent,
     isShippingTaxIncluded = true,
     orderDetails,
   } = props
 
+  const discountValue = orderGetters.getTotalDiscount(orderDetails)
   const total = orderGetters.getTotal(orderDetails)
   const subTotal = orderGetters.getSubtotal(orderDetails)
   const itemTaxTotal = orderGetters.getItemTaxTotal(orderDetails as CrOrder)
@@ -73,9 +73,25 @@ const OrderPrice = <T extends CrCart | CrOrder | Checkout>(props: OrderPriceProp
               title={subTotalLabel as string}
               total={lineItemSubtotal}
               subTotal={subTotal}
-              discountedSubtotal={discountedSubtotal}
+              discountedSubtotal={subTotal}
               taxTotal={itemTaxTotal}
             />
+            {Array.isArray(orderDetails?.orderDiscounts) &&
+              orderDetails?.orderDiscounts?.map((item: any, index: number) => (
+                <OrderPriceList
+                  key={index}
+                  title={item?.couponCode as string}
+                  subTotal={t('negative-currency', { val: item?.impact })}
+                />
+              ))}
+            {Array.isArray(discountValue) &&
+              discountValue?.map((item: any, index: number) => (
+                <OrderPriceList
+                  key={index}
+                  title={item?.couponCode as string}
+                  subTotal={t('negative-currency', { val: item?.shippingDiscount })}
+                />
+              ))}
             <OrderPriceList
               title={shippingTotalLabel as string}
               total={shippingTotal}
@@ -124,14 +140,13 @@ const OrderPrice = <T extends CrCart | CrOrder | Checkout>(props: OrderPriceProp
       </>
       <Divider sx={{ margin: '0' }} />
 
-      {promoComponent && <Box>{promoComponent}</Box>}
-
       <Box sx={{ ...styles.priceTotalRow }}>
         <Typography variant="body1" component="h4" sx={{ ...styles.priceLabel }}>
           {totalLabel}
         </Typography>
         <Price variant="body1" fontWeight="500" price={t('currency', { val: total })} />
       </Box>
+      {promoComponent && <Box>{promoComponent}</Box>}
     </Box>
   )
 }

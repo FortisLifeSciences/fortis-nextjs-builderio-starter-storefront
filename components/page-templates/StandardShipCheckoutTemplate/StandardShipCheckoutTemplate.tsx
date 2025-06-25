@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
+import { useTranslation } from 'next-i18next'
 
 import { DetailsStep, PaymentStep, ReviewStep, StandardShippingStep } from '@/components/checkout'
 import { CheckoutUITemplate } from '@/components/page-templates'
@@ -41,6 +42,7 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
   const router = useRouter()
   const [promoError, setPromoError] = useState<string>('')
   const { checkoutId } = router.query
+  const { t } = useTranslation('common')
 
   const { publicRuntimeConfig } = getConfig()
   const allowInvalidAddresses = publicRuntimeConfig.allowInvalidAddresses
@@ -74,7 +76,7 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
         couponCode,
       })
       if (response?.invalidCoupons?.length) {
-        setPromoError(`<strong>${couponCode}</strong> ${response?.invalidCoupons[0]?.reason}`)
+        setPromoError(`<strong>${couponCode}</strong>  ${t('invalidPromoError')}`)
       }
     } catch (err) {
       console.error(err)
