@@ -84,15 +84,18 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
     checkoutLabel: t('go-to-checkout'),
     shippingLabel: t('go-to-shipping'),
     backLabel: t('go-back'),
-    /*promoComponent: (
+    promoComponent: (
       <PromoCodeBadge
         onApplyCouponCode={handleApplyCouponCode}
         onRemoveCouponCode={handleRemoveCouponCode}
         promoList={checkout?.couponCodes as string[]}
         promoError={!!promoError}
         helpText={promoError}
+        discountThresholdMessages={
+          checkout?.discountThresholdMessages ? checkout?.discountThresholdMessages : []
+        }
       />
-    ),*/
+    ),
   }
   const showCheckoutSteps = activeStep !== steps.length
 
