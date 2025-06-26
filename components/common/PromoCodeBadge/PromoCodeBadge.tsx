@@ -99,6 +99,8 @@ const PromoCodeBadge = (props: PromoCodeBadgeProps) => {
               lineHeight: '25px',
               padding: '4px 12px',
               textDecoration: 'underline',
+              textUnderlineOffset: '2px',
+              textDecorationSkipInk: 'none',
               '&:hover': {
                 background: 'none',
               },
