@@ -14,7 +14,6 @@ import Router from 'next/router'
 import NProgress from 'nprogress'
 
 import GetThemeSettings from './api/getThemeSettings'
-// import IpWhoIs from './api/ipWhoIs'
 import BuilderComponents from './builder-registry'
 import registerDesignToken from './registerDesignToken'
 import { DefaultLayout } from '@/components/layout'
