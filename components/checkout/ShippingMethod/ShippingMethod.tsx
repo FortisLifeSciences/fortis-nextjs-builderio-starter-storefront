@@ -379,12 +379,14 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   }, [upsAccountNumber, isUpsMethodSelected])
 
   useEffect(() => {
-    if (!selectedShippingMethodCode) {
-      return
-    }
-
     const fedExShippings = getFedExShippingMethods()
     const upsShippings = getUPSShippingMethods()
+    const fortisShippings = getFortisShippingMethods()
+
+    const selectedFortisMethod = find(
+      fortisShippings,
+      (fortisShip) => fortisShip?.shippingMethodCode === selectedShippingMethodCode
+    )
 
     const selectedFedExMethod = find(
       fedExShippings,
@@ -395,13 +397,12 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       (upsShip) => upsShip?.shippingMethodCode === selectedShippingMethodCode
     )
 
-    if (
-      fedExShippings &&
-      selectedFedExMethod &&
-      fedExAccountNumber &&
-      fedExAccountNumber.length === 9 &&
-      isFedExMethodSelected
-    ) {
+    if (selectedFortisMethod) {
+      handleShippingMethodSelectChange(
+        selectedFortisMethod?.shippingMethodName as string,
+        selectedFortisMethod?.shippingMethodCode as string
+      )
+    } else if (fedExShippings && selectedFedExMethod) {
       handleShippingMethodSelectChange(
         selectedFedExMethod?.shippingMethodName as string,
         selectedFedExMethod?.shippingMethodCode as string
@@ -409,13 +410,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       setIsFedExMethodSelected(true)
       setIsUpsMethodSelected(false)
       setIsOtherShippingMethod(false)
-    } else if (
-      upsShippings &&
-      selectedUpsMethod &&
-      upsAccountNumber &&
-      upsAccountNumber.length === 6 &&
-      isUpsMethodSelected
-    ) {
+    } else if (upsShippings && selectedUpsMethod) {
       handleShippingMethodSelectChange(
         selectedUpsMethod?.shippingMethodName as string,
         selectedUpsMethod?.shippingMethodCode as string
@@ -424,7 +419,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       setIsUpsMethodSelected(true)
       setIsOtherShippingMethod(false)
     }
-  }, [selectedShippingMethodCode, t])
+  }, [selectedShippingMethodCode, fedExAccountNumber, upsAccountNumber, t])
 
   const handleShippingMethodChange = (value: string, name?: string) => {
     setFedExAccountShippingMethod({})
