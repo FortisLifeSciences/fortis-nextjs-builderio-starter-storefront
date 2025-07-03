@@ -241,6 +241,7 @@
   "this-field-is-required": "This field is required",
   "this-field-is-number": "Must be only digits",
   "this-field-is-min-max-length": "Must be exactly 9 digits",
+  "this-field-is-min-max-length-6": "Must be exactly 6 digits",
   "enter-valid-zip-code": "Please provide valid zip code",
   "ending": "Ending:",
   "exp": "Exp:",
