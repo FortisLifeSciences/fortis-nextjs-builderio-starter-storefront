@@ -66,6 +66,22 @@ const getCustomerFedexAccountNumber = (order: CrOrder) => {
     : null
 }
 
+const getCustomerUpsAccountNumber = (order: CrOrder) => {
+  if (!order || !order.attributes || !Array.isArray(order.attributes)) {
+    return null // Return null if the order object or attributes are invalid
+  }
+
+  // Find the attribute object with fullyQualifiedName as "tenant~customerUpsAccountNumber"
+  const fedexAccountAttribute = order.attributes.find(
+    (attribute) => attribute?.fullyQualifiedName === 'tenant~customerUpsAccountNumber'
+  )
+
+  // Return the first value from the values array if the attribute is found
+  return fedexAccountAttribute && Array.isArray(fedexAccountAttribute.values)
+    ? fedexAccountAttribute.values[0]
+    : null
+}
+
 const getTotalDiscount = (order: any): any[] => {
   const handlingDiscounts = order?.handlingDiscounts || []
   const shippingDiscounts = order?.shippingDiscounts || []
@@ -246,6 +262,7 @@ const getShippingDetails = (order: CrOrder): ShippingDetails => {
     shippingAddress: getShippingAddress(order),
     shippingMethod: getShippingMethod(order),
     customerFedexAccountNumber: getCustomerFedexAccountNumber(order),
+    customerUpsAccountNumber: getCustomerUpsAccountNumber(order),
   }
 }
 
