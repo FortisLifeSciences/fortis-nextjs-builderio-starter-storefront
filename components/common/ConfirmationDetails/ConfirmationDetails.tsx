@@ -80,15 +80,15 @@ const ConfirmationDetails = (props: ConfirmationDetailsProps) => {
                       {detailsData?.shippingMethod?.shippingMethodName}
                     </Typography> */}
                     <Typography variant="body2">
-                      {!detailsData?.shippingMethod?.shippingMethodName?.includes(
-                        'FedEx Account'
+                      {detailsData?.shippingMethod?.shippingMethodName?.includes(
+                        'Fortis Shipping'
                       ) ? (
                         <>
                           Fortis Shipping
                           <br />({t(detailsData?.shippingMethod?.shippingMethodName)})
                         </>
                       ) : (
-                        <>Customer FedEx Account</>
+                        <>{t(detailsData?.shippingMethod?.shippingMethodName)}</>
                       )}
                     </Typography>
                     {detailsData?.customerFedexAccountNumber &&
@@ -97,6 +97,14 @@ const ConfirmationDetails = (props: ConfirmationDetailsProps) => {
                       ) && (
                         <Typography variant="body2">
                           #{detailsData?.customerFedexAccountNumber}
+                        </Typography>
+                      )}
+                    {detailsData?.customerUpsAccountNumber &&
+                      detailsData?.shippingMethod?.shippingMethodName?.includes(
+                        "Customer's UPS Account"
+                      ) && (
+                        <Typography variant="body2">
+                          #{detailsData?.customerUpsAccountNumber}
                         </Typography>
                       )}
                   </Grid>
