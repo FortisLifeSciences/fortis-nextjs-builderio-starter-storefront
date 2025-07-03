@@ -268,49 +268,49 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   const previousFedExAccountNumber = useRef('')
   const previousUpsAccountNumber = useRef('')
 
-  useEffect(() => {
-    if (
-      isFedExMethodSelected &&
-      fedExAccountNumber &&
-      (previousFedExAccountNumber.current.length > fedExAccountNumber.length ||
-        fedExAccountNumber.length === 0)
-    ) {
-      if (isFedexAccountMethodUpdated) {
-        handleShippingMethodSelectChange('', '')
-      }
-    }
+  // useEffect(() => {
+  //   if (
+  //     isFedExMethodSelected &&
+  //     fedExAccountNumber &&
+  //     (previousFedExAccountNumber.current.length > fedExAccountNumber.length ||
+  //       fedExAccountNumber.length === 0)
+  //   ) {
+  //     if (isFedexAccountMethodUpdated) {
+  //       handleShippingMethodSelectChange('', '')
+  //     }
+  //   }
 
-    // Update the previous value
-    previousFedExAccountNumber.current = fedExAccountNumber || ''
-  }, [fedExAccountNumber, isFedExMethodSelected])
+  //   // Update the previous value
+  //   previousFedExAccountNumber.current = fedExAccountNumber || ''
+  // }, [fedExAccountNumber, isFedExMethodSelected])
 
-  useEffect(() => {
-    if (
-      isUpsMethodSelected &&
-      upsAccountNumber &&
-      (previousUpsAccountNumber.current.length > upsAccountNumber.length ||
-        upsAccountNumber.length === 0)
-    ) {
-      if (isFedexAccountMethodUpdated) {
-        handleShippingMethodSelectChange('', '')
-      }
-    }
+  // useEffect(() => {
+  //   if (
+  //     isUpsMethodSelected &&
+  //     upsAccountNumber &&
+  //     (previousUpsAccountNumber.current.length > upsAccountNumber.length ||
+  //       upsAccountNumber.length === 0)
+  //   ) {
+  //     if (isFedexAccountMethodUpdated) {
+  //       handleShippingMethodSelectChange('', '')
+  //     }
+  //   }
 
-    // Update the previous value
-    previousUpsAccountNumber.current = upsAccountNumber || ''
-  }, [upsAccountNumber, isUpsMethodSelected])
+  //   // Update the previous value
+  //   previousUpsAccountNumber.current = upsAccountNumber || ''
+  // }, [upsAccountNumber, isUpsMethodSelected])
 
-  useEffect(() => {
-    if (!fedExAccountNumber || fedExAccountNumber.length < 9) {
-      handleShippingMethodSelectChange('', '')
-    }
-  }, [fedExAccountNumber, isFedExMethodSelected])
+  // useEffect(() => {
+  //   if (!fedExAccountNumber || fedExAccountNumber.length < 9) {
+  //     handleShippingMethodSelectChange('', '')
+  //   }
+  // }, [fedExAccountNumber, isFedExMethodSelected])
 
-  useEffect(() => {
-    if (!upsAccountNumber || upsAccountNumber.length < 6) {
-      handleShippingMethodSelectChange('', '')
-    }
-  }, [upsAccountNumber, isUpsMethodSelected])
+  // useEffect(() => {
+  //   if (!upsAccountNumber || upsAccountNumber.length < 6) {
+  //     handleShippingMethodSelectChange('', '')
+  //   }
+  // }, [upsAccountNumber, isUpsMethodSelected])
 
   //old code may need for future reference
   // useEffect(() => {
@@ -367,10 +367,19 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   // }, [selectedShippingMethodCode, fedExAccountNumber, upsAccountNumber, isFedExMethodSelected, isUpsMethodSelected])
 
   useEffect(() => {
+    if (isFedExMethodSelected && (!fedExAccountNumber || fedExAccountNumber.length < 9)) {
+      handleShippingMethodSelectChange('', '')
+    }
+  }, [fedExAccountNumber, isFedExMethodSelected])
+
+  useEffect(() => {
+    if (isUpsMethodSelected && (!upsAccountNumber || upsAccountNumber.length < 6)) {
+      handleShippingMethodSelectChange('', '')
+    }
+  }, [upsAccountNumber, isUpsMethodSelected])
+
+  useEffect(() => {
     if (!selectedShippingMethodCode) {
-      setIsFedExMethodSelected(false)
-      setIsUpsMethodSelected(false)
-      setIsOtherShippingMethod(false)
       return
     }
 
@@ -386,18 +395,34 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       (upsShip) => upsShip?.shippingMethodCode === selectedShippingMethodCode
     )
 
-    if (selectedFedExMethod) {
+    if (
+      fedExShippings &&
+      selectedFedExMethod &&
+      fedExAccountNumber &&
+      fedExAccountNumber.length === 9 &&
+      isFedExMethodSelected
+    ) {
+      handleShippingMethodSelectChange(
+        selectedFedExMethod?.shippingMethodName as string,
+        selectedFedExMethod?.shippingMethodCode as string
+      )
       setIsFedExMethodSelected(true)
       setIsUpsMethodSelected(false)
       setIsOtherShippingMethod(false)
-    } else if (selectedUpsMethod) {
+    } else if (
+      upsShippings &&
+      selectedUpsMethod &&
+      upsAccountNumber &&
+      upsAccountNumber.length === 6 &&
+      isUpsMethodSelected
+    ) {
+      handleShippingMethodSelectChange(
+        selectedUpsMethod?.shippingMethodName as string,
+        selectedUpsMethod?.shippingMethodCode as string
+      )
       setIsFedExMethodSelected(false)
       setIsUpsMethodSelected(true)
       setIsOtherShippingMethod(false)
-    } else {
-      setIsFedExMethodSelected(false)
-      setIsUpsMethodSelected(false)
-      setIsOtherShippingMethod(true)
     }
   }, [selectedShippingMethodCode, t])
 
@@ -414,13 +439,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
 
   const handleShippingMethodSelectChange = (name: string, value: string) => {
     if (!name && !value) {
-      setFedExAccountShippingMethod({})
-      setUpsAccountShippingMethod({})
-      setIsFedExAccountUpdated(false)
-      setIsUpsAccountUpdated(false)
       onShippingMethodChange && onShippingMethodChange('', '')
-      setIsFedexAccountMethodUpdated(false)
-      setIsUpsAccountUpdated(false)
       return
     }
 
@@ -429,13 +448,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       (shipMethod) => value === shipMethod?.shippingMethodCode
     ) as CrShippingRate
     if (!shippingMethod) {
-      setFedExAccountShippingMethod({})
-      setUpsAccountShippingMethod({})
-      setIsFedExAccountUpdated(false)
-      setIsUpsAccountUpdated(false)
       onShippingMethodChange && onShippingMethodChange('', '')
-      setIsFedexAccountMethodUpdated(false)
-      setIsUpsAccountUpdated(false)
       return
     }
     if (shippingMethod?.shippingMethodName?.includes('FedEx Account')) {
