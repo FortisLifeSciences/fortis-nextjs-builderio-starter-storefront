@@ -917,6 +917,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
             backgroundColor: isUpsMethodSelected ? '#E3E2FF' : 'initial',
             '&:hover': { backgroundColor: '#E3E2FF', borderRadius: '5px' },
             borderRadius: '5px',
+            marginTop: '10px',
           }}
         >
           {/* Customer UPS Shipping method */}
@@ -1004,7 +1005,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                       setUpsAccountNumber(sanitizedValue)
 
                       if (!sanitizedValue || sanitizedValue.length < 6) {
-                        setLocalUpsError(t('this-field-is-min-max-length'))
+                        setLocalUpsError(t('this-field-is-min-max-length-6'))
                       } else {
                         setLocalUpsError('')
                         // Optionally handle method selection here
