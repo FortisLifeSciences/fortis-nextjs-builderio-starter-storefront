@@ -166,6 +166,7 @@ const LoginDialog = (props: any) => {
   }
 
   const processUpdatedVariables = async (result: any, entityResult: any, variables: any) => {
+    console.log('result', result)
     const updatedVariables = {
       ...variables,
       b2BAccountInput: {

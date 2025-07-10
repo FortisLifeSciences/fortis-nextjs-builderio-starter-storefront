@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       ? googleReCaptcha.accountCreationSiteKey
       : process.env.accountCreationSiteKey
     // Construct the API URL
-    const url = `https://recaptchaenterprise.googleapis.com/v1beta1/projects/${projectId}/assessments?key=${apiKey}`
+    const url = `https://recaptchaenterprise.googleapis.com/v1/projects/${projectId}/assessments?key=${apiKey}`
     // console.log('url', url)
     const requestData = {
       event: {
@@ -38,15 +38,16 @@ export default async function handler(req, res) {
       })
 
       const recaptchaRespBody = await response.json()
-      // console.info('recaptchaRespBody=', recaptchaRespBody);
+      console.info('recaptchaRespBody=', recaptchaRespBody)
 
       if (
         !recaptchaRespBody?.tokenProperties?.valid ||
-        (recaptchaRespBody?.score && parseFloat(recaptchaRespBody.score) < parseFloat(minScore))
+        (recaptchaRespBody?.riskAnalysis?.score &&
+          parseFloat(recaptchaRespBody.riskAnalysis.score) < parseFloat(minScore))
       ) {
         console.error('Preventing account creation')
         console.error('Token validation', recaptchaRespBody.tokenProperties.valid)
-        console.error('Token score', recaptchaRespBody.score)
+        console.error('Token score', recaptchaRespBody.riskAnalysis.score)
 
         res.status(400).json({
           message: errorMsg,
@@ -56,7 +57,7 @@ export default async function handler(req, res) {
         res.status(200).json({
           message: 'Recaptcha validated. Proceed with account creation.',
           success: true,
-          score: recaptchaRespBody.score,
+          score: recaptchaRespBody.riskAnalysis.score,
         })
       }
     } catch (error) {
