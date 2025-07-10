@@ -19,7 +19,7 @@ export default async function handler(req, res) {
       : process.env.accountCreationSiteKey
     // Construct the API URL
     const url = `https://recaptchaenterprise.googleapis.com/v1/projects/${projectId}/assessments?key=${apiKey}`
-    console.log('recaptcha enterprise url', url)
+    console.log('recaptcha enterprise url--', url)
     const requestData = {
       event: {
         token: responseKey,
@@ -38,7 +38,7 @@ export default async function handler(req, res) {
       })
 
       const recaptchaRespBody = await response.json()
-      console.info('recaptchaRespBody====', recaptchaRespBody)
+      //console.info('recaptchaRespBody====', recaptchaRespBody)
 
       if (
         !recaptchaRespBody?.tokenProperties?.valid ||
