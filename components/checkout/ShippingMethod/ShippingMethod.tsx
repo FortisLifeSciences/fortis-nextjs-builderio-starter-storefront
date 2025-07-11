@@ -104,6 +104,12 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   const [isUpsAccountUpdated, setIsUpsAccountUpdated] = useState<boolean>(false)
   const [localUpsError, setLocalUpsError] = useState('')
 
+  const lastOrderAttrsRef = useRef({
+    b2bAccountName: '',
+    fedEx: '',
+    ups: '',
+  })
+
   const fedExSchema = useFedExSchema()
 
   const upsSchema = useUpsSchema()
@@ -182,6 +188,59 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   }, [customerAccount?.id || customerAccount?.userId, fedexTrigger])
 
   useEffect(() => {
+    const fedExShippings = getFedExShippingMethods()
+    const upsShippings = getUPSShippingMethods()
+    const fortisShippings = getFortisShippingMethods()
+
+    const selectedFortisMethod = find(
+      fortisShippings,
+      (fortisShip) => fortisShip?.shippingMethodCode === selectedShippingMethodCode
+    )
+
+    const selectedFedExMethod = find(
+      fedExShippings,
+      (fedExShip) => fedExShip?.shippingMethodCode === selectedShippingMethodCode
+    )
+    const selectedUpsMethod = find(
+      upsShippings,
+      (upsShip) => upsShip?.shippingMethodCode === selectedShippingMethodCode
+    )
+
+    if (selectedFortisMethod) {
+      handleShippingMethodSelectChange(
+        selectedFortisMethod?.shippingMethodName as string,
+        selectedFortisMethod?.shippingMethodCode as string
+      )
+    } else if (
+      fedExShippings &&
+      selectedFedExMethod &&
+      fedExAccountNumber &&
+      fedExAccountNumber.length === 9
+    ) {
+      handleShippingMethodSelectChange(
+        selectedFedExMethod?.shippingMethodName as string,
+        selectedFedExMethod?.shippingMethodCode as string
+      )
+      setIsFedExMethodSelected(true)
+      setIsUpsMethodSelected(false)
+      setIsOtherShippingMethod(false)
+    } else if (
+      upsShippings &&
+      selectedUpsMethod &&
+      upsAccountNumber &&
+      upsAccountNumber.length === 6
+    ) {
+      handleShippingMethodSelectChange(
+        selectedUpsMethod?.shippingMethodName as string,
+        selectedUpsMethod?.shippingMethodCode as string
+      )
+      setIsFedExMethodSelected(false)
+      setIsUpsMethodSelected(true)
+      setIsOtherShippingMethod(false)
+    }
+  }, [selectedShippingMethodCode, fedExAccountNumber, upsAccountNumber, t])
+
+  useEffect(() => {
     if (customerAccount?.attributes?.length) {
       if (fedExAccountNumberInput) {
         setFedExAccountNumber(fedExAccountNumberInput)
@@ -245,7 +304,13 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         fedExAccountSelectedShippingMethodName
       )
     }
-  }, [fedExAccountNumber, fedExAccountSelectedShippingMethodName])
+  }, [
+    customerAccount,
+    fedExAccountNumber,
+    fedExAccountSelectedShippingMethodName,
+    isFedExAccountUpdated,
+    isFedExMethodSelected,
+  ])
 
   useEffect(() => {
     if (
@@ -263,167 +328,18 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         upsAccountSelectedShippingMethodName
       )
     }
-  }, [upsAccountNumber, upsAccountSelectedShippingMethodName])
+  }, [
+    customerAccount,
+    isUpsAccountUpdated,
+    isUpsMethodSelected,
+    upsAccountNumber,
+    upsAccountSelectedShippingMethodName,
+  ])
 
   const previousFedExAccountNumber = useRef('')
   const previousUpsAccountNumber = useRef('')
 
-  // useEffect(() => {
-  //   if (
-  //     isFedExMethodSelected &&
-  //     fedExAccountNumber &&
-  //     (previousFedExAccountNumber.current.length > fedExAccountNumber.length ||
-  //       fedExAccountNumber.length === 0)
-  //   ) {
-  //     if (isFedexAccountMethodUpdated) {
-  //       handleShippingMethodSelectChange('', '')
-  //     }
-  //   }
-
-  //   // Update the previous value
-  //   previousFedExAccountNumber.current = fedExAccountNumber || ''
-  // }, [fedExAccountNumber, isFedExMethodSelected])
-
-  // useEffect(() => {
-  //   if (
-  //     isUpsMethodSelected &&
-  //     upsAccountNumber &&
-  //     (previousUpsAccountNumber.current.length > upsAccountNumber.length ||
-  //       upsAccountNumber.length === 0)
-  //   ) {
-  //     if (isFedexAccountMethodUpdated) {
-  //       handleShippingMethodSelectChange('', '')
-  //     }
-  //   }
-
-  //   // Update the previous value
-  //   previousUpsAccountNumber.current = upsAccountNumber || ''
-  // }, [upsAccountNumber, isUpsMethodSelected])
-
-  // useEffect(() => {
-  //   if (!fedExAccountNumber || fedExAccountNumber.length < 9) {
-  //     handleShippingMethodSelectChange('', '')
-  //   }
-  // }, [fedExAccountNumber, isFedExMethodSelected])
-
-  // useEffect(() => {
-  //   if (!upsAccountNumber || upsAccountNumber.length < 6) {
-  //     handleShippingMethodSelectChange('', '')
-  //   }
-  // }, [upsAccountNumber, isUpsMethodSelected])
-
-  //old code may need for future reference
-  // useEffect(() => {
-  //   if (selectedShippingMethodCode && !isFedExMethodSelected && !isUpsMethodSelected) {
-  //     const fedExShippings = getFedExShippingMethods()
-  //     const upsShippings = getUPSShippingMethods()
-
-  //     const selectedFexEdMethod = find(
-  //       fedExShippings,
-  //       (fedExShip) => fedExShip?.shippingMethodCode === selectedShippingMethodCode
-  //     )
-  //     const selectedUpsMethod = find(
-  //       upsShippings,
-  //       (upsShip) => upsShip?.shippingMethodCode === selectedShippingMethodCode
-  //     )
-  //     console.log("triggering code every time")
-  //     if(isOtherShippingMethod){
-  //       handleShippingMethodSelectChange(
-  //         selectedFexEdMethod?.shippingMethodName as string,
-  //         selectedFexEdMethod?.shippingMethodCode as string
-  //       )
-  //       setIsFedExMethodSelected(false)
-  //       setIsOtherShippingMethod(true)
-  //       setIsUpsMethodSelected(false)
-  //     }else if (
-  //       fedExShippings &&
-  //       selectedFexEdMethod &&
-  //       fedExAccountNumber &&
-  //       fedExAccountNumber.length === 9 &&
-  //       isFedExMethodSelected
-  //     ) {
-  //       handleShippingMethodSelectChange(
-  //         selectedFexEdMethod?.shippingMethodName as string,
-  //         selectedFexEdMethod?.shippingMethodCode as string
-  //       )
-  //       setIsFedExMethodSelected(true)
-  //       setIsOtherShippingMethod(false)
-  //       setIsUpsMethodSelected(false)
-  //       console.log("triggering code every time 101")
-  //     } else if (upsShippings && selectedUpsMethod && upsAccountNumber && upsAccountNumber.length === 6 && isUpsMethodSelected) {
-  //       handleShippingMethodSelectChange(
-  //         selectedUpsMethod?.shippingMethodName as string,
-  //         selectedUpsMethod?.shippingMethodCode as string
-  //       )
-  //       setIsUpsMethodSelected(true)
-  //       setIsFedExMethodSelected(false)
-  //       setIsOtherShippingMethod(false)
-  //       console.log("triggering code every time 102")
-  //     } else {
-  //       handleShippingMethodSelectChange('', '')
-  //       console.log("triggering code every time 103")
-  //     }
-  //   }
-  // }, [selectedShippingMethodCode, fedExAccountNumber, upsAccountNumber, isFedExMethodSelected, isUpsMethodSelected])
-
-  useEffect(() => {
-    if (isFedExMethodSelected && (!fedExAccountNumber || fedExAccountNumber.length < 9)) {
-      handleShippingMethodSelectChange('', '')
-    }
-  }, [fedExAccountNumber, isFedExMethodSelected])
-
-  useEffect(() => {
-    if (isUpsMethodSelected && (!upsAccountNumber || upsAccountNumber.length < 6)) {
-      handleShippingMethodSelectChange('', '')
-    }
-  }, [upsAccountNumber, isUpsMethodSelected])
-
-  useEffect(() => {
-    const fedExShippings = getFedExShippingMethods()
-    const upsShippings = getUPSShippingMethods()
-    const fortisShippings = getFortisShippingMethods()
-
-    const selectedFortisMethod = find(
-      fortisShippings,
-      (fortisShip) => fortisShip?.shippingMethodCode === selectedShippingMethodCode
-    )
-
-    const selectedFedExMethod = find(
-      fedExShippings,
-      (fedExShip) => fedExShip?.shippingMethodCode === selectedShippingMethodCode
-    )
-    const selectedUpsMethod = find(
-      upsShippings,
-      (upsShip) => upsShip?.shippingMethodCode === selectedShippingMethodCode
-    )
-
-    if (selectedFortisMethod) {
-      handleShippingMethodSelectChange(
-        selectedFortisMethod?.shippingMethodName as string,
-        selectedFortisMethod?.shippingMethodCode as string
-      )
-    } else if (fedExShippings && selectedFedExMethod) {
-      handleShippingMethodSelectChange(
-        selectedFedExMethod?.shippingMethodName as string,
-        selectedFedExMethod?.shippingMethodCode as string
-      )
-      setIsFedExMethodSelected(true)
-      setIsUpsMethodSelected(false)
-      setIsOtherShippingMethod(false)
-    } else if (upsShippings && selectedUpsMethod) {
-      handleShippingMethodSelectChange(
-        selectedUpsMethod?.shippingMethodName as string,
-        selectedUpsMethod?.shippingMethodCode as string
-      )
-      setIsFedExMethodSelected(false)
-      setIsUpsMethodSelected(true)
-      setIsOtherShippingMethod(false)
-    }
-  }, [selectedShippingMethodCode, fedExAccountNumber, upsAccountNumber, t])
-
   const handleShippingMethodChange = (value: string, name?: string) => {
-    setFedExAccountShippingMethod({})
-    setUpsAccountShippingMethod({})
     onShippingMethodChange && onShippingMethodChange(value, name)
     selectShippingMethodRef.current &&
       (selectShippingMethodRef.current as Element).scrollIntoView({
@@ -431,7 +347,6 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         block: 'start',
       })
   }
-
   const handleShippingMethodSelectChange = (name: string, value: string) => {
     if (!name && !value) {
       onShippingMethodChange && onShippingMethodChange('', '')
@@ -446,15 +361,12 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       onShippingMethodChange && onShippingMethodChange('', '')
       return
     }
+    onShippingMethodChange && onShippingMethodChange(value, name)
     if (shippingMethod?.shippingMethodName?.includes('FedEx Account')) {
       setFedExAccountShippingMethod(shippingMethod)
     } else if (shippingMethod?.shippingMethodName?.includes('UPS Account')) {
       setUpsAccountShippingMethod(shippingMethod)
-    } else {
     }
-    setIsFedExAccountUpdated(false)
-    setIsUpsAccountUpdated(false)
-    onShippingMethodChange && onShippingMethodChange(value, name)
     if (name !== '' && value !== '') {
       if (name.includes('FedEx Account')) {
         setIsFedexAccountMethodUpdated(true)
@@ -480,7 +392,6 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
     }) as CrShippingRate[]
     return fortisShippingMethods
   }
-
   const getFedExShippingMethods = () => {
     const fedExShippingMethods = filter(orderShipmentMethods, (shippingMethod: CrShippingRate) => {
       if (shippingMethod?.shippingMethodName?.includes('FedEx Account')) {
@@ -489,7 +400,6 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
     }) as CrShippingRate[]
     return fedExShippingMethods
   }
-
   const getUPSShippingMethods = () => {
     const upsShippingMethods = filter(orderShipmentMethods, (shippingMethod: CrShippingRate) => {
       if (shippingMethod?.shippingMethodName?.includes('UPS Account')) {
@@ -499,74 +409,88 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
     return upsShippingMethods
   }
 
-  // Save FedEx account into customer attributes
+  // Save FedEx/UPS account into customer attributes and Order Attributes
   const { updateUserData } = useUpdateCustomerProfile()
   const { createOrderAttributes } = useCreateOrderAttribute()
   const { updateOrderAttributes } = useUpdateOrderAttributes()
 
-  const updateFortisOrderAttribute = async (orderAttributeFQN: string, value: string) => {
-    // Update order attributes if found
-    const orderAttr = find(
-      checkout?.attributes,
-      (attr) => attr?.fullyQualifiedName === orderAttributeFQN
-    )
-
-    if (orderAttr) {
-      // Updating Order Attribute
-      if (value === '' || value === null) {
-        await updateOrderAttributes.mutateAsync({
-          orderId: checkout?.id as string,
-          orderAttributeInput: [
-            {
-              fullyQualifiedName: orderAttributeFQN,
-              values: [],
-            },
-          ],
-        })
-      } else {
-        await updateOrderAttributes.mutateAsync({
-          orderId: checkout?.id as string,
-          orderAttributeInput: [
-            {
-              fullyQualifiedName: orderAttributeFQN,
-              values: [value],
-            },
-          ],
-        })
-      }
-    } else {
-      // Adding Order Attribute
-      if (value !== '' && value !== null) {
-        await createOrderAttributes.mutateAsync({
-          orderId: checkout?.id as string,
-          orderAttributeInput: [
-            {
-              fullyQualifiedName: orderAttributeFQN,
-              values: [value],
-            },
-          ],
-        })
-      }
+  const upsertOrderAttribute = async (orderId: string, fqn: string, value: string) => {
+    const attr = find(checkout?.attributes, (a) => a?.fullyQualifiedName === fqn)
+    if (attr) {
+      // Update if exists
+      await updateOrderAttributes.mutateAsync({
+        orderId,
+        orderAttributeInput: [
+          {
+            fullyQualifiedName: fqn,
+            values: value ? [value] : [],
+          },
+        ],
+      })
+    } else if (value) {
+      // Create if not exists and value is not empty
+      await createOrderAttributes.mutateAsync({
+        orderId,
+        orderAttributeInput: [
+          {
+            fullyQualifiedName: fqn,
+            values: [value],
+          },
+        ],
+      })
     }
   }
-
   useEffect(() => {
-    if (customerAccount?.companyOrOrganization) {
-      updateFortisOrderAttribute('tenant~b2bAccountName', customerAccount?.companyOrOrganization)
+    if (!checkout) return
+
+    // B2B Account Name
+    if (
+      customerAccount?.companyOrOrganization &&
+      lastOrderAttrsRef.current.b2bAccountName !== customerAccount.companyOrOrganization
+    ) {
+      lastOrderAttrsRef.current.b2bAccountName = customerAccount.companyOrOrganization
+      upsertOrderAttribute(
+        checkout.id as string,
+        'tenant~b2bAccountName',
+        customerAccount.companyOrOrganization
+      )
     }
 
+    // Shipping method attributes
     if (isOtherShippingMethod) {
-      updateFortisOrderAttribute('tenant~customerFedexAccountNumber', '')
-      updateFortisOrderAttribute('tenant~customerUpsAccountNumber', '')
-    } else if (isFedExMethodSelected) {
-      if (fedExAccountNumber && fedExAccountNumber.length === 9) {
-        updateFortisOrderAttribute('tenant~customerFedexAccountNumber', fedExAccountNumber)
-        updateFortisOrderAttribute('tenant~customerUpsAccountNumber', '')
+      if (lastOrderAttrsRef.current.fedEx !== '') {
+        lastOrderAttrsRef.current.fedEx = ''
+        upsertOrderAttribute(checkout.id as string, 'tenant~customerFedexAccountNumber', '')
       }
-    } else if (isUpsMethodSelected) {
-      if (upsAccountNumber && upsAccountNumber.length === 6) {
-        updateFortisOrderAttribute('tenant~customerUpsAccountNumber', upsAccountNumber)
-        updateFortisOrderAttribute('tenant~customerFedexAccountNumber', '')
+      if (lastOrderAttrsRef.current.ups !== '') {
+        lastOrderAttrsRef.current.ups = ''
+        upsertOrderAttribute(checkout.id as string, 'tenant~customerUpsAccountNumber', '')
+      }
+    } else if (isFedExMethodSelected && fedExAccountNumber && fedExAccountNumber.length === 9) {
+      if (lastOrderAttrsRef.current.fedEx !== fedExAccountNumber) {
+        lastOrderAttrsRef.current.fedEx = fedExAccountNumber
+        upsertOrderAttribute(
+          checkout.id as string,
+          'tenant~customerFedexAccountNumber',
+          fedExAccountNumber
+        )
+      }
+      if (lastOrderAttrsRef.current.ups !== '') {
+        lastOrderAttrsRef.current.ups = ''
+        upsertOrderAttribute(checkout.id as string, 'tenant~customerUpsAccountNumber', '')
+      }
+    } else if (isUpsMethodSelected && upsAccountNumber && upsAccountNumber.length === 6) {
+      if (lastOrderAttrsRef.current.ups !== upsAccountNumber) {
+        lastOrderAttrsRef.current.ups = upsAccountNumber
+        upsertOrderAttribute(
+          checkout.id as string,
+          'tenant~customerUpsAccountNumber',
+          upsAccountNumber
+        )
+      }
+      if (lastOrderAttrsRef.current.fedEx !== '') {
+        lastOrderAttrsRef.current.fedEx = ''
+        upsertOrderAttribute(checkout.id as string, 'tenant~customerFedexAccountNumber', '')
       }
     }
   }, [
@@ -576,6 +500,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
     isOtherShippingMethod,
     isFedExMethodSelected,
     isUpsMethodSelected,
+    checkout,
   ])
 
   const handleFexExAccountShipping = async (
@@ -702,6 +627,52 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
     }
   }
 
+  const selectShippingMethod = (method: 'fortis' | 'fedex' | 'ups') => {
+    if (method === 'fortis') {
+      setIsOtherShippingMethod(true)
+      setIsFedExMethodSelected(false)
+      setIsUpsMethodSelected(false)
+      setIsFedExAccountUpdated(true)
+      setIsUpsAccountUpdated(true)
+    } else if (method === 'fedex') {
+      setIsFedExMethodSelected(true)
+      setIsOtherShippingMethod(false)
+      setIsUpsMethodSelected(false)
+      setIsFedExAccountUpdated(false)
+      setIsUpsAccountUpdated(false)
+      // Only select if valid
+      if (fedExAccountNumber && fedExAccountNumber.length === 9) {
+        const fedex = getFedExShippingMethods()?.[0]
+        if (fedex) {
+          handleShippingMethodSelectChange(
+            fedex.shippingMethodName as string,
+            fedex.shippingMethodCode as string
+          )
+        }
+      } else {
+        handleShippingMethodSelectChange('', '')
+      }
+    } else if (method === 'ups') {
+      setIsUpsMethodSelected(true)
+      setIsFedExMethodSelected(false)
+      setIsOtherShippingMethod(false)
+      setIsUpsAccountUpdated(false)
+      setIsFedExAccountUpdated(false)
+      // Only select if valid
+      if (upsAccountNumber && upsAccountNumber.length === 6) {
+        const ups = getUPSShippingMethods()?.[0]
+        if (ups) {
+          handleShippingMethodSelectChange(
+            ups.shippingMethodName as string,
+            ups.shippingMethodCode as string
+          )
+        }
+      } else {
+        handleShippingMethodSelectChange('', '')
+      }
+    }
+  }
+
   return (
     <Box data-testid="ship-items">
       <Box mt={2}>
@@ -717,40 +688,31 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
           {/* Normal Shipping method */}
           <KiboRadio
             radioOptions={
-              getFortisShippingMethods()?.map((item) => {
-                return {
-                  value: item?.shippingMethodCode as string,
-                  name: item?.shippingMethodName as string,
-                  label: item ? (
-                    <MenuItem
-                      key={item?.shippingMethodCode}
-                      value={`${item?.shippingMethodCode}`}
-                      sx={{ mt: 0.25, background: 'none', '&:hover': { background: 'none' } }}
-                    >
-                      <Price
-                        variant="body2"
-                        fontWeight="normal"
-                        price={`${t('fortis-shipping')} (${item?.shippingMethodName})`}
-                      />
-                      {/* removed price  ${t('currency',{ val: item?.price })} */}
-                    </MenuItem>
-                  ) : (
-                    ''
-                  ),
-                }
-              }) ?? []
+              getFortisShippingMethods()?.map((item) => ({
+                value: item?.shippingMethodCode as string,
+                name: item?.shippingMethodName as string,
+                label: (
+                  <MenuItem
+                    key={item?.shippingMethodCode}
+                    value={`${item?.shippingMethodCode}`}
+                    sx={{ mt: 0.25, background: 'none', '&:hover': { background: 'none' } }}
+                  >
+                    <Price
+                      variant="body2"
+                      fontWeight="normal"
+                      price={`${t('fortis-shipping')} (${item?.shippingMethodName})`}
+                    />
+                  </MenuItem>
+                ),
+              })) ?? []
             }
             selected={
               isOtherShippingMethod && selectedShippingMethodCode ? selectedShippingMethodCode : ''
             }
             align="flex-start"
             onChange={(value) => {
-              setIsOtherShippingMethod(true)
+              selectShippingMethod('fortis')
               handleShippingMethodChange(value)
-              setIsFedExMethodSelected(false)
-              setIsUpsMethodSelected(false)
-              setIsFedExAccountUpdated(true)
-              setIsUpsAccountUpdated(true)
             }}
             sx={{
               borderRadius: 1,
@@ -795,39 +757,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
             ]}
             selected={isFedExMethodSelected ? 'fedExAccount' : ''}
             align="flex-start"
-            onChange={() => {
-              if (selectedShippingMethodCode || fedExAccountShippingMethod?.shippingMethodCode) {
-                const shippingMethod = selectedShippingMethodCode
-                  ? find(
-                      getFedExShippingMethods(),
-                      (fedExMethod) =>
-                        fedExMethod?.shippingMethodCode === selectedShippingMethodCode
-                    )
-                  : undefined
-                if (shippingMethod) {
-                  handleShippingMethodSelectChange(
-                    shippingMethod?.shippingMethodName as string,
-                    shippingMethod?.shippingMethodCode as string
-                  )
-                } else if (fedExAccountShippingMethod) {
-                  if (fedExAccountNumber && fedExAccountNumber.length === 9) {
-                    handleShippingMethodSelectChange(
-                      getFedExShippingMethods()?.[0]?.shippingMethodName as string,
-                      getFedExShippingMethods()?.[0]?.shippingMethodCode as string
-                    )
-                  } else {
-                    // This disables continue button to stop checkout flow
-                    handleShippingMethodSelectChange('', '')
-                  }
-                }
-              } else {
-                handleShippingMethodChange('')
-              }
-              setIsFedExAccountUpdated(false)
-              setIsFedExMethodSelected(true)
-              setIsOtherShippingMethod(false)
-              setIsUpsMethodSelected(false)
-            }}
+            onChange={() => selectShippingMethod('fedex')}
             sx={{ ml: 1.5 }}
           />
           {isFedExMethodSelected && (
@@ -944,39 +874,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
             ]}
             selected={isUpsMethodSelected ? 'upsAccount' : ''}
             align="flex-start"
-            onChange={() => {
-              if (selectedShippingMethodCode || upsAccountShippingMethod?.shippingMethodCode) {
-                const shippingMethod = selectedShippingMethodCode
-                  ? find(
-                      getUPSShippingMethods(),
-                      (upsMethod) => upsMethod?.shippingMethodCode === selectedShippingMethodCode
-                    )
-                  : undefined
-                if (shippingMethod) {
-                  handleShippingMethodSelectChange(
-                    shippingMethod?.shippingMethodName as string,
-                    shippingMethod?.shippingMethodCode as string
-                  )
-                } else if (upsAccountShippingMethod) {
-                  if (upsAccountNumber && upsAccountNumber.length === 6) {
-                    handleShippingMethodSelectChange(
-                      getUPSShippingMethods()?.[0]?.shippingMethodName as string,
-                      getUPSShippingMethods()?.[0]?.shippingMethodCode as string
-                    )
-                  } else {
-                    // This disables continue button to stop checkout flow
-                    handleShippingMethodSelectChange('', '')
-                  }
-                }
-              } else {
-                handleShippingMethodChange('')
-              }
-              setIsUpsMethodSelected(true)
-              setIsFedExMethodSelected(false)
-              setIsOtherShippingMethod(false)
-              setIsUpsAccountUpdated(false)
-              // Optionally handle selection logic here
-            }}
+            onChange={() => selectShippingMethod('ups')}
             sx={{ ml: 1.5 }}
           />
           {isUpsMethodSelected && (
@@ -1006,15 +904,20 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
 
                       if (!sanitizedValue || sanitizedValue.length < 6) {
                         setLocalUpsError(t('this-field-is-min-max-length-6'))
+                        // If the previous value was valid and now it's not, clear the shipping method
+                        if (previousUpsAccountNumber.current.length === 6) {
+                          console.log('code triggered')
+                          handleShippingMethodSelectChange('', '')
+                        }
                       } else {
                         setLocalUpsError('')
-                        // Optionally handle method selection here
                         handleShippingMethodSelectChange(
                           getUPSShippingMethods()?.[0]?.shippingMethodName as string,
                           getUPSShippingMethods()?.[0]?.shippingMethodCode as string
                         )
                       }
                       setIsUpsAccountUpdated(false)
+                      previousUpsAccountNumber.current = sanitizedValue
                     }}
                     onBlur={field.onBlur}
                     required={true}
