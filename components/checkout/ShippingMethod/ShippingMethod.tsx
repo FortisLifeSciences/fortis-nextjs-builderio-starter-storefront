@@ -905,8 +905,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                       if (!sanitizedValue || sanitizedValue.length < 6) {
                         setLocalUpsError(t('this-field-is-min-max-length-6'))
                         // If the previous value was valid and now it's not, clear the shipping method
-                        if (previousUpsAccountNumber.current.length === 6) {
-                          console.log('code triggered')
+                        if (previousUpsAccountNumber.current.length <= 6) {
                           handleShippingMethodSelectChange('', '')
                         }
                       } else {
