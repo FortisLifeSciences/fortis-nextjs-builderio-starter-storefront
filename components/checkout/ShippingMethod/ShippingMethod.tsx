@@ -81,7 +81,6 @@ const useUpsSchema = () => {
 const ShipItemList = (shipProps: ShipItemListProps) => {
   const { checkout, orderShipmentMethods, selectedShippingMethodCode, onShippingMethodChange } =
     shipProps
-  const { data: customerAccount } = useGetCurrentCustomer()
   const { t } = useTranslation('common')
   const [fedExAccountNumber, setFedExAccountNumber] = useState<string>()
   const [isFedExMethodSelected, setIsFedExMethodSelected] = useState<boolean>(false)
