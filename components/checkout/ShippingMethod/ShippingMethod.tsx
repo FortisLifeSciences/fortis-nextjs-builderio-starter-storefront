@@ -81,10 +81,10 @@ const useUpsSchema = () => {
 const ShipItemList = (shipProps: ShipItemListProps) => {
   const { checkout, orderShipmentMethods, selectedShippingMethodCode, onShippingMethodChange } =
     shipProps
+  const { data: customerAccount } = useGetCurrentCustomer()
   const { t } = useTranslation('common')
-
-  const [isFedExMethodSelected, setIsFedExMethodSelected] = useState<boolean>(false)
   const [fedExAccountNumber, setFedExAccountNumber] = useState<string>()
+  const [isFedExMethodSelected, setIsFedExMethodSelected] = useState<boolean>(false)
   const [fedExAccountNumberInput, setFedExAccountNumberInput] = useState<string>()
   const [fedExAccountShippingMethod, setFedExAccountShippingMethod] = useState<CrShippingRate>()
   const [fedExAccountSelectedShippingMethodName, setFedExAccountSelectedShippingMethodName] =
@@ -126,10 +126,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
 
   const selectShippingMethodRef = useRef<HTMLInputElement | null>(null)
   // Define Variables and States
-  const {
-    control,
-    formState: { errors },
-  } = useForm({
+  const { control } = useForm({
     shouldUseNativeValidation: false,
     mode: 'onBlur',
     reValidateMode: 'onBlur',
@@ -251,6 +248,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       }
 
       // Get FedEx account shipping method name
+
       const customerShippingMethodAttr = find(customerAccount?.attributes, {
         fullyQualifiedName: 'tenant~shipping-method',
       })
@@ -266,7 +264,12 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         setUpsAccountShippingMethod(shippingMethod)
       }
     }
-  }, [customerAccount?.attributes, orderShipmentMethods, t])
+  }, [customerAccount?.attributes, orderShipmentMethods])
+
+  // Prioritize input
+  useEffect(() => {
+    setFedExAccountNumber(fedExAccountNumberInput || fedExAccountNumber)
+  }, [fedExAccountNumber, fedExAccountNumberInput])
 
   useEffect(() => {
     if (fedExAccountShippingMethod?.shippingMethodName) {
@@ -276,7 +279,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
           t('currency', { val: fedExAccountShippingMethod?.price })
       )
     }
-  }, [fedExAccountShippingMethod])
+  }, [fedExAccountShippingMethod, t])
 
   useEffect(() => {
     if (upsAccountShippingMethod?.shippingMethodName) {
