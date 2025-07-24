@@ -65,6 +65,39 @@ const AlgoliaAutocomplete = () => {
   const handleEnterSearch = (value: string) => {
     router.push({ pathname: '/search', query: { query: value } }) // 👈 updated
   }
+  useEffect(() => {
+    const wrapper = document.getElementById('autocomplete') as HTMLElement | null
+
+    const getPanel = () => document.querySelector<HTMLElement>('.aa-Panel') ?? null
+
+    const updateContentOffset = () => {
+      if (wrapper) {
+        const panel = getPanel()
+        if (panel) {
+          const top = wrapper.getBoundingClientRect().top
+          panel.style.top = `${top + 24}px`
+        }
+      }
+    }
+
+    if (!wrapper) return
+
+    // 1. Watch wrapper size
+    const resizeObs = new ResizeObserver(updateContentOffset)
+    resizeObs.observe(wrapper)
+
+    // 2. Watch for the panel being added/removed
+    const mutationObs = new MutationObserver(updateContentOffset)
+    mutationObs.observe(document.body, { childList: true, subtree: true })
+
+    // Initial run
+    updateContentOffset()
+
+    return () => {
+      resizeObs.disconnect()
+      mutationObs.disconnect()
+    }
+  }, [])
 
   useEffect(() => {
     if (!containerRef.current) return

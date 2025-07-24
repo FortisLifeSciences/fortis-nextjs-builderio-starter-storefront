@@ -14,6 +14,7 @@ export interface ShippingDetails extends ContactDetails {
   shippingAddress: CrAddress
   shippingMethod?: any
   customerFedexAccountNumber?: string
+  customerUpsAccountNumber?: string
 }
 
 export interface BillingDetails extends ContactDetails {
