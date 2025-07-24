@@ -24,18 +24,6 @@ export const initAlgoliaInsightsClient = () => {
           apiKey: process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || '',
           useCookie: hasConsent,
         })
-        aa(
-          'onUserTokenChange',
-          (userToken) => {
-            if ((window as any).dataLayer) {
-              ;(window as any).dataLayer.push({
-                algoliaUserToken: userToken,
-              })
-            }
-            console.log('Algolia user token updated:', userToken)
-          },
-          { immediate: true }
-        )
       }
     }
   }
