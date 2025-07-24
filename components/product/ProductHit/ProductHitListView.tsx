@@ -114,7 +114,6 @@ const pdpBrandLogos: Record<string, string> = {
 
 const ProductHitListView = ({ hit }: { hit: Product }): JSX.Element => {
   const imageHeight = 180
-  console.log('hit', hit)
   const placeholderImageUrl = DefaultImage,
     kiboImagesData = hit?.product_images,
     variationProductCode = hit?.sku,
@@ -149,53 +148,6 @@ const ProductHitListView = ({ hit }: { hit: Product }): JSX.Element => {
   }`
   truncatedTitle = truncatedTitle + `${uniqueVal}`
 
-  const [authenticatedUserToken, setAuthenticatedUserToken] = useState<string | undefined>()
-
-  // Fetch user tokens and fire Algolia events only on click
-  const handleProductClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (typeof window !== 'undefined') {
-      // Algolia Analytics event with fresh tokens
-      if (typeof aa === 'function') {
-        aa(
-          'getAuthenticatedUserToken',
-          {},
-          (authErr: unknown, authenticatedUserToken: string | number | undefined) => {
-            if (authErr) {
-              console.error('user token auth err', authErr)
-              return
-            }
-            const finalAuthenticatedUserToken =
-              typeof authenticatedUserToken === 'string'
-                ? authenticatedUserToken
-                : typeof authenticatedUserToken === 'number'
-                ? String(authenticatedUserToken)
-                : undefined
-
-            // if ((window as any).dataLayer) {
-            //   (window as any).dataLayer.push({
-            //     event: 'gtm.click',
-            //   })
-            // }
-
-            // if ((window as any).dataLayer) {
-            //   (window as any).dataLayer.push({
-            //     'event': 'Algolia Converted After Search',
-            //     'algolia': {
-            //       'method': 'convertedObjectIDsAfterSearch', // Method from Tag Details
-            //       'userToken': '{{Algolia Insights User Token}}', // Placeholder for User Token variable
-            //       'authenticatedUserToken': '{{Algolia Insights User Token}}', // Placeholder for Authenticated User Token variable
-            //       'index': '{{Algolia Insights Index}}', // Placeholder for Algolia Index variable
-            //       'objectIDs': '{{Algolia Insights ObjectIDs}}', // Placeholder for Object IDs variable (e.g., an array of strings)
-            //       'queryID': '{{Algolia Insights QueryID}}' // Placeholder for Query ID variable
-            //     },
-            //   })
-            // }
-          }
-        )
-      }
-    }
-  }
-
   return (
     <>
       <Box
@@ -208,7 +160,6 @@ const ProductHitListView = ({ hit }: { hit: Product }): JSX.Element => {
           passHref
           data-testid="product-card-link"
           aria-label={title ? `View details for ${title}` : 'Product details'}
-          onClick={handleProductClick}
           data-insights-object-id={hit.objectID}
           data-insights-position={'1'}
           data-insights-query-id={'abcd1234'}
