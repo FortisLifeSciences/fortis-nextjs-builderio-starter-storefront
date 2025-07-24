@@ -131,24 +131,39 @@ const KiboHeader = (props: KiboHeaderProps) => {
   console.log('isAuthenticated in KiboHeader:', isAuthenticated)
 
   React.useEffect(() => {
+    const setToken = (token: string) => {
+      console.log('Setting Algolia user token:', token)
+      // Store the token in localStorage and dataLayer if it has changed
+      // This prevents unnecessary updates to Algolia Insights and avoids triggering user token change events
+      const storedToken = window.localStorage.getItem('algoliaUserToken')
+      if (!storedToken) {
+        window.localStorage.setItem('algoliaUserToken', token)
+        if ((window as any).dataLayer) {
+          window.dataLayer.push({ algoliaUserToken: token })
+        }
+        console.log('Algolia user token set:', token)
+      } else if (storedToken !== token) {
+        window.localStorage.setItem('algoliaUserToken', token)
+        if ((window as any).dataLayer) {
+          window.dataLayer.push({ algoliaUserToken: token })
+        }
+        console.log('Algolia user token updated:', token)
+      }
+    }
+
     if (isAuthenticated && user && user.userId != null && hasConsent) {
       aa('setAuthenticatedUserToken', user.userId)
-      window.dataLayer.push({
-        algoliaUserToken: user.userId,
-      })
+      setToken(user.userId)
     } else if (hasConsent) {
       aa('setAuthenticatedUserToken', undefined)
       aa('getUserToken', {}, (err, userToken) => {
         if (err) {
           console.error('user token error', err)
         }
-        if ((window as any).dataLayer) {
-          window.dataLayer.push({
-            algoliaUserToken: userToken
-              ? userToken
-              : 'anonymous-' + Math.random().toString(36).substring(2, 15),
-          })
-        }
+        const token = userToken
+          ? String(userToken)
+          : 'anonymous-' + Math.random().toString(36).substring(2, 15)
+        setToken(token)
       })
     }
   }, [isAuthenticated, user?.userId, hasConsent])
