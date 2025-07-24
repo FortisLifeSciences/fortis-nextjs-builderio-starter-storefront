@@ -5,6 +5,7 @@ import getConfig from 'next/config'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
+import aa from 'search-insights'
 
 import { headerActionAreaStyles, kiboHeaderStyles, topHeaderStyles } from './FortisHeader.styles'
 import { AccountHierarchyFormDialog } from '@/components/dialogs'
@@ -21,6 +22,7 @@ import {
 } from '@/components/layout'
 import { useAuthContext, useHeaderContext, useModalContext } from '@/context'
 import { useCreateCustomerB2bAccountMutation } from '@/hooks'
+import { getAnalyticsConsentFromLocalStorage } from '@/lib/getAnalyticsConsent'
 import { buildCreateCustomerB2bAccountParams } from '@/lib/helpers'
 import type { CreateCustomerB2bAccountParams, NavigationLink } from '@/lib/types'
 
@@ -109,7 +111,7 @@ const HeaderActionArea = (props: HeaderActionAreaProps) => {
 const KiboHeader = (props: KiboHeaderProps) => {
   const { navLinks, isSticky = true } = props
   const { headerState, toggleMobileSearchPortal, toggleHamburgerMenu } = useHeaderContext()
-  const { isAuthenticated } = useAuthContext()
+  const { isAuthenticated, user } = useAuthContext()
   const { showModal, closeModal } = useModalContext()
   const { t } = useTranslation('common')
   const router = useRouter()
@@ -124,6 +126,32 @@ const KiboHeader = (props: KiboHeaderProps) => {
   const isCheckoutPage = router.pathname.includes('checkout')
   const { publicRuntimeConfig } = getConfig()
   const isMultiShipEnabled = publicRuntimeConfig.isMultiShipEnabled
+  const hasConsent = getAnalyticsConsentFromLocalStorage()
+  console.log('hasConsent in KiboHeader:', hasConsent)
+  console.log('isAuthenticated in KiboHeader:', isAuthenticated)
+
+  React.useEffect(() => {
+    if (isAuthenticated && user && user.userId != null && hasConsent) {
+      aa('setAuthenticatedUserToken', user.userId)
+      window.dataLayer.push({
+        algoliaUserToken: user.userId,
+      })
+    } else if (hasConsent) {
+      aa('setAuthenticatedUserToken', undefined)
+      aa('getUserToken', {}, (err, userToken) => {
+        if (err) {
+          console.error('user token error', err)
+        }
+        if ((window as any).dataLayer) {
+          window.dataLayer.push({
+            algoliaUserToken: userToken
+              ? userToken
+              : 'anonymous-' + Math.random().toString(36).substring(2, 15),
+          })
+        }
+      })
+    }
+  }, [isAuthenticated, user?.userId, hasConsent])
 
   const handleAccountIconClick = () => {
     isHamburgerMenuVisible && toggleHamburgerMenu()

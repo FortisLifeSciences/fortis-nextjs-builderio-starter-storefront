@@ -12,12 +12,14 @@ import 'next-i18next.config'
 // eslint-disable-next-line import/order
 import Router from 'next/router'
 import NProgress from 'nprogress'
+import aa from 'search-insights'
 
 import GetThemeSettings from './api/getThemeSettings'
 import BuilderComponents from './builder-registry'
 import registerDesignToken from './registerDesignToken'
 import { DefaultLayout } from '@/components/layout'
-import { RQNotificationContextProvider } from '@/context'
+import { RQNotificationContextProvider, useAuthContext } from '@/context'
+import { initAlgoliaInsightsClient } from '@/lib/algoliaInsights'
 import createEmotionCache from '@/lib/createEmotionCache'
 import type { NextPageWithLayout } from '@/lib/types'
 
@@ -61,6 +63,11 @@ const App = (props: KiboAppProps) => {
 
   const [googleReCaptcha, setGoogleReCaptcha] = useState()
   const [gtmId, setGtmId] = useState()
+
+  useEffect(() => {
+    initAlgoliaInsightsClient()
+  }, [])
+
   useEffect(() => {
     const fetchSettings = async () => {
       const settings = await GetThemeSettings()

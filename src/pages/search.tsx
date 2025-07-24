@@ -479,7 +479,11 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
                       <Box className={isListView ? 'product-list-view' : 'product-grid-view'}>
                         <div className="productviewstructure">
                           {result.hits.slice(0, 16).map((hit: any, i: number) => (
-                            <div className="productviewlistItem" key={i}>
+                            <div
+                              className="productviewlistItem"
+                              key={i}
+                              data-insights-index="products"
+                            >
                               {isMobile ? (
                                 <ProductHitGridView hit={hit} />
                               ) : isListView ? (
