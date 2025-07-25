@@ -397,7 +397,35 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
         content={props.section}
       />
 
-      <InstantSearch searchClient={searchClient} indexName="products">
+      <InstantSearch
+        searchClient={searchClient}
+        indexName="products"
+        insights={{
+          onEvent(event) {
+            const { widgetType, eventType, payload, hits } = event
+            console.log(
+              'widgetType:',
+              widgetType,
+              'eventType:',
+              eventType,
+              'payload:',
+              payload,
+              'hits:',
+              hits
+            )
+            const objectIDs = hits?.map((hit) => hit.objectID)
+            if (widgetType === 'ais.hits' && eventType === 'view') {
+              if ((window as any).dataLayer) {
+                window.dataLayer.push({
+                  event: 'Hits Viewed',
+                  algoliaObjectIds: objectIDs,
+                  algoliaIndex: 'products',
+                })
+              }
+            }
+          },
+        }}
+      >
         <MyHitsComponent
           categoryCode={categoryCode}
           facets={facets}
