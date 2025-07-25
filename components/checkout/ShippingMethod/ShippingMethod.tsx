@@ -260,9 +260,15 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       const shippingMethod = find(orderShipmentMethods, (shipMethod) =>
         shippingMethodName?.includes(shipMethod?.shippingMethodName)
       ) as CrShippingRate
-      if (shippingMethod.shippingMethodName?.includes('FedEx Account')) {
+      if (
+        shippingMethod?.shippingMethodName &&
+        shippingMethod?.shippingMethodName?.includes('FedEx Account')
+      ) {
         setFedExAccountShippingMethod(shippingMethod)
-      } else if (shippingMethod.shippingMethodName?.includes('UPS Account')) {
+      } else if (
+        shippingMethod?.shippingMethodName &&
+        shippingMethod?.shippingMethodName?.includes('UPS Account')
+      ) {
         setUpsAccountShippingMethod(shippingMethod)
       }
     }
