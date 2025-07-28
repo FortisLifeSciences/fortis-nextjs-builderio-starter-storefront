@@ -46,7 +46,6 @@ const ProdAttr = [
 
 const ProductSpecifications = ({ product }: { product: any }) => {
   const [productData, setProductData] = useState(product)
-  console.log('Product data: ', productData)
   useEffect(() => {
     const hasContentsVariant = product?.properties?.some(
       (prop: any) => prop?.attributeFQN === 'tenant~contents-variant'
