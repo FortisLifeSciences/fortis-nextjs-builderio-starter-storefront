@@ -186,6 +186,7 @@ const variantProperties = [
   'tenant~storage-variant',
   'tenant~shelf-life-variant',
   'tenant~buffer',
+  'tenant~epitope-tag',
   'tenant~prodprocedures-1',
   'tenant~contents-variant',
   'tenant~application-text-variant',
