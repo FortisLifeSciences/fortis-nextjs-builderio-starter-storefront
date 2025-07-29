@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect } from 'react'
 
+import { yupResolver } from '@hookform/resolvers/yup'
 import { Box, Stack, Button, SxProps, Typography, Divider } from '@mui/material'
 import { Theme } from '@mui/material/styles'
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { ReCaptchaProvider } from 'next-recaptcha-v3'
+import * as yup from 'yup'
 
 import { KiboStepper, OrderReview } from '@/components/checkout'
 import { OrderSummary, PromoCodeBadge } from '@/components/common'
@@ -47,7 +49,44 @@ const buttonStyle = {
   },
 } as SxProps<Theme> | undefined
 
+export const useFedExSchema = () => {
+  const { t } = useTranslation('common')
+  return yup.object().shape({
+    fedExAccountNumber: yup
+      .string()
+      .matches(/^[0-9]+$/, t('this-field-is-min-max-length')) // Ensure only digits
+      .required(t('this-field-is-min-max-length')) // Ensure it's not empty
+      .test(
+        'length-9',
+        t('this-field-is-min-max-length'), // Error message
+        (value) => value?.length === 9 // Allow only length 9
+      ),
+  })
+}
+
+const useUpsSchema = () => {
+  const { t } = useTranslation('common')
+  return yup.object().shape({
+    upsAccountNumber: yup
+      .string()
+      .matches(/^[a-zA-Z0-9]+$/, t('this-field-is-min-max-length-6'))
+      .required(t('this-field-is-min-max-length-6'))
+      .test('length-6', t('this-field-is-min-max-length-6'), (value) => value?.length === 6),
+  })
+}
+
 const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITemplateProps<T>) => {
+  // Utility to determine method type from shippingMethodName
+  const getShippingMethodType = (shippingMethodName?: string): 'fortis' | 'fedex' | 'ups' => {
+    if (!shippingMethodName) return 'fortis'
+    if (shippingMethodName.toLowerCase().includes('fedex account')) return 'fedex'
+    if (shippingMethodName.toLowerCase().includes('ups account')) return 'ups'
+    return 'fortis'
+  }
+
+  // Get validation schemas once at component level
+  const fedexSchema = useFedExSchema()
+  const upsSchema = useUpsSchema()
   const {
     checkout,
     handleApplyCouponCode,
@@ -57,6 +96,7 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
     children,
     builderContent,
   } = props
+
   const { t } = useTranslation('common')
   const { activeStep, stepStatus, steps, setStepStatusSubmit, setStepBack } =
     useCheckoutStepContext()
@@ -70,8 +110,154 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
   const reviewStepIndex = steps.findIndex(
     (step: string) => step.toLowerCase() === t('review').toLowerCase()
   )
+
+  // Shipping method and attribute validation for button disabling
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
+
+  let isShippingStep = false
+  let isShippingValid = true
+  if (typeof window !== 'undefined') {
+    const localSelectedShippingMethod = localStorage.getItem('selectedShippingMethod')
+    let shippingMethodCode: string | undefined
+    let shippingMethodName: string | undefined
+    if ('fulfillmentInfo' in checkout && checkout.fulfillmentInfo) {
+      shippingMethodCode = checkout.fulfillmentInfo.shippingMethodCode ?? undefined
+      shippingMethodName = checkout.fulfillmentInfo.shippingMethodName ?? undefined
+    }
+    const methodType = getShippingMethodType(shippingMethodName)
+    const localSelectedFedexAccountNumber = localStorage.getItem('fedExAccountNumber')
+    const localSelectedUpsAccountNumber = localStorage.getItem('upsAccountNumber')
+    if (activeStep === shippingStepIndex) {
+      isShippingStep = true
+      if (
+        !shippingMethodCode ||
+        !shippingMethodName ||
+        localSelectedShippingMethod !== methodType
+      ) {
+        isShippingValid = false
+      }
+      if (localSelectedShippingMethod === 'fedex') {
+        try {
+          fedexSchema.validateSync({ fedExAccountNumber: localSelectedFedexAccountNumber })
+        } catch (err) {
+          isShippingValid = false
+        }
+      } else if (localSelectedShippingMethod === 'ups') {
+        try {
+          upsSchema.validateSync({ upsAccountNumber: localSelectedUpsAccountNumber })
+        } catch (err) {
+          isShippingValid = false
+        }
+      }
+    }
+  }
+
   const handleBack = () => setStepBack()
-  const handleSubmit = useCallback(() => setStepStatusSubmit(), [])
+
+  // Handle form submission based on the active step
+  const handleSubmit = useCallback(() => {
+    if (activeStep === shippingStepIndex) {
+      setIsSubmitting(true)
+      setTimeout(() => {
+        // Utility to determine method type from shippingMethodName
+        // const getShippingMethodType = (shippingMethodName?: string): 'fortis' | 'fedex' | 'ups' => {
+        //   if (!shippingMethodName) return 'fortis'
+        //   if (shippingMethodName.toLowerCase().includes("fedex account")) return 'fedex'
+        //   if (shippingMethodName.toLowerCase().includes("ups account")) return 'ups'
+        //   return 'fortis'
+        // }
+        // let shippingMethodCode: string | undefined
+        // let shippingMethodName: string | undefined
+        // if ('fulfillmentInfo' in checkout && checkout.fulfillmentInfo) {
+        //   shippingMethodCode = checkout.fulfillmentInfo.shippingMethodCode ?? undefined
+        //   shippingMethodName = checkout.fulfillmentInfo.shippingMethodName ?? undefined
+        // }
+        // const methodType = getShippingMethodType(shippingMethodName)
+
+        const localSelectedShippingMethod = localStorage.getItem('selectedShippingMethod')
+        const localSelectedFedexAccountNumber = localStorage.getItem('fedExAccountNumber')
+        const localSelectedUpsAccountNumber = localStorage.getItem('upsAccountNumber')
+
+        let validationError = ''
+        if (localSelectedShippingMethod === 'fedex') {
+          try {
+            fedexSchema.validateSync({ fedExAccountNumber: localSelectedFedexAccountNumber })
+          } catch (err) {
+            validationError = (err as Error).message
+          }
+        } else if (localSelectedShippingMethod === 'ups') {
+          try {
+            upsSchema.validateSync({ upsAccountNumber: localSelectedUpsAccountNumber })
+          } catch (err) {
+            validationError = (err as Error).message
+          }
+        }
+        if (validationError) {
+          // Show error or prevent step
+          alert(validationError || t('Please select a shipping method before continuing.'))
+          setIsSubmitting(false)
+          return
+        }
+        setIsSubmitting(false)
+        setStepStatusSubmit()
+      }, 2000)
+    } else if (activeStep === reviewStepIndex) {
+      const localSelectedShippingMethod = localStorage.getItem('selectedShippingMethod')
+      let attributeFqn = ''
+      if (localSelectedShippingMethod === 'fedex')
+        attributeFqn = 'tenant~customerFedexAccountNumber'
+      else if (localSelectedShippingMethod === 'ups')
+        attributeFqn = 'tenant~customerUpsAccountNumber'
+      let attributeValue = ''
+      if (Array.isArray(checkout.attributes)) {
+        const attr = checkout.attributes.find(
+          (a) => a != null && a.fullyQualifiedName === attributeFqn
+        )
+        if (attr && Array.isArray(attr.values) && attr.values.length > 0) {
+          attributeValue = attr.values[0]
+        }
+      }
+      let validationError = ''
+      if (localSelectedShippingMethod === 'fedex') {
+        try {
+          fedexSchema.validateSync({ fedExAccountNumber: attributeValue })
+        } catch (err) {
+          validationError = (err as Error).message
+        }
+      } else if (localSelectedShippingMethod === 'ups') {
+        try {
+          upsSchema.validateSync({ upsAccountNumber: attributeValue })
+        } catch (err) {
+          validationError = (err as Error).message
+        }
+      }
+      let shippingMethodName: string | undefined
+      if ('fulfillmentInfo' in checkout && checkout.fulfillmentInfo) {
+        shippingMethodName = checkout.fulfillmentInfo.shippingMethodName ?? undefined
+      }
+      if (validationError) {
+        // Show error or prevent step
+        alert(
+          'there is some issue with your selected shipping method-' +
+            shippingMethodName +
+            ', please check and try again.'
+        )
+        return
+      }
+      setStepStatusSubmit()
+    } else {
+      setStepStatusSubmit()
+    }
+  }, [
+    activeStep,
+    shippingStepIndex,
+    reviewStepIndex,
+    setStepStatusSubmit,
+    fedexSchema,
+    upsSchema,
+    t,
+    checkout,
+  ])
 
   const orderSummaryArgs = {
     nameLabel: t('Order Summary'),
@@ -124,9 +310,13 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
               sx={{ ...buttonStyle }}
               fullWidth
               onClick={handleSubmit}
-              disabled={stepStatus !== STEP_STATUS.VALID || activeStep === steps.length - 1}
+              disabled={
+                stepStatus !== STEP_STATUS.VALID ||
+                activeStep === steps.length - 1 ||
+                (isShippingStep && !isShippingValid)
+              }
             >
-              {t('continue') || buttonLabels[activeStep]}
+              {isSubmitting ? t('loading') : t('continue') || buttonLabels[activeStep]}
             </Button>
             {/* <Button
               variant="contained"
