@@ -780,10 +780,11 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
         viewItemGTM(
           productCode,
           '',
-          productGetters.getName(product) as string,
+          variantProductName ? variantProductName : (productGetters.getName(product) as string),
           product?.categories?.[0]?.content?.name,
           brandName,
-          value
+          value,
+          variationProductCode
         )
       }
       setVariationCodeDynamic(variationProductCode)
