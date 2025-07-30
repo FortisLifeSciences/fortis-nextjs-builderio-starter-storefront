@@ -157,6 +157,10 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       })
 
       const attributeDetails = await entityResponse.json()
+      localStorage.setItem(
+        'upsAccountNumber',
+        attributeDetails?.data?.values?.[0] ? attributeDetails?.data?.values?.[0] : ''
+      )
       setUpsAccountNumber(
         attributeDetails?.data?.values?.[0] ? attributeDetails?.data?.values?.[0] : ''
       )
@@ -180,6 +184,10 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       })
 
       const attributeDetails = await entityResponse.json()
+      localStorage.setItem(
+        'fedExAccountNumber',
+        attributeDetails?.data?.values?.[0] ? attributeDetails?.data?.values?.[0] : ''
+      )
       setFedExAccountNumber(
         attributeDetails?.data?.values?.[0] ? attributeDetails?.data?.values?.[0] : ''
       )
@@ -634,6 +642,8 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   }
 
   const selectShippingMethod = (method: 'fortis' | 'fedex' | 'ups') => {
+    localStorage.setItem('selectedShippingMethod', method)
+
     if (method === 'fortis') {
       setIsOtherShippingMethod(true)
       setIsFedExMethodSelected(false)
@@ -792,7 +802,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                         field.onChange(sanitizedValue)
                         setFedExAccountNumberInput(sanitizedValue)
                         setFedExAccountNumber(sanitizedValue)
-
+                        localStorage.setItem('fedExAccountNumber', sanitizedValue ?? '')
                         if (
                           sanitizedValue == '' ||
                           sanitizedValue.length === 0 ||
@@ -887,12 +897,11 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                         field.onChange(sanitizedValue)
                         setUpsAccountNumberInput(sanitizedValue)
                         setUpsAccountNumber(sanitizedValue)
-
+                        localStorage.setItem('upsAccountNumber', sanitizedValue ?? '')
                         if (!sanitizedValue || sanitizedValue.length < 6) {
                           setLocalUpsError(t('this-field-is-min-max-length-6'))
                           // If the previous value was valid and now it's not, clear the shipping method
                           if (previousUpsAccountNumber.current.length === 6) {
-                            console.log('code triggered')
                             handleShippingMethodSelectChange('', '')
                           }
                         } else {
