@@ -168,13 +168,15 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
           try {
             fedexSchema.validateSync({ fedExAccountNumber: localSelectedFedexAccountNumber })
           } catch (err) {
-            validationError = (err as Error).message
+            validationError =
+              'Please enter a valid FedEx customer account number, ' + (err as Error).message
           }
         } else if (localSelectedShippingMethod === 'ups') {
           try {
             upsSchema.validateSync({ upsAccountNumber: localSelectedUpsAccountNumber })
           } catch (err) {
-            validationError = (err as Error).message
+            validationError =
+              'Please enter a valid UPS customer account number, ' + (err as Error).message
           }
         }
         if (validationError) {
