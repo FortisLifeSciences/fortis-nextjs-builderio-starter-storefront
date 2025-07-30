@@ -114,44 +114,6 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
   // Shipping method and attribute validation for button disabling
   const [isSubmitting, setIsSubmitting] = React.useState(false)
 
-  // let isShippingStep = false
-  // let isShippingValid = true
-  // if (typeof window !== 'undefined') {
-  //   const localSelectedShippingMethod = localStorage.getItem('selectedShippingMethod')
-  //   let shippingMethodCode: string | undefined
-  //   let shippingMethodName: string | undefined
-  //   if ('fulfillmentInfo' in checkout && checkout.fulfillmentInfo) {
-  //     shippingMethodCode = checkout.fulfillmentInfo.shippingMethodCode ?? undefined
-  //     shippingMethodName = checkout.fulfillmentInfo.shippingMethodName ?? undefined
-  //   }
-  //   const methodType = getShippingMethodType(shippingMethodName)
-  //   const localSelectedFedexAccountNumber = localStorage.getItem('fedExAccountNumber')
-  //   const localSelectedUpsAccountNumber = localStorage.getItem('upsAccountNumber')
-  //   if (activeStep === shippingStepIndex) {
-  //     isShippingStep = true
-  //     if (
-  //       !shippingMethodCode ||
-  //       !shippingMethodName ||
-  //       localSelectedShippingMethod !== methodType
-  //     ) {
-  //       isShippingValid = false
-  //     }
-  //     if (localSelectedShippingMethod === 'fedex') {
-  //       try {
-  //         fedexSchema.validateSync({ fedExAccountNumber: localSelectedFedexAccountNumber })
-  //       } catch (err) {
-  //         isShippingValid = false
-  //       }
-  //     } else if (localSelectedShippingMethod === 'ups') {
-  //       try {
-  //         upsSchema.validateSync({ upsAccountNumber: localSelectedUpsAccountNumber })
-  //       } catch (err) {
-  //         isShippingValid = false
-  //       }
-  //     }
-  //   }
-  // }
-
   const handleBack = () => setStepBack()
 
   // Handle form submission based on the active step
