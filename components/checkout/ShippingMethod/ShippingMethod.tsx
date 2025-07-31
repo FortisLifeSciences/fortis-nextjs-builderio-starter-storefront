@@ -157,6 +157,10 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       })
 
       const attributeDetails = await entityResponse.json()
+      localStorage.setItem(
+        'upsAccountNumber',
+        attributeDetails?.data?.values?.[0] ? attributeDetails?.data?.values?.[0] : ''
+      )
       setUpsAccountNumber(
         attributeDetails?.data?.values?.[0] ? attributeDetails?.data?.values?.[0] : ''
       )
@@ -180,6 +184,10 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       })
 
       const attributeDetails = await entityResponse.json()
+      localStorage.setItem(
+        'fedExAccountNumber',
+        attributeDetails?.data?.values?.[0] ? attributeDetails?.data?.values?.[0] : ''
+      )
       setFedExAccountNumber(
         attributeDetails?.data?.values?.[0] ? attributeDetails?.data?.values?.[0] : ''
       )
@@ -260,9 +268,15 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       const shippingMethod = find(orderShipmentMethods, (shipMethod) =>
         shippingMethodName?.includes(shipMethod?.shippingMethodName)
       ) as CrShippingRate
-      if (shippingMethod.shippingMethodName?.includes('FedEx Account')) {
+      if (
+        shippingMethod?.shippingMethodName &&
+        shippingMethod?.shippingMethodName?.includes('FedEx Account')
+      ) {
         setFedExAccountShippingMethod(shippingMethod)
-      } else if (shippingMethod.shippingMethodName?.includes('UPS Account')) {
+      } else if (
+        shippingMethod?.shippingMethodName &&
+        shippingMethod?.shippingMethodName?.includes('UPS Account')
+      ) {
         setUpsAccountShippingMethod(shippingMethod)
       }
     }
@@ -628,6 +642,8 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   }
 
   const selectShippingMethod = (method: 'fortis' | 'fedex' | 'ups') => {
+    localStorage.setItem('selectedShippingMethod', method)
+
     if (method === 'fortis') {
       setIsOtherShippingMethod(true)
       setIsFedExMethodSelected(false)
@@ -723,211 +739,191 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
             }}
           />
         </Box>
-        <Box
-          m={0}
-          py={0.5}
-          sx={{
-            display: 'grid',
-            backgroundColor: isFedExMethodSelected ? '#E3E2FF' : 'initial',
-            '&:hover': { backgroundColor: '#E3E2FF', borderRadius: '5px' },
-            borderRadius: '5px',
-          }}
-        >
-          {/* Customer FedEx Shipping method */}
-          <KiboRadio
-            radioOptions={[
-              {
-                value: 'fedExAccount',
-                name: 'Use Customer FedEx Account',
-                label: (
-                  <MenuItem
-                    key={'fedExAccount'}
-                    value={'fedExAccount'}
-                    sx={{
-                      mt: 0.25,
-                      width: '100%',
-                      backgroundColor: 'none',
-                      '&:hover': { background: 'none' },
-                    }}
-                  >
-                    <Price variant="body2" fontWeight="normal" price={'Customer FedEx Account'} />
-                  </MenuItem>
-                ),
-              },
-            ]}
-            selected={isFedExMethodSelected ? 'fedExAccount' : ''}
-            align="flex-start"
-            onChange={() => selectShippingMethod('fedex')}
-            sx={{ ml: 1.5 }}
-          />
-          {isFedExMethodSelected && (
-            <Box
-              ml={8.5}
-              mr={4}
-              mb={2}
-              sx={{ backgroundColor: isFedExMethodSelected ? '#E3E2FF' : 'initial' }}
-            >
-              <Controller
-                name="fedExAccountNumber"
-                control={control}
-                defaultValue={fedExAccountNumber}
-                render={({ field }) => (
-                  <KiboTextBox
-                    value={field.value ?? fedExAccountNumber}
-                    label={'FedEx Account Number'}
-                    ref={null}
-                    error={!!localError}
-                    helperText={localError}
-                    onChange={(_name: string, value: string) => {
-                      // Allow only digits and ensure the length doesn't exceed 9 characters
-                      const sanitizedValue = value.replace(/[^0-9]/g, '').slice(0, 9)
-                      field.onChange(sanitizedValue)
-                      setFedExAccountNumberInput(sanitizedValue)
-                      setFedExAccountNumber(sanitizedValue)
-
-                      if (
-                        sanitizedValue == '' ||
-                        sanitizedValue.length === 0 ||
-                        sanitizedValue.length < 9
-                      ) {
-                        setLocalError(t('this-field-is-min-max-length')) // error message
-                        if (isFedexAccountMethodUpdated) {
-                          handleShippingMethodSelectChange('', '')
-                        }
-                      } else {
-                        setLocalError('') // Clear error message if valid
-                        handleShippingMethodSelectChange(
-                          getFedExShippingMethods()?.[0]?.shippingMethodName as string,
-                          getFedExShippingMethods()?.[0]?.shippingMethodCode as string
-                        )
-                      }
-                      setIsFedExAccountUpdated(false)
-                    }}
-                    onBlur={field.onBlur}
-                    required={true}
-                    sx={{ background: '#ffffff' }}
-                  />
-                )}
-              />
-              {/* <KiboSelect
-                name="shippingMethodCode"
-                label={'Method'}
-                onChange={handleShippingMethodSelectChange}
-                value={
-                  (selectedShippingMethodCode
-                    ? selectedShippingMethodCode
-                    : fedExAccountShippingMethod?.shippingMethodCode) ?? ''
-                }
-                required
-                sx={{ background: '#ffffff' }}
-              >
-                {getFedExShippingMethods()?.map((item) => {
-                  return (
-                    <MenuItem key={item?.shippingMethodCode} value={`${item?.shippingMethodCode}`}>
-                      <Price
-                        variant="body2"
-                        fontWeight="normal"
-                        price={
-                          `${item?.shippingMethodName}` + ' ' + t('currency', { val: item?.price })
-                        }
-                      />
+        {/* Only show Customer FedEx Shipping method if there are FedEx shipping methods available */}
+        {getFedExShippingMethods()?.length > 0 && (
+          <Box
+            m={0}
+            py={0.5}
+            sx={{
+              display: 'grid',
+              backgroundColor: isFedExMethodSelected ? '#E3E2FF' : 'initial',
+              '&:hover': { backgroundColor: '#E3E2FF', borderRadius: '5px' },
+              borderRadius: '5px',
+            }}
+          >
+            {/* Customer FedEx Shipping method */}
+            <KiboRadio
+              radioOptions={[
+                {
+                  value: 'fedExAccount',
+                  name: 'Use Customer FedEx Account',
+                  label: (
+                    <MenuItem
+                      key={'fedExAccount'}
+                      value={'fedExAccount'}
+                      sx={{
+                        mt: 0.25,
+                        width: '100%',
+                        backgroundColor: 'none',
+                        '&:hover': { background: 'none' },
+                      }}
+                    >
+                      <Price variant="body2" fontWeight="normal" price={'Customer FedEx Account'} />
                     </MenuItem>
-                  )
-                })}
-              </KiboSelect> */}
-            </Box>
-          )}
-        </Box>
-
-        <Box
-          m={0}
-          py={0.5}
-          sx={{
-            display: 'grid',
-            backgroundColor: isUpsMethodSelected ? '#E3E2FF' : 'initial',
-            '&:hover': { backgroundColor: '#E3E2FF', borderRadius: '5px' },
-            borderRadius: '5px',
-            marginTop: '10px',
-          }}
-        >
-          {/* Customer UPS Shipping method */}
-          <KiboRadio
-            radioOptions={[
-              {
-                value: 'upsAccount',
-                name: 'Use Customer UPS Account',
-                label: (
-                  <MenuItem
-                    key={'upsAccount'}
-                    value={'upsAccount'}
-                    sx={{
-                      mt: 0.25,
-                      width: '100%',
-                      backgroundColor: 'none',
-                      '&:hover': { background: 'none' },
-                    }}
-                  >
-                    <Price variant="body2" fontWeight="normal" price={'Customer UPS Account'} />
-                  </MenuItem>
-                ),
-              },
-            ]}
-            selected={isUpsMethodSelected ? 'upsAccount' : ''}
-            align="flex-start"
-            onChange={() => selectShippingMethod('ups')}
-            sx={{ ml: 1.5 }}
-          />
-          {isUpsMethodSelected && (
-            <Box
-              ml={8.5}
-              mr={4}
-              mb={2}
-              sx={{ backgroundColor: isUpsMethodSelected ? '#E3E2FF' : 'initial' }}
-            >
-              <Controller
-                name="upsAccountNumber"
-                control={upsControl}
-                defaultValue={upsAccountNumber}
-                render={({ field }) => (
-                  <KiboTextBox
-                    value={field.value ?? upsAccountNumber}
-                    label={'UPS Account Number'}
-                    ref={null}
-                    error={!!localUpsError}
-                    helperText={localUpsError}
-                    onChange={(_name: string, value: string) => {
-                      // Allow only alphanumeric and max 6 chars
-                      const sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 6)
-                      field.onChange(sanitizedValue)
-                      setUpsAccountNumberInput(sanitizedValue)
-                      setUpsAccountNumber(sanitizedValue)
-
-                      if (!sanitizedValue || sanitizedValue.length < 6) {
-                        setLocalUpsError(t('this-field-is-min-max-length-6'))
-                        // If the previous value was valid and now it's not, clear the shipping method
-                        if (previousUpsAccountNumber.current.length === 6) {
-                          console.log('code triggered')
-                          handleShippingMethodSelectChange('', '')
+                  ),
+                },
+              ]}
+              selected={isFedExMethodSelected ? 'fedExAccount' : ''}
+              align="flex-start"
+              onChange={() => selectShippingMethod('fedex')}
+              sx={{ ml: 1.5 }}
+            />
+            {isFedExMethodSelected && (
+              <Box
+                ml={8.5}
+                mr={4}
+                mb={2}
+                sx={{ backgroundColor: isFedExMethodSelected ? '#E3E2FF' : 'initial' }}
+              >
+                <Controller
+                  name="fedExAccountNumber"
+                  control={control}
+                  defaultValue={fedExAccountNumber}
+                  render={({ field }) => (
+                    <KiboTextBox
+                      value={field.value ?? fedExAccountNumber}
+                      label={'FedEx Account Number'}
+                      ref={null}
+                      error={!!localError}
+                      helperText={localError}
+                      onChange={(_name: string, value: string) => {
+                        // Allow only digits and ensure the length doesn't exceed 9 characters
+                        const sanitizedValue = value.replace(/[^0-9]/g, '').slice(0, 9)
+                        field.onChange(sanitizedValue)
+                        setFedExAccountNumberInput(sanitizedValue)
+                        setFedExAccountNumber(sanitizedValue)
+                        localStorage.setItem('fedExAccountNumber', sanitizedValue ?? '')
+                        if (
+                          sanitizedValue == '' ||
+                          sanitizedValue.length === 0 ||
+                          sanitizedValue.length < 9
+                        ) {
+                          setLocalError(t('this-field-is-min-max-length')) // error message
+                          if (isFedexAccountMethodUpdated) {
+                            handleShippingMethodSelectChange('', '')
+                          }
+                        } else {
+                          setLocalError('') // Clear error message if valid
+                          handleShippingMethodSelectChange(
+                            getFedExShippingMethods()?.[0]?.shippingMethodName as string,
+                            getFedExShippingMethods()?.[0]?.shippingMethodCode as string
+                          )
                         }
-                      } else {
-                        setLocalUpsError('')
-                        handleShippingMethodSelectChange(
-                          getUPSShippingMethods()?.[0]?.shippingMethodName as string,
-                          getUPSShippingMethods()?.[0]?.shippingMethodCode as string
-                        )
-                      }
-                      setIsUpsAccountUpdated(false)
-                      previousUpsAccountNumber.current = sanitizedValue
-                    }}
-                    onBlur={field.onBlur}
-                    required={true}
-                    sx={{ background: '#ffffff' }}
-                  />
-                )}
-              />
-            </Box>
-          )}
-        </Box>
+                        setIsFedExAccountUpdated(false)
+                      }}
+                      onBlur={field.onBlur}
+                      required={true}
+                      sx={{ background: '#ffffff' }}
+                    />
+                  )}
+                />
+                {/* <KiboSelect ... */}
+              </Box>
+            )}
+          </Box>
+        )}
+
+        {/* Only show Customer UPS Shipping method if there are UPS shipping methods available */}
+        {getUPSShippingMethods()?.length > 0 && (
+          <Box
+            m={0}
+            py={0.5}
+            sx={{
+              display: 'grid',
+              backgroundColor: isUpsMethodSelected ? '#E3E2FF' : 'initial',
+              '&:hover': { backgroundColor: '#E3E2FF', borderRadius: '5px' },
+              borderRadius: '5px',
+              marginTop: '10px',
+            }}
+          >
+            {/* Customer UPS Shipping method */}
+            <KiboRadio
+              radioOptions={[
+                {
+                  value: 'upsAccount',
+                  name: 'Use Customer UPS Account',
+                  label: (
+                    <MenuItem
+                      key={'upsAccount'}
+                      value={'upsAccount'}
+                      sx={{
+                        mt: 0.25,
+                        width: '100%',
+                        backgroundColor: 'none',
+                        '&:hover': { background: 'none' },
+                      }}
+                    >
+                      <Price variant="body2" fontWeight="normal" price={'Customer UPS Account'} />
+                    </MenuItem>
+                  ),
+                },
+              ]}
+              selected={isUpsMethodSelected ? 'upsAccount' : ''}
+              align="flex-start"
+              onChange={() => selectShippingMethod('ups')}
+              sx={{ ml: 1.5 }}
+            />
+            {isUpsMethodSelected && (
+              <Box
+                ml={8.5}
+                mr={4}
+                mb={2}
+                sx={{ backgroundColor: isUpsMethodSelected ? '#E3E2FF' : 'initial' }}
+              >
+                <Controller
+                  name="upsAccountNumber"
+                  control={upsControl}
+                  defaultValue={upsAccountNumber}
+                  render={({ field }) => (
+                    <KiboTextBox
+                      value={field.value ?? upsAccountNumber}
+                      label={'UPS Account Number'}
+                      ref={null}
+                      error={!!localUpsError}
+                      helperText={localUpsError}
+                      onChange={(_name: string, value: string) => {
+                        // Allow only alphanumeric and max 6 chars
+                        const sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 6)
+                        field.onChange(sanitizedValue)
+                        setUpsAccountNumberInput(sanitizedValue)
+                        setUpsAccountNumber(sanitizedValue)
+                        localStorage.setItem('upsAccountNumber', sanitizedValue ?? '')
+                        if (!sanitizedValue || sanitizedValue.length < 6) {
+                          setLocalUpsError(t('this-field-is-min-max-length-6'))
+                          // If the previous value was valid and now it's not, clear the shipping method
+                          if (previousUpsAccountNumber.current.length === 6) {
+                            handleShippingMethodSelectChange('', '')
+                          }
+                        } else {
+                          setLocalUpsError('')
+                          handleShippingMethodSelectChange(
+                            getUPSShippingMethods()?.[0]?.shippingMethodName as string,
+                            getUPSShippingMethods()?.[0]?.shippingMethodCode as string
+                          )
+                        }
+                        setIsUpsAccountUpdated(false)
+                        previousUpsAccountNumber.current = sanitizedValue
+                      }}
+                      onBlur={field.onBlur}
+                      required={true}
+                      sx={{ background: '#ffffff' }}
+                    />
+                  )}
+                />
+              </Box>
+            )}
+          </Box>
+        )}
       </Box>
     </Box>
   )

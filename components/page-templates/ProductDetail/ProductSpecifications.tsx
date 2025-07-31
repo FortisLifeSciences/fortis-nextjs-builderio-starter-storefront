@@ -17,6 +17,7 @@ import { grey } from '@/styles/theme'
 const ProdAttr = [
   'tenant~target',
   'tenant~verified-reactivity',
+  'tenant~source-species',
   'tenant~applications-variant',
   'tenant~ph',
   'tenant~host',
@@ -24,6 +25,7 @@ const ProdAttr = [
   'tenant~clone',
   'tenant~format',
   'tenant~immunogen',
+  'tenant~epitope-tag',
   'tenant~iso-type',
   'tenant~conjugate-type-variant',
   'tenant~purity-variant',
