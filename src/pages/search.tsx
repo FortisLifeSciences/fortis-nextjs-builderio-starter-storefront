@@ -188,6 +188,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
               page: pagination.productsPage, // ← add page here
               facets: ['*'],
               filters,
+              clickAnalytics: true, // Enable click analytics
             },
           },
         ])
@@ -296,6 +297,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
               />
             )
           }
+
           return (
             <>
               {/* Search summary title */}
@@ -482,14 +484,32 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
                             <div
                               className="productviewlistItem"
                               key={i}
-                              data-insights-index="products"
+                              data-insights-index={result?.index}
                             >
                               {isMobile ? (
-                                <ProductHitGridView hit={hit} />
+                                <ProductHitGridView
+                                  hit={hit}
+                                  position={i}
+                                  algoliaIndex={result?.index}
+                                  queryId={result?.queryID}
+                                  dataInsideMethod={'clickedObjectIDsAfterSearch'}
+                                />
                               ) : isListView ? (
-                                <ProductHitListView hit={hit} />
+                                <ProductHitListView
+                                  hit={hit}
+                                  position={i}
+                                  algoliaIndex={result?.index}
+                                  queryId={result?.queryID}
+                                  dataInsideMethod={'clickedObjectIDsAfterSearch'}
+                                />
                               ) : (
-                                <ProductHitGridView hit={hit} />
+                                <ProductHitGridView
+                                  hit={hit}
+                                  position={i}
+                                  algoliaIndex={result?.index}
+                                  queryId={result?.queryID}
+                                  dataInsideMethod={'clickedObjectIDsAfterSearch'}
+                                />
                               )}
                             </div>
                           ))}

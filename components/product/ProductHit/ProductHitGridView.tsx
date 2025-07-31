@@ -46,6 +46,8 @@ import vectorLogo from '@/public/BrandLogos/vector_logo.png'
 import DefaultImage from '@/public/noImage.png'
 
 type Product = {
+  __position: any
+  __queryID: any
   formulation: any
   plp_citation_count: any
   validation_text: any
@@ -90,7 +92,21 @@ const pdpBrandLogos: Record<string, string> = {
   fortis: fortis.src,
 }
 
-const ProductHitGridView = ({ hit }: { hit: Product }): JSX.Element => {
+type ProductHitGridViewProps = {
+  hit: Product
+  algoliaIndex?: string
+  position?: number
+  dataInsideMethod?: string
+  queryId?: string
+}
+
+const ProductHitGridView = ({
+  hit,
+  position,
+  algoliaIndex,
+  queryId,
+  dataInsideMethod,
+}: ProductHitGridViewProps): JSX.Element => {
   const imageHeight = 180
   const placeholderImageUrl = DefaultImage,
     kiboImagesData = hit?.product_images,
@@ -103,6 +119,7 @@ const ProductHitGridView = ({ hit }: { hit: Product }): JSX.Element => {
     brandLabel = hit?.brand,
     brand = hit?.brand_code,
     newProduct = hit.new_product
+  position = hit.__position
 
   const firstImage = hit?.product_images?.[0]
     ? `https://cdn-tp1.mozu.com/31165-m1/cms/files/${kiboImagesData[0]}`
@@ -120,12 +137,23 @@ const ProductHitGridView = ({ hit }: { hit: Product }): JSX.Element => {
 
   return (
     <>
-      <Box sx={ProductCardStyles.main} data-id={hit.plp_catalog_number}>
+      <Box
+        sx={ProductCardStyles.main}
+        data-id={hit.plp_catalog_number}
+        className="product-card resource-card"
+        data-index={algoliaIndex || 'products'}
+      >
         <Link
           href={hit.product_url}
           passHref
           data-testid="product-card-link"
           aria-label={title ? `View details for ${title}` : 'Product details'}
+          data-insights-object-id={hit.objectID}
+          data-insights-position={position !== undefined ? position : '1'}
+          data-insights-query-id={queryId || hit.__queryID}
+          data-insights-index={algoliaIndex || 'products'}
+          data-insights-method={dataInsideMethod || 'clickedObjectIDs'}
+          className="product-card"
         >
           <Box>
             <Card sx={ProductCardStyles.cardRoot} data-testid="product-card">
