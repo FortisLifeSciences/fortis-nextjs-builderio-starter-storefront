@@ -129,7 +129,6 @@ const ResourceSearchSliders: React.FC<Props> = ({
                     data-insights-query-id={algoliaQueryId}
                     data-insights-index={'builder-page'}
                     data-insights-method={'clickedObjectIDsAfterSearch'}
-                    data-insights-object-type="Resource"
                   >
                     <span className={styles.imageContainer}>
                       <Image
@@ -205,7 +204,6 @@ const ResourceSearchSliders: React.FC<Props> = ({
                     data-insights-query-id={algoliaQueryId}
                     data-insights-index={'builder-page'}
                     data-insights-method={'clickedObjectIDsAfterSearch'}
-                    data-insights-object-type="Resource"
                   >
                     <span className={styles.imageContainer}>
                       <Image
