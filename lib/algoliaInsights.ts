@@ -17,7 +17,7 @@ export const initAlgoliaInsightsClient = () => {
       window.aa = aa
       const hasConsent = getAnalyticsConsentFromLocalStorage()
       // Initialize Algolia Insights with your app ID and API key
-      console.log('Algolia Insights initialized with consent:', hasConsent)
+      // console.log('Algolia Insights initialized with consent:', hasConsent)
       if (hasConsent) {
         aa('init', {
           appId: process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || '',

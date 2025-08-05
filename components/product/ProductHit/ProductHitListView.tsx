@@ -168,7 +168,7 @@ const ProductHitListView = ({
       <Box
         sx={{ ...ProductCardStyles.main, marginBottom: '20px' }}
         data-id={hit.plp_catalog_number}
-        className="product-card resource-card"
+        className="product-card"
         data-index={algoliaIndex || 'products'} // <-- Add index as a data attribute if needed
       >
         <Link

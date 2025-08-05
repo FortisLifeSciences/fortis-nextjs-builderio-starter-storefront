@@ -127,12 +127,9 @@ const KiboHeader = (props: KiboHeaderProps) => {
   const { publicRuntimeConfig } = getConfig()
   const isMultiShipEnabled = publicRuntimeConfig.isMultiShipEnabled
   const hasConsent = getAnalyticsConsentFromLocalStorage()
-  console.log('hasConsent in KiboHeader:', hasConsent)
-  console.log('isAuthenticated in KiboHeader:', isAuthenticated)
 
   React.useEffect(() => {
     const setToken = (token: string) => {
-      console.log('Setting Algolia user token:', token)
       // Store the token in localStorage and dataLayer if it has changed
       // This prevents unnecessary updates to Algolia Insights and avoids triggering user token change events
       const storedToken = window.localStorage.getItem('algoliaUserToken')
@@ -141,13 +138,13 @@ const KiboHeader = (props: KiboHeaderProps) => {
         if ((window as any).dataLayer) {
           window.dataLayer.push({ algoliaUserToken: token })
         }
-        console.log('Algolia user token set:', token)
+        // console.log('Algolia user token set:', token)
       } else if (storedToken !== token) {
         window.localStorage.setItem('algoliaUserToken', token)
         if ((window as any).dataLayer) {
           window.dataLayer.push({ algoliaUserToken: token })
         }
-        console.log('Algolia user token updated:', token)
+        // console.log('Algolia user token updated:', token)
       }
     }
 

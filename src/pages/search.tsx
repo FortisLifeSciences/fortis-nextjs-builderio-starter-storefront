@@ -298,6 +298,12 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
             )
           }
 
+          //setting queryID for to use different places
+          const algoliaQueryId = localStorage.getItem('algoliaQueryId')
+          if(!algoliaQueryId || algoliaQueryId !== result.queryID) {
+            localStorage.setItem('algoliaQueryId', result.queryID || '')
+          }
+
           return (
             <>
               {/* Search summary title */}
