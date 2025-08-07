@@ -256,6 +256,58 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
       resultsSection.scrollIntoView({ behavior: 'smooth' })
     }
   }
+
+  useEffect(() => {
+    if (!manualSearchResults) return
+
+    let builderObjectIDs: string[] = []
+    let productObjectIDs: string[] = []
+
+    manualSearchResults.forEach((result) => {
+      if (result.index === 'builder-page') {
+        const hits = result.hits as BuilderPageHit[]
+        builderObjectIDs = hits.map((hit) => hit.objectID)
+      }
+
+      if (result.index === 'products') {
+        const hits = result.hits || []
+        productObjectIDs = hits.map((hit) => hit.objectID)
+      }
+    })
+
+    const dataLayer = (window as any).dataLayer
+
+    if (dataLayer && productObjectIDs.length > 0) {
+      const existingIndex = dataLayer.findIndex(
+        (item: any) => item.event === 'Hits Viewed' && item.algoliaIndex === 'products'
+      )
+      if (existingIndex !== -1) {
+        dataLayer[existingIndex].algoliaObjectIds = productObjectIDs
+      } else {
+        dataLayer.push({
+          event: 'Hits Viewed',
+          algoliaObjectIds: productObjectIDs,
+          algoliaIndex: 'products',
+        })
+      }
+    }
+
+    if (dataLayer && builderObjectIDs.length > 0) {
+      const existingIndex = dataLayer.findIndex(
+        (item: any) => item.event === 'Hits Viewed' && item.algoliaIndex === 'builder-page'
+      )
+      if (existingIndex !== -1) {
+        dataLayer[existingIndex].algoliaObjectIds = builderObjectIDs
+      } else {
+        dataLayer.push({
+          event: 'Hits Viewed',
+          algoliaObjectIds: builderObjectIDs,
+          algoliaIndex: 'builder-page',
+        })
+      }
+    }
+  }, [manualSearchResults])
+
   return (
     <>
       <KiboBreadcrumbs breadcrumbs={breadcrumbs} />
@@ -300,7 +352,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
 
           //setting queryID for to use different places
           const algoliaQueryId = localStorage.getItem('algoliaQueryId')
-          if(!algoliaQueryId || algoliaQueryId !== result.queryID) {
+          if (!algoliaQueryId || algoliaQueryId !== result.queryID) {
             localStorage.setItem('algoliaQueryId', result.queryID || '')
           }
 
