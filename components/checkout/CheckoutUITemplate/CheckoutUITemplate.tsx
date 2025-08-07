@@ -214,7 +214,7 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
   const orderSummaryArgs = {
     nameLabel: t('Order Summary'),
     subTotalLabel: `Subtotal`,
-    shippingTotalLabel: t('Shipping'),
+    shippingTotalLabel: t('shipping'),
     taxLabel: t('Estimated Tax'),
     totalLabel: t('Total'),
     handlingLabel: t('Handling'),
