@@ -131,7 +131,6 @@ const KiboHeader = (props: KiboHeaderProps) => {
   React.useEffect(() => {
     const setToken = (token: string) => {
       // Store the token in localStorage and dataLayer if it has changed
-      // This prevents unnecessary updates to Algolia Insights and avoids triggering user token change events
       const storedToken = window.localStorage.getItem('algoliaUserToken')
       if (!storedToken) {
         window.localStorage.setItem('algoliaUserToken', token)
@@ -151,7 +150,7 @@ const KiboHeader = (props: KiboHeaderProps) => {
     if (isAuthenticated && user && user.userId != null && hasConsent) {
       aa('setAuthenticatedUserToken', user.userId)
       setToken(user.userId)
-    } else if (hasConsent) {
+    } else {
       aa('setAuthenticatedUserToken', undefined)
       aa('getUserToken', {}, (err, userToken) => {
         if (err) {
