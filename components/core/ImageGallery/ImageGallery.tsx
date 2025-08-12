@@ -320,7 +320,7 @@ const ImageGallery = (props: ImageGalleryProps) => {
                       cursor: 'pointer',
                     }}
                     role="tab"
-                    aria-label={(image?.imagealt as string) || t('product-image-alt')}
+                    aria-label={String(image?.imagealt || t('product-image-alt'))} // safe string conversion
                     aria-selected={i === selectedImage.selectedIndex}
                     onClick={() => setSelectedImage({ ...selectedImage, selectedIndex: i })}
                   >
@@ -440,7 +440,7 @@ const ImageGallery = (props: ImageGalleryProps) => {
                       aria-label="zoom in"
                       onClick={() => openImageGalary(images, selectedImage)}
                     >
-                      <span className="material-symbols-outlined">zoom_in</span>
+                      <span className="material-symbols-outlined">info</span>
                     </IconButton>
                   ) : (
                     <></>

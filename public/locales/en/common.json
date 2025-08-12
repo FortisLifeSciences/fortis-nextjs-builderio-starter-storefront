@@ -98,7 +98,7 @@
   "order-summary": "Order Summary",
   "cart-summary": "Cart Summary",
   "subtotal": "Subtotal",
-  "shipping": "Shipping",
+  "shipping": "Estimated Shipping",
   "total-price": "Total Price",
   "free": "Free",
   "filter-orders": "Filter Orders",
@@ -589,5 +589,6 @@
   "fortis-shipping": "Fortis Shipping",
   "password-reset-successful": "Password Reset Successful",
   "password-reset-successful-paragraph1": "Your password has been successfully reset. You can now",
-  "password-reset-successful-paragraph2": "with your new credentials."
+  "password-reset-successful-paragraph2": "with your new credentials.",
+  "loading": "Loading..."
 }
