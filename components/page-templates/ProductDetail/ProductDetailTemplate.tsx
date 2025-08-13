@@ -186,6 +186,7 @@ const variantProperties = [
   'tenant~storage-variant',
   'tenant~shelf-life-variant',
   'tenant~buffer',
+  'tenant~epitope-tag',
   'tenant~prodprocedures-1',
   'tenant~contents-variant',
   'tenant~application-text-variant',
@@ -779,10 +780,11 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
         viewItemGTM(
           productCode,
           '',
-          productGetters.getName(product) as string,
+          variantProductName ? variantProductName : (productGetters.getName(product) as string),
           product?.categories?.[0]?.content?.name,
           brandName,
-          value
+          value,
+          variationProductCode
         )
       }
       setVariationCodeDynamic(variationProductCode)

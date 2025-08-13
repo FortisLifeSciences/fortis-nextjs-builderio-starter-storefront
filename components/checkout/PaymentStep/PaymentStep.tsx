@@ -1130,6 +1130,13 @@ const PaymentStep = (props: PaymentStepProps) => {
   const uniqueCards = cardOptions.filter(
     (card, index, self) => index === self.findIndex((c) => c?.cardInfo?.id === card?.cardInfo?.id)
   )
+  function isCardExpired(expireMonth: number, expireYear: number): boolean {
+    const today = new Date()
+    const currentMonth = today.getMonth() + 1
+    const currentYear = today.getFullYear()
+
+    return expireYear < currentYear || (expireYear === currentYear && expireMonth < currentMonth)
+  }
 
   return (
     <Stack data-testid="checkout-payment">
@@ -1220,10 +1227,14 @@ const PaymentStep = (props: PaymentStepProps) => {
                                 const address = addressGetters.getAddress(
                                   card?.billingAddressInfo?.contact.address as CrAddress
                                 )
+                                const expireMonth = cardGetters.getExpireMonth(card?.cardInfo)
+                                const expireYear = cardGetters.getExpireYear(card?.cardInfo)
+                                const expired = isCardExpired(expireMonth, expireYear)
                                 return {
                                   sx: { width: '100%' },
                                   value: cardGetters.getCardId(card?.cardInfo),
                                   name: cardGetters.getCardId(card?.cardInfo),
+                                  disabled: expired,
                                   label: (
                                     <>
                                       <Box
@@ -1250,8 +1261,15 @@ const PaymentStep = (props: PaymentStepProps) => {
                                             expireYear={cardGetters.getExpireYear(card?.cardInfo)}
                                             // onPaymentCardSelection={() => null}
                                           />
+                                          {expired && (
+                                            <Box sx={{ color: '#BD3742', fontSize: '14px', mt: 1 }}>
+                                              Oops! This card has expired. Try using a different
+                                              one.
+                                            </Box>
+                                          )}
                                           {selectedCardRadio === card?.cardInfo?.id &&
-                                            !isCVVAddedForNewPayment && (
+                                            !isCVVAddedForNewPayment &&
+                                            !expired && (
                                               <Box pt={2} width={'100%'} sx={{ marginTop: '20px' }}>
                                                 <FormControl sx={{ width: '50%' }}>
                                                   <Controller

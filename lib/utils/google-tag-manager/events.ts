@@ -217,7 +217,8 @@ export const viewItemGTM = (
   name: string,
   category: string,
   brand: string,
-  price: number
+  price: number,
+  variant: string
 ) => {
   //eslint-disable-next-line
   resetEcommerceDataLayer()
@@ -236,6 +237,7 @@ export const viewItemGTM = (
           item_brand: brand,
           item_list_id: 'PDP',
           item_list_name: 'Product Detail Page',
+          item_variant: variant,
         },
       ],
     },
