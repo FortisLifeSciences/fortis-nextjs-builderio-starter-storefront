@@ -85,7 +85,7 @@ const ViewOrderDetails = (props: ViewOrderDetailsProps) => {
   const orderSummeryArgs = {
     nameLabel: t('order-summary'),
     subTotalLabel: `${t('subtotal')} (${t('item-quantity', { count: order.items?.length })})`,
-    shippingTotalLabel: t('shipping'),
+    shippingTotalLabel: t('estimated-shipping'),
     taxLabel: t('estimated-tax'),
     totalLabel: t('total-price'),
     handlingLabel: t('additional-handling'),
