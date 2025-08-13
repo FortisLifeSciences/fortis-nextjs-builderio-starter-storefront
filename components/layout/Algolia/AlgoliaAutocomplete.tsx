@@ -282,6 +282,7 @@ const AlgoliaAutocomplete = () => {
                     productHits: results[0].nbHits,
                   })
                 }
+
                 return hits
               },
             })
@@ -294,6 +295,7 @@ const AlgoliaAutocomplete = () => {
               return html`<h4>Products</h4>`
             },
             item({ item, html }: { item: any; html: any }) {
+              console.log('algolia-Autocomplete item/product: ', item)
               const link = (item && item.product_url) || '#'
               const title =
                 typeof item && item.product_name === 'string'
@@ -320,9 +322,20 @@ const AlgoliaAutocomplete = () => {
               const name = item.slice_product ? item.product_name_variant : item.product_name
               const sku = item.slice_product ? item.sku : item.plp_catalog_number
               const showNewTag = item.new_product
+              const dataInsightMethod = 'clickedObjectIDsAfterSearch'
 
               return html`<div class="aa-ItemWrapper">
-                <a href="${link}" target="_self" rel="noopener noreferrer" class="aa-CustomCard">
+                <a
+                  href="${link}"
+                  target="_self"
+                  rel="noopener noreferrer"
+                  class="aa-CustomCard"
+                  data-insights-object-id="${item.objectID}"
+                  data-insights-position="${1}"
+                  data-insights-query-id="${item.__autocomplete_queryID}"
+                  data-insights-index="${item.__autocomplete_indexName}"
+                  data-insights-method="${dataInsightMethod}"
+                >
                   ${showNewTag
                     ? html`<div
                         class="aa-NewTag"
@@ -385,6 +398,7 @@ const AlgoliaAutocomplete = () => {
               return html`<h4>More from Fortis</h4>`
             },
             item({ item, html }: { item: any; html: any }) {
+              console.log('algolia-Autocomplete item/Builder : ', item)
               const link = (item.meta && item.meta.lastPreviewUrl) || '#'
               const title =
                 typeof (item.data && item.data.title) === 'string'
@@ -401,6 +415,7 @@ const AlgoliaAutocomplete = () => {
               const iconHTML = resourceTypeIcon
                 ? html`<span class="material-symbols-outlined">${resourceTypeIcon.value}</span>`
                 : html`<span class="material-symbols-outlined">description</span>`
+              const dataInsightMethod = 'clickedObjectIDsAfterSearch'
 
               return html`<div class="aa-itemWrapper">
                 <div class="aa-ItemContent">
@@ -409,7 +424,17 @@ const AlgoliaAutocomplete = () => {
                       ? html`<img src="${image}" alt="${title}" class="aa-ItemImage" />`
                       : iconHTML}
                   </div>
-                  <a class="aa-ItemTitle" href="${link}" target="_self" rel="noopener noreferrer">
+                  <a
+                    class="aa-ItemTitle"
+                    href="${link}"
+                    target="_self"
+                    rel="noopener noreferrer"
+                    data-insights-object-id="${item.objectID}"
+                    data-insights-position="${1}"
+                    data-insights-query-id="${item.__autocomplete_queryID}"
+                    data-insights-index="${item.__autocomplete_indexName}"
+                    data-insights-method="${dataInsightMethod}"
+                  >
                     ${title.split(' | ')[0]}
                   </a>
                 </div>

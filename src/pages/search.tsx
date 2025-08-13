@@ -278,12 +278,13 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
     const dataLayer = (window as any).dataLayer
 
     if (dataLayer && productObjectIDs.length > 0) {
-      const existingIndex = dataLayer.findIndex(
-        (item: any) => item.event === 'Hits Viewed' && item.algoliaIndex === 'products'
+      const existingEvent = window.dataLayer.find(
+        (item) =>
+          item.event === 'Hits Viewed' &&
+          item.algoliaIndex === 'products' &&
+          JSON.stringify(item.algoliaObjectIds) === JSON.stringify(productObjectIDs)
       )
-      if (existingIndex !== -1) {
-        dataLayer[existingIndex].algoliaObjectIds = productObjectIDs
-      } else {
+      if (!existingEvent) {
         dataLayer.push({
           event: 'Hits Viewed',
           algoliaObjectIds: productObjectIDs,
@@ -293,13 +294,14 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
     }
 
     if (dataLayer && builderObjectIDs.length > 0) {
-      const existingIndex = dataLayer.findIndex(
-        (item: any) => item.event === 'Hits Viewed' && item.algoliaIndex === 'builder-page'
+      const existingEvent = window.dataLayer.find(
+        (item) =>
+          item.event === 'Hits Viewed' &&
+          item.algoliaIndex === 'builder-page' &&
+          JSON.stringify(item.algoliaObjectIds) === JSON.stringify(builderObjectIDs)
       )
-      if (existingIndex !== -1) {
-        dataLayer[existingIndex].algoliaObjectIds = builderObjectIDs
-      } else {
-        dataLayer.push({
+      if (!existingEvent) {
+        window.dataLayer.push({
           event: 'Hits Viewed',
           algoliaObjectIds: builderObjectIDs,
           algoliaIndex: 'builder-page',
