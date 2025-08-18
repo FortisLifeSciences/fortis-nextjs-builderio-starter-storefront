@@ -140,7 +140,7 @@ const ProductHitGridView = ({
       <Box
         sx={ProductCardStyles.main}
         data-id={hit.plp_catalog_number}
-        className="product-card resource-card"
+        className="product-card"
         data-index={algoliaIndex || 'products'}
       >
         <Link
@@ -153,7 +153,11 @@ const ProductHitGridView = ({
           data-insights-query-id={queryId || hit.__queryID}
           data-insights-index={algoliaIndex || 'products'}
           data-insights-method={dataInsideMethod || 'clickedObjectIDs'}
-          className="product-card"
+          className={
+            dataInsideMethod === 'clickedObjectIDsAfterSearch'
+              ? 'product-card-search'
+              : 'product-card'
+          }
         >
           <Box>
             <Card sx={ProductCardStyles.cardRoot} data-testid="product-card">
