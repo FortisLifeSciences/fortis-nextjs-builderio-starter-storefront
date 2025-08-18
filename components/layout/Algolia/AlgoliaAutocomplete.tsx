@@ -283,7 +283,14 @@ const AlgoliaAutocomplete = () => {
                   })
                 }
 
-                return hits
+                const items = (results[0] as any)?.hits || []
+
+                for (let i = 0; i < items.length; i++) {
+                  const item = items[i] as any
+                  item.__autocomplete_position = i + 1
+                }
+
+                return items
               },
             })
           },
@@ -295,7 +302,6 @@ const AlgoliaAutocomplete = () => {
               return html`<h4>Products</h4>`
             },
             item({ item, html }: { item: any; html: any }) {
-              console.log('algolia-Autocomplete item/product: ', item)
               const link = (item && item.product_url) || '#'
               const title =
                 typeof item && item.product_name === 'string'
@@ -331,7 +337,7 @@ const AlgoliaAutocomplete = () => {
                   rel="noopener noreferrer"
                   class="aa-CustomCard"
                   data-insights-object-id="${item.objectID}"
-                  data-insights-position="${1}"
+                  data-insights-position="${item.__autocomplete_position}"
                   data-insights-query-id="${item.__autocomplete_queryID}"
                   data-insights-index="${item.__autocomplete_indexName}"
                   data-insights-method="${dataInsightMethod}"
@@ -386,7 +392,13 @@ const AlgoliaAutocomplete = () => {
                     pageHits: results[0].nbHits,
                   })
                 }
-                return hits
+                const items = (results[0] as any)?.hits || []
+                for (let i = 0; i < items.length; i++) {
+                  const item = items[i] as any
+                  item.__autocomplete_position = i + 1
+                }
+
+                return items
               },
             })
           },
@@ -398,7 +410,6 @@ const AlgoliaAutocomplete = () => {
               return html`<h4>More from Fortis</h4>`
             },
             item({ item, html }: { item: any; html: any }) {
-              console.log('algolia-Autocomplete item/Builder : ', item)
               const link = (item.meta && item.meta.lastPreviewUrl) || '#'
               const title =
                 typeof (item.data && item.data.title) === 'string'
@@ -430,7 +441,7 @@ const AlgoliaAutocomplete = () => {
                     target="_self"
                     rel="noopener noreferrer"
                     data-insights-object-id="${item.objectID}"
-                    data-insights-position="${1}"
+                    data-insights-position="${item.__autocomplete_position}"
                     data-insights-query-id="${item.__autocomplete_queryID}"
                     data-insights-index="${item.__autocomplete_indexName}"
                     data-insights-method="${dataInsightMethod}"
