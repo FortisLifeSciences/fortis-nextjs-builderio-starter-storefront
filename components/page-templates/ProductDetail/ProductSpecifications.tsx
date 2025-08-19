@@ -49,7 +49,6 @@ const ProdAttr = [
 ]
 
 const ProductSpecifications = ({ product }: { product: any }) => {
-  console.log('product Details: ', product)
   const [productData, setProductData] = useState(product)
   useEffect(() => {
     const hasContentsVariant = product?.properties?.some(
