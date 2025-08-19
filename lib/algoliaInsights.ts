@@ -22,7 +22,7 @@ export const initAlgoliaInsightsClient = () => {
       aa('init', {
         appId: process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || '',
         apiKey: process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || '',
-        useCookie: hasConsent,
+        useCookie: true,
       })
       // }
     }
