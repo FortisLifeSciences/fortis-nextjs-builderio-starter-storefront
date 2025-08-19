@@ -131,6 +131,10 @@ const MyHitsComponent = ({
   const [isListView, setIsListView] = useState<boolean>(true)
   const { t } = useTranslation('common')
 
+  const algoliaQueryId = localStorage.getItem('algoliaQueryId')
+  if (algoliaQueryId || algoliaQueryId !== '') {
+    localStorage.setItem('algoliaQueryId', '')
+  }
   // const [expandedFacets, setExpandedFacets] = useState<{ [key: string]: boolean }>({})
   // const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [isFilterOpen, setIsFilterOpen] = useState(false)
