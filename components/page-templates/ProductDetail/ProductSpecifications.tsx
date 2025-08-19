@@ -19,6 +19,10 @@ const ProdAttr = [
   'tenant~verified-reactivity',
   'tenant~source-species',
   'tenant~applications-variant',
+  'tenant~assay-range',
+  'tenant~sample-type',
+  'tenant~detection-method',
+  'tenant~assay-type',
   'tenant~ph',
   'tenant~host',
   'tenant~clonality',
@@ -45,6 +49,7 @@ const ProdAttr = [
 ]
 
 const ProductSpecifications = ({ product }: { product: any }) => {
+  console.log('product Details: ', product)
   const [productData, setProductData] = useState(product)
   useEffect(() => {
     const hasContentsVariant = product?.properties?.some(
