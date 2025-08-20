@@ -18,13 +18,11 @@ export const initAlgoliaInsightsClient = () => {
       const hasConsent = getAnalyticsConsentFromLocalStorage()
       // Initialize Algolia Insights with your app ID and API key
       console.log('Ignitiv: >>>>> Algolia Insights initialized with consent:', hasConsent)
-      // if (hasConsent) {
       aa('init', {
         appId: process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || '',
         apiKey: process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || '',
         useCookie: true,
       })
-      // }
     }
   }
 }

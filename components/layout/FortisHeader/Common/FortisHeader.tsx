@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import aa from 'search-insights'
+import { v4 as uuidv4 } from 'uuid'
 
 import { headerActionAreaStyles, kiboHeaderStyles, topHeaderStyles } from './FortisHeader.styles'
 import { AccountHierarchyFormDialog } from '@/components/dialogs'
@@ -127,33 +128,43 @@ const KiboHeader = (props: KiboHeaderProps) => {
   const { publicRuntimeConfig } = getConfig()
   const isMultiShipEnabled = publicRuntimeConfig.isMultiShipEnabled
   const hasConsent = getAnalyticsConsentFromLocalStorage()
+  const setRandomToken = `anonymous-${uuidv4()}`
 
   React.useEffect(() => {
     const setToken = (token: string) => {
       // Store the token in localStorage and dataLayer if it has changed
       const storedToken = window.localStorage.getItem('algoliaUserToken')
-      console.log(' Ignitiv: >>>>>   setting token function:')
-      if (!storedToken) {
-        window.localStorage.setItem('algoliaUserToken', token)
-        if ((window as any).dataLayer) {
-          window.dataLayer.push({ algoliaUserToken: token })
+      if (hasConsent) {
+        console.log(' Ignitiv: >>>>>   setting token function:')
+        if (!storedToken) {
+          window.localStorage.setItem('algoliaUserToken', token)
+          if ((window as any).dataLayer) {
+            window.dataLayer.push({ algoliaUserToken: token })
+          }
+          console.log(' Ignitiv: >>>>>    token send to dataLayer:')
+          // console.log('Algolia user token set:', token)
+        } else if (storedToken !== token) {
+          window.localStorage.setItem('algoliaUserToken', token)
+          if ((window as any).dataLayer) {
+            window.dataLayer.push({ algoliaUserToken: token })
+          }
+          console.log(' Ignitiv: >>>>>    change token send to dataLayer:')
         }
-        // console.log('Algolia user token set:', token)
-      } else if (storedToken !== token) {
-        window.localStorage.setItem('algoliaUserToken', token)
-        if ((window as any).dataLayer) {
-          window.dataLayer.push({ algoliaUserToken: token })
+      } else {
+        if (storedToken || storedToken !== '') {
+          window.localStorage.setItem('algoliaUserToken', '')
+          window.localStorage.removeItem('algoliaUserToken')
         }
-        // console.log('Algolia user token updated:', token)
+        console.log(' Ignitiv: >>>>>   setting token function: no consent', setRandomToken)
+        if ((window as any).dataLayer) {
+          window.dataLayer.push({ algoliaUserToken: setRandomToken })
+        }
       }
     }
 
     if (isAuthenticated && user && user.userId != null && hasConsent) {
       aa('setAuthenticatedUserToken', user.userId)
       setToken(user.userId)
-      // if ((window as any).dataLayer) {
-      //     window.dataLayer.push({ algoliaUserToken: user.userId) })
-      //   }
     } else {
       aa('setAuthenticatedUserToken', undefined)
       aa('getUserToken', {}, (err, userToken) => {
@@ -162,11 +173,11 @@ const KiboHeader = (props: KiboHeaderProps) => {
         }
         const token = String(userToken)
 
-        console.log(' Ignitiv: >>>>>  not authenticated, setting token:')
+        console.log(' Ignitiv: >>>>>  not authenticated, setting token:', token)
         setToken(token)
       })
     }
-  }, [isAuthenticated, user?.userId, hasConsent])
+  }, [isAuthenticated, user?.userId, hasConsent, setRandomToken])
 
   const handleAccountIconClick = () => {
     isHamburgerMenuVisible && toggleHamburgerMenu()
