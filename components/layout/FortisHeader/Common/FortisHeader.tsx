@@ -135,27 +135,22 @@ const KiboHeader = (props: KiboHeaderProps) => {
       // Store the token in localStorage and dataLayer if it has changed
       const storedToken = window.localStorage.getItem('algoliaUserToken')
       if (hasConsent) {
-        console.log(' Ignitiv: >>>>>   setting token function:')
         if (!storedToken) {
           window.localStorage.setItem('algoliaUserToken', token)
           if ((window as any).dataLayer) {
             window.dataLayer.push({ algoliaUserToken: token })
           }
-          console.log(' Ignitiv: >>>>>    token send to dataLayer:')
           // console.log('Algolia user token set:', token)
         } else if (storedToken !== token) {
           window.localStorage.setItem('algoliaUserToken', token)
           if ((window as any).dataLayer) {
             window.dataLayer.push({ algoliaUserToken: token })
           }
-          console.log(' Ignitiv: >>>>>    change token send to dataLayer:')
         }
       } else {
         if (storedToken || storedToken !== '') {
-          window.localStorage.setItem('algoliaUserToken', '')
           window.localStorage.removeItem('algoliaUserToken')
         }
-        console.log(' Ignitiv: >>>>>   setting token function: no consent', setRandomToken)
         if ((window as any).dataLayer) {
           window.dataLayer.push({ algoliaUserToken: setRandomToken })
         }
@@ -172,8 +167,6 @@ const KiboHeader = (props: KiboHeaderProps) => {
           console.error('user token error', err)
         }
         const token = String(userToken)
-
-        console.log(' Ignitiv: >>>>>  not authenticated, setting token:', token)
         setToken(token)
       })
     }
