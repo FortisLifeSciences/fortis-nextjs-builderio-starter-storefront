@@ -142,6 +142,8 @@ const KiboHeader = (props: KiboHeaderProps) => {
           window.dataLayer.push({ algoliaUserToken: token })
           if (isAuthenticated) {
             window.dataLayer.push({ algoliaAuthenticatedUserToken: token })
+          } else {
+            window.dataLayer.push({ algoliaAuthenticatedUserToken: undefined })
           }
         }
       } else {
@@ -155,6 +157,8 @@ const KiboHeader = (props: KiboHeaderProps) => {
           window.dataLayer.push({ algoliaUserToken: randomToken })
           if (isAuthenticated) {
             window.dataLayer.push({ algoliaAuthenticatedUserToken: token })
+          } else {
+            window.dataLayer.push({ algoliaAuthenticatedUserToken: undefined })
           }
         }
       }
