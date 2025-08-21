@@ -128,31 +128,25 @@ const KiboHeader = (props: KiboHeaderProps) => {
   const { publicRuntimeConfig } = getConfig()
   const isMultiShipEnabled = publicRuntimeConfig.isMultiShipEnabled
   const hasConsent = getAnalyticsConsentFromLocalStorage()
-  const setRandomToken = `anonymous-${uuidv4()}`
+  const randomToken = `anonymous-${uuidv4()}`
 
   React.useEffect(() => {
     const setToken = (token: string) => {
       // Store the token in localStorage and dataLayer if it has changed
       const storedToken = window.localStorage.getItem('algoliaUserToken')
       if (hasConsent) {
-        if (!storedToken) {
+        if (storedToken !== token) {
           window.localStorage.setItem('algoliaUserToken', token)
-          if ((window as any).dataLayer) {
-            window.dataLayer.push({ algoliaUserToken: token })
-          }
-          // console.log('Algolia user token set:', token)
-        } else if (storedToken !== token) {
-          window.localStorage.setItem('algoliaUserToken', token)
-          if ((window as any).dataLayer) {
-            window.dataLayer.push({ algoliaUserToken: token })
-          }
+        }
+        if ((window as any).dataLayer) {
+          window.dataLayer.push({ algoliaUserToken: token })
         }
       } else {
-        if (storedToken || storedToken !== '') {
+        if (storedToken) {
           window.localStorage.removeItem('algoliaUserToken')
         }
         if ((window as any).dataLayer) {
-          window.dataLayer.push({ algoliaUserToken: setRandomToken })
+          window.dataLayer.push({ algoliaUserToken: randomToken })
         }
       }
     }
@@ -170,7 +164,7 @@ const KiboHeader = (props: KiboHeaderProps) => {
         setToken(token)
       })
     }
-  }, [isAuthenticated, user?.userId, hasConsent, setRandomToken])
+  }, [isAuthenticated, user?.userId, hasConsent, randomToken])
 
   const handleAccountIconClick = () => {
     isHamburgerMenuVisible && toggleHamburgerMenu()
