@@ -140,6 +140,9 @@ const KiboHeader = (props: KiboHeaderProps) => {
         }
         if ((window as any).dataLayer) {
           window.dataLayer.push({ algoliaUserToken: token })
+          if (isAuthenticated) {
+            window.dataLayer.push({ algoliaAuthenticatedUserToken: token })
+          }
         }
       } else {
         if (!isAuthenticated) {
@@ -150,6 +153,9 @@ const KiboHeader = (props: KiboHeaderProps) => {
         }
         if ((window as any).dataLayer) {
           window.dataLayer.push({ algoliaUserToken: randomToken })
+          if (isAuthenticated) {
+            window.dataLayer.push({ algoliaAuthenticatedUserToken: token })
+          }
         }
       }
     }
