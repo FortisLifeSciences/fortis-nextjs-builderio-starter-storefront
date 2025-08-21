@@ -142,6 +142,9 @@ const KiboHeader = (props: KiboHeaderProps) => {
           window.dataLayer.push({ algoliaUserToken: token })
         }
       } else {
+        if (!isAuthenticated) {
+          aa('setAuthenticatedUserToken', undefined)
+        }
         if (storedToken) {
           window.localStorage.removeItem('algoliaUserToken')
         }
