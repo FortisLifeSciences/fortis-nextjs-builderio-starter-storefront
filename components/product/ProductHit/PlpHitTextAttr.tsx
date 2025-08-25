@@ -2,6 +2,7 @@ import { Box } from '@mui/material'
 
 type prod = {
   reactivity: any
+  sourceSpecies: any
   applications: any
   platforms: any
   conjugate: any
@@ -10,12 +11,14 @@ type prod = {
   detectionMethod: any
   host: any
   format: any
+  epitopeTag: any
   immunogen: any
   purity: any
 }
 
 const PlpHitTextAttr = ({
   reactivity,
+  sourceSpecies,
   applications,
   platforms,
   conjugate,
@@ -24,11 +27,13 @@ const PlpHitTextAttr = ({
   detectionMethod,
   host,
   format,
+  epitopeTag,
   immunogen,
   purity,
 }: prod) => {
   const orderedAttributes = [
     { label: 'Reactivity', value: reactivity?.join(', ') },
+    { label: 'Source Species', value: sourceSpecies?.join(', ') },
     { label: 'Applications', value: applications?.join(', ') },
     { label: 'Platforms ', value: platforms },
     { label: 'Conjugate ', value: conjugate },
@@ -37,6 +42,7 @@ const PlpHitTextAttr = ({
     { label: 'Detection Method', value: detectionMethod },
     { label: 'Host', value: host },
     { label: 'Format', value: format },
+    { label: 'Epitope Tag', value: epitopeTag?.join(', ') },
     { label: 'Immunogen', value: immunogen },
     { label: 'Purity  ', value: purity },
   ]
