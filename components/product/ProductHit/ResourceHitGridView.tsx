@@ -47,6 +47,8 @@ const brandImages: Record<string, string> = {
   fortis: fortis.src,
 }
 type Resources = {
+  objectID: any
+  __position: any
   query: any
   data: any
 }
@@ -61,6 +63,8 @@ const ResourceHitGridView = ({ hit }: { hit: Resources }): JSX.Element => {
     truncatedTitle = title && title.length > 30 ? `${title.substring(0, 30)}` : title,
     resourceImage = hit?.data?.image ? hit?.data?.image : placeholderImageUrl
 
+  console.log('hit', hit)
+
   return (
     <>
       <Box sx={ProductCardStyles.main}>
@@ -69,6 +73,11 @@ const ResourceHitGridView = ({ hit }: { hit: Resources }): JSX.Element => {
           passHref
           data-testid="product-card-link"
           aria-label={title ? `View details for ${title}` : 'Product details'}
+          data-insights-object-id={hit.objectID}
+          data-insis-position={hit.__position}
+          data-insights-index={'builder-page'}
+          data-insights-method={'clickedObjectIDs'}
+          className="resource-card"
         >
           <Box>
             <Box>

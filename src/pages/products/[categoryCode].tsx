@@ -131,6 +131,10 @@ const MyHitsComponent = ({
   const [isListView, setIsListView] = useState<boolean>(true)
   const { t } = useTranslation('common')
 
+  const algoliaQueryId = localStorage.getItem('algoliaQueryId')
+  if (algoliaQueryId || algoliaQueryId !== '') {
+    localStorage.setItem('algoliaQueryId', '')
+  }
   // const [expandedFacets, setExpandedFacets] = useState<{ [key: string]: boolean }>({})
   // const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [isFilterOpen, setIsFilterOpen] = useState(false)
@@ -397,7 +401,35 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
         content={props.section}
       />
 
-      <InstantSearch searchClient={searchClient} indexName="products">
+      <InstantSearch
+        searchClient={searchClient}
+        indexName="products"
+        insights={{
+          onEvent(event) {
+            const { widgetType, eventType, payload, hits } = event
+            console.log(
+              'widgetType:',
+              widgetType,
+              'eventType:',
+              eventType,
+              'payload:',
+              payload,
+              'hits:',
+              hits
+            )
+            const objectIDs = hits?.map((hit) => hit.objectID)
+            if (widgetType === 'ais.hits' && eventType === 'view') {
+              if ((window as any).dataLayer) {
+                window.dataLayer.push({
+                  event: 'Hits Viewed',
+                  algoliaObjectIds: objectIDs,
+                  algoliaIndex: 'products',
+                })
+              }
+            }
+          },
+        }}
+      >
         <MyHitsComponent
           categoryCode={categoryCode}
           facets={facets}

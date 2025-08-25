@@ -15,10 +15,12 @@ import {
   IconButton,
 } from '@mui/material'
 import Link from 'next/link'
+import aa from 'search-insights'
 
 import PlpHitTextAttr from './PlpHitTextAttr'
 import { KiboImage, Price } from '@/components/common'
 import { ProductCardStyles } from '@/components/product/ProductCardListView/ProductCardListView.styles'
+import { getAnalyticsConsentFromLocalStorage } from '@/lib/getAnalyticsConsent'
 import abcore from '@/public/Brand_Logo/abcore-logo.png'
 import arista from '@/public/Brand_Logo/arista-logo.png'
 import bethyl from '@/public/Brand_Logo/bethyl-logo.png'
@@ -66,6 +68,8 @@ const plpIconStyles = {
 }
 
 export type Product = {
+  __position: any
+  __queryID: any
   platforms: any
   purity: any
   conjugate: any
@@ -116,7 +120,21 @@ const pdpBrandLogos: Record<string, string> = {
   fortis: fortis.src,
 }
 
-const ProductHitListView = ({ hit }: { hit: Product }): JSX.Element => {
+type ProductHitListViewProps = {
+  hit: Product
+  algoliaIndex?: string
+  position?: number
+  dataInsideMethod?: string
+  queryId?: string
+}
+
+const ProductHitListView = ({
+  hit,
+  position,
+  algoliaIndex,
+  queryId,
+  dataInsideMethod,
+}: ProductHitListViewProps): JSX.Element => {
   const imageHeight = 180
   const placeholderImageUrl = DefaultImage,
     kiboImagesData = hit?.product_images,
@@ -144,6 +162,7 @@ const ProductHitListView = ({ hit }: { hit: Product }): JSX.Element => {
     formulation = hit?.formulation,
     citation = hit?.plp_citation_count,
     newProduct = hit.new_product
+  position = hit.__position
 
   const firstImage = hit?.product_images?.[0]
     ? `https://cdn-tp1.mozu.com/31165-m1/cms/files/${kiboImagesData[0]}`
@@ -164,12 +183,24 @@ const ProductHitListView = ({ hit }: { hit: Product }): JSX.Element => {
       <Box
         sx={{ ...ProductCardStyles.main, marginBottom: '20px' }}
         data-id={hit.plp_catalog_number}
+        className="product-card"
+        data-index={algoliaIndex || 'products'} // <-- Add index as a data attribute if needed
       >
         <Link
           href={hit.product_url}
           passHref
           data-testid="product-card-link"
           aria-label={title ? `View details for ${title}` : 'Product details'}
+          data-insights-object-id={hit.objectID}
+          data-insights-position={position !== undefined ? position : '1'}
+          data-insights-query-id={queryId || hit.__queryID}
+          data-insights-index={algoliaIndex || 'products'}
+          data-insights-method={dataInsideMethod || 'clickedObjectIDs'}
+          className={
+            dataInsideMethod === 'clickedObjectIDsAfterSearch'
+              ? 'product-card-search'
+              : 'product-card'
+          }
         >
           <Box>
             <Card sx={ProductCardStyles.cardRoot} data-testid="product-card">
