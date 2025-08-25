@@ -58,8 +58,8 @@ const OrderConfirmation = ({ order }: { order: CrOrder }) => {
 
   const orderSummeryArgs = {
     nameLabel: t('order-summary'),
-    subTotalLabel: `${t('subtotal')} (${t('item-quantity', { count: order.items?.length })})`,
-    shippingTotalLabel: t('shipping'),
+    subTotalLabel: t('subtotal'),
+    shippingTotalLabel: t('estimated-shipping'),
     taxLabel: t('estimated-tax'),
     totalLabel: t('total-price'),
     handlingLabel: t('handling'),
