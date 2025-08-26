@@ -67,7 +67,7 @@ const plpIconStyles = {
 
 export type Product = {
   'Epitope Tag'?: any
-  'Source Species'?: any
+  Species?: any
   platforms: any
   purity: any
   conjugate: any
@@ -133,7 +133,7 @@ const ProductHitListView = ({ hit }: { hit: Product }): JSX.Element => {
     applications = hit?.applications,
     format = hit?.format,
     epitopeTag = hit['Epitope Tag'],
-    sourceSpecies = hit['Source Species'],
+    species = hit?.Species,
     reactivity = hit?.reactivity,
     assayRange = hit?.assay_range,
     sampleType = hit?.sample_type,
@@ -322,7 +322,7 @@ const ProductHitListView = ({ hit }: { hit: Product }): JSX.Element => {
                 </Box>
                 <PlpHitTextAttr
                   reactivity={reactivity}
-                  sourceSpecies={sourceSpecies}
+                  species={species}
                   applications={applications}
                   platforms={platforms}
                   conjugate={conjugate}
