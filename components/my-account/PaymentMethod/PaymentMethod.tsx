@@ -145,9 +145,10 @@ const PaymentMethod = (props: PaymentMethodProps) => {
     setBillingFormAddress({ ...address })
   }
 
-  const handleCardFormValidDetails = (isValid: boolean) => {
+  const handleCardFormValidDetails = (isValid: boolean, cardData?: CardForm) => {
     setCardFormDetails({
       ...cardFormDetails,
+      ...cardData,
       isCardDetailsValidated: isValid,
     })
   }
@@ -433,7 +434,7 @@ const PaymentMethod = (props: PaymentMethodProps) => {
             validateForm={validateForm}
             showCvv={false}
             onSaveCardData={handleCardFormData}
-            onFormStatusChange={handleCardFormValidDetails}
+            onFormStatusChange={(status, data) => handleCardFormValidDetails(status, data)}
           />
 
           <Stack display={'flex'} paddingY={2} gap={2} pl={1}>

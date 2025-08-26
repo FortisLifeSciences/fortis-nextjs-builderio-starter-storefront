@@ -17,6 +17,7 @@ import {
 import Link from 'next/link'
 import aa from 'search-insights'
 
+import PlpHitTextAttr from './PlpHitTextAttr'
 import { KiboImage, Price } from '@/components/common'
 import { ProductCardStyles } from '@/components/product/ProductCardListView/ProductCardListView.styles'
 import { getAnalyticsConsentFromLocalStorage } from '@/lib/getAnalyticsConsent'
@@ -66,9 +67,16 @@ const plpIconStyles = {
   },
 }
 
-type Product = {
+export type Product = {
   __position: any
   __queryID: any
+  platforms: any
+  purity: any
+  conjugate: any
+  immunogen: any
+  detection_method: any
+  sample_type: any
+  assay_range: any
   formulation: any
   plp_citation_count: any
   validation_text: any
@@ -141,6 +149,13 @@ const ProductHitListView = ({
     applications = hit?.applications,
     format = hit?.format,
     reactivity = hit?.reactivity,
+    assayRange = hit?.assay_range,
+    sampleType = hit?.sample_type,
+    immunogen = hit?.immunogen,
+    conjugate = hit?.conjugate,
+    purity = hit?.purity,
+    platforms = hit?.platforms,
+    detectionMethod = hit?.detection_method,
     host = hit?.host,
     trialSizeAvailable = hit?.trial_size_available,
     validated = hit?.validation_text,
@@ -332,144 +347,19 @@ const ProductHitListView = ({
                     ) : null}
                   </Grid>
                 </Box>
-                <Box>
-                  {reactivity ? (
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                      <Box
-                        sx={{
-                          fontSize: '14px',
-                          fontFamily: 'Poppins',
-                          color: '#333',
-                          fontStyle: 'normal',
-                          fontWeight: '500',
-                          lineHeight: '22px',
-                          width: '25%',
-                          wordWrap: 'break-word',
-                          textAlign: 'left',
-                        }}
-                      >
-                        Reactivity:
-                      </Box>
-                      <Box
-                        sx={{
-                          fontSize: '14px',
-                          fontFamily: 'Poppins',
-                          color: '#333',
-                          fontStyle: 'normal',
-                          fontWeight: '400',
-                          lineHeight: '22px',
-                          width: 'calc(75% - 50px)',
-                          wordWrap: 'break-word',
-                          textAlign: 'left',
-                        }}
-                      >
-                        {reactivity.join(', ')}
-                      </Box>
-                    </Box>
-                  ) : null}
-                  {applications ? (
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                      <Box
-                        sx={{
-                          fontSize: '14px',
-                          fontFamily: 'Poppins',
-                          color: '#333',
-                          fontStyle: 'normal',
-                          fontWeight: '500',
-                          lineHeight: '22px',
-                          width: '25%',
-                          wordWrap: 'break-word',
-                          textAlign: 'left',
-                        }}
-                      >
-                        Applications:
-                      </Box>
-                      <Box
-                        sx={{
-                          fontSize: '14px',
-                          fontFamily: 'Poppins',
-                          color: '#333',
-                          fontStyle: 'normal',
-                          fontWeight: '400',
-                          lineHeight: '22px',
-                          width: 'calc(75% - 50px)',
-                          wordWrap: 'break-word',
-                          textAlign: 'left',
-                        }}
-                      >
-                        {applications.join(', ')}
-                      </Box>
-                    </Box>
-                  ) : null}
-                  {format ? (
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                      <Box
-                        sx={{
-                          fontSize: '14px',
-                          fontFamily: 'Poppins',
-                          color: '#333',
-                          fontStyle: 'normal',
-                          fontWeight: '500',
-                          lineHeight: '22px',
-                          width: '25%',
-                          wordWrap: 'break-word',
-                          textAlign: 'left',
-                        }}
-                      >
-                        Format:
-                      </Box>
-                      <Box
-                        sx={{
-                          fontSize: '14px',
-                          fontFamily: 'Poppins',
-                          color: '#333',
-                          fontStyle: 'normal',
-                          fontWeight: '400',
-                          lineHeight: '22px',
-                          width: 'calc(75% - 50px)',
-                          wordWrap: 'break-word',
-                          textAlign: 'left',
-                        }}
-                      >
-                        {format}
-                      </Box>
-                    </Box>
-                  ) : null}
-                  {host ? (
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                      <Box
-                        sx={{
-                          fontSize: '14px',
-                          fontFamily: 'Poppins',
-                          color: '#333',
-                          fontStyle: 'normal',
-                          fontWeight: '500',
-                          lineHeight: '22px',
-                          width: '25%',
-                          wordWrap: 'break-word',
-                          textAlign: 'left',
-                        }}
-                      >
-                        Host:
-                      </Box>
-                      <Box
-                        sx={{
-                          fontSize: '14px',
-                          fontFamily: 'Poppins',
-                          color: '#333',
-                          fontStyle: 'normal',
-                          fontWeight: '400',
-                          lineHeight: '22px',
-                          width: 'calc(75% - 50px)',
-                          wordWrap: 'break-word',
-                          textAlign: 'left',
-                        }}
-                      >
-                        {host}
-                      </Box>
-                    </Box>
-                  ) : null}
-                </Box>
+                <PlpHitTextAttr
+                  reactivity={reactivity}
+                  applications={applications}
+                  platforms={platforms}
+                  conjugate={conjugate}
+                  assayRange={assayRange}
+                  sampleType={sampleType}
+                  detectionMethod={detectionMethod}
+                  host={host}
+                  format={format}
+                  immunogen={immunogen}
+                  purity={purity}
+                />
               </Box>
               <IconButton
                 component="span"
