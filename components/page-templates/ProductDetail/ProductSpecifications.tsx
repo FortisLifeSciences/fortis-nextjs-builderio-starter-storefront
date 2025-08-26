@@ -96,6 +96,7 @@ const ProductSpecifications = ({ product }: { product: any }) => {
               {name}
             </TableCell>
             <TableCell
+              className="builder-text"
               sx={{
                 width: '80%',
                 color: `${grey[900]}`,
