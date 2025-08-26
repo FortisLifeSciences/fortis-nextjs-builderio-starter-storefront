@@ -216,6 +216,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     PDPCustomAndBulkDisplaySectionKey,
     getCurrentProduct,
   } = props
+
   const [updatedProduct, setUpdatedProduct] = useState(product)
   const [minQuantity, setMinQuantity] = useState(1)
   const { t } = useTranslation('common')
@@ -257,6 +258,22 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
   const { addOrRemoveWishlistItem, checkProductInWishlist, isWishlistLoading } = useWishlist()
 
   const countryCode = cookieNext.getCookie('ipBasedCountryCode')
+
+  const [algoliaQueryId, setAlgoliaQueryId] = useState<string | null>('')
+
+  useEffect(() => {
+    const queryId = getQueryID() // your helper function
+
+    if (queryId) {
+      setAlgoliaQueryId(queryId)
+      localStorage.setItem('algoliaQueryId', queryId)
+    } else {
+      const storedQueryId = localStorage.getItem('algoliaQueryId')
+      if (storedQueryId) {
+        setAlgoliaQueryId(storedQueryId)
+      }
+    }
+  }, [])
 
   // console.log("pdp-countryCode", countryCode)
 
@@ -500,6 +517,22 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
           cartResponse?.product?.price?.price,
           quantity
         )
+      }
+      if ((window as any).dataLayer) {
+        window.dataLayer.push({
+          algoliaObjectIds: [variationProductCode],
+          // algoliaEvent: algoliaQueryId? 'Algolia Add to Cart After Search':'Algolia Add to Cart',
+          // algoliaQueryID: [algoliaQueryId], // must be array
+          algoliaObjectData: [
+            {
+              // optional but useful
+              // name: productGetters.getName(product).replace(/[^a-zA-Z0-9 -]/g, ''),
+              price: productPrice.regular,
+            },
+          ],
+          value: productPrice.regular,
+          currency: 'USD',
+        })
       }
     } catch (err) {
       console.log(err)
@@ -1121,6 +1154,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                         className="add-to-cart-button"
                         onClick={() => handleAddToCart()}
                         loading={addToCart.isPending}
+                        data-insights-query-id={algoliaQueryId ? algoliaQueryId : undefined}
                         sx={{
                           marginTop: '20px',
                           bgcolor: theme?.palette.primary.main,
@@ -1398,6 +1432,12 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
       ) : null}
     </Grid>
   )
+}
+
+function getQueryID(): string | null {
+  if (typeof window === 'undefined') return null // server safety
+  const params = new URLSearchParams(window.location.search)
+  return params.get('queryID')
 }
 
 export default ProductDetailTemplate
