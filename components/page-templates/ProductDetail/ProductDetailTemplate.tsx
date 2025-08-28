@@ -521,13 +521,11 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
       if ((window as any).dataLayer) {
         window.dataLayer.push({
           algoliaObjectIds: [variationProductCode],
-          // algoliaEvent: algoliaQueryId? 'Algolia Add to Cart After Search':'Algolia Add to Cart',
-          // algoliaQueryID: [algoliaQueryId], // must be array
+          index: 'products',
           algoliaObjectData: [
             {
-              // optional but useful
-              // name: productGetters.getName(product).replace(/[^a-zA-Z0-9 -]/g, ''),
               price: productPrice.regular,
+              quantity: quantity,
             },
           ],
           value: productPrice.regular,
@@ -1151,7 +1149,9 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                         variant="contained"
                         color="primary"
                         fullWidth
-                        className="add-to-cart-button"
+                        className={
+                          algoliaQueryId ? 'add-to-cart-button-search' : 'add-to-cart-button'
+                        }
                         onClick={() => handleAddToCart()}
                         loading={addToCart.isPending}
                         data-insights-query-id={algoliaQueryId ? algoliaQueryId : undefined}
