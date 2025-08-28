@@ -63,8 +63,6 @@ const ResourceHitGridView = ({ hit }: { hit: Resources }): JSX.Element => {
     truncatedTitle = title && title.length > 30 ? `${title.substring(0, 30)}` : title,
     resourceImage = hit?.data?.image ? hit?.data?.image : placeholderImageUrl
 
-  console.log('hit', hit)
-
   return (
     <>
       <Box sx={ProductCardStyles.main}>
