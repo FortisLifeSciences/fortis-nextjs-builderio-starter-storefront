@@ -155,11 +155,12 @@ const KiboHeader = (props: KiboHeaderProps) => {
         }
         if ((window as any).dataLayer) {
           window.dataLayer.push({ algoliaUserToken: randomToken })
-          if (isAuthenticated) {
-            window.dataLayer.push({ algoliaAuthenticatedUserToken: token })
-          } else {
-            window.dataLayer.push({ algoliaAuthenticatedUserToken: undefined })
-          }
+          window.dataLayer.push({ algoliaAuthenticatedUserToken: undefined })
+          // if (isAuthenticated) {
+          //   window.dataLayer.push({ algoliaAuthenticatedUserToken: token })
+          // } else {
+          //   window.dataLayer.push({ algoliaAuthenticatedUserToken: undefined })
+          // }
         }
       }
     }
