@@ -506,21 +506,6 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
         })
       }
 
-      if ((window as any).dataLayer) {
-        window.dataLayer.push({
-          eventName: 'Algolia Add to Cart',
-          index: 'products',
-          algoliaObjectData: [
-            {
-              price: productPrice.regular,
-              quantity: quantity,
-            },
-          ],
-          value: productPrice.regular,
-          currency: 'USD',
-        })
-      }
-
       if (product?.productCode && cartResponse && product?.categories?.[0]?.content?.name) {
         addToCartGTMPDP(
           cartResponse?.total,
@@ -836,6 +821,13 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
       }, 100)
     }
   }, [citationCountVariant])
+
+  const algoliaObjectData = [
+    {
+      price: productPrice?.special ? productPrice?.special : productPrice?.regular,
+      quantity: quantity,
+    },
+  ]
 
   return (
     <Grid container>
@@ -1158,6 +1150,9 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                         loading={addToCart.isPending}
                         data-insights-object-id={variationProductCode}
                         data-insights-query-id={algoliaQueryId ? algoliaQueryId : undefined}
+                        data-insights-object-data={
+                          algoliaObjectData ? JSON.stringify(algoliaObjectData) : undefined
+                        }
                         sx={{
                           marginTop: '20px',
                           bgcolor: theme?.palette.primary.main,
