@@ -505,6 +505,22 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
           },
         })
       }
+
+      if ((window as any).dataLayer) {
+        window.dataLayer.push({
+          eventName: 'Algolia Add to Cart',
+          index: 'products',
+          algoliaObjectData: [
+            {
+              price: productPrice.regular,
+              quantity: quantity,
+            },
+          ],
+          value: productPrice.regular,
+          currency: 'USD',
+        })
+      }
+
       if (product?.productCode && cartResponse && product?.categories?.[0]?.content?.name) {
         addToCartGTMPDP(
           cartResponse?.total,
@@ -517,20 +533,6 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
           cartResponse?.product?.price?.price,
           quantity
         )
-      }
-      if ((window as any).dataLayer) {
-        window.dataLayer.push({
-          algoliaObjectIds: [variationProductCode],
-          index: 'products',
-          algoliaObjectData: [
-            {
-              price: productPrice.regular,
-              quantity: quantity,
-            },
-          ],
-          value: productPrice.regular,
-          currency: 'USD',
-        })
       }
     } catch (err) {
       console.log(err)
@@ -1154,6 +1156,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                         }
                         onClick={() => handleAddToCart()}
                         loading={addToCart.isPending}
+                        data-insights-object-id={variationProductCode}
                         data-insights-query-id={algoliaQueryId ? algoliaQueryId : undefined}
                         sx={{
                           marginTop: '20px',
