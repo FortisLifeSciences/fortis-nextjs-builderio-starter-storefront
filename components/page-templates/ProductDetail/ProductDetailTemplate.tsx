@@ -1219,7 +1219,11 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                       variant="contained"
                       color="primary"
                       fullWidth
-                      className="add-to-cart-button"
+                      className={
+                        algoliaQueryId ? 'add-to-cart-button-search' : 'add-to-cart-button'
+                      }
+                      data-insights-object-id={variationProductCode}
+                      data-insights-query-id={algoliaQueryId ? algoliaQueryId : undefined}
                       onClick={() =>
                         ousShowDistributorBtn ? handleLinkTarget() : handleCustomCTATarget()
                       }
@@ -1252,6 +1256,16 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                   content={PDPCustomAndBulkDisplayContentSection}
                   context={{
                     bulkRedirect: () => {
+                      if (
+                        typeof window !== 'undefined' &&
+                        Array.isArray((window as any).dataLayer)
+                      ) {
+                        window.dataLayer.push({
+                          event: 'builderButtonClicked',
+                          objectId: variationProductCode,
+                          queryId: algoliaQueryId || undefined,
+                        })
+                      }
                       window.location.href = `${siteUrl}${sectionTargetUrl}?Catalog_Num=${variationCodeDynamic}`
                     },
                   }}
