@@ -829,6 +829,9 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     },
   ]
 
+  const addtocartvalue =
+    (productPrice?.special ? productPrice?.special : productPrice?.regular) * quantity
+
   return (
     <Grid container>
       {!isQuickViewModal && (
@@ -1153,6 +1156,8 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                         data-insights-object-data={
                           algoliaObjectData ? JSON.stringify(algoliaObjectData) : undefined
                         }
+                        data-insights-product-price={JSON.stringify(addtocartvalue)}
+                        data-insights-currency={JSON.stringify('USD')}
                         sx={{
                           marginTop: '20px',
                           bgcolor: theme?.palette.primary.main,
