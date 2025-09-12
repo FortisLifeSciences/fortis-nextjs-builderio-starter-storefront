@@ -216,6 +216,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     PDPCustomAndBulkDisplaySectionKey,
     getCurrentProduct,
   } = props
+
   const [updatedProduct, setUpdatedProduct] = useState(product)
   const [minQuantity, setMinQuantity] = useState(1)
   const { t } = useTranslation('common')
@@ -257,6 +258,22 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
   const { addOrRemoveWishlistItem, checkProductInWishlist, isWishlistLoading } = useWishlist()
 
   const countryCode = cookieNext.getCookie('ipBasedCountryCode')
+
+  const [algoliaQueryId, setAlgoliaQueryId] = useState<string | null>('')
+
+  useEffect(() => {
+    const queryId = getQueryID() // your helper function
+
+    if (queryId) {
+      setAlgoliaQueryId(queryId)
+      localStorage.setItem('algoliaQueryId', queryId)
+    } else {
+      const storedQueryId = localStorage.getItem('algoliaQueryId')
+      if (storedQueryId) {
+        setAlgoliaQueryId(storedQueryId)
+      }
+    }
+  }, [])
 
   // console.log("pdp-countryCode", countryCode)
 
@@ -488,6 +505,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
           },
         })
       }
+
       if (product?.productCode && cartResponse && product?.categories?.[0]?.content?.name) {
         addToCartGTMPDP(
           cartResponse?.total,
@@ -804,6 +822,16 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     }
   }, [citationCountVariant])
 
+  const algoliaObjectData = [
+    {
+      price: productPrice?.special ? productPrice?.special : productPrice?.regular,
+      quantity: quantity,
+    },
+  ]
+
+  const addtocartvalue =
+    (productPrice?.special ? productPrice?.special : productPrice?.regular) * quantity
+
   return (
     <Grid container>
       {!isQuickViewModal && (
@@ -1118,9 +1146,18 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                         variant="contained"
                         color="primary"
                         fullWidth
-                        className="add-to-cart-button"
+                        className={
+                          algoliaQueryId ? 'add-to-cart-button-search' : 'add-to-cart-button'
+                        }
                         onClick={() => handleAddToCart()}
                         loading={addToCart.isPending}
+                        data-insights-object-id={variationProductCode}
+                        data-insights-query-id={algoliaQueryId ? algoliaQueryId : undefined}
+                        data-insights-object-data={
+                          algoliaObjectData ? JSON.stringify(algoliaObjectData) : undefined
+                        }
+                        data-insights-product-price={JSON.stringify(addtocartvalue)}
+                        data-insights-currency={JSON.stringify('USD')}
                         sx={{
                           marginTop: '20px',
                           bgcolor: theme?.palette.primary.main,
@@ -1187,7 +1224,11 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                       variant="contained"
                       color="primary"
                       fullWidth
-                      className="add-to-cart-button"
+                      className={
+                        algoliaQueryId ? 'add-to-cart-button-search' : 'add-to-cart-button'
+                      }
+                      data-insights-object-id={variationProductCode}
+                      data-insights-query-id={algoliaQueryId ? algoliaQueryId : undefined}
                       onClick={() =>
                         ousShowDistributorBtn ? handleLinkTarget() : handleCustomCTATarget()
                       }
@@ -1220,6 +1261,16 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                   content={PDPCustomAndBulkDisplayContentSection}
                   context={{
                     bulkRedirect: () => {
+                      if (
+                        typeof window !== 'undefined' &&
+                        Array.isArray((window as any).dataLayer)
+                      ) {
+                        window.dataLayer.push({
+                          event: 'builderButtonClicked',
+                          objectId: variationProductCode,
+                          queryId: algoliaQueryId || undefined,
+                        })
+                      }
                       window.location.href = `${siteUrl}${sectionTargetUrl}?Catalog_Num=${variationCodeDynamic}`
                     },
                   }}
@@ -1398,6 +1449,12 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
       ) : null}
     </Grid>
   )
+}
+
+function getQueryID(): string | null {
+  if (typeof window === 'undefined') return null // server safety
+  const params = new URLSearchParams(window.location.search)
+  return params.get('queryID')
 }
 
 export default ProductDetailTemplate

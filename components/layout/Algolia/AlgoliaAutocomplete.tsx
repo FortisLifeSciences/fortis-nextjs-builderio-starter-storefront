@@ -302,7 +302,14 @@ const AlgoliaAutocomplete = () => {
               return html`<h4>Products</h4>`
             },
             item({ item, html }: { item: any; html: any }) {
-              const link = (item && item.product_url) || '#'
+              // const link = (item && item.product_url) || '#'
+              const link =
+                item && item.product_url
+                  ? item.product_url +
+                    (item.product_url.includes('?selected=')
+                      ? '&queryID=' + item.__autocomplete_queryID
+                      : '?queryID=' + item.__autocomplete_queryID)
+                  : '#'
               const title =
                 typeof item && item.product_name === 'string'
                   ? item.product_name.split(' | ')[0]
