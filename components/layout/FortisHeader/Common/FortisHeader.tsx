@@ -5,6 +5,8 @@ import getConfig from 'next/config'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
+import aa from 'search-insights'
+import { v4 as uuidv4 } from 'uuid'
 
 import { headerActionAreaStyles, kiboHeaderStyles, topHeaderStyles } from './FortisHeader.styles'
 import { AccountHierarchyFormDialog } from '@/components/dialogs'
@@ -21,6 +23,7 @@ import {
 } from '@/components/layout'
 import { useAuthContext, useHeaderContext, useModalContext } from '@/context'
 import { useCreateCustomerB2bAccountMutation } from '@/hooks'
+import { getAnalyticsConsentFromLocalStorage } from '@/lib/getAnalyticsConsent'
 import { buildCreateCustomerB2bAccountParams } from '@/lib/helpers'
 import type { CreateCustomerB2bAccountParams, NavigationLink } from '@/lib/types'
 
@@ -109,7 +112,7 @@ const HeaderActionArea = (props: HeaderActionAreaProps) => {
 const KiboHeader = (props: KiboHeaderProps) => {
   const { navLinks, isSticky = true } = props
   const { headerState, toggleMobileSearchPortal, toggleHamburgerMenu } = useHeaderContext()
-  const { isAuthenticated } = useAuthContext()
+  const { isAuthenticated, user } = useAuthContext()
   const { showModal, closeModal } = useModalContext()
   const { t } = useTranslation('common')
   const router = useRouter()
@@ -124,6 +127,58 @@ const KiboHeader = (props: KiboHeaderProps) => {
   const isCheckoutPage = router.pathname.includes('checkout')
   const { publicRuntimeConfig } = getConfig()
   const isMultiShipEnabled = publicRuntimeConfig.isMultiShipEnabled
+  const hasConsent = getAnalyticsConsentFromLocalStorage()
+  const randomToken = `anonymous-${uuidv4()}`
+
+  React.useEffect(() => {
+    const setToken = (token: string) => {
+      // Store the token in localStorage and dataLayer if it has changed
+      const storedToken = window.localStorage.getItem('algoliaUserToken')
+      if (hasConsent) {
+        if (storedToken !== token) {
+          window.localStorage.setItem('algoliaUserToken', token)
+        }
+        if ((window as any).dataLayer) {
+          window.dataLayer.push({ algoliaUserToken: token })
+          if (isAuthenticated) {
+            window.dataLayer.push({ algoliaAuthenticatedUserToken: token })
+          } else {
+            window.dataLayer.push({ algoliaAuthenticatedUserToken: undefined })
+          }
+        }
+      } else {
+        if (!isAuthenticated) {
+          aa('setAuthenticatedUserToken', undefined)
+        }
+        if (storedToken) {
+          window.localStorage.removeItem('algoliaUserToken')
+        }
+        if ((window as any).dataLayer) {
+          window.dataLayer.push({ algoliaUserToken: randomToken })
+          window.dataLayer.push({ algoliaAuthenticatedUserToken: undefined })
+          // if (isAuthenticated) {
+          //   window.dataLayer.push({ algoliaAuthenticatedUserToken: token })
+          // } else {
+          //   window.dataLayer.push({ algoliaAuthenticatedUserToken: undefined })
+          // }
+        }
+      }
+    }
+
+    if (isAuthenticated && user && user.userId != null && hasConsent) {
+      aa('setAuthenticatedUserToken', user.userId)
+      setToken(user.userId)
+    } else {
+      aa('setAuthenticatedUserToken', undefined)
+      aa('getUserToken', {}, (err, userToken) => {
+        if (err) {
+          console.error('user token error', err)
+        }
+        const token = String(userToken)
+        setToken(token)
+      })
+    }
+  }, [isAuthenticated, user?.userId, hasConsent, randomToken])
 
   const handleAccountIconClick = () => {
     isHamburgerMenuVisible && toggleHamburgerMenu()
