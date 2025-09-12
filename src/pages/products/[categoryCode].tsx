@@ -407,16 +407,6 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
         insights={{
           onEvent(event) {
             const { widgetType, eventType, payload, hits } = event
-            console.log(
-              'widgetType:',
-              widgetType,
-              'eventType:',
-              eventType,
-              'payload:',
-              payload,
-              'hits:',
-              hits
-            )
             const objectIDs = hits?.map((hit) => hit.objectID)
             if (widgetType === 'ais.hits' && eventType === 'view') {
               if ((window as any).dataLayer) {
