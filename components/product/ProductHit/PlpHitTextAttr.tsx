@@ -2,6 +2,7 @@ import { Box } from '@mui/material'
 
 type prod = {
   reactivity: any
+  species: any
   applications: any
   platforms: any
   conjugate: any
@@ -10,12 +11,14 @@ type prod = {
   detectionMethod: any
   host: any
   format: any
+  epitopeTag: any
   immunogen: any
   purity: any
 }
 
 const PlpHitTextAttr = ({
   reactivity,
+  species,
   applications,
   platforms,
   conjugate,
@@ -24,21 +27,24 @@ const PlpHitTextAttr = ({
   detectionMethod,
   host,
   format,
+  epitopeTag,
   immunogen,
   purity,
 }: prod) => {
   const orderedAttributes = [
     { label: 'Reactivity', value: reactivity?.join(', ') },
+    { label: 'Species', value: species?.join(', ') },
     { label: 'Applications', value: applications?.join(', ') },
-    { label: 'Platforms ', value: platforms },
-    { label: 'Conjugate ', value: conjugate },
+    { label: 'Platforms', value: platforms },
+    { label: 'Conjugate', value: conjugate },
     { label: 'Assay Range', value: assayRange },
     { label: 'Sample Type', value: sampleType },
     { label: 'Detection Method', value: detectionMethod },
     { label: 'Host', value: host },
     { label: 'Format', value: format },
+    { label: 'Epitope Tag', value: epitopeTag?.join(', ') },
     { label: 'Immunogen', value: immunogen },
-    { label: 'Purity  ', value: purity },
+    { label: 'Purity', value: purity },
   ]
 
   const visibleAttributes = orderedAttributes.filter((attr) => attr.value).slice(0, 4)
