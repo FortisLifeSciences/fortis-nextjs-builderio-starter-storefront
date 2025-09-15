@@ -194,6 +194,11 @@ const variantProperties = [
   'tenant~citation-count-variant',
 ]
 
+type queryIdArr = {
+  ProductCode: string | undefined
+  queryId: string
+}
+
 const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
   const { getProductLink } = uiHelpers()
   const {
@@ -492,9 +497,48 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     }),
   }
 
+  const [productsQueryIdArr, setProductsQueryIdArr] = useState<queryIdArr[]>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('queryIdArray')
+      return stored ? JSON.parse(stored) : []
+    }
+    return []
+  })
+  useEffect(() => {
+    localStorage.setItem('queryIdArray', JSON.stringify(productsQueryIdArr))
+  }, [productsQueryIdArr])
+
   // methods
   const handleAddToCart = async () => {
     try {
+      const storedQueryId = localStorage.getItem('algoliaQueryId')
+
+      if (storedQueryId) {
+        const newProductQuery: queryIdArr = {
+          ProductCode: variationProductCode || undefined,
+          queryId: storedQueryId,
+        }
+
+        setProductsQueryIdArr((prevProducts) => {
+          // check if product already exists
+          const existingIndex = prevProducts.findIndex(
+            (p) => p.ProductCode === newProductQuery.ProductCode
+          )
+
+          if (existingIndex !== -1) {
+            // replace queryId for existing product
+            const updatedProducts = [...prevProducts]
+            updatedProducts[existingIndex] = {
+              ...updatedProducts[existingIndex],
+              queryId: storedQueryId,
+            }
+            return updatedProducts
+          }
+
+          // otherwise, add new product
+          return [...prevProducts, newProductQuery]
+        })
+      }
       const cartResponse = await addToCart.mutateAsync(addToCartPayload)
       const productPrice = productGetters.getPrice(product)
       if (cartResponse.id && !isB2B) {
