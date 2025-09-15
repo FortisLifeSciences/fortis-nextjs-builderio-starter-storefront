@@ -394,6 +394,17 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
   const categoryCode = (props.categoryCode as string) || (router.query.categoryCode as string)
   const facets = props.facets
   const searchableAttributes = props.searchableAttributes
+
+  useEffect(() => {
+    window.dataLayer = window.dataLayer || []
+
+    // Pushing a clean 'Algolia Filter View' event to GTM
+    window.dataLayer.push({
+      event: 'Algolia Filter View',
+      algoliaFilters: [],
+    })
+  }, [])
+
   return (
     <>
       <BuilderComponent
