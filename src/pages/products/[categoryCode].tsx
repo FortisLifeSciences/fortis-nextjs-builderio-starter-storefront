@@ -394,6 +394,17 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
   const categoryCode = (props.categoryCode as string) || (router.query.categoryCode as string)
   const facets = props.facets
   const searchableAttributes = props.searchableAttributes
+
+  useEffect(() => {
+    window.dataLayer = window.dataLayer || []
+
+    // Pushing a clean 'Algolia Filter View' event to GTM
+    window.dataLayer.push({
+      event: 'Algolia Filter View',
+      algoliaFilters: [],
+    })
+  }, [])
+
   return (
     <>
       <BuilderComponent
@@ -407,16 +418,6 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
         insights={{
           onEvent(event) {
             const { widgetType, eventType, payload, hits } = event
-            console.log(
-              'widgetType:',
-              widgetType,
-              'eventType:',
-              eventType,
-              'payload:',
-              payload,
-              'hits:',
-              hits
-            )
             const objectIDs = hits?.map((hit) => hit.objectID)
             if (widgetType === 'ais.hits' && eventType === 'view') {
               if ((window as any).dataLayer) {
