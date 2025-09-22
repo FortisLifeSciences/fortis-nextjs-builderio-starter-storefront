@@ -1137,13 +1137,20 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                 </Box>
 
                 {/* Column for QuantitySelector and LoadingButton */}
-                {skuStatusText && skuStatusText === 'CustomCTA' && (
+                {skuStatusText === 'CustomCTA' && (
                   <LoadingButton
                     variant="contained"
                     color="primary"
                     fullWidth
-                    className="add-to-cart-button"
-                    onClick={() => handleCustomCTATarget()}
+                    className={algoliaQueryId ? 'custom-cta-button-search' : 'custom-cta-button'}
+                    onClick={() =>
+                      ousShowDistributorBtn ? handleLinkTarget() : handleCustomCTATarget()
+                    }
+                    {...(algoliaQueryId && {
+                      'data-insights-query-id': algoliaQueryId,
+                    })}
+                    data-insights-object-id={variationProductCode}
+                    data-insights-index="products"
                     sx={{
                       marginTop: 1,
                       bgcolor: theme?.palette.primary.main,
@@ -1158,9 +1165,9 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                       '@media (max-width: 1023px)': {
                         width: '52%',
                       },
-                    }} // Add margin top for spacing between QuantitySelector and LoadingButton
+                    }}
                   >
-                    {customCTALabel}
+                    {ousShowDistributorBtn ? t('distributors') : customCTALabel}
                   </LoadingButton>
                 )}
                 {skuStatusText &&
@@ -1202,6 +1209,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                         }
                         data-insights-product-price={JSON.stringify(addtocartvalue)}
                         data-insights-currency={JSON.stringify('USD')}
+                        data-insights-index="products"
                         sx={{
                           marginTop: '20px',
                           bgcolor: theme?.palette.primary.main,
@@ -1273,6 +1281,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                       }
                       data-insights-object-id={variationProductCode}
                       data-insights-query-id={algoliaQueryId ? algoliaQueryId : undefined}
+                      data-insights-index="products"
                       onClick={() =>
                         ousShowDistributorBtn ? handleLinkTarget() : handleCustomCTATarget()
                       }
@@ -1303,18 +1312,12 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                   key={variationCodeDynamic}
                   model={PDPCustomAndBulkDisplaySectionKey}
                   content={PDPCustomAndBulkDisplayContentSection}
+                  data={{
+                    objectId: variationProductCode,
+                    queryId: algoliaQueryId || undefined,
+                  }}
                   context={{
                     bulkRedirect: () => {
-                      if (
-                        typeof window !== 'undefined' &&
-                        Array.isArray((window as any).dataLayer)
-                      ) {
-                        window.dataLayer.push({
-                          event: 'builderButtonClicked',
-                          objectId: variationProductCode,
-                          queryId: algoliaQueryId || undefined,
-                        })
-                      }
                       window.location.href = `${siteUrl}${sectionTargetUrl}?Catalog_Num=${variationCodeDynamic}`
                     },
                   }}
