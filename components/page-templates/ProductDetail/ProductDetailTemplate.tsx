@@ -1142,7 +1142,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                     variant="contained"
                     color="primary"
                     fullWidth
-                    className={algoliaQueryId ? 'custom-cta-button-search' : 'custom-cta-button'}
+                    className={algoliaQueryId ? 'custom-CTA-button-search' : 'custom-CTA-button'}
                     onClick={() =>
                       ousShowDistributorBtn ? handleLinkTarget() : handleCustomCTATarget()
                     }
@@ -1276,9 +1276,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                       variant="contained"
                       color="primary"
                       fullWidth
-                      className={
-                        algoliaQueryId ? 'add-to-cart-button-search' : 'add-to-cart-button'
-                      }
+                      className={algoliaQueryId ? 'custom-CTA-button-search' : 'custom-CTA-button'}
                       data-insights-object-id={variationProductCode}
                       data-insights-query-id={algoliaQueryId ? algoliaQueryId : undefined}
                       data-insights-index="products"
@@ -1317,6 +1315,9 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                     queryId: algoliaQueryId || undefined,
                   }}
                   context={{
+                    className: algoliaQueryId
+                      ? 'bulk-and-custom-button-search'
+                      : 'bulk-and-custom-button',
                     bulkRedirect: () => {
                       window.location.href = `${siteUrl}${sectionTargetUrl}?Catalog_Num=${variationCodeDynamic}`
                     },
