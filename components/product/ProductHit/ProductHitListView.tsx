@@ -68,6 +68,8 @@ const plpIconStyles = {
 }
 
 export type Product = {
+  'Epitope Tag'?: any
+  Species?: any
   __position: any
   __queryID: any
   platforms: any
@@ -148,6 +150,8 @@ const ProductHitListView = ({
     brand = hit?.brand_code,
     applications = hit?.applications,
     format = hit?.format,
+    epitopeTag = hit['Epitope Tag'],
+    species = hit?.Species,
     reactivity = hit?.reactivity,
     assayRange = hit?.assay_range,
     sampleType = hit?.sample_type,
@@ -349,6 +353,7 @@ const ProductHitListView = ({
                 </Box>
                 <PlpHitTextAttr
                   reactivity={reactivity}
+                  species={species}
                   applications={applications}
                   platforms={platforms}
                   conjugate={conjugate}
@@ -357,6 +362,7 @@ const ProductHitListView = ({
                   detectionMethod={detectionMethod}
                   host={host}
                   format={format}
+                  epitopeTag={epitopeTag}
                   immunogen={immunogen}
                   purity={purity}
                 />

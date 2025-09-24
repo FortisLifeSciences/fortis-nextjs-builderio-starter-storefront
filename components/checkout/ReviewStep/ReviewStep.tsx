@@ -23,6 +23,7 @@ import { styled } from '@mui/material/styles'
 import getConfig from 'next/config'
 import { useTranslation } from 'next-i18next'
 import { useForm, Controller } from 'react-hook-form'
+import aa from 'search-insights'
 import * as yup from 'yup'
 
 import {
@@ -275,12 +276,40 @@ const ReviewStep = (props: ReviewStepProps) => {
         await updateOrder.mutateAsync(checkout as CrOrder)
       }
       await onCreateOrder(checkout)
-
+      algoliaObjectData()
       setStepStatusComplete()
       // setStepNext()
     } catch (e) {
       console.log('error', e)
     }
+  }
+  const algoliaObjectData = () => {
+    const queryIdArr: any[] = JSON.parse(localStorage.getItem('queryIdArray') || '[]')
+
+    const products = checkout?.items
+    aa('purchasedObjectIDsAfterSearch', {
+      eventName: 'Algolia Purchase After Search',
+      index: 'products',
+      objectIDs: (products ?? [])
+        .map((p) => p?.product?.variationProductCode)
+        .filter((id): id is string => Boolean(id)),
+      objectData: (products ?? []).map((p) => {
+        const matched = queryIdArr.find(
+          (data) => data?.ProductCode === p?.product?.variationProductCode
+        )
+        const price = typeof p?.product?.price?.price === 'number' ? p?.product?.price?.price : 0
+        console.log('price:', price)
+        return {
+          ...(matched?.queryId ? { queryID: matched.queryId } : {}),
+          price,
+          // discount: ,
+          quantity: p?.quantity ?? 1,
+        }
+      }),
+      value: checkout?.total ? checkout?.total : 0,
+      currency: 'USD',
+    })
+    localStorage.removeItem('queryIdArray')
   }
 
   const onInvalidForm = (error: any) => {

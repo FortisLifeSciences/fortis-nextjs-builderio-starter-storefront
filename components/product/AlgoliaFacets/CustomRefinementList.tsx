@@ -150,9 +150,13 @@ function CustomRefinementList({ attribute, searchableAttributes }: CustomRefinem
                 checked={item.isRefined}
                 onChange={() => refine(item.value)}
                 size="small"
-                inputProps={{
-                  'aria-label': `${item.label} (${item.count})`,
-                }}
+                inputProps={
+                  {
+                    'aria-label': `${item.label} (${item.count})`,
+                    'data-insights-filter': `${attribute}:${item.label}`,
+                  } as React.InputHTMLAttributes<HTMLInputElement>
+                }
+                className="algolia-facet-label"
               />
             }
             label={item.label}

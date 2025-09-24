@@ -162,8 +162,15 @@ const ManualFacetBlock = ({
                     control={
                       <Checkbox
                         checked={selectedFilters[facet]?.includes(value) || false}
+                        data-insights-filter={`${facet}:${value}`}
                         onChange={() => onFilterChange(facet, value)}
                         size="small"
+                        inputProps={
+                          {
+                            'data-insights-filter': `${facet}:${value}`,
+                          } as React.InputHTMLAttributes<HTMLInputElement>
+                        }
+                        className="algolia-facet-label"
                       />
                     }
                     label={value}

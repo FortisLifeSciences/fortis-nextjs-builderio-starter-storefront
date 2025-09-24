@@ -129,6 +129,7 @@ const KiboHeader = (props: KiboHeaderProps) => {
   const isMultiShipEnabled = publicRuntimeConfig.isMultiShipEnabled
   const hasConsent = getAnalyticsConsentFromLocalStorage()
   const randomToken = `anonymous-${uuidv4()}`
+  const randomAuthToken = `anonymous-${uuidv4()}`
 
   React.useEffect(() => {
     const setToken = (token: string) => {
@@ -156,7 +157,7 @@ const KiboHeader = (props: KiboHeaderProps) => {
         if ((window as any).dataLayer) {
           window.dataLayer.push({ algoliaUserToken: randomToken })
           if (isAuthenticated) {
-            window.dataLayer.push({ algoliaAuthenticatedUserToken: token })
+            window.dataLayer.push({ algoliaAuthenticatedUserToken: randomAuthToken })
           } else {
             window.dataLayer.push({ algoliaAuthenticatedUserToken: undefined })
           }
