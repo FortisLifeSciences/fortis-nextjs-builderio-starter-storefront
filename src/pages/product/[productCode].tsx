@@ -69,7 +69,14 @@ export async function getStaticProps(
 ): Promise<GetStaticPropsResult<any>> {
   const { locale, params } = context
   const { productCode } = params as any
-  const product = await getProduct(productCode)
+  console.log('productCode in getstaticprops', productCode)
+  let product = null
+  try {
+    product = await getProduct(productCode)
+  } catch (error) {
+    console.error(`Failed to fetch product: ${productCode}`, error)
+  }
+  console.log('product api call returns product in getstaticprops as:', product)
   const variantCodes = product?.variations
   const relatedProducts = []
   const relatedProductData =
@@ -104,8 +111,17 @@ export async function getStaticProps(
     }
   }
 
-  const productVariations = await getProductSearchVariations(productCode, variantCodes)
+  let productVariations = []
+  try {
+    productVariations = await getProductSearchVariations(productCode, variantCodes)
+  } catch (error) {
+    console.error(`Failed to fetch variations for: ${productCode} in getstaticprops`, error)
+    return { notFound: true }
+  }
+
   const categoriesTree = await getCategoryTree()
+  console.log('In getstaticprops: product', product)
+  console.log('In getstaticprops: variations', productVariations)
   if (!product) {
     return { notFound: true }
   }
@@ -117,19 +133,31 @@ export async function getStaticProps(
   const targetingBrandName = productCode.split('-')[0].toLowerCase()
 
   const pdpBuilderSectionKey = publicRuntimeConfig?.builderIO?.modelKeys?.productDetailSection || ''
-  const section = await builder
-    .get(pdpBuilderSectionKey, { userAttributes: { slug: `product-${productCode}` } })
-    .promise()
+  let section = null
+  let PDPCustomAndBulkDisplayContentSection = null
+  try {
+    section = await builder
+      .get(pdpBuilderSectionKey, { userAttributes: { slug: `product-${productCode}` } })
+      .promise()
+  } catch (error) {
+    console.error(`Failed to fetch Builder section for ${productCode}:`, error)
+    section = null
+  }
 
   const PDPCustomAndBulkDisplaySectionKey =
     publicRuntimeConfig?.builderIO?.modelKeys?.PDPCustomAndBulkDisplaySection || ''
-  const PDPCustomAndBulkDisplayContentSection = await builder
-    .get(PDPCustomAndBulkDisplaySectionKey, {
-      userAttributes: {
-        brand: [targetingBrandName],
-      },
-    })
-    .promise()
+  try {
+    PDPCustomAndBulkDisplayContentSection = await builder
+      .get(PDPCustomAndBulkDisplaySectionKey, {
+        userAttributes: {
+          brand: [targetingBrandName],
+        },
+      })
+      .promise()
+  } catch (error) {
+    console.error(`Failed to fetch Builder custom section for ${targetingBrandName}:`, error)
+    PDPCustomAndBulkDisplayContentSection = null
+  }
 
   return {
     props: {
