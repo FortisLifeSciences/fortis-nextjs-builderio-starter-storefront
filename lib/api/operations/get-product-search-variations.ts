@@ -83,7 +83,7 @@ export default async function getProductSearchVariations(
       console.log('This is variant level response', variationResponse)
 
       const variationProduct: Product = variationResponse.data?.product
-
+      console.log('This is variationProduct', variationProduct)
       if (variationProduct) {
         const selectedValues =
           variationProduct.options
@@ -106,6 +106,6 @@ export default async function getProductSearchVariations(
       }
     }
   }
-
+  console.log('In get product search variations', result)
   return result
 }
