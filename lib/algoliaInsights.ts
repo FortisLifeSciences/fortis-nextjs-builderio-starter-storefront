@@ -7,8 +7,8 @@ declare global {
     aa?: typeof aa
   }
 }
-
-import { getAnalyticsConsentFromLocalStorage } from './getAnalyticsConsent'
+// Utility function to get consent status
+//import { getAnalyticsConsentFromLocalStorage } from './getAnalyticsConsent'
 
 export const initAlgoliaInsightsClient = () => {
   // Ensure this runs only on the client-side and only once

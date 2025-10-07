@@ -1,5 +1,6 @@
 import { BuilderComponent, builder, Builder } from '@builder.io/react'
 import getConfig from 'next/config'
+import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
@@ -54,6 +55,7 @@ Builder.registerComponent(ProductRecommendations, {
     },
   ],
 })
+
 function getMetaData(product: Product): MetaData {
   return {
     title: product?.content?.metaTagTitle || null,
@@ -69,7 +71,14 @@ export async function getStaticProps(
 ): Promise<GetStaticPropsResult<any>> {
   const { locale, params } = context
   const { productCode } = params as any
-  const product = await getProduct(productCode)
+  console.log('productCode in getstaticprops', productCode)
+  let product = null
+  try {
+    product = await getProduct(productCode)
+  } catch (error) {
+    console.error(`Failed to fetch product: ${productCode}`, error)
+  }
+  console.log('product api call returns product in getstaticprops as:', product)
   const variantCodes = product?.variations
   const relatedProducts = []
   const relatedProductData =
@@ -104,8 +113,16 @@ export async function getStaticProps(
     }
   }
 
-  const productVariations = await getProductSearchVariations(productCode, variantCodes)
+  let productVariations = []
+  try {
+    productVariations = await getProductSearchVariations(productCode, variantCodes)
+  } catch (error) {
+    console.error(`Failed to fetch variations for: ${productCode} in getstaticprops`, error)
+    return { notFound: true }
+  }
+
   const categoriesTree = await getCategoryTree()
+
   if (!product) {
     return { notFound: true }
   }
@@ -117,30 +134,44 @@ export async function getStaticProps(
   const targetingBrandName = productCode.split('-')[0].toLowerCase()
 
   const pdpBuilderSectionKey = publicRuntimeConfig?.builderIO?.modelKeys?.productDetailSection || ''
-  const section = await builder
-    .get(pdpBuilderSectionKey, { userAttributes: { slug: `product-${productCode}` } })
-    .promise()
+  let section = null
+  let PDPCustomAndBulkDisplayContentSection = null
+  try {
+    section = await builder
+      .get(pdpBuilderSectionKey, { userAttributes: { slug: `product-${productCode}` } })
+      .promise()
+  } catch (error) {
+    console.error(`Failed to fetch Builder section for ${productCode}:`, error)
+    section = null
+  }
 
   const PDPCustomAndBulkDisplaySectionKey =
     publicRuntimeConfig?.builderIO?.modelKeys?.PDPCustomAndBulkDisplaySection || ''
-  const PDPCustomAndBulkDisplayContentSection = await builder
-    .get(PDPCustomAndBulkDisplaySectionKey, {
-      userAttributes: {
-        brand: [targetingBrandName],
-      },
-    })
-    .promise()
+  try {
+    PDPCustomAndBulkDisplayContentSection = await builder
+      .get(PDPCustomAndBulkDisplaySectionKey, {
+        userAttributes: {
+          brand: [targetingBrandName],
+        },
+      })
+      .promise()
+  } catch (error) {
+    console.error(`Failed to fetch Builder custom section for ${targetingBrandName}:`, error)
+    PDPCustomAndBulkDisplayContentSection = null
+  }
+
+  console.log('product, productvariations', product, productVariations)
 
   return {
     props: {
       product,
       productVariations,
+      metaData: getMetaData(product),
       categoriesTree,
       section: section || null,
       PDPCustomAndBulkDisplayContentSection: PDPCustomAndBulkDisplayContentSection || null,
       PDPCustomAndBulkDisplaySectionKey: PDPCustomAndBulkDisplaySectionKey || '',
       relatedProducts,
-      metaData: getMetaData(product),
       ...(await serverSideTranslations(locale as string, ['common'])),
     },
     revalidate: parseInt(serverRuntimeConfig.revalidate),
@@ -155,7 +186,7 @@ export async function getStaticPaths(): Promise<GetStaticPathsResult> {
   } as CategorySearchParams)
   const items = searchResult?.data?.products?.items || []
   const paths: string[] = items.map(buildProductPath)
-  return { paths, fallback: true }
+  return { paths, fallback: 'blocking' }
 }
 
 const ProductDetailPage: NextPage<ProductPageType> = (props) => {
@@ -166,6 +197,11 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
     PDPCustomAndBulkDisplayContentSection,
     PDPCustomAndBulkDisplaySectionKey,
   } = props
+
+  // const metaSource = (props.metaData || product || {}) as Record<string, unknown>
+  const metaTitle = props?.metaData?.title || product?.content?.metaTagTitle
+  const metaDescription = props?.metaData?.description || product?.content?.metaTagDescription
+  const canonicalUrl = props?.metaData?.canonicalUrl ? props?.metaData?.canonicalUrl : undefined
 
   const router = useRouter()
 
@@ -185,8 +221,20 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
   }
   const pdpBuilderSectionKey = publicRuntimeConfig?.builderIO?.modelKeys?.productDetailSection || ''
   const breadcrumbs = product ? productGetters.getBreadcrumbs(product) : []
+
   return (
     <>
+      <Head>
+        {/* marker to indicate server-side page meta is present */}
+        {/* {metaTitle && <meta name="ssr-meta" data-ssr-meta="true" content="true" />} */}
+        {metaTitle && <title>{metaTitle}</title>}
+        {metaDescription && <meta name="description" content={metaDescription} />}
+        {/* {metaKeywords && <meta name="keywords" content={metaKeywords} />}
+        {metaImage && <meta property="og:image" content={metaImage} />} */}
+        {metaTitle && <meta property="og:title" content={metaTitle} />}
+        {metaDescription && <meta property="og:description" content={metaDescription} />}
+        {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+      </Head>
       {productResponseData ? (
         <ProductDetailTemplate
           product={{ ...product, ...productResponseData }}

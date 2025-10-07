@@ -218,6 +218,31 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
     }
   }, [searchQuery, sortIndex, pagination.productsPage, selectedFilters])
 
+  const trackViewedFilters = (filters: Record<string, string[]>) => {
+    const filterList = Object.entries(filters).flatMap(([facet, values]) =>
+      values.map((v) => `${facet}:${v}`)
+    )
+
+    //console.log('trackViewedFilters:', filterList)
+
+    window.dataLayer = window.dataLayer || []
+    window.dataLayer.push({
+      event: 'Algolia Filter View',
+      algoliaFilters: filterList,
+    })
+
+    // Optional: Algolia insights (uncomment if needed)
+    /*
+    if (filterList.length > 0) {
+      aa('viewedFilters', {
+        eventName: 'Filters Applied',
+        index: 'products',
+        filters: filterList,
+      })
+    }
+    */
+  }
+
   const handleFilterChange = (facet: string, value: string) => {
     setSelectedFilters((prev) => {
       const newFilters = { ...prev }
@@ -230,6 +255,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
       } else {
         newFilters[facet] = [value]
       }
+      trackViewedFilters(newFilters)
       return newFilters
     })
   }
@@ -241,12 +267,14 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
       if (newFilters[facet].length === 0) {
         delete newFilters[facet]
       }
+      trackViewedFilters(newFilters)
       return newFilters
     })
   }
 
   const handleClearAllFilters = () => {
     setSelectedFilters({})
+    trackViewedFilters({})
   }
 
   const onFilterByClose = () => {

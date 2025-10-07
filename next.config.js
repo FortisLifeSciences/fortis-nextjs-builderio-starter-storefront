@@ -13,7 +13,7 @@ const loadCustomRedirects = () => {
     const rawData = fs.readFileSync(redirectsFilePath)
     try {
       const redirects = JSON.parse(rawData)
-      console.log('raw redirects', rawData)
+      // console.log('raw redirects', rawData)
       return redirects
     } catch (error) {
       console.error('Error parsing custom redirects JSON:', error)
