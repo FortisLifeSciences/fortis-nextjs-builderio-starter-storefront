@@ -1,5 +1,6 @@
 import { BuilderComponent, builder, Builder } from '@builder.io/react'
 import getConfig from 'next/config'
+import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
@@ -54,6 +55,32 @@ Builder.registerComponent(ProductRecommendations, {
     },
   ],
 })
+
+// function getMetaData(data: unknown): MetaData {
+//   const d = (data || {}) as Record<string, unknown>
+//   const content = (d['content'] || {}) as Record<string, unknown>
+
+//   const title =
+//     typeof content['metaTagTitle'] === 'string' ? (content['metaTagTitle'] as string) : null
+//   const description =
+//     typeof content['metaTagDescription'] === 'string'
+//       ? (content['metaTagDescription'] as string)
+//       : null
+//   const keywords =
+//     typeof content['metaTagKeywords'] === 'string' ? (content['metaTagKeywords'] as string) : null
+
+//   const canonicalUrl = null
+//   const robots = null
+
+//   return {
+//     title,
+//     description,
+//     keywords,
+//     canonicalUrl,
+//     robots,
+//   }
+// }
+
 function getMetaData(product: Product): MetaData {
   return {
     title: product?.content?.metaTagTitle || null,
@@ -120,8 +147,7 @@ export async function getStaticProps(
   }
 
   const categoriesTree = await getCategoryTree()
-  console.log('In getstaticprops: product', product)
-  console.log('In getstaticprops: variations', productVariations)
+
   if (!product) {
     return { notFound: true }
   }
@@ -195,6 +221,15 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
     PDPCustomAndBulkDisplaySectionKey,
   } = props
 
+  // const metaSource = (props.metaData || product || {}) as Record<string, unknown>
+  const metaTitle = props?.metaData?.title
+    ? props?.metaData?.title
+    : product?.content?.metaTagTitle || null
+  const metaDescription = props?.metaData?.description
+    ? props?.metaData?.description
+    : product?.content?.metaTagDescription || null
+  const canonicalUrl = props?.metaData?.canonicalUrl ? props?.metaData?.canonicalUrl : undefined
+
   const router = useRouter()
 
   const { isFallback, query } = router
@@ -213,8 +248,20 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
   }
   const pdpBuilderSectionKey = publicRuntimeConfig?.builderIO?.modelKeys?.productDetailSection || ''
   const breadcrumbs = product ? productGetters.getBreadcrumbs(product) : []
+
   return (
     <>
+      <Head>
+        {/* marker to indicate server-side page meta is present */}
+        {metaTitle && <meta name="ssr-meta" data-ssr-meta="true" content="true" />}
+        {metaTitle && <title>{metaTitle}</title>}
+        {metaDescription && <meta name="description" content={metaDescription} />}
+        {/* {metaKeywords && <meta name="keywords" content={metaKeywords} />}
+        {metaImage && <meta property="og:image" content={metaImage} />} */}
+        {metaTitle && <meta property="og:title" content={metaTitle} />}
+        {metaDescription && <meta property="og:description" content={metaDescription} />}
+        {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+      </Head>
       {productResponseData ? (
         <ProductDetailTemplate
           product={{ ...product, ...productResponseData }}
