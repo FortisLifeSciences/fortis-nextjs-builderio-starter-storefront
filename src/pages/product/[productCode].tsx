@@ -56,31 +56,6 @@ Builder.registerComponent(ProductRecommendations, {
   ],
 })
 
-// function getMetaData(data: unknown): MetaData {
-//   const d = (data || {}) as Record<string, unknown>
-//   const content = (d['content'] || {}) as Record<string, unknown>
-
-//   const title =
-//     typeof content['metaTagTitle'] === 'string' ? (content['metaTagTitle'] as string) : null
-//   const description =
-//     typeof content['metaTagDescription'] === 'string'
-//       ? (content['metaTagDescription'] as string)
-//       : null
-//   const keywords =
-//     typeof content['metaTagKeywords'] === 'string' ? (content['metaTagKeywords'] as string) : null
-
-//   const canonicalUrl = null
-//   const robots = null
-
-//   return {
-//     title,
-//     description,
-//     keywords,
-//     canonicalUrl,
-//     robots,
-//   }
-// }
-
 function getMetaData(product: Product): MetaData {
   return {
     title: product?.content?.metaTagTitle || null,
@@ -185,16 +160,18 @@ export async function getStaticProps(
     PDPCustomAndBulkDisplayContentSection = null
   }
 
+  console.log('product, productvariations', product, productVariations)
+
   return {
     props: {
       product,
       productVariations,
+      metaData: getMetaData(product),
       categoriesTree,
       section: section || null,
       PDPCustomAndBulkDisplayContentSection: PDPCustomAndBulkDisplayContentSection || null,
       PDPCustomAndBulkDisplaySectionKey: PDPCustomAndBulkDisplaySectionKey || '',
       relatedProducts,
-      metaData: getMetaData(product),
       ...(await serverSideTranslations(locale as string, ['common'])),
     },
     revalidate: parseInt(serverRuntimeConfig.revalidate),
@@ -209,7 +186,7 @@ export async function getStaticPaths(): Promise<GetStaticPathsResult> {
   } as CategorySearchParams)
   const items = searchResult?.data?.products?.items || []
   const paths: string[] = items.map(buildProductPath)
-  return { paths, fallback: true }
+  return { paths, fallback: 'blocking' }
 }
 
 const ProductDetailPage: NextPage<ProductPageType> = (props) => {
@@ -222,12 +199,8 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
   } = props
 
   // const metaSource = (props.metaData || product || {}) as Record<string, unknown>
-  const metaTitle = props?.metaData?.title
-    ? props?.metaData?.title
-    : product?.content?.metaTagTitle || null
-  const metaDescription = props?.metaData?.description
-    ? props?.metaData?.description
-    : product?.content?.metaTagDescription || null
+  const metaTitle = props?.metaData?.title || product?.content?.metaTagTitle
+  const metaDescription = props?.metaData?.description || product?.content?.metaTagDescription
   const canonicalUrl = props?.metaData?.canonicalUrl ? props?.metaData?.canonicalUrl : undefined
 
   const router = useRouter()
@@ -253,7 +226,7 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
     <>
       <Head>
         {/* marker to indicate server-side page meta is present */}
-        {metaTitle && <meta name="ssr-meta" data-ssr-meta="true" content="true" />}
+        {/* {metaTitle && <meta name="ssr-meta" data-ssr-meta="true" content="true" />} */}
         {metaTitle && <title>{metaTitle}</title>}
         {metaDescription && <meta name="description" content={metaDescription} />}
         {/* {metaKeywords && <meta name="keywords" content={metaKeywords} />}
