@@ -82,6 +82,7 @@ module.exports = {
   },
   publicRuntimeConfig: {
     currentUrl: process.env.CURRENT_DOMAIN,
+    baseUrl: process.env.NEXT_PUBLIC_URL,
     metaData: {
       siteTitle: 'Fortis Life Sciences',
       defaultTitle: 'Fortis Life Sciences',

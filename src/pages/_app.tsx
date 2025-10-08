@@ -59,6 +59,7 @@ const App = (props: KiboAppProps) => {
     pageProps?.metaData?.title || pageProps?.page?.data?.title || defaultTitle || siteTitle
   const pageDescription =
     pageProps?.metaData?.description || pageProps?.page?.data?.description || defaultDescription
+  const canonicalUrl = pageProps?.metaData?.canonicalUrl || null
   const pageImage = pageProps?.metaData?.image || pageProps?.page?.data?.image
 
   // Determine if the page itself provided metadata (server-side). If so, avoid rendering
@@ -67,7 +68,8 @@ const App = (props: KiboAppProps) => {
     pageProps?.metaData?.title ||
     pageProps?.page?.data?.title ||
     pageProps?.metaData?.description ||
-    pageProps?.page?.data?.description
+    pageProps?.page?.data?.description ||
+    pageProps?.metaData?.canonicalUrl
   )
 
   const [googleReCaptcha, setGoogleReCaptcha] = useState()
@@ -190,6 +192,7 @@ const App = (props: KiboAppProps) => {
 
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
+        <link rel="canonical" href={canonicalUrl} key="canonical" />
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
