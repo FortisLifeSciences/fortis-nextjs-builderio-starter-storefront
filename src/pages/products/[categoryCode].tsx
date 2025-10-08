@@ -66,7 +66,12 @@ function getMetaData(data: unknown): MetaData {
   const description = typeof d['description'] === 'string' ? (d['description'] as string) : null
   const keywords =
     typeof d['metaTagKeywords'] === 'string' ? (d['metaTagKeywords'] as string) : null
-  const canonicalUrl = typeof d['canonicalUrl'] === 'string' ? (d['canonicalUrl'] as string) : null
+  const canonicalUrl =
+    typeof d['canonical'] === 'string'
+      ? (d['canonical'] as string)
+      : typeof d['canonicalUrl'] === 'string'
+      ? (d['canonicalUrl'] as string)
+      : null
   const robots = d['noIndex'] === true ? 'noindex,nofollow' : null
 
   return {
@@ -425,7 +430,10 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
     null
   const metaImage = metaSource?.image || section?.data?.image || null
   const metaKeywords = metaSource?.keywords || section?.data?.metaTagKeywords || null
-  const canonicalUrl = metaSource?.canonicalUrl || section?.data?.canonicalUrl || null
+  const canonicalUrl =
+    metaSource?.canonicalUrl ||
+    section?.data?.canonicalUrl ||
+    `${publicRuntimeConfig?.baseUrl || ''}/products/${categoryCode}`
 
   useEffect(() => {
     window.dataLayer = window.dataLayer || []

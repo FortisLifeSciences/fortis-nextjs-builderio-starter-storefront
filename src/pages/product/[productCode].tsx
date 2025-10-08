@@ -57,11 +57,17 @@ Builder.registerComponent(ProductRecommendations, {
 })
 
 function getMetaData(product: Product): MetaData {
+  const categoryCode = product?.categories?.[0]?.categoryCode || ''
+  const productSlug = product?.content?.seoFriendlyUrl?.replace(/^\/+/, '') || ''
+  const parentProductCode = product?.productCode || ''
   return {
     title: product?.content?.metaTagTitle || null,
     description: product?.content?.metaTagDescription || null,
     keywords: product?.content?.metaTagKeywords || null,
-    canonicalUrl: null,
+    canonicalUrl:
+      `${
+        publicRuntimeConfig?.baseUrl || 'https://www.fortislife.com/'
+      }products/${categoryCode}/${productSlug}/${parentProductCode}` || null,
     robots: null,
   }
 }
@@ -71,14 +77,14 @@ export async function getStaticProps(
 ): Promise<GetStaticPropsResult<any>> {
   const { locale, params } = context
   const { productCode } = params as any
-  console.log('productCode in getstaticprops', productCode)
+  // console.log('productCode in getstaticprops', productCode)
   let product = null
   try {
     product = await getProduct(productCode)
   } catch (error) {
     console.error(`Failed to fetch product: ${productCode}`, error)
   }
-  console.log('product api call returns product in getstaticprops as:', product)
+  // console.log('product api call returns product in getstaticprops as:', product)
   const variantCodes = product?.variations
   const relatedProducts = []
   const relatedProductData =
@@ -160,8 +166,6 @@ export async function getStaticProps(
     PDPCustomAndBulkDisplayContentSection = null
   }
 
-  console.log('product, productvariations', product, productVariations)
-
   return {
     props: {
       product,
@@ -201,10 +205,7 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
   // const metaSource = (props.metaData || product || {}) as Record<string, unknown>
   const metaTitle = props?.metaData?.title || product?.content?.metaTagTitle
   const metaDescription = props?.metaData?.description || product?.content?.metaTagDescription
-  const canonicalUrl = props?.metaData?.canonicalUrl ? props?.metaData?.canonicalUrl : undefined
-
   const router = useRouter()
-
   const { isFallback, query } = router
 
   const {
@@ -233,7 +234,9 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
         {metaImage && <meta property="og:image" content={metaImage} />} */}
         {metaTitle && <meta property="og:title" content={metaTitle} />}
         {metaDescription && <meta property="og:description" content={metaDescription} />}
-        {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+        {props?.metaData?.canonicalUrl && (
+          <link rel="canonical" href={props.metaData.canonicalUrl} key="canonical" />
+        )}
       </Head>
       {productResponseData ? (
         <ProductDetailTemplate

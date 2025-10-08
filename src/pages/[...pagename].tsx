@@ -24,7 +24,12 @@ function getMetaData(data: unknown): MetaData {
   const description = typeof d['description'] === 'string' ? (d['description'] as string) : null
   const keywords =
     typeof d['metaTagKeywords'] === 'string' ? (d['metaTagKeywords'] as string) : null
-  const canonicalUrl = typeof d['canonicalUrl'] === 'string' ? (d['canonicalUrl'] as string) : null
+  const canonicalUrl =
+    typeof d['canonicalUrl'] === 'string'
+      ? (d['canonicalUrl'] as string)
+      : typeof d['canonical'] === 'string'
+      ? (d['canonical'] as string)
+      : null
   const robots = d['noIndex'] === true ? 'noindex,nofollow' : null
 
   return {
@@ -121,6 +126,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       return { notFound: true } // This will render `pages/404.tsx`
     }
   }
+
+  const metaData = getMetaData(page?.data || section?.data)
 
   return {
     props: {
