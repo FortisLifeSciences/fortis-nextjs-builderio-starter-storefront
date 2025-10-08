@@ -52,6 +52,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     pagename = pathnameArr
   }
 
+  const pageURL = Array.isArray(pathnameArr) ? pathnameArr.join('/') : pathnameArr || ''
+
   let resourcesPage = false
   let resourceCategoryCode = null
   let pCategory = null
@@ -142,19 +144,30 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       facets: facets || null,
       pathLength,
       urlFirstPart: pathnameArr?.[0] || null,
+      pageURL: pageURL || null,
       ...(await serverSideTranslations(locale as string, ['common'])),
     },
   }
 }
 
 const Page = (props: any) => {
-  const { page, resourcesPage, section, resourceCategoryCode, facets, pathLength, pCategory } =
-    props
+  const {
+    page,
+    resourcesPage,
+    section,
+    resourceCategoryCode,
+    facets,
+    pathLength,
+    pCategory,
+    pageURL,
+  } = props
   const noIndex = page?.data?.noIndex
     ? page?.data?.noIndex
     : section?.data?.noIndex
     ? section?.data?.noIndex
     : false
+
+  const staticCanonicalURL = `${publicRuntimeConfig?.baseUrl || ''}${pageURL}`
 
   // Server-side metadata: prefer explicit metaData prop, fall back to builder page/section data
   const metaSource = props.metaData || page?.data || section?.data || {}
@@ -174,7 +187,10 @@ const Page = (props: any) => {
   const metaKeywords =
     metaSource?.keywords || page?.data?.metaTagKeywords || section?.data?.metaTagKeywords || null
   const canonicalUrl =
-    metaSource?.canonicalUrl || page?.data?.canonicalUrl || section?.data?.canonicalUrl || null
+    metaSource?.canonicalUrl ||
+    page?.data?.canonicalUrl ||
+    section?.data?.canonicalUrl ||
+    staticCanonicalURL
 
   if (resourcesPage && resourceCategoryCode) {
     return (

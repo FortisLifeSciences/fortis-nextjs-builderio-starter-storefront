@@ -433,7 +433,7 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
   const canonicalUrl =
     metaSource?.canonicalUrl ||
     section?.data?.canonicalUrl ||
-    `${publicRuntimeConfig?.baseUrl || ''}/products/${categoryCode}`
+    `${publicRuntimeConfig?.baseUrl || ''}products/${categoryCode}`
 
   useEffect(() => {
     window.dataLayer = window.dataLayer || []
