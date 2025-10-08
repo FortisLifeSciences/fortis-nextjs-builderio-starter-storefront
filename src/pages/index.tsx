@@ -59,7 +59,8 @@ const Home: NextPageWithLayout<HomePageProps> = (props) => {
     null
   const metaImage = metaSource?.image || page?.data?.image || null
   const metaKeywords = metaSource?.keywords || page?.data?.metaTagKeywords || null
-  const canonicalUrl = metaSource?.canonicalUrl || page?.data?.canonicalUrl || null
+  const canonicalUrl =
+    metaSource?.canonicalUrl || page?.data?.canonicalUrl || publicRuntimeConfig?.baseUrl || null
   return (
     <>
       <Head>
