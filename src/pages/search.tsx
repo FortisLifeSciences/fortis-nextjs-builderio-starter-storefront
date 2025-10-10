@@ -566,7 +566,15 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
                           {t('no-of-products', { count: result?.nbHits ?? 0 })}
                         </Box>
                       </Box>
-                      <Box className={isListView ? 'product-list-view' : 'product-grid-view'}>
+                      <Box
+                        className={
+                          isMobile
+                            ? 'product-grid-view'
+                            : isListView
+                            ? 'product-list-view'
+                            : 'product-grid-view'
+                        }
+                      >
                         <div className="productviewstructure">
                           {result.hits.slice(0, 16).map((hit: any, i: number) => (
                             <div
