@@ -34,7 +34,7 @@ export const LeftTextHeroStyle = {
       width: '100%',
       height: 'auto',
       position: 'absolute',
-      top: '30%',
+      top: '35%',
       padding: '20px',
       zIndex: 1,
       display: 'flex',
@@ -124,21 +124,21 @@ export const LeftTextHeroStyle = {
       position: 'absolute',
       width: '100%',
       height: '285px',
-      top: '73%',
+      top: '77%',
       right: 0,
       zIndex: 2,
       marginTop: '20px',
-      '@media (min-width: 384px) and (max-width: 427px)': {
+      '@media (min-width: 384px) and (max-width: 422px)': {
+        top: '79%',
+      },
+      '@media (min-width: 423px) and (max-width: 500px)': {
         top: '72%',
       },
-      '@media (min-width: 428px) and (max-width: 500px)': {
-        top: '68%',
+      '@media (min-width: 501px) and (max-width: 576px)': {
+        top: '70%',
       },
-      '@media (min-width: 501px) and (max-width: 577px)': {
-        top: '66%',
-      },
-      '@media (min-width: 578px) and (max-width: 599px)': {
-        top: '62%',
+      '@media (min-width: 577px) and (max-width: 599px)': {
+        top: '65%',
       },
     },
     '@media (min-width: 601px) and (max-width: 990px)': {

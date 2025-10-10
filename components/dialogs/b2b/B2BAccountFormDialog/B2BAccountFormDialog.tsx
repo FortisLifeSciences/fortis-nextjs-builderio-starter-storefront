@@ -14,6 +14,7 @@ interface B2BAccountFormDialogProps {
   formTitle?: string
   primaryButtonText: string
   isAccountCreationError?: boolean
+  isSubmitting?: boolean
   onSave: (data: CreateCustomerB2bAccountParams) => void
   onClose: () => void
 }
@@ -27,6 +28,7 @@ const B2BAccountFormDialog = (props: B2BAccountFormDialogProps) => {
     b2BAccount,
     isAccountCreationError,
     primaryButtonText,
+    isSubmitting,
     onSave,
     onClose,
   } = props
@@ -47,6 +49,7 @@ const B2BAccountFormDialog = (props: B2BAccountFormDialogProps) => {
             isAddingAccountToChild={isAddingAccountToChild}
             isRequestAccount={isRequestAccount}
             primaryButtonText={primaryButtonText}
+            isSubmitting={isSubmitting}
             onSave={onSave}
             onClose={onClose}
           />
