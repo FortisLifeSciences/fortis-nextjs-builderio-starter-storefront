@@ -284,7 +284,15 @@ const ResourcesHitComponent = ({ categoryCode, facets }: { categoryCode: string;
               {t('no-of-products', { count: results?.nbHits ?? 0 })}
             </Box>
           </Box>
-          <Box className={isListView ? 'product-list-view' : 'product-grid-view'}>
+          <Box
+            className={
+              isMobile
+                ? 'product-grid-view'
+                : isListView
+                ? 'product-list-view'
+                : 'product-grid-view'
+            }
+          >
             {isMobile ? (
               <Hits hitComponent={ResourceHitGridView} />
             ) : isListView ? (
