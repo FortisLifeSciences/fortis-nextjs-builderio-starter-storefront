@@ -7,6 +7,7 @@ import ReorderRounded from '@mui/icons-material/ReorderRounded'
 import { Box, Button, Typography, useMediaQuery } from '@mui/material'
 import algoliasearch from 'algoliasearch'
 import getConfig from 'next/config'
+import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
@@ -59,15 +60,37 @@ const apiKey = publicRuntimeConfig?.builderIO?.apiKey
 
 builder.init(apiKey)
 
-function getMetaData(data: any): MetaData {
+function getMetaData(data: unknown): MetaData {
+  const d = (data || {}) as Record<string, unknown>
+  const title = typeof d['title'] === 'string' ? (d['title'] as string) : null
+  const description = typeof d['description'] === 'string' ? (d['description'] as string) : null
+  const keywords =
+    typeof d['metaTagKeywords'] === 'string' ? (d['metaTagKeywords'] as string) : null
+  const canonicalUrl =
+    typeof d['canonical'] === 'string'
+      ? (d['canonical'] as string)
+      : typeof d['canonicalUrl'] === 'string'
+      ? (d['canonicalUrl'] as string)
+      : null
+  const robots = d['noIndex'] === true ? 'noindex,nofollow' : null
+
   return {
-    title: data?.title || null,
-    description: data?.description || null,
-    keywords: data?.metaTagKeywords || null,
-    canonicalUrl: null,
-    robots: null,
+    title,
+    description,
+    keywords,
+    canonicalUrl,
+    robots,
   }
 }
+// function getMetaData(data: any): MetaData {
+//   return {
+//     title: data?.title || null,
+//     description: data?.description || null,
+//     keywords: data?.metaTagKeywords || null,
+//     canonicalUrl: null,
+//     robots: null,
+//   }
+// }
 
 export async function getStaticPaths() {
   const response = await productIndex.search('', {
@@ -370,7 +393,15 @@ const MyHitsComponent = ({
               {t('no-of-products', { count: results?.nbHits ?? 0 })}
             </Box>
           </Box>
-          <Box className={isListView ? 'product-list-view' : 'product-grid-view'}>
+          <Box
+            className={
+              isMobile
+                ? 'product-grid-view'
+                : isListView
+                ? 'product-list-view'
+                : 'product-grid-view'
+            }
+          >
             {isMobile ? (
               <Hits hitComponent={ProductHitGridView} />
             ) : isListView ? (
@@ -389,11 +420,28 @@ const MyHitsComponent = ({
 }
 
 const CategoryPage: NextPage<CategoryPageType> = (props) => {
+  const { section } = props
   const router = useRouter()
   const { publicRuntimeConfig } = getConfig()
   const categoryCode = (props.categoryCode as string) || (router.query.categoryCode as string)
   const facets = props.facets
   const searchableAttributes = props.searchableAttributes
+
+  // Server-side metadata: prefer explicit metaData prop, fall back to builder page/section data
+  const metaSource = props.metaData || section?.data || {}
+  const metaTitle =
+    metaSource?.title || section?.data?.title || publicRuntimeConfig?.metaData?.defaultTitle || null
+  const metaDescription =
+    metaSource?.description ||
+    section?.data?.description ||
+    publicRuntimeConfig?.metaData?.defaultDescription ||
+    null
+  const metaImage = metaSource?.image || section?.data?.image || null
+  const metaKeywords = metaSource?.keywords || section?.data?.metaTagKeywords || null
+  const canonicalUrl =
+    metaSource?.canonicalUrl ||
+    section?.data?.canonicalUrl ||
+    `${publicRuntimeConfig?.baseUrl || ''}products/${categoryCode}`
 
   useEffect(() => {
     window.dataLayer = window.dataLayer || []
@@ -407,6 +455,17 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
 
   return (
     <>
+      <Head>
+        {/* marker to indicate server-side page meta is present */}
+        {metaTitle && <meta name="ssr-meta" data-ssr-meta="true" content="true" />}
+        {metaTitle && <title>{metaTitle}</title>}
+        {metaDescription && <meta name="description" content={metaDescription} />}
+        {metaKeywords && <meta name="keywords" content={metaKeywords} />}
+        {metaImage && <meta property="og:image" content={metaImage} />}
+        {metaTitle && <meta property="og:title" content={metaTitle} />}
+        {metaDescription && <meta property="og:description" content={metaDescription} />}
+        {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+      </Head>
       <BuilderComponent
         model={publicRuntimeConfig?.builderIO?.modelKeys?.categoryTopSection}
         content={props.section}

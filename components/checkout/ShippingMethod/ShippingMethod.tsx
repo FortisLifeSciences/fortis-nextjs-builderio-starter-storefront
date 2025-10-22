@@ -474,16 +474,19 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
 
     // Shipping method attributes
     if (isOtherShippingMethod) {
-      if (lastOrderAttrsRef.current.fedEx !== '') {
+      if (lastOrderAttrsRef.current.fedEx !== '' || lastOrderAttrsRef.current.fedEx === '') {
         lastOrderAttrsRef.current.fedEx = ''
         upsertOrderAttribute(checkout.id as string, 'tenant~customerFedexAccountNumber', '')
       }
-      if (lastOrderAttrsRef.current.ups !== '') {
+      if (lastOrderAttrsRef.current.ups !== '' || lastOrderAttrsRef.current.ups === '') {
         lastOrderAttrsRef.current.ups = ''
         upsertOrderAttribute(checkout.id as string, 'tenant~customerUpsAccountNumber', '')
       }
     } else if (isFedExMethodSelected && fedExAccountNumber && fedExAccountNumber.length === 9) {
-      if (lastOrderAttrsRef.current.fedEx !== fedExAccountNumber) {
+      if (
+        lastOrderAttrsRef.current.fedEx !== fedExAccountNumber ||
+        lastOrderAttrsRef.current.fedEx !== ''
+      ) {
         lastOrderAttrsRef.current.fedEx = fedExAccountNumber
         upsertOrderAttribute(
           checkout.id as string,
@@ -496,7 +499,10 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         upsertOrderAttribute(checkout.id as string, 'tenant~customerUpsAccountNumber', '')
       }
     } else if (isUpsMethodSelected && upsAccountNumber && upsAccountNumber.length === 6) {
-      if (lastOrderAttrsRef.current.ups !== upsAccountNumber) {
+      if (
+        lastOrderAttrsRef.current.ups !== upsAccountNumber ||
+        lastOrderAttrsRef.current.ups !== ''
+      ) {
         lastOrderAttrsRef.current.ups = upsAccountNumber
         upsertOrderAttribute(
           checkout.id as string,

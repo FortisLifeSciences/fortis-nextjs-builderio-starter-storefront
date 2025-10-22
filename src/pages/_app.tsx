@@ -59,7 +59,18 @@ const App = (props: KiboAppProps) => {
     pageProps?.metaData?.title || pageProps?.page?.data?.title || defaultTitle || siteTitle
   const pageDescription =
     pageProps?.metaData?.description || pageProps?.page?.data?.description || defaultDescription
+  const canonicalUrl = pageProps?.metaData?.canonicalUrl || null
   const pageImage = pageProps?.metaData?.image || pageProps?.page?.data?.image
+
+  // Determine if the page itself provided metadata (server-side). If so, avoid rendering
+  // the default <title> and avoid client-side meta injection to prevent duplicates.
+  const pageProvidedMeta = !!(
+    pageProps?.metaData?.title ||
+    pageProps?.page?.data?.title ||
+    pageProps?.metaData?.description ||
+    pageProps?.page?.data?.description ||
+    pageProps?.metaData?.canonicalUrl
+  )
 
   const [googleReCaptcha, setGoogleReCaptcha] = useState()
   const [gtmId, setGtmId] = useState()
@@ -128,6 +139,9 @@ const App = (props: KiboAppProps) => {
     // Update metadata dynamically
 
     const updateMetaTags = () => {
+      // If the page provided SSR meta, skip client-side injection to avoid duplicates.
+      if (pageProvidedMeta) return
+
       const head = document.head
 
       // Helper function to update or create meta tags
@@ -161,13 +175,24 @@ const App = (props: KiboAppProps) => {
       })
     }
 
-    updateMetaTags()
+    // Also guard by presence of DOM marker meta (for SSR pages that added a marker)
+    const hasSsrMarker =
+      typeof document !== 'undefined' && !!document.querySelector('meta[name="ssr-meta"]')
+    if (!hasSsrMarker) updateMetaTags()
   }, [router.pathname, pageTitle, pageDescription, pageImage, pageProps?.metaData])
 
   return (
     <CacheProvider value={emotionCache}>
       <Head>
+        {/* Only render default title when the page did not provide one server-side */}
+        {/* {!pageProvidedMeta && pageTitle && <title>{pageTitle}</title>}
+        {!pageProvidedMeta && pageDescription && (
+          <meta name="description" content={pageDescription} />
+        )} */}
+
         <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        {canonicalUrl && <link rel="canonical" href={canonicalUrl} key="canonical" />}
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"

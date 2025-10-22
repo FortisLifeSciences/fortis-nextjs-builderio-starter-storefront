@@ -37,6 +37,7 @@ interface AccountHierarchyFormProps {
   isRequestAccount?: boolean
   primaryButtonText: string
   b2BAccount?: B2BAccount
+  isSubmitting?: boolean
   onSave: (data: CreateCustomerB2bAccountParams) => void
   onClose?: () => void
 }
@@ -66,6 +67,7 @@ const B2BAccountCreateForm = (props: AccountHierarchyFormProps) => {
     isRequestAccount = false,
     b2BAccount,
     primaryButtonText,
+    isSubmitting,
     onSave,
     onClose,
   } = props
@@ -132,15 +134,23 @@ const B2BAccountCreateForm = (props: AccountHierarchyFormProps) => {
     }
   }, [accounts, b2BAccount, setValue])
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     if (isLoading || !isValid) return
     setLoading(true)
-    const formValues = getValues()
-    onSave({
-      ...formValues,
-      parentAccount: selectedParentAccount,
-    })
-    setLoading(false)
+
+    try {
+      const formValues = getValues()
+
+      // Await the onSave if it's async (it should be)
+      await onSave({
+        ...formValues,
+        parentAccount: selectedParentAccount,
+      })
+    } catch (error) {
+      console.error('Form submission error:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleParentAccountChange = (name: string, value: string) => {
@@ -504,8 +514,8 @@ const B2BAccountCreateForm = (props: AccountHierarchyFormProps) => {
                     data-testid="submit-button"
                     variant="contained"
                     type="submit"
-                    loading={isLoading}
-                    disabled={!isValid}
+                    loading={isLoading || isSubmitting}
+                    disabled={!isValid || isLoading || isSubmitting}
                   >
                     {primaryButtonText}
                   </LoadingButton>

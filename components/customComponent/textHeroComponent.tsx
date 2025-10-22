@@ -17,8 +17,8 @@ const TextHero: React.FC<TextHeroProps> = ({ FirstImage, SecondImage, paragraphT
   const smScreen = useMediaQuery(theme.breakpoints.between('sm', 'md'))
 
   const truncatedText =
-    paragraphText && paragraphText.length > 160
-      ? `${paragraphText.substring(0, 160)}`
+    paragraphText && paragraphText.length > 600
+      ? `${paragraphText.substring(0, 600)}`
       : paragraphText
 
   return (
