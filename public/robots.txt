@@ -8,6 +8,15 @@ Allow: /
 # *
 User-agent: *
 Allow: /
+Allow: /images/
+Allow: /icons/
+Allow: /logos/
+Allow: /uploads/
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.svg$
+Allow: /*.webp$
 Disallow: /admin*
 Disallow: /cart*
 Disallow: /checkout*
@@ -23,7 +32,7 @@ Disallow: /nomore*
 Disallow: /registrations-sign-in*
 Disallow: /home-temp*
 Disallow: /test-pricelist*
-Disallow: /*?*
+# Disallow: /*?*
 
 # AhrefsSiteAudit
 User-agent: AhrefsSiteAudit
