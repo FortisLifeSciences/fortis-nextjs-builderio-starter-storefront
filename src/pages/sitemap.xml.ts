@@ -31,25 +31,22 @@ function generateSiteMap(cursors: ProductSearchRandomAccessCursor) {
   return `<?xml version="1.0" encoding="UTF-8"?>
   <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <sitemap>
-      <loc>${process.env.NEXT_PUBLIC_URL}/sitemap.xml/categories</loc>
+      <loc>${process.env.NEXT_PUBLIC_URL}sitemap.xml/categories</loc>
     </sitemap>
     ${cursors.cursorMarks
       ?.map(
         (id: string) =>
           `<sitemap><loc>${
             process.env.NEXT_PUBLIC_URL
-          }/sitemap.xml/productBatch/${encodeURIComponent(id)}</loc></sitemap>`
+          }sitemap.xml/productBatch/${encodeURIComponent(id)}</loc></sitemap>`
       )
       .join('')}
     <sitemap>
-      <loc>${process.env.NEXT_PUBLIC_URL}/sitemap.xml/builderUrls</loc>
+      <loc>${process.env.NEXT_PUBLIC_URL}sitemap.xml/builderUrls</loc>
     </sitemap>
   </sitemapindex>`
 }
 
-function SiteMap() {
-  // getServerSideProps will do the heavy lifting
-}
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   const cursors = await fetchCursorsData()
   const sitemap = generateSiteMap(cursors?.response)
@@ -61,4 +58,6 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   return { props: {} }
 }
 
-export default SiteMap
+export default function SiteMap() {
+  return null
+}
