@@ -31,7 +31,7 @@ async function fetchCursorsData(cursorMark: any) {
 
 function generateSiteMap(categoryItems: any) {
   return `<?xml version="1.0" encoding="UTF-8"?>
-  <urlset>
+  <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
      ${(categoryItems?.items || [])
        .map((product: Product) => {
          let productUrl = process.env.NEXT_PUBLIC_URL + 'product/' + product.productCode
