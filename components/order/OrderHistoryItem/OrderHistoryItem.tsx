@@ -93,7 +93,7 @@ const OrderHistoryItem = (props: OrderHistoryItemProps) => {
     router.push('/cart')
   }
 
-  return (
+  return orderStatus !== 'Pending' ? (
     <Stack>
       <Stack sx={styles.stack} direction="row" data-testid="history-item">
         <Stack sx={{ width: '95%' }} gap={0.6}>
@@ -128,6 +128,8 @@ const OrderHistoryItem = (props: OrderHistoryItemProps) => {
         {mdScreen ? <Divider sx={{ borderColor: 'grey.500' }} /> : <FullWidthDivider />}
       </Stack>
     </Stack>
+  ) : (
+    ''
   )
 }
 
