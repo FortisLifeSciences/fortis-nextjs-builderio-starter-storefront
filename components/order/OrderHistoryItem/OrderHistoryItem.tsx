@@ -93,7 +93,10 @@ const OrderHistoryItem = (props: OrderHistoryItemProps) => {
     router.push('/cart')
   }
 
-  return orderStatus !== 'Pending' ? (
+  return orderStatus === 'Accepted' ||
+    orderStatus === 'Processing' ||
+    orderStatus === 'Completed' ||
+    orderStatus === 'Cancelled' ? (
     <Stack>
       <Stack sx={styles.stack} direction="row" data-testid="history-item">
         <Stack sx={{ width: '95%' }} gap={0.6}>
