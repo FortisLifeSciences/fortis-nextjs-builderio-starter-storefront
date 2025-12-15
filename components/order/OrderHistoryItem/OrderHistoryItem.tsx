@@ -92,7 +92,7 @@ const OrderHistoryItem = (props: OrderHistoryItemProps) => {
     await handleAddListToCart()
     router.push('/cart')
   }
-
+  // Update order statuses here as needed
   return orderStatus === 'Accepted' ||
     orderStatus === 'Processing' ||
     orderStatus === 'Completed' ||
