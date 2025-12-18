@@ -65,6 +65,39 @@ const AlgoliaAutocomplete = () => {
   const handleEnterSearch = (value: string) => {
     router.push({ pathname: '/search', query: { query: value } }) // 👈 updated
   }
+  useEffect(() => {
+    const wrapper = document.getElementById('autocomplete') as HTMLElement | null
+
+    const getPanel = () => document.querySelector<HTMLElement>('.aa-Panel') ?? null
+
+    const updateContentOffset = () => {
+      if (wrapper) {
+        const panel = getPanel()
+        if (panel) {
+          const top = wrapper.getBoundingClientRect().top
+          panel.style.top = `${top + 24}px`
+        }
+      }
+    }
+
+    if (!wrapper) return
+
+    // 1. Watch wrapper size
+    const resizeObs = new ResizeObserver(updateContentOffset)
+    resizeObs.observe(wrapper)
+
+    // 2. Watch for the panel being added/removed
+    const mutationObs = new MutationObserver(updateContentOffset)
+    mutationObs.observe(document.body, { childList: true, subtree: true })
+
+    // Initial run
+    updateContentOffset()
+
+    return () => {
+      resizeObs.disconnect()
+      mutationObs.disconnect()
+    }
+  }, [])
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -227,7 +260,7 @@ const AlgoliaAutocomplete = () => {
     }) => {
       const sources: any[] = []
 
-      if (query.length < 2) return sources
+      if (query.length < 1) return sources
 
       sources.push(
         // Products source
@@ -249,7 +282,15 @@ const AlgoliaAutocomplete = () => {
                     productHits: results[0].nbHits,
                   })
                 }
-                return hits
+
+                const items = (results[0] as any)?.hits || []
+
+                for (let i = 0; i < items.length; i++) {
+                  const item = items[i] as any
+                  item.__autocomplete_position = i + 1
+                }
+
+                return items
               },
             })
           },
@@ -261,7 +302,14 @@ const AlgoliaAutocomplete = () => {
               return html`<h4>Products</h4>`
             },
             item({ item, html }: { item: any; html: any }) {
-              const link = (item && item.product_url) || '#'
+              // const link = (item && item.product_url) || '#'
+              const link =
+                item && item.product_url
+                  ? item.product_url +
+                    (item.product_url.includes('?selected=')
+                      ? '&queryID=' + item.__autocomplete_queryID
+                      : '?queryID=' + item.__autocomplete_queryID)
+                  : '#'
               const title =
                 typeof item && item.product_name === 'string'
                   ? item.product_name.split(' | ')[0]
@@ -287,9 +335,20 @@ const AlgoliaAutocomplete = () => {
               const name = item.slice_product ? item.product_name_variant : item.product_name
               const sku = item.slice_product ? item.sku : item.plp_catalog_number
               const showNewTag = item.new_product
+              const dataInsightMethod = 'clickedObjectIDsAfterSearch'
 
               return html`<div class="aa-ItemWrapper">
-                <a href="${link}" target="_self" rel="noopener noreferrer" class="aa-CustomCard">
+                <a
+                  href="${link}"
+                  target="_self"
+                  rel="noopener noreferrer"
+                  class="aa-CustomCard"
+                  data-insights-object-id="${item.objectID}"
+                  data-insights-position="${item.__autocomplete_position}"
+                  data-insights-query-id="${item.__autocomplete_queryID}"
+                  data-insights-index="${item.__autocomplete_indexName}"
+                  data-insights-method="${dataInsightMethod}"
+                >
                   ${showNewTag
                     ? html`<div
                         class="aa-NewTag"
@@ -340,7 +399,13 @@ const AlgoliaAutocomplete = () => {
                     pageHits: results[0].nbHits,
                   })
                 }
-                return hits
+                const items = (results[0] as any)?.hits || []
+                for (let i = 0; i < items.length; i++) {
+                  const item = items[i] as any
+                  item.__autocomplete_position = i + 1
+                }
+
+                return items
               },
             })
           },
@@ -368,6 +433,7 @@ const AlgoliaAutocomplete = () => {
               const iconHTML = resourceTypeIcon
                 ? html`<span class="material-symbols-outlined">${resourceTypeIcon.value}</span>`
                 : html`<span class="material-symbols-outlined">description</span>`
+              const dataInsightMethod = 'clickedObjectIDsAfterSearch'
 
               return html`<div class="aa-itemWrapper">
                 <div class="aa-ItemContent">
@@ -376,7 +442,17 @@ const AlgoliaAutocomplete = () => {
                       ? html`<img src="${image}" alt="${title}" class="aa-ItemImage" />`
                       : iconHTML}
                   </div>
-                  <a class="aa-ItemTitle" href="${link}" target="_self" rel="noopener noreferrer">
+                  <a
+                    class="aa-ItemTitle"
+                    href="${link}"
+                    target="_self"
+                    rel="noopener noreferrer"
+                    data-insights-object-id="${item.objectID}"
+                    data-insights-position="${item.__autocomplete_position}"
+                    data-insights-query-id="${item.__autocomplete_queryID}"
+                    data-insights-index="${item.__autocomplete_indexName}"
+                    data-insights-method="${dataInsightMethod}"
+                  >
                     ${title.split(' | ')[0]}
                   </a>
                 </div>

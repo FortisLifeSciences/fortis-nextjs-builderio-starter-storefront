@@ -53,6 +53,7 @@ const LoginDialog = (props: any) => {
   const { login } = useAuthContext()
   const { showModal, closeModal } = useModalContext()
   const { createCustomerB2bAccount } = useCreateCustomerB2bAccountMutation()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const onRegisterClick = () => {
     showModal({
@@ -63,6 +64,7 @@ const LoginDialog = (props: any) => {
         primaryButtonText: t('create-account'),
         formTitle: t('b2b-account-request'),
         isAccountCreationError: false,
+        isSubmitting,
         onSave: (formValues: CreateCustomerB2bAccountParams) => handleAccountRequest(formValues),
         onClose: () => closeModal(),
       },
@@ -90,78 +92,158 @@ const LoginDialog = (props: any) => {
     fetchSettings()
   }, [])
 
+  // const handleAccountRequest = async (formValues: CreateCustomerB2bAccountParams) => {
+  //   const variables = buildCreateCustomerB2bAccountParams(formValues)
+  //   const emailAddress = formValues?.emailAddress
+  //   const emailDomain = extractDomain(emailAddress)
+  //   const entityListFullName = 'B2BAccountMapping@fortis'
+  //   const entityPayLoad = {
+  //     entityListFullName: entityListFullName,
+  //     id: emailDomain,
+  //   }
+
+  //   const getExistingUser = await fetch('/api/user/getAccountsByUser', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify({ emailAddress }),
+  //   })
+
+  //   const userDetails = await getExistingUser.json()
+
+  //   if (userDetails.success === true) {
+  //     showModal({ Component: ExistingUserDialog })
+  //   } else {
+  //     const entityResponse = await fetch('/api/user/get-entity', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ entityPayLoad }),
+  //     })
+
+  //     const entityResult = await entityResponse.json()
+
+  //     if ((googleReCaptcha as any)?.reCaptchAccountCreation) {
+  //       try {
+  //         // Ensure grecaptcha is available and ready
+  //         const siteKey = (googleReCaptcha as any)?.accountCreationSiteKey
+  //           ? (googleReCaptcha as any)?.accountCreationSiteKey
+  //           : process.env.accountCreationSiteKey
+
+  //         if (typeof grecaptcha !== 'undefined' && grecaptcha.enterprise) {
+  //           grecaptcha.enterprise.ready(async () => {
+  //             try {
+  //               const reCaptchaResponseCode = await grecaptcha.enterprise.execute(siteKey, {
+  //                 action: 'signup',
+  //               })
+  //               const payLoad = {
+  //                 googleReCaptcha: googleReCaptcha,
+  //                 responseKey: reCaptchaResponseCode,
+  //               }
+  //               const response = await fetch('/api/user/validate-recaptcha', {
+  //                 method: 'POST',
+  //                 headers: {
+  //                   'Content-Type': 'application/json',
+  //                 },
+  //                 body: JSON.stringify({ payLoad }),
+  //               })
+  //               const data = await response.json()
+  //               processUpdatedVariables(data, entityResult, variables)
+  //             } catch (error) {
+  //               processUpdatedVariables(null, entityResult, variables)
+  //             }
+  //           })
+  //         } else {
+  //           processUpdatedVariables(null, entityResult, variables)
+  //         }
+  //       } catch (error) {
+  //         processUpdatedVariables(null, entityResult, variables)
+  //       }
+  //     } else {
+  //       processUpdatedVariables(null, entityResult, variables)
+  //     }
+  //   }
+  // }
+
   const handleAccountRequest = async (formValues: CreateCustomerB2bAccountParams) => {
-    const variables = buildCreateCustomerB2bAccountParams(formValues)
-    const emailAddress = formValues?.emailAddress
-    const emailDomain = extractDomain(emailAddress)
-    const entityListFullName = 'B2BAccountMapping@fortis'
-    const entityPayLoad = {
-      entityListFullName: entityListFullName,
-      id: emailDomain,
-    }
+    if (isSubmitting) return
+    setIsSubmitting(true)
 
-    const getExistingUser = await fetch('/api/user/getAccountsByUser', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ emailAddress }),
-    })
+    try {
+      const variables = buildCreateCustomerB2bAccountParams(formValues)
+      const emailAddress = formValues?.emailAddress
+      const emailDomain = extractDomain(emailAddress)
+      const entityListFullName = 'B2BAccountMapping@fortis'
+      const entityPayLoad = {
+        entityListFullName: entityListFullName,
+        id: emailDomain,
+      }
 
-    const userDetails = await getExistingUser.json()
+      const getExistingUser = await fetch('/api/user/getAccountsByUser', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emailAddress }),
+      })
 
-    if (userDetails.success === true) {
-      showModal({ Component: ExistingUserDialog })
-    } else {
+      const userDetails = await getExistingUser.json()
+
+      if (userDetails.success === true) {
+        setIsSubmitting(false)
+        showModal({ Component: ExistingUserDialog })
+        return
+      }
+
+      // Wait for get-entity
       const entityResponse = await fetch('/api/user/get-entity', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ entityPayLoad }),
       })
 
       const entityResult = await entityResponse.json()
 
-      if ((googleReCaptcha as any)?.reCaptchAccountCreation) {
-        try {
-          // Ensure grecaptcha is available and ready
-          const siteKey = (googleReCaptcha as any)?.accountCreationSiteKey
-            ? (googleReCaptcha as any)?.accountCreationSiteKey
-            : process.env.accountCreationSiteKey
+      let reCaptchaResult = null
 
-          if (typeof grecaptcha !== 'undefined' && grecaptcha.enterprise) {
+      // Validate recaptcha if required
+      if ((googleReCaptcha as any)?.reCaptchAccountCreation) {
+        const siteKey =
+          (googleReCaptcha as any)?.accountCreationSiteKey || process.env.accountCreationSiteKey
+
+        if (typeof grecaptcha !== 'undefined' && grecaptcha.enterprise) {
+          reCaptchaResult = await new Promise((resolve) => {
             grecaptcha.enterprise.ready(async () => {
               try {
-                const reCaptchaResponseCode = await grecaptcha.enterprise.execute(siteKey, {
+                const responseKey = await grecaptcha.enterprise.execute(siteKey, {
                   action: 'signup',
                 })
                 const payLoad = {
-                  googleReCaptcha: googleReCaptcha,
-                  responseKey: reCaptchaResponseCode,
+                  googleReCaptcha,
+                  responseKey,
                 }
+
                 const response = await fetch('/api/user/validate-recaptcha', {
                   method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
+                  headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ payLoad }),
                 })
+
                 const data = await response.json()
-                processUpdatedVariables(data, entityResult, variables)
+                resolve(data)
               } catch (error) {
-                processUpdatedVariables(null, entityResult, variables)
+                resolve(null)
               }
             })
-          } else {
-            processUpdatedVariables(null, entityResult, variables)
-          }
-        } catch (error) {
-          processUpdatedVariables(null, entityResult, variables)
+          })
         }
-      } else {
-        processUpdatedVariables(null, entityResult, variables)
       }
+
+      // Now all API calls are complete, safely proceed with:
+      await processUpdatedVariables(reCaptchaResult, entityResult, variables)
+    } catch (error) {
+      console.error('Account request error:', error)
+      setIsSubmitting(false)
     }
   }
 
@@ -271,6 +353,9 @@ const LoginDialog = (props: any) => {
           onClose: () => closeModal(),
         },
       })
+    } finally {
+      // Always resetting the flag
+      setIsSubmitting(false)
     }
   }
 

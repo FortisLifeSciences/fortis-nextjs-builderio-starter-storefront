@@ -115,6 +115,7 @@ const RelatedProductsCarousel = (props: any) => {
               const imgUrl = productGetters.handleProtocolRelativeUrl(
                 data?.productImages[0]?.imageUrl as string
               )
+              const plpCatalogNumber = data?.plpCatalogNumber || ''
               const altText = productName
               const productUrl =
                 categoryCode !== undefined && seoFriendlyUrl
@@ -182,6 +183,20 @@ const RelatedProductsCarousel = (props: any) => {
                             sx={{ ...ProductCardStyles.productNameStyle, color: '#2B2B2B' }}
                           >
                             {productName}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            gutterBottom
+                            fontWeight={400}
+                            className="productNameStyle"
+                            sx={{
+                              ...ProductCardStyles.productNameStyle,
+                              color: '#2B2B2B',
+                              fontSize: '14px',
+                              marginTop: '16px',
+                            }}
+                          >
+                            {plpCatalogNumber}
                           </Typography>
                         </Box>
                         <IconButton

@@ -91,6 +91,15 @@ let cachedRedirects: { source: string; destination: string; permanent: boolean }
 let cachedRedirectsTimestamp: number | null = null
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl
+  const fullUrl = new URL(request.url)
+  const match = pathname.match(/^\/cms\/files\/(.+)/)
+  // Handle CDN file redirects from /cms/files/* to Kibo CDN
+  if ((fullUrl.hostname === 'www.fortislife.com' || pathname.startsWith('/cms/files/')) && match) {
+    const relativePath = pathname.replace('/cms/files/', '')
+    const redirectUrl = `https://t31165-s51694.tp1.mozu.com/cms/files/${relativePath}`
+    return NextResponse.redirect(redirectUrl, 308)
+  }
+
   // Fetch redirects from Edge Config
   if (
     !(

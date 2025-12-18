@@ -23,6 +23,7 @@ import { styled } from '@mui/material/styles'
 import getConfig from 'next/config'
 import { useTranslation } from 'next-i18next'
 import { useForm, Controller } from 'react-hook-form'
+import aa from 'search-insights'
 import * as yup from 'yup'
 
 import {
@@ -275,12 +276,40 @@ const ReviewStep = (props: ReviewStepProps) => {
         await updateOrder.mutateAsync(checkout as CrOrder)
       }
       await onCreateOrder(checkout)
-
+      algoliaObjectData()
       setStepStatusComplete()
       // setStepNext()
     } catch (e) {
       console.log('error', e)
     }
+  }
+  const algoliaObjectData = () => {
+    const queryIdArr: any[] = JSON.parse(localStorage.getItem('queryIdArray') || '[]')
+
+    const products = checkout?.items
+    aa('purchasedObjectIDsAfterSearch', {
+      eventName: 'Algolia Purchase After Search',
+      index: 'products',
+      objectIDs: (products ?? [])
+        .map((p) => p?.product?.variationProductCode)
+        .filter((id): id is string => Boolean(id)),
+      objectData: (products ?? []).map((p) => {
+        const matched = queryIdArr.find(
+          (data) => data?.ProductCode === p?.product?.variationProductCode
+        )
+        const price = typeof p?.product?.price?.price === 'number' ? p?.product?.price?.price : 0
+        console.log('price:', price)
+        return {
+          ...(matched?.queryId ? { queryID: matched.queryId } : {}),
+          price,
+          // discount: ,
+          quantity: p?.quantity ?? 1,
+        }
+      }),
+      value: checkout?.total ? checkout?.total : 0,
+      currency: 'USD',
+    })
+    localStorage.removeItem('queryIdArray')
   }
 
   const onInvalidForm = (error: any) => {
@@ -313,6 +342,9 @@ const ReviewStep = (props: ReviewStepProps) => {
   const [customerFedexAccountNumberVal, setCustomerFedexAccountNumberVal] = useState<
     string | undefined
   >(undefined)
+  const [customerUpsAccountNumberVal, setCustomerUpsAccountNumberVal] = useState<
+    string | undefined
+  >(undefined)
 
   useEffect(() => {
     if (checkout?.attributes) {
@@ -320,7 +352,16 @@ const ReviewStep = (props: ReviewStepProps) => {
         (data: any) => data?.fullyQualifiedName === 'tenant~customerFedexAccountNumber'
       )?.values?.[0]
 
-      setCustomerFedexAccountNumberVal(customerFedexAccountNumber)
+      const customerUpsAccountNumber = checkout?.attributes.find(
+        (data: any) => data?.fullyQualifiedName === 'tenant~customerUpsAccountNumber'
+      )?.values?.[0]
+
+      if (customerUpsAccountNumber) {
+        setCustomerUpsAccountNumberVal(customerUpsAccountNumber)
+      }
+      if (customerFedexAccountNumber) {
+        setCustomerFedexAccountNumberVal(customerFedexAccountNumber)
+      }
     }
   }, [checkout])
 
@@ -505,18 +546,22 @@ const ReviewStep = (props: ReviewStepProps) => {
                 {t('Shipping Method')}
               </Typography>
               <Typography variant="body2">
-                {!shippingMethod?.includes('FedEx Account') ? (
+                {shippingMethod?.includes('Fortis Shipping') ? (
                   <>
                     Fortis Shipping
                     <br />({t(shippingMethod)})
                   </>
                 ) : (
-                  <>Customer FedEx Account</>
+                  <>{t(shippingMethod)}</>
                 )}
               </Typography>
               {customerFedexAccountNumberVal && shippingMethod?.includes('FedEx Account') && (
                 <Typography variant="body2">#{customerFedexAccountNumberVal}</Typography>
               )}
+              {customerUpsAccountNumberVal &&
+                shippingMethod?.includes("Customer's UPS Account") && (
+                  <Typography variant="body2">#{customerUpsAccountNumberVal}</Typography>
+                )}
             </Grid>
             <Grid item sm={6}>
               <Typography variant="body2" data-testid="shippingAddress" sx={{ fontWeight: 500 }}>

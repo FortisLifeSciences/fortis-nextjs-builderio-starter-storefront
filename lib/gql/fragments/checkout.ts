@@ -120,6 +120,14 @@ export const baseCheckoutFragment = /* GraphQL */ `
       couponCode
     }
 
+    discountThresholdMessages {
+      message
+      showInCart
+      showOnCheckout
+      requiresCouponCode
+      discountId
+    }
+
     billingInfo {
       billingContact {
         id

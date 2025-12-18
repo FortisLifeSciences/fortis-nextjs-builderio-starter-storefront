@@ -63,7 +63,7 @@ const RegisterAccountDialog = () => {
       <Link
         component="button"
         variant="body1"
-        aria-label={t('login-to-your-account')}
+        aria-label={String(t('login-to-your-account'))}
         onClick={gotoLogin}
         sx={{ textDecoration: 'underline', color: 'text.primary' }}
       >

@@ -42,40 +42,38 @@ const LeftTextHero: React.FC<LeftTextHeroProps> = ({
             backgroundImage: `url(${backgroundImage || '/leftTxtBoxBackgroundImage.svg'})`,
           }}
         >
-          {(mdScreen || smScreen || xsScreen) && (
-            <>
-              <Box>
-                <Typography component="h1" sx={{ ...LeftTextHeroStyle.leftTxtHeading }}>
-                  {leftTextHeading}
-                </Typography>
-              </Box>
-              <Box>
-                <Typography component="div" sx={{ ...LeftTextHeroStyle.leftTxtParagraph }}>
-                  {leftTextParagraph}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
-                {primaryButtonText && (
-                  <Button
-                    sx={{ ...LeftTextHeroStyle.leftTxtPrimaryButton }}
-                    component="a"
-                    href={primaryButtonUrl}
-                  >
-                    {primaryButtonText}
-                  </Button>
-                )}
-                {secondaryButtonText && (
-                  <Button
-                    sx={{ ...LeftTextHeroStyle.leftTxtSecondaryButton }}
-                    component="a"
-                    href={secondaryButtonUrl}
-                  >
-                    {secondaryButtonText}
-                  </Button>
-                )}
-              </Box>
-            </>
-          )}
+          <>
+            <Box>
+              <Typography component="h1" sx={{ ...LeftTextHeroStyle.leftTxtHeading }}>
+                {leftTextHeading}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography component="div" sx={{ ...LeftTextHeroStyle.leftTxtParagraph }}>
+                {leftTextParagraph}
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
+              {primaryButtonText && (
+                <Button
+                  sx={{ ...LeftTextHeroStyle.leftTxtPrimaryButton }}
+                  component="a"
+                  href={primaryButtonUrl}
+                >
+                  {primaryButtonText}
+                </Button>
+              )}
+              {secondaryButtonText && (
+                <Button
+                  sx={{ ...LeftTextHeroStyle.leftTxtSecondaryButton }}
+                  component="a"
+                  href={secondaryButtonUrl}
+                >
+                  {secondaryButtonText}
+                </Button>
+              )}
+            </Box>
+          </>
         </Box>
         <Box sx={{ ...LeftTextHeroStyle.leftTxtImage }}>
           <Image src={leftTextImage} alt={ImageAltText} fill />

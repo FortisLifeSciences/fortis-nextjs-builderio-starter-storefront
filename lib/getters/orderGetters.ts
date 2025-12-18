@@ -66,6 +66,40 @@ const getCustomerFedexAccountNumber = (order: CrOrder) => {
     : null
 }
 
+const getCustomerUpsAccountNumber = (order: CrOrder) => {
+  if (!order || !order.attributes || !Array.isArray(order.attributes)) {
+    return null // Return null if the order object or attributes are invalid
+  }
+
+  // Find the attribute object with fullyQualifiedName as "tenant~customerUpsAccountNumber"
+  const fedexAccountAttribute = order.attributes.find(
+    (attribute) => attribute?.fullyQualifiedName === 'tenant~customerUpsAccountNumber'
+  )
+
+  // Return the first value from the values array if the attribute is found
+  return fedexAccountAttribute && Array.isArray(fedexAccountAttribute.values)
+    ? fedexAccountAttribute.values[0]
+    : null
+}
+
+const getTotalDiscount = (order: any): any[] => {
+  const handlingDiscounts = order?.handlingDiscounts || []
+  const shippingDiscounts = order?.shippingDiscounts || []
+
+  const result = shippingDiscounts.map((item: any, i: number) => {
+    const shippingImpact = item?.discount?.impact || 0
+    const couponCode = item?.discount?.couponCode || null
+    const handlingImpact = handlingDiscounts[i]?.impact || 0
+
+    return {
+      couponCode,
+      shippingDiscount: shippingImpact + handlingImpact,
+    }
+  })
+
+  return result
+}
+
 const getHandlingTotal = (order: CrOrder | CrCart | Checkout) => order?.handlingTotal || 0
 
 const getHandlingSubTotal = (order: CrOrder | CrCart | Checkout) => order?.handlingSubTotal || 0
@@ -89,7 +123,7 @@ const getSubtotal = (order: CrOrder | CrCart | Checkout): number =>
 const getDiscountedSubtotal = (order: CrOrder | CrCart): number => {
   if (order?.discountedSubtotal && order?.discountedSubtotal != order?.subtotal)
     return order?.discountedSubtotal
-  else return 0
+  else return order?.total || 0
 }
 
 const getOrderDiscounts = (order: CrOrder) =>
@@ -228,6 +262,7 @@ const getShippingDetails = (order: CrOrder): ShippingDetails => {
     shippingAddress: getShippingAddress(order),
     shippingMethod: getShippingMethod(order),
     customerFedexAccountNumber: getCustomerFedexAccountNumber(order),
+    customerUpsAccountNumber: getCustomerUpsAccountNumber(order),
   }
 }
 
@@ -467,4 +502,5 @@ export const orderGetters = {
   getDigitalItems,
   getShippingMethodName,
   getAllOrderItems,
+  getTotalDiscount,
 }

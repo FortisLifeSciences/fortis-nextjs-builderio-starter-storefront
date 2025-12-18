@@ -39,3 +39,4 @@ export { default as MetadataComponent } from '../MetaDataComponent/metaDataCompo
 export { default as ConfirmationDetails } from './ConfirmationDetails/ConfirmationDetails'
 export { default as CheckoutProductItem } from './CheckoutProductItem/CheckoutProductItem'
 export { default as OrderPriceList } from './OrderPriceList/OrderPriceList'
+export { default as AnnouncementBar } from './AnnouncementBar/AnnouncementBar'

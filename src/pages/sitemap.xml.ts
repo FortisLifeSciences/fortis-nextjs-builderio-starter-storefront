@@ -29,50 +29,35 @@ async function fetchCursorsData() {
 
 function generateSiteMap(cursors: ProductSearchRandomAccessCursor) {
   return `<?xml version="1.0" encoding="UTF-8"?>
-  <sitemapindex xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <sitemap>
       <loc>${process.env.NEXT_PUBLIC_URL}sitemap.xml/categories</loc>
     </sitemap>
-    <sitemap>
-      ${(cursors.cursorMarks || [])
-        .map((id: string) => {
-          return `
-            <loc>${process.env.NEXT_PUBLIC_URL}sitemap.xml/productBatch/${`${id}`}</loc>
-            `
-        })
-        .join('')}
-    </sitemap>
+    ${cursors.cursorMarks
+      ?.map(
+        (id: string) =>
+          `<sitemap><loc>${
+            process.env.NEXT_PUBLIC_URL
+          }sitemap.xml/productBatch/${encodeURIComponent(id)}</loc></sitemap>`
+      )
+      .join('')}
     <sitemap>
       <loc>${process.env.NEXT_PUBLIC_URL}sitemap.xml/builderUrls</loc>
     </sitemap>
-  </sitemapindex>
-`
+  </sitemapindex>`
 }
-// currently hiding general url Dann to confirm which need to display
-// <sitemap>
-//    <loc>${process.env.NEXT_PUBLIC_URL}sitemap.xml/general-Urls</loc>
-// </sitemap>
 
-function SiteMap() {
-  // getServerSideProps will do the heavy lifting
-}
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
-  // We make an API call to gather the URLs for our site
-
-  // const cursors = await getRandomAccessCursorsResult()
-  //console.log(cursors)
   const cursors = await fetchCursorsData()
-  // We generate the XML sitemap with the posts data
   const sitemap = generateSiteMap(cursors?.response)
 
-  res.setHeader('Content-Type', 'text/xml')
-  // we send the XML to the browser
+  res.setHeader('Content-Type', 'application/xml') // ✅ Ensure correct MIME type
   res.write(sitemap)
   res.end()
 
-  return {
-    props: {},
-  }
+  return { props: {} }
 }
 
-export default SiteMap
+export default function SiteMap() {
+  return null
+}

@@ -67,6 +67,8 @@
   "estimated-order-total": "Estimated Order Total",
   "standard-shopping": "Standard Shipping",
   "currency": "{{val, currency(USD)}}",
+  "negative-currency": "-{{val}}",
+  "invalidPromoError": "is not valid for this order.",
   "count": "count",
   "cart-total": "{{cartTotalLabel}} of {{numberOfItems}}",
   "suggestions": "Suggestions",
@@ -97,6 +99,7 @@
   "cart-summary": "Cart Summary",
   "subtotal": "Subtotal",
   "shipping": "Shipping",
+  "estimated-shipping": "Estimated Shipping",
   "total-price": "Total Price",
   "free": "Free",
   "filter-orders": "Filter Orders",
@@ -239,6 +242,7 @@
   "this-field-is-required": "This field is required",
   "this-field-is-number": "Must be only digits",
   "this-field-is-min-max-length": "Must be exactly 9 digits",
+  "this-field-is-min-max-length-6": "Must be exactly 6 alpha-numeric characters",
   "enter-valid-zip-code": "Please provide valid zip code",
   "ending": "Ending:",
   "exp": "Exp:",
@@ -586,5 +590,6 @@
   "fortis-shipping": "Fortis Shipping",
   "password-reset-successful": "Password Reset Successful",
   "password-reset-successful-paragraph1": "Your password has been successfully reset. You can now",
-  "password-reset-successful-paragraph2": "with your new credentials."
+  "password-reset-successful-paragraph2": "with your new credentials.",
+  "loading": "Loading..."
 }

@@ -10,6 +10,7 @@ interface Props {
 const options = [
   { value: 'products', label: 'Relevance' },
   { value: 'products_relevance', label: 'Featured' },
+  { label: 'Citation Count', value: 'products_citation_count' },
 ]
 
 const ManualSortDropdown = ({ sortIndex, onChangeSort }: Props) => {

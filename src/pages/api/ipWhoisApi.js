@@ -31,9 +31,12 @@ export default async function handler(req, res) {
         return res.status(200).json({ success: true, message: 'retrieve country code from theme' })
       } else if (countryCode === 'ipWhois') {
         const ipWhoisResponse = await fetch(
-          `https://ipwhois.app/json/${ip}?key=${process.env.IP_WHO_IS_API_KEY}`
+          `https://ipwhois.pro/${ip}?key=${process.env.IP_WHO_IS_API_KEY}`
         )
         const ipWhoisData = await ipWhoisResponse.json()
+
+        console.log('IP Address:', ip)
+        console.log('IPWhois Response:', ipWhoisData)
 
         // console.log("IP Data:", ipWhoisData);
 
@@ -51,9 +54,17 @@ export default async function handler(req, res) {
             message: 'retrieve country code from IPWhois',
           })
         } else {
+          setCookie('ipBasedCountryCode', 'US', {
+            req,
+            res,
+            expires: expiryDate,
+            secure: true,
+            sameSite: 'Strict',
+          })
+
           return res.status(500).json({
             success: false,
-            message: 'Failed to retrieve country code from IPWhois',
+            message: 'Failed to retrieve country code from IPWhois, setting default to US',
           })
         }
       } else {
