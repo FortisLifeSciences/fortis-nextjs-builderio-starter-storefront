@@ -17,13 +17,6 @@ const CartIcon = ({ size, isElementVisible, mobileIconColor }: IconProps) => {
 
   const router = useRouter()
   useEffect(() => {
-    if (
-      router.pathname === '/order-confirmation' ||
-      router.asPath.includes('/order-confirmation')
-    ) {
-      setItemCount(0)
-      return
-    }
     const count = cartGetters.getCartItemCount(cart)
     setItemCount(count)
   }, [cart, router.pathname, router.asPath])
