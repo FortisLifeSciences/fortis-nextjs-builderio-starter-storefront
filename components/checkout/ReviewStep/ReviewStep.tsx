@@ -37,7 +37,7 @@ import {
 } from '@/components/common'
 import type { OrderPriceProps } from '@/components/common/OrderPrice/OrderPrice'
 import { useCheckoutStepContext, useAuthContext } from '@/context'
-import { useUpdateOrder, useUpdateUserOrder, useProductCardActions } from '@/hooks'
+import { useUpdateOrder, useUpdateUserOrder } from '@/hooks'
 import { addressGetters, checkoutGetters, orderGetters, productGetters } from '@/lib/getters'
 import { isPasswordValid } from '@/lib/helpers/validations/validations'
 
@@ -174,7 +174,6 @@ const ReviewStep = (props: ReviewStepProps) => {
   } = props
 
   const { t } = useTranslation('common')
-  const { handleDeleteCurrentCart } = useProductCardActions()
   const theme = useTheme()
   const { isAuthenticated, createAccount } = useAuthContext()
   const { updateUserOrder } = useUpdateUserOrder()
@@ -279,7 +278,6 @@ const ReviewStep = (props: ReviewStepProps) => {
       await onCreateOrder(checkout)
       algoliaObjectData()
       setStepStatusComplete()
-      handleDeleteCurrentCart()
       // setStepNext()
     } catch (e) {
       console.log('error', e)
