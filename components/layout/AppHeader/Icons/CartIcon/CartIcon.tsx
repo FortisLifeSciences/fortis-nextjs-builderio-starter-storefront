@@ -14,12 +14,12 @@ const CartIcon = ({ size, isElementVisible, mobileIconColor }: IconProps) => {
 
   const { data: cart } = useGetCart()
   const [itemCount, setItemCount] = useState(0)
+
+  const router = useRouter()
   useEffect(() => {
     const count = cartGetters.getCartItemCount(cart)
     setItemCount(count)
-  }, [cart])
-
-  const router = useRouter()
+  }, [cart, router.pathname, router.asPath])
 
   const gotoCart = () => {
     router.push('/cart')

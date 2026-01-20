@@ -10,9 +10,9 @@ import {
 } from '@/hooks'
 import { cartItemGetters, productGetters } from '@/lib/getters'
 import { ProductCustom, WishlistProductInput } from '@/lib/types'
+import { addToCartGTMPDP, addToWishlistGTM } from '@/lib/utils'
 
 import { CrProductOption, CrWishlist, CrWishlistInput, Product } from '@/lib/gql/types'
-import { addToCartGTMPDP, addToWishlistGTM } from '@/lib/utils'
 
 export const useProductCardActions = (shouldFetchShippingMethods?: boolean) => {
   const { showModal } = useModalContext()
