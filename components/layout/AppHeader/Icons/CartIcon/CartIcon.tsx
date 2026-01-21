@@ -5,7 +5,7 @@ import { useTranslation } from 'next-i18next'
 
 import ShoppingCartIcon from '@/assets/icons/cartIcon.svg'
 import { HeaderAction } from '@/components/common'
-import { useGetCart } from '@/hooks'
+import { useGetCart, useProductCardActions } from '@/hooks'
 import { cartGetters } from '@/lib/getters'
 import type { IconProps } from '@/lib/types'
 
@@ -14,7 +14,8 @@ const CartIcon = ({ size, isElementVisible, mobileIconColor }: IconProps) => {
 
   const { data: cart } = useGetCart()
   const [itemCount, setItemCount] = useState(0)
-
+  
+  const { handleDeleteCurrentCart } = useProductCardActions()
   const router = useRouter()
   useEffect(() => {
     if (
@@ -22,6 +23,7 @@ const CartIcon = ({ size, isElementVisible, mobileIconColor }: IconProps) => {
       router.asPath.includes('/order-confirmation')
     ) {
       setItemCount(0)
+      handleDeleteCurrentCart()
       return
     }
     const count = cartGetters.getCartItemCount(cart)
