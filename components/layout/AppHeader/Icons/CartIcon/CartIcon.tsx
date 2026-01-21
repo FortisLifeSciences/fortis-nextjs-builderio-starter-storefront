@@ -14,9 +14,8 @@ const CartIcon = ({ size, isElementVisible, mobileIconColor }: IconProps) => {
 
   const { data: cart } = useGetCart()
   const [itemCount, setItemCount] = useState(0)
-
+  
   const { handleDeleteCurrentCart } = useProductCardActions()
-
   const router = useRouter()
   useEffect(() => {
     if (
