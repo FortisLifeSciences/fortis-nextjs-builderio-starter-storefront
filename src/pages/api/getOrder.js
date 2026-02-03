@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   const baseUrl = process.env.KIBO_API_HOST
   const orderId = orderPayLoad?.orderId
 
-  const url = `https://${baseUrl}/api/commerce/orders/${orderId}?includeBin=false&responseFields=shopperNotes`
+  const url = `https://${baseUrl}/api/commerce/orders/${orderId}`
 
   console.log('This is URL for order --> ', url)
 
