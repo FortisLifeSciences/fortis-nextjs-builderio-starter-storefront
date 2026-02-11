@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
@@ -11,9 +13,13 @@ const CartIcon = ({ size, isElementVisible, mobileIconColor }: IconProps) => {
   const { t } = useTranslation('common')
 
   const { data: cart } = useGetCart()
-  const itemCount = cartGetters.getCartItemCount(cart)
+  const [itemCount, setItemCount] = useState(0)
 
   const router = useRouter()
+  useEffect(() => {
+    const count = cartGetters.getCartItemCount(cart)
+    setItemCount(count)
+  }, [cart, router.pathname, router.asPath])
 
   const gotoCart = () => {
     router.push('/cart')

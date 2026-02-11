@@ -76,7 +76,9 @@ const HeaderAction = (props: HeaderActionProps) => {
           title={
             <Fragment>
               <Typography variant="body2">{title}</Typography>
-              <Typography variant="body2">{subtitle}</Typography>
+              <Typography variant="body2" sx={{ cursor: 'pointer' }}>
+                {subtitle}
+              </Typography>
             </Fragment>
           }
         >
@@ -145,7 +147,7 @@ const HeaderAction = (props: HeaderActionProps) => {
               variant="body2"
               component="span"
               color="text.primary"
-              sx={{ display: 'block' }}
+              sx={{ display: 'block', cursor: 'pointer' }}
             >
               {subtitle}
             </Typography>
