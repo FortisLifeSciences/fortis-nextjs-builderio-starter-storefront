@@ -1,8 +1,15 @@
 import { GetServerSideProps } from 'next'
 
+import redirectsData from '@/customRedirects/redirects.json'
 import { apiAuthClient } from '@/lib/api/util/api-auth-client'
 
 import { Product } from '@/lib/gql/types'
+
+// Type definition for redirect entries
+interface RedirectEntry {
+  source: string
+  destination: string
+}
 
 //pages/sitemap.xml.js
 
@@ -11,6 +18,7 @@ async function fetchCursorsData(cursorMark: any) {
   const baseUrl = process.env.KIBO_API_HOST
   const url = `https://${baseUrl}/api/commerce/catalog/storefront/productsearch/search?collapse=true&pageSize=2000&startIndex=0&enableSearchTuningRules=true&cursorMark=${cursorMark}&includeAllImages=false&spellcorrectOverride=Default&useSubscriptionPricing=false`
 
+  console.log('baseUrl', url)
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -21,7 +29,6 @@ async function fetchCursorsData(cursorMark: any) {
       },
     })
     const data = await response.json()
-    // console.log("cursor data", data)
     return { response: data }
   } catch (error) {
     console.error('Error in getting cursor', error)
@@ -30,8 +37,15 @@ async function fetchCursorsData(cursorMark: any) {
 }
 
 function generateSiteMap(categoryItems: any) {
+  // Create a map for quick lookup of redirects
+  const redirectMap = new Map<string, string>()
+
+  ;(redirectsData as RedirectEntry[]).forEach((redirect) => {
+    redirectMap.set(redirect.source, redirect.destination)
+  })
   return `<?xml version="1.0" encoding="UTF-8"?>
-  <urlset>
+  <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
      ${(categoryItems?.items || [])
        .map((product: Product) => {
          let productUrl = process.env.NEXT_PUBLIC_URL + 'product/' + product.productCode
@@ -44,14 +58,22 @@ function generateSiteMap(categoryItems: any) {
              product.content?.seoFriendlyUrl +
              '/' +
              product.productCode
+
+           // Extract the path without the domain for comparison
+           const productPath = productUrl.replace(process.env.NEXT_PUBLIC_URL || '', '/')
+
+           // Check if there's a redirect for this URL
+           if (redirectMap.has(productPath) && process.env.NEXT_PUBLIC_URL) {
+             productUrl = process.env.NEXT_PUBLIC_URL + redirectMap.get(productPath)?.substring(1)
+           }
          }
+
          return `
          <url>
            <loc>${productUrl}</loc>
            <changefreq>daily</changefreq>
-            <priority>.7</priority>
-          </url>
-           `
+           <priority>0.7</priority>
+         </url>`
        })
        .join('')}
   </urlset>
