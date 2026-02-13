@@ -72,6 +72,14 @@ export const facetLabelMapping: FacetLabelMapping[] = [
     facetValue: 'data.applications',
     label: 'Application',
   },
+  {
+    facetValue: 'related_gene_info.tumor_markers_facet',
+    label: 'Tumor Markers',
+  },
+  {
+    facetValue: 'related_gene_info.serum_protein_markers_facet',
+    label: 'Serum Protein Markers',
+  },
 ]
 
 export const getFacetLabel = (facetValue: string): string => {
