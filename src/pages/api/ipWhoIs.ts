@@ -21,7 +21,7 @@ const IpWhoIs = async (countryCode: string) => {
         const response = await fetch('https://api.ipify.org?format=json')
         const data = await response.json()
 
-        const res = await fetch(`https://ipwhois.app/json/${data.ip}?key=${ipWhoIsApiKey}`)
+        const res = await fetch(`https://ipwhois.pro/${data.ip}?key=${ipWhoIsApiKey}`)
         const ipData = await res.json()
 
         cookieNext.setCookie('ipBasedCountryCode', ipData.country_code, {

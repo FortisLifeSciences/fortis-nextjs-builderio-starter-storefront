@@ -89,6 +89,7 @@ const KiboTextBox = (props: KiboTextBoxProps) => {
           fontSize: { xs: '14px !important', md: '16px !important' },
           ...sx,
           height: '32px',
+          backgroundColor: '#fff',
         }}
         value={value}
         id={label}
@@ -121,6 +122,12 @@ const KiboTextBox = (props: KiboTextBoxProps) => {
         id="helper-text"
         aria-errormessage={helperText}
         dangerouslySetInnerHTML={{ __html: helperText || '&nbsp;' }}
+        sx={{
+          fontSize: '16px',
+          fontFamily: 'poppins',
+          fontWeight: '400',
+          lineHeight: '25px',
+        }}
       />
     </FormControl>
   )

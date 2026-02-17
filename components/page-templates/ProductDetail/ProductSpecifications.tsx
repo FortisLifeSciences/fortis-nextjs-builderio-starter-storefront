@@ -17,13 +17,19 @@ import { grey } from '@/styles/theme'
 const ProdAttr = [
   'tenant~target',
   'tenant~verified-reactivity',
+  'tenant~source-species',
   'tenant~applications-variant',
+  'tenant~assay-range',
+  'tenant~sample-type',
+  'tenant~detection-method',
+  'tenant~assay-type',
   'tenant~ph',
   'tenant~host',
   'tenant~clonality',
   'tenant~clone',
   'tenant~format',
   'tenant~immunogen',
+  'tenant~epitope-tag',
   'tenant~iso-type',
   'tenant~conjugate-type-variant',
   'tenant~purity-variant',
@@ -90,6 +96,7 @@ const ProductSpecifications = ({ product }: { product: any }) => {
               {name}
             </TableCell>
             <TableCell
+              className="builder-text"
               sx={{
                 width: '80%',
                 color: `${grey[900]}`,

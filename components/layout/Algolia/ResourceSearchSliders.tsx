@@ -96,6 +96,8 @@ const ResourceSearchSliders: React.FC<Props> = ({
     setNonResourceEndState(swiper.isEnd)
   }
 
+  const algoliaQueryId = localStorage.getItem('algoliaQueryId')
+
   return (
     <div key={index} className={styles.container}>
       {nonResourceHits.length > 0 && (
@@ -119,9 +121,14 @@ const ResourceSearchSliders: React.FC<Props> = ({
                 <SwiperSlide key={`non-res-${index}-${i}`} className={styles.swiperSlide}>
                   <a
                     href={hit.meta?.lastPreviewUrl || '#'}
-                    target="_blank"
+                    target="_self"
                     rel="noopener noreferrer"
-                    className={styles.link}
+                    className={`${styles.link} resource-card-search`}
+                    data-insights-object-id={hit.objectID}
+                    data-insights-position={i + 1}
+                    data-insights-query-id={algoliaQueryId}
+                    data-insights-index={'builder-page'}
+                    data-insights-method={'clickedObjectIDsAfterSearch'}
                   >
                     <span className={styles.imageContainer}>
                       <Image
@@ -189,9 +196,14 @@ const ResourceSearchSliders: React.FC<Props> = ({
                 <SwiperSlide key={`res-${index}-${i}`} className={styles.swiperSlide}>
                   <a
                     href={hit.meta?.lastPreviewUrl || '#'}
-                    target="_blank"
+                    target="_self"
                     rel="noopener noreferrer"
-                    className={styles.link}
+                    className={`${styles.link} resource-card-search`}
+                    data-insights-object-id={hit.objectID}
+                    data-insights-position={i + 1}
+                    data-insights-query-id={algoliaQueryId}
+                    data-insights-index={'builder-page'}
+                    data-insights-method={'clickedObjectIDsAfterSearch'}
                   >
                     <span className={styles.imageContainer}>
                       <Image

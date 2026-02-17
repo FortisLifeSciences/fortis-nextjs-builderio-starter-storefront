@@ -13,7 +13,7 @@ const loadCustomRedirects = () => {
     const rawData = fs.readFileSync(redirectsFilePath)
     try {
       const redirects = JSON.parse(rawData)
-      console.log('raw redirects', rawData)
+      // console.log('raw redirects', rawData)
       return redirects
     } catch (error) {
       console.error('Error parsing custom redirects JSON:', error)
@@ -82,6 +82,7 @@ module.exports = {
   },
   publicRuntimeConfig: {
     currentUrl: process.env.CURRENT_DOMAIN,
+    baseUrl: process.env.NEXT_PUBLIC_URL,
     metaData: {
       siteTitle: 'Fortis Life Sciences',
       defaultTitle: 'Fortis Life Sciences',
@@ -523,6 +524,7 @@ module.exports = {
         cartEmptySection: 'cart-empty-content-section',
         PDPCustomAndBulkDisplaySection: 'pdp-custom-and-bulk-display-section',
         emptyProductSearchResults: 'empty-product-search-results',
+        announcementBar: 'announcement-bar',
       },
     },
     inventorySettings: {

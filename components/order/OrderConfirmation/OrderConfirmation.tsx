@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 
-import Print from '@mui/icons-material/Print'
-import { Box, Container, Divider, Grid, IconButton, Stack, Typography } from '@mui/material'
+import { Container, Divider, Grid, Stack, Typography } from '@mui/material'
 import { useTranslation } from 'next-i18next'
 import { useReactToPrint } from 'react-to-print'
 
 import { ConfirmationDetails, OrderSummary, ProductItemList } from '@/components/common'
-import { ProductOptionList } from '@/components/product'
+import { useProductCardActions } from '@/hooks'
 import { orderGetters } from '@/lib/getters'
 
 import type { CrOrder } from '@/lib/gql/types'
@@ -47,19 +46,22 @@ const OrderConfirmation = ({ order }: { order: CrOrder }) => {
   const billingDetails = orderGetters.getBillingDetails(order)
 
   const [shopperNotes, setShopperNotes] = useState<any>()
-
+  const { handleDeleteCurrentCart } = useProductCardActions()
   useEffect(() => {
     const fetchShopperNotes = async () => {
       const response = await getOrderNotes(order)
       setShopperNotes(response?.data?.shopperNotes)
+      if (response.data && response.data.status && response.data.status !== 'Errored') {
+        handleDeleteCurrentCart()
+      }
     }
     fetchShopperNotes()
   }, [order])
 
   const orderSummeryArgs = {
     nameLabel: t('order-summary'),
-    subTotalLabel: `${t('subtotal')} (${t('item-quantity', { count: order.items?.length })})`,
-    shippingTotalLabel: t('shipping'),
+    subTotalLabel: t('subtotal'),
+    shippingTotalLabel: t('estimated-shipping'),
     taxLabel: t('estimated-tax'),
     totalLabel: t('total-price'),
     handlingLabel: t('handling'),

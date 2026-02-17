@@ -205,7 +205,8 @@ const ResourceProductCardListView = (props: ProductCardListViewProps) => {
                   </Typography>
                   {isResourceType && resourceTypeName
                     ? resourceTypeArr.map((data) => {
-                        return data.resourceType === resourceType?.value ? (
+                        return data.resourceType === resourceType?.value ||
+                          data.value === resourceType?.value ? (
                           <Box
                             sx={{
                               position: 'absolute',

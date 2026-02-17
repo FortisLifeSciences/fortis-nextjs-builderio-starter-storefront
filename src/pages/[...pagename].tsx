@@ -18,13 +18,26 @@ const apiKey = publicRuntimeConfig?.builderIO?.apiKey
 
 builder.init(apiKey)
 
-function getMetaData(data: any): MetaData {
+function getMetaData(data: unknown): MetaData {
+  const d = (data || {}) as Record<string, unknown>
+  const title = typeof d['title'] === 'string' ? (d['title'] as string) : null
+  const description = typeof d['description'] === 'string' ? (d['description'] as string) : null
+  const keywords =
+    typeof d['metaTagKeywords'] === 'string' ? (d['metaTagKeywords'] as string) : null
+  const canonicalUrl =
+    typeof d['canonicalUrl'] === 'string'
+      ? (d['canonicalUrl'] as string)
+      : typeof d['canonical'] === 'string'
+      ? (d['canonical'] as string)
+      : null
+  const robots = d['noIndex'] === true ? 'noindex,nofollow' : null
+
   return {
-    title: data?.title || null,
-    description: data?.description || null,
-    keywords: data?.metaTagKeywords || null,
-    canonicalUrl: null,
-    robots: null,
+    title,
+    description,
+    keywords,
+    canonicalUrl,
+    robots,
   }
 }
 
@@ -39,13 +52,23 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     pagename = pathnameArr
   }
 
+  const pageURL = Array.isArray(pathnameArr) ? pathnameArr.join('/') : pathnameArr || ''
+
   let resourcesPage = false
   let resourceCategoryCode = null
+  let pCategory = null
   const pathLength = pathnameArr?.length
 
   if (Array.isArray(pathnameArr)) {
-    if (pathLength === 2 && pathnameArr[0] === 'resources') {
+    if (
+      pathLength === 2 &&
+      (pathnameArr[0] === 'resources' ||
+        pathnameArr[0] === 'protocols' ||
+        pathnameArr[0] === 'services' ||
+        pathnameArr[0] === 'general')
+    ) {
       resourceCategoryCode = pathnameArr[1]
+      pCategory = pathnameArr[0]
       resourcesPage = true
     } else if (
       pathLength === 1 &&
@@ -72,8 +95,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       filters: `category_url:"${
         pathLength === 1
           ? resourceCategoryCode
-          : pathnameArr?.[0] === 'resources'
-          ? `resources/${resourceCategoryCode}`
+          : pCategory !== null
+          ? `${pCategory}/${resourceCategoryCode}`
           : ''
       }"`,
       facets: ['*'],
@@ -85,8 +108,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       .get(categoryTopSection, {
         userAttributes: {
           slug:
-            pathnameArr?.[0] === 'resources'
-              ? `resources-${resourceCategoryCode}`
+            pCategory !== null && resourceCategoryCode
+              ? `${pCategory}-${resourceCategoryCode}`
               : `${resourceCategoryCode}`,
           urlPath: `/${pagename}`,
         },
@@ -106,35 +129,84 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     }
   }
 
+  const metaData = getMetaData(page?.data || section?.data)
+
   return {
     props: {
       page: page || null,
-      metaData: getMetaData(section?.data) || null,
+      // Ensure metaData is pulled from either the page or the section data so it's available server-side
+      metaData: getMetaData(page?.data || section?.data) || null,
       categoriesTree: categoriesTree || null,
       section: section || null,
       resourcesPage: resourcesPage,
       resourceCategoryCode: resourceCategoryCode || null,
+      pCategory: pCategory || null,
       facets: facets || null,
       pathLength,
       urlFirstPart: pathnameArr?.[0] || null,
+      pageURL: pageURL || null,
       ...(await serverSideTranslations(locale as string, ['common'])),
     },
   }
 }
 
 const Page = (props: any) => {
-  const { page, resourcesPage, section, resourceCategoryCode, facets, pathLength, urlFirstPart } =
-    props
+  const {
+    page,
+    resourcesPage,
+    section,
+    resourceCategoryCode,
+    facets,
+    pathLength,
+    pCategory,
+    pageURL,
+  } = props
   const noIndex = page?.data?.noIndex
     ? page?.data?.noIndex
     : section?.data?.noIndex
     ? section?.data?.noIndex
     : false
 
+  const staticCanonicalURL = `${publicRuntimeConfig?.baseUrl || ''}${pageURL}`
+
+  // Server-side metadata: prefer explicit metaData prop, fall back to builder page/section data
+  const metaSource = props.metaData || page?.data || section?.data || {}
+  const metaTitle =
+    metaSource?.title ||
+    page?.data?.title ||
+    section?.data?.title ||
+    publicRuntimeConfig?.metaData?.defaultTitle ||
+    null
+  const metaDescription =
+    metaSource?.description ||
+    page?.data?.description ||
+    section?.data?.description ||
+    publicRuntimeConfig?.metaData?.defaultDescription ||
+    null
+  const metaImage = metaSource?.image || page?.data?.image || section?.data?.image || null
+  const metaKeywords =
+    metaSource?.keywords || page?.data?.metaTagKeywords || section?.data?.metaTagKeywords || null
+  const canonicalUrl =
+    metaSource?.canonicalUrl ||
+    page?.data?.canonicalUrl ||
+    section?.data?.canonicalUrl ||
+    staticCanonicalURL
+
   if (resourcesPage && resourceCategoryCode) {
     return (
       <>
-        <Head>{noIndex && <meta name="robots" content="noindex,nofollow" />}</Head>
+        <Head>
+          {/* marker to indicate server-side page meta is present */}
+          {metaTitle && <meta name="ssr-meta" data-ssr-meta="true" content="true" />}
+          {metaTitle && <title>{metaTitle}</title>}
+          {metaDescription && <meta name="description" content={metaDescription} />}
+          {metaKeywords && <meta name="keywords" content={metaKeywords} />}
+          {metaImage && <meta property="og:image" content={metaImage} />}
+          {metaTitle && <meta property="og:title" content={metaTitle} />}
+          {metaDescription && <meta property="og:description" content={metaDescription} />}
+          {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+          {noIndex && <meta name="robots" content="noindex,nofollow" />}
+        </Head>
         <BuilderComponent
           model={publicRuntimeConfig?.builderIO?.modelKeys?.categoryTopSection}
           content={section}
@@ -146,8 +218,8 @@ const Page = (props: any) => {
               filters: `category_url:"${
                 pathLength === 1
                   ? resourceCategoryCode
-                  : urlFirstPart === 'resources'
-                  ? `resources/${resourceCategoryCode}`
+                  : pCategory !== null
+                  ? `${pCategory}/${resourceCategoryCode}`
                   : ''
               }"`,
             } as any)}
@@ -160,7 +232,18 @@ const Page = (props: any) => {
 
   return (
     <>
-      <Head>{noIndex && <meta name="robots" content="noindex,nofollow" />}</Head>
+      <Head>
+        {/* marker to indicate server-side page meta is present */}
+        {metaTitle && <meta name="ssr-meta" data-ssr-meta="true" content="true" />}
+        {metaTitle && <title>{metaTitle}</title>}
+        {metaDescription && <meta name="description" content={metaDescription} />}
+        {metaKeywords && <meta name="keywords" content={metaKeywords} />}
+        {metaImage && <meta property="og:image" content={metaImage} />}
+        {metaTitle && <meta property="og:title" content={metaTitle} />}
+        {metaDescription && <meta property="og:description" content={metaDescription} />}
+        {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+        {noIndex && <meta name="robots" content="noindex,nofollow" />}
+      </Head>
       <div>
         <BuilderComponent
           model={publicRuntimeConfig?.builderIO?.modelKeys?.defaultPage}

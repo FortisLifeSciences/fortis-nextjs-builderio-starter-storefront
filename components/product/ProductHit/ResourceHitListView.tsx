@@ -66,6 +66,8 @@ const plpIconStyles = {
 }
 
 type Resources = {
+  objectID: any
+  __position: any
   query: any
   data: any
 }
@@ -119,6 +121,11 @@ const ProductHitListView = ({ hit }: { hit: Resources }): JSX.Element => {
           passHref
           data-testid="product-card-link"
           aria-label={title ? `View details for ${title}` : 'Product details'}
+          data-insights-object-id={hit.objectID}
+          data-insis-position={hit.__position}
+          data-insights-index={'builder-page'}
+          data-insights-method={'clickedObjectIDs'}
+          className="resource-card"
         >
           <Box>
             <Card sx={ProductCardStyles.cardRoot} data-testid="product-card">

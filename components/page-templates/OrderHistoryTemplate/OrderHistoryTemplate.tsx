@@ -29,7 +29,6 @@ const styles = {
     borderColor: 'grey.900',
     color: 'grey.900',
     justifyContent: 'space-between',
-    width: '148px',
     minWidth: '148px',
     height: '2.188rem',
   },

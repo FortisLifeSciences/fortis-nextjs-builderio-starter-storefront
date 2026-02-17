@@ -188,6 +188,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
               page: pagination.productsPage, // ← add page here
               facets: ['*'],
               filters,
+              clickAnalytics: true, // Enable click analytics
             },
           },
         ])
@@ -217,6 +218,31 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
     }
   }, [searchQuery, sortIndex, pagination.productsPage, selectedFilters])
 
+  const trackViewedFilters = (filters: Record<string, string[]>) => {
+    const filterList = Object.entries(filters).flatMap(([facet, values]) =>
+      values.map((v) => `${facet}:${v}`)
+    )
+
+    //console.log('trackViewedFilters:', filterList)
+
+    window.dataLayer = window.dataLayer || []
+    window.dataLayer.push({
+      event: 'Algolia Filter View',
+      algoliaFilters: filterList,
+    })
+
+    // Optional: Algolia insights (uncomment if needed)
+    /*
+    if (filterList.length > 0) {
+      aa('viewedFilters', {
+        eventName: 'Filters Applied',
+        index: 'products',
+        filters: filterList,
+      })
+    }
+    */
+  }
+
   const handleFilterChange = (facet: string, value: string) => {
     setSelectedFilters((prev) => {
       const newFilters = { ...prev }
@@ -229,6 +255,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
       } else {
         newFilters[facet] = [value]
       }
+      trackViewedFilters(newFilters)
       return newFilters
     })
   }
@@ -240,12 +267,14 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
       if (newFilters[facet].length === 0) {
         delete newFilters[facet]
       }
+      trackViewedFilters(newFilters)
       return newFilters
     })
   }
 
   const handleClearAllFilters = () => {
     setSelectedFilters({})
+    trackViewedFilters({})
   }
 
   const onFilterByClose = () => {
@@ -255,6 +284,60 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
       resultsSection.scrollIntoView({ behavior: 'smooth' })
     }
   }
+
+  useEffect(() => {
+    if (!manualSearchResults) return
+
+    let builderObjectIDs: string[] = []
+    let productObjectIDs: string[] = []
+
+    manualSearchResults.forEach((result) => {
+      if (result.index === 'builder-page') {
+        const hits = result.hits as BuilderPageHit[]
+        builderObjectIDs = hits.map((hit) => hit.objectID)
+      }
+
+      if (result.index === 'products') {
+        const hits = result.hits || []
+        productObjectIDs = hits.map((hit) => hit.objectID)
+      }
+    })
+
+    const dataLayer = (window as any).dataLayer
+
+    if (dataLayer && productObjectIDs.length > 0) {
+      const existingEvent = window.dataLayer.find(
+        (item) =>
+          item.event === 'Hits Viewed' &&
+          item.algoliaIndex === 'products' &&
+          JSON.stringify(item.algoliaObjectIds) === JSON.stringify(productObjectIDs)
+      )
+      if (!existingEvent) {
+        dataLayer.push({
+          event: 'Hits Viewed',
+          algoliaObjectIds: productObjectIDs,
+          algoliaIndex: 'products',
+        })
+      }
+    }
+
+    if (dataLayer && builderObjectIDs.length > 0) {
+      const existingEvent = window.dataLayer.find(
+        (item) =>
+          item.event === 'Hits Viewed' &&
+          item.algoliaIndex === 'builder-page' &&
+          JSON.stringify(item.algoliaObjectIds) === JSON.stringify(builderObjectIDs)
+      )
+      if (!existingEvent) {
+        window.dataLayer.push({
+          event: 'Hits Viewed',
+          algoliaObjectIds: builderObjectIDs,
+          algoliaIndex: 'builder-page',
+        })
+      }
+    }
+  }, [manualSearchResults])
+
   return (
     <>
       <KiboBreadcrumbs breadcrumbs={breadcrumbs} />
@@ -296,6 +379,13 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
               />
             )
           }
+
+          //setting queryID for to use different places
+          const algoliaQueryId = localStorage.getItem('algoliaQueryId')
+          if (!algoliaQueryId || algoliaQueryId !== result.queryID) {
+            localStorage.setItem('algoliaQueryId', result.queryID || '')
+          }
+
           return (
             <>
               {/* Search summary title */}
@@ -476,16 +566,46 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
                           {t('no-of-products', { count: result?.nbHits ?? 0 })}
                         </Box>
                       </Box>
-                      <Box className={isListView ? 'product-list-view' : 'product-grid-view'}>
+                      <Box
+                        className={
+                          isMobile
+                            ? 'product-grid-view'
+                            : isListView
+                            ? 'product-list-view'
+                            : 'product-grid-view'
+                        }
+                      >
                         <div className="productviewstructure">
                           {result.hits.slice(0, 16).map((hit: any, i: number) => (
-                            <div className="productviewlistItem" key={i}>
+                            <div
+                              className="productviewlistItem"
+                              key={i}
+                              data-insights-index={result?.index}
+                            >
                               {isMobile ? (
-                                <ProductHitGridView hit={hit} />
+                                <ProductHitGridView
+                                  hit={hit}
+                                  position={i}
+                                  algoliaIndex={result?.index}
+                                  queryId={result?.queryID}
+                                  dataInsideMethod={'clickedObjectIDsAfterSearch'}
+                                />
                               ) : isListView ? (
-                                <ProductHitListView hit={hit} />
+                                <ProductHitListView
+                                  hit={hit}
+                                  position={i}
+                                  algoliaIndex={result?.index}
+                                  queryId={result?.queryID}
+                                  dataInsideMethod={'clickedObjectIDsAfterSearch'}
+                                />
                               ) : (
-                                <ProductHitGridView hit={hit} />
+                                <ProductHitGridView
+                                  hit={hit}
+                                  position={i}
+                                  algoliaIndex={result?.index}
+                                  queryId={result?.queryID}
+                                  dataInsideMethod={'clickedObjectIDsAfterSearch'}
+                                />
                               )}
                             </div>
                           ))}
