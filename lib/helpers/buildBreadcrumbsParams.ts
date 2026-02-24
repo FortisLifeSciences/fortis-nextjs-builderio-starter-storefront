@@ -6,7 +6,9 @@ const buildBreadcrumbsList = (rootCat: PrCategory, bc: BreadCrumb[]): BreadCrumb
     ...bc,
     {
       text: rootCat.content?.name,
-      link: `${rootCat.categoryCode}`,
+      link: rootCat.parentCategory
+        ? `${rootCat.parentCategory.categoryCode}/${rootCat.categoryCode}`
+        : rootCat.categoryCode,
       seoFriendlyUrl: `${rootCat.content?.slug}`,
     },
   ]
