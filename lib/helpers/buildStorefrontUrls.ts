@@ -59,7 +59,7 @@ export function buildCategoryPath(category: PrCategory, options?: BuildPathOptio
 export function buildCategoryPathByCode(categoryCode: string, options?: BuildPathOptions) {
   const pathInput: string[] = []
   pathInput.push(getPathStart(options))
-  if (categoryCode !== categoryRoutePath) {
+  if (categoryCode !== categoryRoutePath && !categoryCode.includes('resources')) {
     pathInput.push(categoryRoutePath)
   }
   /* add category content slugs here  */
