@@ -5,12 +5,12 @@ import '@builder.io/widgets'
 import getConfig from 'next/config'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
 import { pageNotFound } from '@/lib/utils'
 
 const { publicRuntimeConfig } = getConfig()
 const apiKey = publicRuntimeConfig?.builderIO?.apiKey
-
 builder.init(apiKey)
 
 const Custom404 = () => {
@@ -51,4 +51,11 @@ const Custom404 = () => {
   )
 }
 
+export const getStaticProps = async ({ locale }: { locale: string }) => {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+    },
+  }
+}
 export default Custom404
