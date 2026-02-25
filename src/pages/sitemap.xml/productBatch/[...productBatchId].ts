@@ -18,7 +18,6 @@ async function fetchCursorsData(cursorMark: any) {
   const baseUrl = process.env.KIBO_API_HOST
   const url = `https://${baseUrl}/api/commerce/catalog/storefront/productsearch/search?collapse=true&pageSize=2000&startIndex=0&enableSearchTuningRules=true&cursorMark=${cursorMark}&includeAllImages=false&spellcorrectOverride=Default&useSubscriptionPricing=false`
 
-  console.log('baseUrl', url)
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -40,8 +39,11 @@ function generateSiteMap(categoryItems: any) {
   // Create a map for quick lookup of redirects
   const redirectMap = new Map<string, string>()
 
+  // Key the map by path only (strip domain) so it works across environments
   ;(redirectsData as RedirectEntry[]).forEach((redirect) => {
-    redirectMap.set(redirect.source, redirect.destination)
+    const sourcePath = new URL(redirect.source).pathname
+    const destinationPath = new URL(redirect.destination).pathname
+    redirectMap.set(sourcePath, destinationPath)
   })
   return `<?xml version="1.0" encoding="UTF-8"?>
   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -58,14 +60,16 @@ function generateSiteMap(categoryItems: any) {
              product.content?.seoFriendlyUrl +
              '/' +
              product.productCode
+         }
 
-           // Extract the path without the domain for comparison
-           const productPath = productUrl.replace(process.env.NEXT_PUBLIC_URL || '', '/')
-
-           // Check if there's a redirect for this URL
-           if (redirectMap.has(productPath) && process.env.NEXT_PUBLIC_URL) {
-             productUrl = process.env.NEXT_PUBLIC_URL + redirectMap.get(productPath)?.substring(1)
-           }
+         // Check redirect for all product URLs (domain-agnostic path comparison)
+         const productPath = new URL(productUrl).pathname
+         const redirectedPath = redirectMap.get(productPath)
+         if (redirectedPath && process.env.NEXT_PUBLIC_URL) {
+           console.log(`[Sitemap Redirect] MATCH: ${productPath} → ${redirectedPath}`)
+           productUrl = process.env.NEXT_PUBLIC_URL + redirectedPath.slice(1)
+         } else {
+           console.log(`[Sitemap Redirect] NO MATCH (kept as-is): ${productPath}`)
          }
 
          return `
