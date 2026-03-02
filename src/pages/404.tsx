@@ -50,6 +50,13 @@ const Custom404 = () => {
     </>
   )
 }
+export const getStaticProps = async ({ locale }: { locale: string }) => {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+    },
+  }
+}
 
 export const getStaticProps = async ({ locale }: { locale: string }) => {
   return {
