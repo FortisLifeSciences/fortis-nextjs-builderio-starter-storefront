@@ -1098,5 +1098,10 @@
     "source": "/products/antibody-resources/a-comprehensive-guide-to-elisas-enzyme-linked-immunosorbent-assays/Guide-to-ELISAs",
     "destination": "/resources/antibody-resources/guide-to-elisas",
     "permanent": true
+  },
+  {
+    "source": "/libraries/abnano-anti-t-cell-vhh-library",
+    "destination": "/products/abnano-anti-t-cell-vhh-library",
+    "permanent": true
   }
 ]
