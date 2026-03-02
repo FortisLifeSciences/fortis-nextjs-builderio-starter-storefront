@@ -1,8 +1,15 @@
 import { GetServerSideProps } from 'next'
 
+import redirectsData from '@/customRedirects/redirects.json'
 import { apiAuthClient } from '@/lib/api/util/api-auth-client'
 
 import { Product } from '@/lib/gql/types'
+
+// Type definition for redirect entries
+interface RedirectEntry {
+  source: string
+  destination: string
+}
 
 //pages/sitemap.xml.js
 
@@ -21,7 +28,6 @@ async function fetchCursorsData(cursorMark: any) {
       },
     })
     const data = await response.json()
-    // console.log("cursor data", data)
     return { response: data }
   } catch (error) {
     console.error('Error in getting cursor', error)
@@ -30,8 +36,18 @@ async function fetchCursorsData(cursorMark: any) {
 }
 
 function generateSiteMap(categoryItems: any) {
+  // Create a map for quick lookup of redirects
+  const redirectMap = new Map<string, string>()
+
+  // Key the map by path only (strip domain) so it works across environments
+  ;(redirectsData as RedirectEntry[]).forEach((redirect) => {
+    const sourcePath = new URL(redirect.source).pathname
+    const destinationPath = new URL(redirect.destination).pathname
+    redirectMap.set(sourcePath, destinationPath)
+  })
   return `<?xml version="1.0" encoding="UTF-8"?>
   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
      ${(categoryItems?.items || [])
        .map((product: Product) => {
          let productUrl = process.env.NEXT_PUBLIC_URL + 'product/' + product.productCode
@@ -45,13 +61,23 @@ function generateSiteMap(categoryItems: any) {
              '/' +
              product.productCode
          }
+
+         // Check redirect for all product URLs (domain-agnostic path comparison)
+         const productPath = new URL(productUrl).pathname
+         const redirectedPath = redirectMap.get(productPath)
+         if (redirectedPath && process.env.NEXT_PUBLIC_URL) {
+           console.log(`[Sitemap Redirect] MATCH: ${productPath} → ${redirectedPath}`)
+           productUrl = process.env.NEXT_PUBLIC_URL + redirectedPath.slice(1)
+         } else {
+           console.log(`[Sitemap Redirect] NO MATCH (kept as-is): ${productPath}`)
+         }
+
          return `
          <url>
            <loc>${productUrl}</loc>
            <changefreq>daily</changefreq>
-            <priority>.7</priority>
-          </url>
-           `
+           <priority>0.7</priority>
+         </url>`
        })
        .join('')}
   </urlset>
