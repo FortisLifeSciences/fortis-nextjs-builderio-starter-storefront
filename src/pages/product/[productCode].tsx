@@ -16,6 +16,7 @@ import {
 import { productGetters } from '@/lib/getters'
 import { buildProductPath, uiHelpers } from '@/lib/helpers'
 import type { CategorySearchParams, MetaData, PageWithMetaData, ProductCustom } from '@/lib/types'
+import { generateSchemaMarkups, renderSchemaMarkup } from '@/lib/utils/generate-schema-markup'
 
 import { PrCategory, Product } from '@/lib/gql/types'
 import type {
@@ -223,6 +224,30 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
   const pdpBuilderSectionKey = publicRuntimeConfig?.builderIO?.modelKeys?.productDetailSection || ''
   const breadcrumbs = product ? productGetters.getBreadcrumbs(product) : []
 
+  const baseUrl = (publicRuntimeConfig?.baseUrl || 'https://www.fortislife.com/').replace(/\/$/, '')
+
+  const brandValue = product?.properties?.find(
+    (prop: any) => prop?.attributeFQN?.toLowerCase() === publicRuntimeConfig?.brandAttrName
+  )?.values?.[0]?.stringValue
+
+  const schemaJson = product
+    ? generateSchemaMarkups({
+        product,
+        breadcrumbs,
+        productVariations,
+        baseUrl,
+        organizationConfig: {
+          name: 'Fortis Life Sciences',
+          url: baseUrl,
+          logo: `${baseUrl}/fortis-logo.png`,
+        },
+        brandConfig: {
+          name: brandValue || 'Fortis Life Sciences',
+          logo: `${baseUrl}/fortis-logo.png`,
+        },
+      })
+    : ''
+
   return (
     <>
       <Head>
@@ -237,6 +262,7 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
         {props?.metaData?.canonicalUrl && (
           <link rel="canonical" href={props.metaData.canonicalUrl} key="canonical" />
         )}
+        {schemaJson && renderSchemaMarkup(schemaJson)}
       </Head>
       {productResponseData ? (
         <ProductDetailTemplate
