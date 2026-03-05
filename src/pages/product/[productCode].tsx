@@ -248,7 +248,6 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
       })
     : ''
 
-  console.log('Generated schema markup:', schemaJson)
   return (
     <>
       <Head>
