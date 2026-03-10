@@ -351,35 +351,68 @@ const CartTemplate = (props: CartTemplateProps) => {
                     />
                   </Box>
                   {orderSummaryArgs?.orderDetails && (
-                    <Box>
-                      {orderSummaryArgs?.orderDetails?.orderDiscounts?.map((item, index) => {
-                        const formatted = new Intl.NumberFormat('en-US', {
-                          style: 'currency',
-                          currency: 'USD',
-                          signDisplay: 'never',
-                        }).format(Math.abs(item?.impact || 0))
-                        return (
-                          <Box
-                            key={index}
-                            sx={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              lineHeight: '35px',
-                            }}
-                          >
-                            <Typography variant="body1" lineHeight="35px" color="grey.900">
-                              {item?.couponCode}
-                            </Typography>
-                            <Price
-                              variant="body1"
-                              fontWeight="500"
-                              color="red.900"
-                              price={t('negative-currency', { val: formatted })}
-                            />
-                          </Box>
-                        )
-                      })}
-                    </Box>
+                    <>
+                      <Box>
+                        {orderSummaryArgs?.orderDetails?.items?.map((item, index) => {
+                          if ((item?.productDiscounts?.length ?? 0) > 0) {
+                            const formatted = new Intl.NumberFormat('en-US', {
+                              style: 'currency',
+                              currency: 'USD',
+                              signDisplay: 'never',
+                            }).format(Math.abs(item?.productDiscounts?.[0]?.impact || 0))
+                            return (
+                              <Box
+                                key={index}
+                                sx={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  lineHeight: '35px',
+                                }}
+                              >
+                                <Typography variant="body1" lineHeight="35px" color="grey.900">
+                                  {item?.productDiscounts?.[0]?.discount?.name}
+                                </Typography>
+                                <Price
+                                  variant="body1"
+                                  fontWeight="500"
+                                  color="red.900"
+                                  price={t('negative-currency', { val: formatted })}
+                                />
+                              </Box>
+                            )
+                          }
+                        })}
+                      </Box>
+                      <Box>
+                        {orderSummaryArgs?.orderDetails?.orderDiscounts?.map((item, index) => {
+                          const formatted = new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: 'USD',
+                            signDisplay: 'never',
+                          }).format(Math.abs(item?.impact || 0))
+                          return (
+                            <Box
+                              key={index}
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                lineHeight: '35px',
+                              }}
+                            >
+                              <Typography variant="body1" lineHeight="35px" color="grey.900">
+                                {item?.couponCode}
+                              </Typography>
+                              <Price
+                                variant="body1"
+                                fontWeight="500"
+                                color="red.900"
+                                price={t('negative-currency', { val: formatted })}
+                              />
+                            </Box>
+                          )
+                        })}
+                      </Box>
+                    </>
                   )}
 
                   <Typography

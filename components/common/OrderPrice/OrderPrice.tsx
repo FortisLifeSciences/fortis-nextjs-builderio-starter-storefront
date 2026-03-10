@@ -76,6 +76,17 @@ const OrderPrice = <T extends CrCart | CrOrder | Checkout>(props: OrderPriceProp
               discountedSubtotal={subTotal}
               taxTotal={itemTaxTotal}
             />
+            {orderDetails?.items
+              ?.filter((item: any) => (item?.productDiscounts?.length ?? 0) > 0)
+              .map((item: any, index: number) => (
+                <OrderPriceList
+                  key={index}
+                  title={item?.productDiscounts?.[0]?.discount?.name as string}
+                  subTotal={t('negative-currency', {
+                    val: item?.productDiscounts?.[0]?.impact || 0,
+                  })}
+                />
+              ))}
             {Array.isArray(orderDetails?.orderDiscounts) &&
               orderDetails?.orderDiscounts?.map((item: any, index: number) => (
                 <OrderPriceList
