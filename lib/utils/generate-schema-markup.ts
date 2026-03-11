@@ -139,37 +139,122 @@ function generateBreadcrumbSchema(
   }
 }
 
+// Attributes whose stringValue contains raw HTML — strip tags before use in schema
+const HTML_ATTRIBUTES = new Set([
+  'tenant~target-sentence',
+  'tenant~application-text',
+  'tenant~application-text-variant',
+  'tenant~gene-aliases',
+  'tenant~usage-instructions',
+  'tenant~prodprocedures-1',
+])
+
+function stripHtml(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 /**
  * Extract additional properties from product
  */
 function extractAdditionalProperties(product: Product): Array<Record<string, any>> {
   const additionalProperties: Array<Record<string, any>> = []
 
-  // Map of common property names to display names
+  // Map of attribute FQN suffixes (after tenant~) to display names
   const propertyMap: Record<string, string> = {
+    // Core product specs
     target: 'Target',
-    specificity: 'Specificity',
-    'host-species': 'Host Species',
+    'target-sentence': 'Target Description',
+    'verified-reactivity': 'Verified Reactivity',
+    'source-species': 'Source Species',
+    'antigen-species': 'Antigen Species',
+    host: 'Host',
     clonality: 'Clonality',
     clone: 'Clone',
-    isotype: 'Isotype',
-    applications: 'Applications',
-    format: 'Format',
-    conjugate: 'Conjugate',
-    purification: 'Purification',
-    buffer: 'Buffer',
-    'storage-conditions': 'Storage Conditions',
+    'iso-type': 'Isotype',
+    'epitope-tag': 'Epitope Tag',
     immunogen: 'Immunogen',
+    format: 'Format',
+    'conjugate-type-variant': 'Conjugate',
+    'purity-variant': 'Purity',
+    buffer: 'Buffer',
+    'storage-buffer': 'Storage Buffer',
+    'storage-variant': 'Storage',
+    'storage-handling': 'Storage Handling',
+    'shelf-life-variant': 'Shelf Life',
     'physical-state': 'Physical State',
+    'stock-concentration': 'Stock Concentration',
+    contents: 'Contents',
+    'contents-variant': 'Contents',
+    'country-of-origin': 'Country of Origin',
+    // Applications & assay
+    'applications-variant': 'Applications',
+    'application-text': 'Application Details',
+    'application-text-variant': 'Application Details',
+    'application-dilution-range': 'Dilution Range',
+    'assay-range': 'Assay Range',
+    'assay-type': 'Assay Type',
+    'detection-method': 'Detection Method',
+    'sample-type': 'Sample Type',
+    ph: 'pH',
+    'usage-instructions': 'Usage Instructions',
+    'prodprocedures-1': 'Product Procedures',
+    // Gene / bioinformatics
+    'gene-id': 'Gene ID',
+    symbol: 'Gene Symbol',
+    'gene-name': 'Gene Name',
+    'gene-aliases': 'Gene Aliases',
+    'uniprot-id': 'UniProt ID',
+    'protein-name': 'Protein Name',
+    // Other identifiers
+    'plp-catalog-number': 'Catalog Number',
+    'citeab-product-code': 'CiteAb Product Code',
+    'current-lot-variant': 'Current Lot',
+    // Manufacturing / certifications
+    mfgcertification: 'Manufacturing Certification',
+    mfgavailability: 'Manufacturing Availability',
+    // Specificity (kept for backwards compatibility)
+    specificity: 'Specificity',
   }
+
+  // UI-only, internal, or CMS-specific attributes that should not appear in schema
+  const excludedAttributes = new Set([
+    // Brand / relations (handled separately)
+    'tenant~brand',
+    'tenant~related-products',
+    // UI flags and config
+    'tenant~new-product',
+    'tenant~ous-show-distributors-button',
+    'tenant~ous-show-prices',
+    'tenant~show-prices',
+    'tenant~sku-status-text',
+    'tenant~custom-cta-label',
+    'tenant~custom-cta-target',
+    'tenant~stock-behavior-option',
+    'tenant~minimum-stock',
+    'tenant~availability-message',
+    'tenant~child-priority',
+    'tenant~resourcetype',
+    'tenant~validation-text',
+    'tenant~citation-count-variant',
+    'tenant~variant-product-name',
+    'tenant~description-variant',
+    'tenant~trial-size-available',
+    // Internal/CMS document ID fields (not human-readable values)
+    'tenant~image-links',
+    'tenant~sds-links',
+    'tenant~spec-sheet-links',
+    // Redundant / internal display fields
+    'tenant~productnameshort',
+    'tenant~physical-state-text',
+    'tenant~applications', // superseded by applications-variant
+  ])
 
   if (product?.properties) {
     product.properties.forEach((prop: any) => {
-      // Skip brand and related-products as they're handled separately
-      if (
-        prop?.attributeFQN?.includes('brand') ||
-        prop?.attributeFQN?.includes('related-products')
-      ) {
+      if (excludedAttributes.has(prop?.attributeFQN)) {
         return
       }
 
@@ -188,7 +273,7 @@ function extractAdditionalProperties(product: Product): Array<Record<string, any
         additionalProperties.push({
           '@type': 'PropertyValue',
           name: displayName,
-          value: value,
+          value: HTML_ATTRIBUTES.has(prop?.attributeFQN) ? stripHtml(value) : value,
         })
       }
     })
@@ -216,6 +301,8 @@ function generateProductSchema(
     description:
       product?.content?.productShortDescription || product?.content?.metaTagDescription || '',
     url: productUrl,
+    sku: product?.productCode,
+    mpn: product?.productCode,
     brand: {
       '@id': `${baseUrl}#brand-${brandSlug}`,
     },
@@ -230,14 +317,29 @@ function generateProductSchema(
     schema.additionalProperty = additionalProps
   }
 
-  // Add product images
+  // Add product images — ensure absolute URLs (CDN may return protocol-relative //cdn...)
   const images =
     product?.content?.productImages
       ?.filter((img: any) => img?.imageUrl)
-      .map((img: any) => img.imageUrl) || []
+      .map((img: any) => {
+        const url: string = img.imageUrl
+        return url.startsWith('//') ? `https:${url}` : url
+      }) || []
 
   if (images.length > 0) {
     schema.image = images
+  }
+
+  // Required by Google for Product rich results eligibility.
+  // No public list price — priceSpecification signals pricing exists without committing to a value.
+  schema.offers = {
+    '@type': 'Offer',
+    url: productUrl,
+    availability: 'https://schema.org/InStock',
+    priceSpecification: {
+      '@type': 'PriceSpecification',
+      priceCurrency: 'USD',
+    },
   }
 
   // Add variants if available
