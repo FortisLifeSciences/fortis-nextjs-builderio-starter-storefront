@@ -71,6 +71,18 @@ export const orderItemFragment = /* GraphQL */ `
     product {
       ...orderItemProductFragment
     }
+    productDiscounts {
+      discountQuantity
+      productQuantity
+      impactPerUnit
+      impact
+      excluded
+      discount {
+        id
+        name
+        hasMultipleTargetProducts
+      }
+    }
   }
   ${orderItemProductFragment}
 `
