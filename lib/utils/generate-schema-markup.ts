@@ -11,10 +11,12 @@ interface SchemaMarkupOptions {
   productVariations?: Product[]
   baseUrl?: string
   organizationConfig?: OrganizationConfig
+  websiteConfig?: WebSiteConfig
   brandConfig?: BrandConfig
 }
 
 interface OrganizationConfig {
+  id?: string // custom @id, e.g. "https://fortislife.com/#organization"
   name: string
   url: string
   logo: string
@@ -33,7 +35,13 @@ interface OrganizationConfig {
   }
 }
 
+interface WebSiteConfig {
+  name: string
+  url: string
+}
+
 interface BrandConfig {
+  id?: string // custom @id, e.g. "https://www.fortislife.com/#brand-bethyl-laboratories"
   name: string
   slogan?: string
   logo: string
@@ -47,9 +55,11 @@ function generateOrganizationSchema(
   config: OrganizationConfig,
   baseUrl: string
 ): Record<string, any> {
+  const organizationId = config.id || `${baseUrl}/#organization`
+
   const schema: Record<string, any> = {
     '@type': 'Organization',
-    '@id': `${baseUrl}#organization`,
+    '@id': organizationId,
     name: config.name,
     url: config.url,
     logo: config.logo,
@@ -83,20 +93,36 @@ function generateOrganizationSchema(
 }
 
 /**
+ * Generates WebSite schema
+ */
+function generateWebSiteSchema(config: WebSiteConfig, organizationId: string): Record<string, any> {
+  return {
+    '@type': 'WebSite',
+    '@id': `${config.url}/#website`,
+    name: config.name,
+    url: config.url,
+    publisher: {
+      '@id': organizationId,
+    },
+  }
+}
+
+/**
  * Generates Brand schema
  */
 function generateBrandSchema(
   config: BrandConfig,
   baseUrl: string,
-  brandSlug: string
+  brandSlug: string,
+  organizationId: string
 ): Record<string, any> {
   const schema: Record<string, any> = {
     '@type': 'Brand',
-    '@id': `${baseUrl}#brand-${brandSlug}`,
+    '@id': config.id || `${baseUrl}/#brand-${brandSlug}`,
     name: config.name,
     logo: config.logo,
-    parentOrganization: {
-      '@id': `${baseUrl}#organization`,
+    memberOf: {
+      '@id': organizationId,
     },
   }
 
@@ -129,7 +155,6 @@ function generateBreadcrumbSchema(
         name: crumb.text,
       }
 
-      // Add item URL for all breadcrumbs including the last one
       if (crumb.link) {
         item.item = baseUrl + crumb.link
       }
@@ -289,10 +314,11 @@ function generateProductSchema(
   product: Product,
   productVariations: Product[] | undefined,
   baseUrl: string,
-  brandSlug: string
+  brandId: string,
+  organizationId: string
 ): Record<string, any> {
-  const { getProductLink } = uiHelpers()
-  const productUrl = baseUrl + getProductLink(product.productCode ?? undefined)
+  const { getProductSeoLink } = uiHelpers()
+  const productUrl = baseUrl + getProductSeoLink(product)
 
   const schema: Record<string, any> = {
     '@type': 'Product',
@@ -304,10 +330,10 @@ function generateProductSchema(
     sku: product?.productCode,
     mpn: product?.productCode,
     brand: {
-      '@id': `${baseUrl}#brand-${brandSlug}`,
+      '@id': brandId,
     },
     manufacturer: {
-      '@id': `${baseUrl}#organization`,
+      '@id': organizationId,
     },
   }
 
@@ -355,10 +381,10 @@ function generateProductSchema(
         mpn: variant.variationProductCode,
         url: variantUrl,
         brand: {
-          '@id': `${baseUrl}#brand-${brandSlug}`,
+          '@id': brandId,
         },
         manufacturer: {
-          '@id': `${baseUrl}#organization`,
+          '@id': organizationId,
         },
         isVariantOf: {
           '@id': `${productUrl}#product`,
@@ -380,17 +406,21 @@ export function generateSchemaMarkups(options: SchemaMarkupOptions): string {
     productVariations,
     baseUrl = '',
     organizationConfig,
+    websiteConfig,
     brandConfig,
   } = options
 
   if (!product) return ''
 
-  const { getProductLink } = uiHelpers()
-  const productUrl = baseUrl + getProductLink(product.productCode ?? undefined)
+  const { getProductSeoLink } = uiHelpers()
+  const productUrl = baseUrl + getProductSeoLink(product)
 
-  // Extract brand information from product
-  const brandProperty = product?.properties?.find((prop: any) =>
-    prop?.attributeFQN?.toLowerCase().includes('brand')
+  // Resolve stable @ids used as cross-references throughout the graph
+  const organizationId = organizationConfig?.id || `${baseUrl}/#organization`
+
+  // Extract brand slug from product properties as fallback for @id
+  const brandProperty = product?.properties?.find(
+    (prop: any) => prop?.attributeFQN?.toLowerCase() === 'tenant~brand'
   )
   const brandValue = brandProperty?.values?.[0]
   const brandName =
@@ -398,30 +428,34 @@ export function generateSchemaMarkups(options: SchemaMarkupOptions): string {
       ? brandValue.stringValue
       : typeof brandValue === 'string'
       ? brandValue
-      : 'Default Brand'
-
-  // Create brand slug for IDs (lowercase, hyphenated)
-  const brandSlug = brandName?.toLowerCase().replace(/\s+/g, '-')
+      : 'default'
+  const brandSlug = brandName?.toLowerCase().replace(/\s+/g, '-') ?? 'default'
+  const brandId = brandConfig?.id || `${baseUrl}/#brand-${brandSlug}`
 
   const graph: Array<Record<string, any>> = []
 
-  // Add Organization schema
+  // 1. Organization
   if (organizationConfig) {
     graph.push(generateOrganizationSchema(organizationConfig, baseUrl))
   }
 
-  // Add Brand schema
-  if (brandConfig) {
-    graph.push(generateBrandSchema(brandConfig, baseUrl, brandSlug as string))
+  // 2. WebSite
+  if (websiteConfig) {
+    graph.push(generateWebSiteSchema(websiteConfig, organizationId))
   }
 
-  // Add BreadcrumbList schema
+  // 3. Brand
+  if (brandConfig) {
+    graph.push(generateBrandSchema(brandConfig, baseUrl, brandSlug, organizationId))
+  }
+
+  // 4. BreadcrumbList
   if (breadcrumbs && breadcrumbs.length > 0) {
     graph.push(generateBreadcrumbSchema(breadcrumbs, baseUrl, productUrl))
   }
 
-  // Add Product schema
-  graph.push(generateProductSchema(product, productVariations, baseUrl, brandSlug as string))
+  // 5. Product
+  graph.push(generateProductSchema(product, productVariations, baseUrl, brandId, organizationId))
 
   const schemaData = {
     '@context': 'https://schema.org',
