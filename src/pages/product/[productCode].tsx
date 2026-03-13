@@ -14,8 +14,8 @@ import {
   getProductSearchVariations,
 } from '@/lib/api/operations'
 import { productGetters } from '@/lib/getters'
-import { buildProductPath, uiHelpers } from '@/lib/helpers'
-import type { CategorySearchParams, MetaData, PageWithMetaData, ProductCustom } from '@/lib/types'
+import { buildProductPath } from '@/lib/helpers'
+import type { CategorySearchParams, MetaData, PageWithMetaData } from '@/lib/types'
 import { generateSchemaMarkups, renderSchemaMarkup } from '@/lib/utils/generate-schema-markup'
 
 import { PrCategory, Product } from '@/lib/gql/types'
@@ -40,7 +40,6 @@ interface ProductPageType extends PageWithMetaData {
 
 const { publicRuntimeConfig } = getConfig()
 const apiKey = publicRuntimeConfig?.builderIO?.apiKey
-const { getProductLink, getProductSeoLink } = uiHelpers()
 builder.init(apiKey)
 
 Builder.registerComponent(ProductRecommendations, {
@@ -244,8 +243,8 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
     },
     Abcore: {
       id: 'https://www.fortislife.com/#brand-abcore',
-      logo: 'https://cdn.builder.io/api/v1/assets/bea8d49fc591467587ef6a596924214c/abcore-logo',
-      sameAs: [],
+      logo: 'https://cdn.builder.io/api/v1/assets/bea8d49fc591467587ef6a596924214c/abcore-a-brand-of-fortis-life-sciences',
+      sameAs: ['https://www.linkedin.com/company/abcore/'],
     },
   }
 
