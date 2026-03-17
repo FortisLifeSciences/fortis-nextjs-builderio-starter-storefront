@@ -1103,5 +1103,30 @@
     "source": "/libraries/abnano-anti-t-cell-vhh-library",
     "destination": "/products/abnano-anti-t-cell-vhh-library",
     "permanent": true
+  },
+  {
+    "source": "/products/articles/retrieval-buffers-citrate-vs.-tris-edta/citrate-vs-tris-edta",
+    "destination": "/resources/antibody-resources/retrieval-buffers-citrate-vs-tris-edta",
+    "permanent": true
+  },
+  {
+    "source": "/products/protocols/tyramide-signal-amplification-tsa-based-immunofluorescent-multiplex-mif-assays/protocol001",
+    "destination": "/resources/antibody-resources/tyramide-signal-amplification-tsa-based-immunofluorescent-multiplex-mif-assays",
+    "permanent": true
+  },
+  {
+    "source": "/products/articles/novel-autophagy-pathway-links-cd38-and-lrrk2-to-tfeb-nuclear-translocation/tfeb0001",
+    "destination": "/resources/antibody-resources/novel-autophagy-pathway-links-cd38-and-lrrk2-to-tfeb-nuclear-translocation",
+    "permanent": true
+  },
+  {
+    "source": "/protocols/2-step-immunoperoxidase-procedure-epitope-retrieval-method-for-formalin-fixed-paraffin-embedded-tissues-and-cell-blocks",
+    "destination": "/protocols/spatial-biology-protocols/2-step-immunoperoxidase-procedure-formalin-fixed-paraffin-embedded-tissues-and-cell-blocks",
+    "permanent": true
+  },
+  {
+    "source": "/products/articles/usp11-is-a-potential-new-therapeutic-target-to-inhibit-autophagy-in-cancer/USP11",
+    "destination": "/resources/antibody-resources/usp11-is-a-potential-new-therapeutic-target-to-inhibit-autophagy-in-cancer",
+    "permanent": true
   }
 ]

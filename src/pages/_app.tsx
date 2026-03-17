@@ -181,6 +181,25 @@ const App = (props: KiboAppProps) => {
     if (!hasSsrMarker) updateMetaTags()
   }, [router.pathname, pageTitle, pageDescription, pageImage, pageProps?.metaData])
 
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      const errorDiv = Array.from(document.querySelectorAll('div')).find((el) =>
+        el.innerText?.includes('Could not connect to the reCAPTCHA server')
+      )
+
+      if (errorDiv) {
+        errorDiv.style.position = 'fixed'
+        errorDiv.style.bottom = '0'
+        errorDiv.style.left = '0'
+        errorDiv.style.zIndex = '9999'
+      }
+    })
+
+    observer.observe(document.body, { childList: true, subtree: true })
+
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <CacheProvider value={emotionCache}>
       <Head>
