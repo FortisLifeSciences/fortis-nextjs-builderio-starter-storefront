@@ -57,4 +57,5 @@ export const getStaticProps = async ({ locale }: { locale: string }) => {
     },
   }
 }
+
 export default Custom404

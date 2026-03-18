@@ -16,6 +16,7 @@ import {
 import { productGetters } from '@/lib/getters'
 import { buildProductPath, uiHelpers } from '@/lib/helpers'
 import type { CategorySearchParams, MetaData, PageWithMetaData, ProductCustom } from '@/lib/types'
+import { generateSchemaMarkups, renderSchemaMarkup } from '@/lib/utils/generate-schema-markup'
 
 import { PrCategory, Product } from '@/lib/gql/types'
 import type {
@@ -223,6 +224,77 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
   const pdpBuilderSectionKey = publicRuntimeConfig?.builderIO?.modelKeys?.productDetailSection || ''
   const breadcrumbs = product ? productGetters.getBreadcrumbs(product) : []
 
+  const baseUrl = (publicRuntimeConfig?.baseUrl || 'https://www.fortislife.com/').replace(/\/$/, '')
+
+  const brandValue = product?.properties?.find(
+    (prop: any) => prop?.attributeFQN?.toLowerCase() === publicRuntimeConfig?.brandAttrName
+  )?.values?.[0]?.stringValue
+
+  // Per-brand config — @id, logo and LinkedIn must be exact for each brand
+  const BRAND_CONFIGS: Record<string, { id: string; logo: string; sameAs: string[] }> = {
+    'Bethyl Laboratories': {
+      id: 'https://www.fortislife.com/#brand-bethyl-laboratories',
+      logo: 'https://cdn.builder.io/api/v1/assets/bea8d49fc591467587ef6a596924214c/bethyl-laboratories-a-fortis-life-sciences-brand',
+      sameAs: ['https://www.linkedin.com/company/bethyl-laboratories-inc-/'],
+    },
+    'Arista Biologicals': {
+      id: 'https://www.fortislife.com/#brand-arista',
+      logo: 'https://cdn.builder.io/api/v1/assets/bea8d49fc591467587ef6a596924214c/arista-biologicals-logo',
+      sameAs: ['https://www.linkedin.com/company/arista-biologicals-inc/'],
+    },
+    Abcore: {
+      id: 'https://www.fortislife.com/#brand-abcore',
+      logo: 'https://cdn.builder.io/api/v1/assets/bea8d49fc591467587ef6a596924214c/abcore-logo',
+      sameAs: [],
+    },
+  }
+
+  const brandKey = brandValue || ''
+  const resolvedBrand = BRAND_CONFIGS[brandKey]
+
+  const schemaJson = product
+    ? generateSchemaMarkups({
+        product,
+        breadcrumbs,
+        productVariations,
+        baseUrl,
+        organizationConfig: {
+          id: 'https://fortislife.com/#organization',
+          name: 'Fortis Life Sciences',
+          url: 'https://www.fortislife.com/',
+          logo: 'https://cdn.builder.io/api/v1/assets/bea8d49fc591467587ef6a596924214c/fortis-life-science-logo',
+          sameAs: ['https://www.linkedin.com/company/fortis-life-sci/'],
+          contactPoint: [
+            {
+              telephone: '+1-800-338-9579',
+              contactType: 'sales',
+              areaServed: 'US',
+            },
+          ],
+          address: {
+            streetAddress: '7 Whittier Place, Suite 108 PMB 173',
+            addressLocality: 'Boston',
+            addressRegion: 'MA',
+            postalCode: '02114',
+            addressCountry: 'US',
+          },
+        },
+        websiteConfig: {
+          name: 'Fortis Life Sciences',
+          url: 'https://www.fortislife.com/',
+        },
+        brandConfig: {
+          id: resolvedBrand?.id,
+          name: brandKey || 'Fortis Life Sciences',
+          slogan: 'A Brand of Fortis Life Sciences',
+          logo:
+            resolvedBrand?.logo ||
+            'https://cdn.builder.io/api/v1/assets/bea8d49fc591467587ef6a596924214c/fortis-life-science-logo',
+          sameAs: resolvedBrand?.sameAs,
+        },
+      })
+    : ''
+
   return (
     <>
       <Head>
@@ -237,6 +309,7 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
         {props?.metaData?.canonicalUrl && (
           <link rel="canonical" href={props.metaData.canonicalUrl} key="canonical" />
         )}
+        {schemaJson && renderSchemaMarkup(schemaJson)}
       </Head>
       {productResponseData ? (
         <ProductDetailTemplate
