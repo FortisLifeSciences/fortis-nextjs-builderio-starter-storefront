@@ -6,8 +6,11 @@ const buildBreadcrumbsList = (rootCat: PrCategory, bc: BreadCrumb[]): BreadCrumb
     ...bc,
     {
       text: rootCat.content?.name,
-      link: `${rootCat.categoryCode}`,
-      seoFriendlyUrl: `${rootCat.content?.slug}`,
+      link:
+        rootCat?.parentCategory && rootCat?.parentCategory?.categoryCode?.includes('resources')
+          ? `${rootCat?.parentCategory?.categoryCode}/${rootCat?.categoryCode}`
+          : rootCat?.categoryCode,
+      seoFriendlyUrl: `${rootCat?.content?.slug}`,
     },
   ]
   return rootCat.parentCategory ? buildBreadcrumbsList(rootCat.parentCategory, newBc) : newBc
