@@ -11,7 +11,6 @@ import { pageNotFound } from '@/lib/utils'
 
 const { publicRuntimeConfig } = getConfig()
 const apiKey = publicRuntimeConfig?.builderIO?.apiKey
-
 builder.init(apiKey)
 
 const Custom404 = () => {
