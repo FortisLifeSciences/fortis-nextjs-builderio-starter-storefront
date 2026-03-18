@@ -2,6 +2,7 @@ import type { PrCategory } from '../gql/types'
 import type { BreadCrumb } from '../types'
 
 const buildBreadcrumbsList = (rootCat: PrCategory, bc: BreadCrumb[]): BreadCrumb[] => {
+  //parent category condition checked for link
   const newBc = [
     ...bc,
     {
