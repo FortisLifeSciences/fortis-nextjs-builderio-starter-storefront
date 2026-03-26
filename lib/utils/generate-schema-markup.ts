@@ -518,9 +518,16 @@ export function generateSchemaMarkups(options: SchemaMarkupOptions): string {
   }
 
   // 4. BreadcrumbList
-  // if (breadcrumbs && breadcrumbs.length > 0) {
-  //   graph.push(generateBreadcrumbSchema(breadcrumbs, baseUrl, productUrl, product?.content?.productName || ''))
-  // }
+  if (breadcrumbs && breadcrumbs.length > 0) {
+    graph.push(
+      generateBreadcrumbSchema(
+        breadcrumbs,
+        baseUrl,
+        productUrl,
+        product?.content?.productName || ''
+      )
+    )
+  }
 
   // 5. WebPage
   const websiteId = websiteConfig
