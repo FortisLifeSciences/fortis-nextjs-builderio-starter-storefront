@@ -1125,8 +1125,18 @@
     "permanent": true
   },
   {
-    "source": "/products/articles/usp11-is-a-potential-new-therapeutic-target-to-inhibit-autophagy-in-cancer/USP11",
-    "destination": "/resources/antibody-resources/usp11-is-a-potential-new-therapeutic-target-to-inhibit-autophagy-in-cancer",
+    "source": "/products/products",
+    "destination": "/products",
+    "permanent": true
+  },
+  {
+    "source": "/products/immunoassay-buffers",
+    "destination": "/products",
+    "permanent": true
+  },
+  {
+    "source": "/products/articles",
+    "destination": "/products",
     "permanent": true
   }
 ]
