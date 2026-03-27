@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect } from 'react'
 
-import { Container, Stack } from '@mui/material'
+import { Box, Stack } from '@mui/material'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider } from '@mui/material/styles'
 import { HydrationBoundary } from '@tanstack/react-query'
@@ -46,32 +46,6 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
     }
   }, [])
 
-  useEffect(() => {
-    const wrapper = document.getElementById('fixed-header-wrapper')
-    const content = document.getElementById('main-content')
-
-    const updateContentOffset = () => {
-      if (wrapper && content) {
-        const height = wrapper.getBoundingClientRect().height
-        content.style.marginTop = `${height}px`
-      }
-    }
-
-    if (wrapper) {
-      // ResizeObserver watches for any size changes in the wrapper
-      const observer = new ResizeObserver(() => {
-        updateContentOffset()
-      })
-
-      observer.observe(wrapper)
-      // Initial call
-      updateContentOffset()
-
-      return () => {
-        observer.disconnect()
-      }
-    }
-  }, [])
   return (
     <HydrationBoundary state={pageProps.dehydratedState}>
       <ThemeProvider theme={theme}>
@@ -80,7 +54,7 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
           <AuthContextProvider>
             <HeaderContextProvider>
               <GlobalFetchingIndicator />
-              <Stack sx={{ minHeight: '100vh' }}>
+              <Stack sx={{ minHeight: '100vh', width: '100%' }}>
                 {/* <KiboHeader
                   navLinks={[
                     {
@@ -121,12 +95,9 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
                 </Stack>
                 <DialogRoot />
                 <SnackbarRoot />
-                <Container
-                  id="main-content"
-                  sx={{ py: 2, flex: '1 0 auto', maxWidth: '1200px', px: { lg: 0 } }}
-                >
+                <Box id="main-content" sx={{ flex: '1 0 auto', width: '100%', pt: 0 }}>
                   {children}
-                </Container>
+                </Box>
                 <Footer />
               </Stack>
             </HeaderContextProvider>

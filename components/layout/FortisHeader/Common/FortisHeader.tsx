@@ -236,14 +236,7 @@ const KiboHeader = (props: KiboHeaderProps) => {
         </MobileHeader>
       )
 
-    return (
-      <HeaderActionArea
-        isHeaderSmall={false}
-        isElementVisible={true}
-        onAccountIconClick={handleAccountIconClick}
-        onAccountRequestClick={handleB2BAccountRequestClick}
-      />
-    )
+    return null
   }
 
   return (
@@ -256,7 +249,7 @@ const KiboHeader = (props: KiboHeaderProps) => {
         <Backdrop open={isBackdropOpen} data-testid="backdrop" />
 
         <Box component={'section'} sx={{ ...kiboHeaderStyles.topBarStyles }}>
-          <Container disableGutters>{getSection()}</Container>
+          <Box sx={{ width: '100%' }}>{getSection()}</Box>
         </Box>
 
         <Box
@@ -266,18 +259,10 @@ const KiboHeader = (props: KiboHeaderProps) => {
           }}
           data-testid="mega-menu-container"
         >
-          <Container
-            disableGutters
-            sx={{
-              position: 'relative', // Ensure the parent remains stable
-              // overflow: 'hidden', // Avoid overflow-induced layout shifts
-              width: '100%',
-            }}
-          >
-            <Box sx={{ display: 'flex', width: '100%', flexDirection: 'column' }}>
-              <NavigationBar isCheckoutPage={isCheckoutPage} />
-            </Box>
-          </Container>
+          <NavigationBar
+            isCheckoutPage={isCheckoutPage}
+            onAccountIconClick={handleAccountIconClick}
+          />
         </Box>
       </AppBar>
     </>
