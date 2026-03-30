@@ -1,5 +1,3 @@
-import theme from '@/styles/theme'
-
 export const topHeaderStyles = {
   wrapper: {
     display: {
@@ -26,7 +24,6 @@ export const headerActionAreaStyles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#e3e2ff',
-    // paddingBlock: { xs: 0, md: 1 },
   },
   container: {
     display: 'flex',
@@ -51,26 +48,23 @@ export const headerActionAreaStyles = {
 export const kiboHeaderStyles = {
   topBarStyles: {
     zIndex: (theme: any) => theme.zIndex.modal,
+    display: { xs: 'block', md: 'none' }, // desktop handled by NavigationBar
     width: '100%',
-    backgroundColor: '#e3e2ff', //Change with theme term later
-    height: '40',
-    [theme.breakpoints.down('md')]: {
-      backgroundColor: 'common.white', // new color when screen is below 900px, for mobile search.
-    },
+    backgroundColor: 'transparent',
+    background: 'none',
   },
   appBarStyles: {
     zIndex: (theme: any) => theme.zIndex.modal,
     scrollBehavior: 'smooth',
-    backgroundColor: 'common.white',
-    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+    backgroundColor: 'transparent !important',
+    background: 'none !important',
+    backgroundImage: 'none !important',
+    boxShadow: 'none',
   },
   logoStyles: {
-    // cursor: 'pointer',
     textAlign: 'center',
     position: 'relative',
     margin: 'auto',
-    // minHeight: '70px',
-    // width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
     flex: 1,
@@ -86,7 +80,8 @@ export const kiboHeaderStyles = {
     color: 'common.black',
     width: '100%',
     minHeight: '50px',
-    backgroundColor: 'common.white',
+    backgroundColor: 'transparent',
+    background: 'none',
     display: {
       xs: 'none',
       md: 'block',

@@ -1,25 +1,36 @@
 import { useEffect, useState } from 'react'
 
+import SearchIcon from '@mui/icons-material/Search'
 import { Box } from '@mui/material'
+import Image from 'next/image'
 import Link from 'next/link'
 
-import { logoStyles, navbarStyles, navMenuStyles } from './NavigationBar.styles'
+import {
+  iconGroupStyles,
+  logoStyles,
+  navInnerStyles,
+  navLinksStyles,
+  navRightContainerStyles,
+  navWrapperStyles,
+  searchWrapperStyles,
+} from './NavigationBar.styles'
 import FortisMegaMenu from '../FortisMegaMenu/FortisMegaMenu'
-import logo from '@/assets/fortisLogo.png'
-import { KiboLogo } from '@/components/common'
+import logo from '@/assets/fortislogo-transparent.png'
+import logoBlue from '@/assets/fortisLogo.png'
+import AlgoliaAutocomplete from '@/components/layout/Algolia/AlgoliaAutocomplete'
+import AccountIcon from '@/components/layout/AppHeader/Icons/AccountIcon/AccountIcon'
+import CartIcon from '@/components/layout/AppHeader/Icons/CartIcon/CartIcon'
 
 const NavigationBar = (props: any) => {
   const [scrolled, setScrolled] = useState(false)
-  const { isCheckoutPage } = props
+  const { isCheckoutPage, onAccountIconClick } = props
 
   useEffect(() => {
-    // If it's a checkout page, force the `scrolled` state to true and exit
     if (isCheckoutPage) {
       setScrolled(true)
       return
     }
 
-    // Normal scroll behavior for non-checkout pages
     const buffer = 20
     const scrollThreshold = 70
 
@@ -33,22 +44,70 @@ const NavigationBar = (props: any) => {
     }
 
     window.addEventListener('scroll', handleScroll)
-
-    // Cleanup event listener on unmount
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-    }
-  }, [isCheckoutPage, scrolled]) // Listen for changes to `isCheckoutPage` and `scrolled`
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [isCheckoutPage, scrolled])
 
   return (
-    <Box component="nav" sx={navbarStyles} className={scrolled ? 'scrolled' : ''}>
-      <Box component="section" sx={logoStyles}>
-        <Link href="/">
-          <KiboLogo logo={logo} small={scrolled} />
-        </Link>
-      </Box>
-      <Box component="div" sx={navMenuStyles}>
-        {!isCheckoutPage && <FortisMegaMenu scrolled={scrolled} />}
+    <Box sx={navWrapperStyles} className={scrolled ? 'scrolled' : ''}>
+      <Box component="nav" sx={navInnerStyles}>
+        {/* Logo — 115×30px exact Figma size */}
+        <Box sx={logoStyles}>
+          <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
+            <Image
+              src={scrolled ? logoBlue : logo}
+              alt="Fortis Life Sciences"
+              width={115}
+              height={30}
+              priority
+            />
+          </Link>
+        </Box>
+
+        {/* Right group: nav links + search + icons */}
+        {!isCheckoutPage && (
+          <Box sx={navRightContainerStyles}>
+            {/* Nav links */}
+            <Box sx={navLinksStyles}>
+              <FortisMegaMenu scrolled={scrolled} />
+            </Box>
+
+            {/* Search — pill ghost with plain icon */}
+            <Box sx={searchWrapperStyles}>
+              <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+                <SearchIcon
+                  sx={{
+                    position: 'absolute',
+                    left: '20px',
+                    zIndex: 1,
+                    fontSize: '20px',
+                    color: scrolled ? '#111' : '#FFFFFF',
+                    pointerEvents: 'none',
+                  }}
+                />
+                <AlgoliaAutocomplete />
+              </Box>
+            </Box>
+
+            {/* Divider + Cart + Account */}
+            <Box sx={iconGroupStyles} className="nav-right-icons">
+              <Box
+                sx={{
+                  width: '1px',
+                  height: '32px',
+                  bgcolor: scrolled ? '#B5B5B5' : 'rgba(181,181,181,0.6)',
+                }}
+              />
+              <CartIcon size="medium" />
+              <button
+                aria-label="Login"
+                onClick={onAccountIconClick}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex' }}
+              >
+                <AccountIcon size="medium" onAccountIconClick={onAccountIconClick} />
+              </button>
+            </Box>
+          </Box>
+        )}
       </Box>
     </Box>
   )
