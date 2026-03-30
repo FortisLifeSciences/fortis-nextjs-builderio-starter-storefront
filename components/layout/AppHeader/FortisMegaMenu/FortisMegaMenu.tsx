@@ -63,22 +63,32 @@ export const FortisMegaMenu: React.FC<MegaMenuProps> = ({ scrolled }) => {
   }
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
       {menuContent?.map((menu, index) => (
         <React.Fragment key={index}>
           <Box
             sx={{
-              margin: '20px',
               display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'center',
               alignItems: 'center',
+              padding: '8px',
+              gap: '8px',
               cursor: 'pointer',
             }}
             onMouseOver={() => handleMouseEnter(menu)}
             onMouseLeave={handleMouseLeave}
           >
             <Typography
-              variant="h5"
-              sx={{ fontSize: '16px', fontWeight: '500', color: 'primary.main' }}
+              sx={{
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: 500,
+                fontSize: '15px',
+                lineHeight: '150%',
+                letterSpacing: '-0.005em',
+                color: scrolled ? 'primary.main' : 'common.white',
+                whiteSpace: 'nowrap',
+              }}
               tabIndex={0}
               onFocus={() => handleMouseEnter(menu)}
               onBlur={handleMouseLeave}
@@ -86,9 +96,13 @@ export const FortisMegaMenu: React.FC<MegaMenuProps> = ({ scrolled }) => {
               {menu.categoryName}
             </Typography>
             {hoveredMenu === menu ? (
-              <KeyboardArrowUpIcon sx={{ color: 'primary.main', marginLeft: '10px' }} />
+              <KeyboardArrowUpIcon
+                sx={{ color: scrolled ? 'primary.main' : 'common.white', fontSize: '20px' }}
+              />
             ) : (
-              <KeyboardArrowDownIcon sx={{ color: 'primary.main', marginLeft: '10px' }} />
+              <KeyboardArrowDownIcon
+                sx={{ color: scrolled ? 'primary.main' : 'common.white', fontSize: '20px' }}
+              />
             )}
           </Box>
 
