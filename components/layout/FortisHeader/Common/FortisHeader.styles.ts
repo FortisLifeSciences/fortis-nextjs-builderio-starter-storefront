@@ -56,9 +56,9 @@ export const kiboHeaderStyles = {
   appBarStyles: {
     zIndex: (theme: any) => theme.zIndex.modal,
     scrollBehavior: 'smooth',
-    backgroundColor: 'transparent !important',
-    background: 'none !important',
-    backgroundImage: 'none !important',
+    backgroundColor: 'transparent',
+    background: 'none',
+    backgroundImage: 'none',
     boxShadow: 'none',
   },
   logoStyles: {

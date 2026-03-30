@@ -17,25 +17,36 @@ interface MobileHeaderProps {
   onAccountIconClick?: () => void
 }
 
+const TRANSPARENT_PAGES = ['/', '/new-home-page']
+
 const MobileHeader = ({ children, hideIcons = false }: MobileHeaderProps) => {
   const router = useRouter()
-  const [scrolled, setScrolled] = useState(false)
+  const isTransparentPage = TRANSPARENT_PAGES.includes(router.asPath.split('?')[0])
+  const [hasScrolled, setHasScrolled] = useState(false)
+
+  // Reset scroll tracking on route change
+  useEffect(() => {
+    setHasScrolled(false)
+  }, [router.asPath])
 
   useEffect(() => {
+    if (!isTransparentPage) return
+
     const buffer = 20
     const scrollThreshold = 50
 
     const handleScroll = () => {
       const y = window.scrollY
-      if (y > scrollThreshold + buffer && !scrolled) setScrolled(true)
-      else if (y < scrollThreshold - buffer && scrolled) setScrolled(false)
+      if (y > scrollThreshold + buffer) setHasScrolled(true)
+      else if (y < scrollThreshold - buffer) setHasScrolled(false)
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [scrolled])
+  }, [isTransparentPage])
 
-  const iconColor = scrolled ? '#30299A' : '#FFFFFF'
+  const showWhite = !isTransparentPage || hasScrolled
+  const iconColor = showWhite ? '#30299A' : '#FFFFFF'
 
   return (
     <>
@@ -49,8 +60,8 @@ const MobileHeader = ({ children, hideIcons = false }: MobileHeaderProps) => {
           justifyContent: 'space-between',
           px: '16px',
           boxSizing: 'border-box',
-          backgroundColor: scrolled ? '#FFFFFF' : 'transparent',
-          boxShadow: scrolled ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
+          backgroundColor: showWhite ? '#FFFFFFE5' : 'transparent',
+          boxShadow: showWhite ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
           transition: 'background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
         }}
       >
@@ -81,7 +92,7 @@ const MobileHeader = ({ children, hideIcons = false }: MobileHeaderProps) => {
           }}
         >
           <Image
-            src={scrolled ? fortisLogoBlue : fortisLogoTransparent}
+            src={showWhite ? fortisLogoBlue : fortisLogoTransparent}
             alt="Fortis Life Sciences"
             width={100}
             height={26}

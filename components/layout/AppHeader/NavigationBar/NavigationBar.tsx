@@ -4,6 +4,7 @@ import SearchIcon from '@mui/icons-material/Search'
 import { Box } from '@mui/material'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 import {
   iconGroupStyles,
@@ -21,40 +22,56 @@ import AlgoliaAutocomplete from '@/components/layout/Algolia/AlgoliaAutocomplete
 import AccountIcon from '@/components/layout/AppHeader/Icons/AccountIcon/AccountIcon'
 import CartIcon from '@/components/layout/AppHeader/Icons/CartIcon/CartIcon'
 
+const TRANSPARENT_PAGES = ['/', '/new-home-page']
+
 const NavigationBar = (props: any) => {
-  const [scrolled, setScrolled] = useState(false)
+  const router = useRouter()
   const { isCheckoutPage, onAccountIconClick } = props
+  const isTransparentPage = TRANSPARENT_PAGES.includes(router.asPath.split('?')[0])
+  const [hasScrolled, setHasScrolled] = useState(false)
+
+  // Reset scroll tracking on route change
+  useEffect(() => {
+    setHasScrolled(false)
+  }, [router.asPath])
 
   useEffect(() => {
-    if (isCheckoutPage) {
-      setScrolled(true)
-      return
-    }
+    if (!isTransparentPage || isCheckoutPage) return
 
     const buffer = 20
     const scrollThreshold = 70
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY
-      if (currentScrollY > scrollThreshold + buffer && !scrolled) {
-        setScrolled(true)
-      } else if (currentScrollY < scrollThreshold - buffer && scrolled) {
-        setScrolled(false)
+      if (currentScrollY > scrollThreshold + buffer) {
+        setHasScrolled(true)
+      } else if (currentScrollY < scrollThreshold - buffer) {
+        setHasScrolled(false)
       }
     }
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [isCheckoutPage, scrolled])
+  }, [isCheckoutPage, isTransparentPage])
+
+  // White when: not a transparent page, checkout page, or user has showWhite on a transparent page
+  const showWhite = !isTransparentPage || isCheckoutPage || hasScrolled
 
   return (
-    <Box sx={navWrapperStyles} className={scrolled ? 'scrolled' : ''}>
+    <Box
+      sx={{
+        ...navWrapperStyles,
+        backgroundColor: showWhite ? '#FFFFFFE5' : 'transparent',
+        boxShadow: showWhite ? '0 2px 10px rgba(0, 0, 0, 0.1)' : 'none',
+      }}
+      className={showWhite ? 'scrolled' : ''}
+    >
       <Box component="nav" sx={navInnerStyles}>
         {/* Logo — 115×30px exact Figma size */}
         <Box sx={logoStyles}>
           <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
             <Image
-              src={scrolled ? logoBlue : logo}
+              src={showWhite ? logoBlue : logo}
               alt="Fortis Life Sciences"
               width={115}
               height={30}
@@ -68,7 +85,7 @@ const NavigationBar = (props: any) => {
           <Box sx={navRightContainerStyles}>
             {/* Nav links */}
             <Box sx={navLinksStyles}>
-              <FortisMegaMenu scrolled={scrolled} />
+              <FortisMegaMenu scrolled={showWhite} />
             </Box>
 
             {/* Search — pill ghost with plain icon */}
@@ -80,7 +97,7 @@ const NavigationBar = (props: any) => {
                     left: '20px',
                     zIndex: 1,
                     fontSize: '20px',
-                    color: scrolled ? '#111' : '#FFFFFF',
+                    color: showWhite ? '#111' : '#FFFFFF',
                     pointerEvents: 'none',
                   }}
                 />
@@ -94,7 +111,7 @@ const NavigationBar = (props: any) => {
                 sx={{
                   width: '1px',
                   height: '32px',
-                  bgcolor: scrolled ? '#B5B5B5' : 'rgba(181,181,181,0.6)',
+                  bgcolor: showWhite ? '#B5B5B5' : 'rgba(181,181,181,0.6)',
                 }}
               />
               <CartIcon size="medium" />
