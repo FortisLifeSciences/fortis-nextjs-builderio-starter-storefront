@@ -30,7 +30,6 @@ const NavigationBar = (props: any) => {
   const isTransparentPage = TRANSPARENT_PAGES.includes(router.asPath.split('?')[0])
   const [hasScrolled, setHasScrolled] = useState(false)
 
-  // Reset scroll tracking on route change
   useEffect(() => {
     setHasScrolled(false)
   }, [router.asPath])
@@ -38,23 +37,25 @@ const NavigationBar = (props: any) => {
   useEffect(() => {
     if (!isTransparentPage || isCheckoutPage) return
 
-    const buffer = 20
-    const scrollThreshold = 70
+    // Place a sentinel at the top of #main-content.
+    // IntersectionObserver fires when it exits the viewport regardless of scroll container.
+    const target = document.getElementById('main-content') || document.body
+    const sentinel = document.createElement('div')
+    sentinel.style.cssText =
+      'position:absolute;top:80px;left:0;height:1px;width:1px;pointer-events:none;z-index:-1;'
+    target.prepend(sentinel)
 
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY
-      if (currentScrollY > scrollThreshold + buffer) {
-        setHasScrolled(true)
-      } else if (currentScrollY < scrollThreshold - buffer) {
-        setHasScrolled(false)
-      }
+    const observer = new IntersectionObserver(([entry]) => setHasScrolled(!entry.isIntersecting), {
+      threshold: 0,
+    })
+    observer.observe(sentinel)
+
+    return () => {
+      observer.disconnect()
+      sentinel.remove()
     }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
   }, [isCheckoutPage, isTransparentPage])
 
-  // White when: not a transparent page, checkout page, or user has showWhite on a transparent page
   const showWhite = !isTransparentPage || isCheckoutPage || hasScrolled
 
   return (

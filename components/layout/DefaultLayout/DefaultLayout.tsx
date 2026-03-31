@@ -117,6 +117,7 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
                   sx={{
                     flex: '1 0 auto',
                     width: '100%',
+                    position: 'relative',
                     pt: isTransparentPage ? 0 : `${headerHeight}px`,
                   }}
                 >
