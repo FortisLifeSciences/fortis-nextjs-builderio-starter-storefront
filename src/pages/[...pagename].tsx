@@ -244,7 +244,7 @@ const Page = (props: any) => {
         {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
         {noIndex && <meta name="robots" content="noindex,nofollow" />}
       </Head>
-      <div>
+      <div style={{ paddingTop: '24px' }}>
         <BuilderComponent
           model={publicRuntimeConfig?.builderIO?.modelKeys?.defaultPage}
           content={page}

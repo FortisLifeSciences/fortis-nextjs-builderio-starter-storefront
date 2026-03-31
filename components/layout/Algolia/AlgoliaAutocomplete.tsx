@@ -483,7 +483,7 @@ const AlgoliaAutocomplete = () => {
 
     const search = autocomplete<QuickAccessHit>({
       container: containerRef.current,
-      placeholder: 'SEARCH',
+      placeholder: 'Search',
       openOnFocus: true,
       insights: true,
       plugins: [querySuggestionsPlugin, popularPlugin, quickAccessPlugin],
