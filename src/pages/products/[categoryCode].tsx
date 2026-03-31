@@ -4,7 +4,7 @@ import { BuilderComponent, builder } from '@builder.io/react'
 import { Add, ExpandLess, ExpandMore } from '@mui/icons-material'
 import Apps from '@mui/icons-material/Apps'
 import ReorderRounded from '@mui/icons-material/ReorderRounded'
-import { Box, Button, Container, Typography, useMediaQuery } from '@mui/material'
+import { Box, Button, Typography, useMediaQuery } from '@mui/material'
 import algoliasearch from 'algoliasearch'
 import getConfig from 'next/config'
 import Head from 'next/head'
@@ -471,36 +471,31 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
         content={props.section}
       />
 
-      <Container
-        disableGutters
-        sx={{ maxWidth: '1200px !important', mx: 'auto', px: { xs: 2, md: 0 } }}
-      >
-        <InstantSearch
-          searchClient={searchClient}
-          indexName="products"
-          insights={{
-            onEvent(event) {
-              const { widgetType, eventType, payload, hits } = event
-              const objectIDs = hits?.map((hit) => hit.objectID)
-              if (widgetType === 'ais.hits' && eventType === 'view') {
-                if ((window as any).dataLayer) {
-                  window.dataLayer.push({
-                    event: 'Hits Viewed',
-                    algoliaObjectIds: objectIDs,
-                    algoliaIndex: 'products',
-                  })
-                }
+      <InstantSearch
+        searchClient={searchClient}
+        indexName="products"
+        insights={{
+          onEvent(event) {
+            const { widgetType, eventType, payload, hits } = event
+            const objectIDs = hits?.map((hit) => hit.objectID)
+            if (widgetType === 'ais.hits' && eventType === 'view') {
+              if ((window as any).dataLayer) {
+                window.dataLayer.push({
+                  event: 'Hits Viewed',
+                  algoliaObjectIds: objectIDs,
+                  algoliaIndex: 'products',
+                })
               }
-            },
-          }}
-        >
-          <MyHitsComponent
-            categoryCode={categoryCode}
-            facets={facets}
-            searchableAttributes={searchableAttributes}
-          />
-        </InstantSearch>
-      </Container>
+            }
+          },
+        }}
+      >
+        <MyHitsComponent
+          categoryCode={categoryCode}
+          facets={facets}
+          searchableAttributes={searchableAttributes}
+        />
+      </InstantSearch>
     </>
   )
 }
