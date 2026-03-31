@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useRef, useState } from 'react'
 
-import { Box, Stack } from '@mui/material'
+import { Box, Container, Stack } from '@mui/material'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider } from '@mui/material/styles'
 import { HydrationBoundary } from '@tanstack/react-query'
@@ -117,10 +117,20 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
                   sx={{
                     flex: '1 0 auto',
                     width: '100%',
+                    position: 'relative',
                     pt: isTransparentPage ? 0 : `${headerHeight}px`,
                   }}
                 >
-                  {children}
+                  {isTransparentPage ? (
+                    children
+                  ) : (
+                    <Container
+                      disableGutters
+                      sx={{ maxWidth: '1200px !important', mx: 'auto', px: { xs: 2, md: 0 } }}
+                    >
+                      {children}
+                    </Container>
+                  )}
                 </Box>
                 <Footer />
               </Stack>

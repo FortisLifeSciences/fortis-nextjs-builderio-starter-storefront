@@ -24,7 +24,6 @@ const MobileHeader = ({ children, hideIcons = false }: MobileHeaderProps) => {
   const isTransparentPage = TRANSPARENT_PAGES.includes(router.asPath.split('?')[0])
   const [hasScrolled, setHasScrolled] = useState(false)
 
-  // Reset scroll tracking on route change
   useEffect(() => {
     setHasScrolled(false)
   }, [router.asPath])
@@ -32,17 +31,21 @@ const MobileHeader = ({ children, hideIcons = false }: MobileHeaderProps) => {
   useEffect(() => {
     if (!isTransparentPage) return
 
-    const buffer = 20
-    const scrollThreshold = 50
+    const target = document.getElementById('main-content') || document.body
+    const sentinel = document.createElement('div')
+    sentinel.style.cssText =
+      'position:absolute;top:80px;left:0;height:1px;width:1px;pointer-events:none;z-index:-1;'
+    target.prepend(sentinel)
 
-    const handleScroll = () => {
-      const y = window.scrollY
-      if (y > scrollThreshold + buffer) setHasScrolled(true)
-      else if (y < scrollThreshold - buffer) setHasScrolled(false)
+    const observer = new IntersectionObserver(([entry]) => setHasScrolled(!entry.isIntersecting), {
+      threshold: 0,
+    })
+    observer.observe(sentinel)
+
+    return () => {
+      observer.disconnect()
+      sentinel.remove()
     }
-
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
   }, [isTransparentPage])
 
   const showWhite = !isTransparentPage || hasScrolled
