@@ -22,7 +22,14 @@ import AlgoliaAutocomplete from '@/components/layout/Algolia/AlgoliaAutocomplete
 import AccountIcon from '@/components/layout/AppHeader/Icons/AccountIcon/AccountIcon'
 import CartIcon from '@/components/layout/AppHeader/Icons/CartIcon/CartIcon'
 
-const TRANSPARENT_PAGES = ['/', '/new-home-page']
+const TRANSPARENT_PAGES = [
+  '/',
+  '/new-home-page',
+  '/new-about',
+  '/new-services-page',
+  '/fortis-grant-2026-abnano-vhh-discovery',
+  '/data-in-focus',
+]
 
 const NavigationBar = (props: any) => {
   const router = useRouter()
