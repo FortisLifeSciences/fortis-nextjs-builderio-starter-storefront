@@ -55,7 +55,7 @@ export const navWrapperStyles: SxProps = {
 
   // Scrolled — white background
   '&.scrolled': {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FFFFFFE5',
     boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
 
     '& .aa-Form': {
@@ -79,7 +79,7 @@ export const navInnerStyles: SxProps = {
   flexDirection: 'row',
   justifyContent: 'space-between',
   alignItems: 'center',
-  padding: '16px 80px 16px 0',
+  padding: '16px 0',
   gap: '20px',
   maxWidth: '1200px',
   width: '100%',
@@ -89,7 +89,7 @@ export const navInnerStyles: SxProps = {
   transition: 'height 0.3s ease-in-out, padding 0.3s ease-in-out',
   '.scrolled &': {
     height: '66px',
-    padding: '18px 80px 18px 0',
+    padding: '18px 0',
   },
 }
 

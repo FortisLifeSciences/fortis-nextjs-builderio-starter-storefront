@@ -4,6 +4,7 @@ import SearchIcon from '@mui/icons-material/Search'
 import { Box } from '@mui/material'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 import {
   iconGroupStyles,
@@ -21,40 +22,64 @@ import AlgoliaAutocomplete from '@/components/layout/Algolia/AlgoliaAutocomplete
 import AccountIcon from '@/components/layout/AppHeader/Icons/AccountIcon/AccountIcon'
 import CartIcon from '@/components/layout/AppHeader/Icons/CartIcon/CartIcon'
 
+const TRANSPARENT_PAGES = [
+  '/',
+  '/new-home-page',
+  '/new-about',
+  '/new-services-page',
+  '/fortis-grant-2026-abnano-vhh-discovery',
+  '/data-in-focus',
+]
+
 const NavigationBar = (props: any) => {
-  const [scrolled, setScrolled] = useState(false)
+  const router = useRouter()
   const { isCheckoutPage, onAccountIconClick } = props
+  const isTransparentPage = TRANSPARENT_PAGES.includes(router.asPath.split('?')[0])
+  const [hasScrolled, setHasScrolled] = useState(false)
 
   useEffect(() => {
-    if (isCheckoutPage) {
-      setScrolled(true)
-      return
+    setHasScrolled(false)
+  }, [router.asPath])
+
+  useEffect(() => {
+    if (!isTransparentPage || isCheckoutPage) return
+
+    // Place a sentinel at the top of #main-content.
+    // IntersectionObserver fires when it exits the viewport regardless of scroll container.
+    const target = document.getElementById('main-content') || document.body
+    const sentinel = document.createElement('div')
+    sentinel.style.cssText =
+      'position:absolute;top:80px;left:0;height:1px;width:1px;pointer-events:none;z-index:-1;'
+    target.prepend(sentinel)
+
+    const observer = new IntersectionObserver(([entry]) => setHasScrolled(!entry.isIntersecting), {
+      threshold: 0,
+    })
+    observer.observe(sentinel)
+
+    return () => {
+      observer.disconnect()
+      sentinel.remove()
     }
+  }, [isCheckoutPage, isTransparentPage])
 
-    const buffer = 20
-    const scrollThreshold = 70
-
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY
-      if (currentScrollY > scrollThreshold + buffer && !scrolled) {
-        setScrolled(true)
-      } else if (currentScrollY < scrollThreshold - buffer && scrolled) {
-        setScrolled(false)
-      }
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [isCheckoutPage, scrolled])
+  const showWhite = !isTransparentPage || isCheckoutPage || hasScrolled
 
   return (
-    <Box sx={navWrapperStyles} className={scrolled ? 'scrolled' : ''}>
+    <Box
+      sx={{
+        ...navWrapperStyles,
+        backgroundColor: showWhite ? '#FFFFFFE5' : 'transparent',
+        boxShadow: showWhite ? '0 2px 10px rgba(0, 0, 0, 0.1)' : 'none',
+      }}
+      className={showWhite ? 'scrolled' : ''}
+    >
       <Box component="nav" sx={navInnerStyles}>
         {/* Logo — 115×30px exact Figma size */}
         <Box sx={logoStyles}>
           <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
             <Image
-              src={scrolled ? logoBlue : logo}
+              src={showWhite ? logoBlue : logo}
               alt="Fortis Life Sciences"
               width={115}
               height={30}
@@ -68,7 +93,7 @@ const NavigationBar = (props: any) => {
           <Box sx={navRightContainerStyles}>
             {/* Nav links */}
             <Box sx={navLinksStyles}>
-              <FortisMegaMenu scrolled={scrolled} />
+              <FortisMegaMenu scrolled={showWhite} />
             </Box>
 
             {/* Search — pill ghost with plain icon */}
@@ -80,7 +105,7 @@ const NavigationBar = (props: any) => {
                     left: '20px',
                     zIndex: 1,
                     fontSize: '20px',
-                    color: scrolled ? '#111' : '#FFFFFF',
+                    color: showWhite ? '#111' : '#FFFFFF',
                     pointerEvents: 'none',
                   }}
                 />
@@ -94,7 +119,7 @@ const NavigationBar = (props: any) => {
                 sx={{
                   width: '1px',
                   height: '32px',
-                  bgcolor: scrolled ? '#B5B5B5' : 'rgba(181,181,181,0.6)',
+                  bgcolor: showWhite ? '#B5B5B5' : 'rgba(181,181,181,0.6)',
                 }}
               />
               <CartIcon size="medium" />

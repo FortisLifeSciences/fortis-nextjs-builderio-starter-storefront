@@ -17,25 +17,39 @@ interface MobileHeaderProps {
   onAccountIconClick?: () => void
 }
 
+const TRANSPARENT_PAGES = ['/', '/new-home-page']
+
 const MobileHeader = ({ children, hideIcons = false }: MobileHeaderProps) => {
   const router = useRouter()
-  const [scrolled, setScrolled] = useState(false)
+  const isTransparentPage = TRANSPARENT_PAGES.includes(router.asPath.split('?')[0])
+  const [hasScrolled, setHasScrolled] = useState(false)
 
   useEffect(() => {
-    const buffer = 20
-    const scrollThreshold = 50
+    setHasScrolled(false)
+  }, [router.asPath])
 
-    const handleScroll = () => {
-      const y = window.scrollY
-      if (y > scrollThreshold + buffer && !scrolled) setScrolled(true)
-      else if (y < scrollThreshold - buffer && scrolled) setScrolled(false)
+  useEffect(() => {
+    if (!isTransparentPage) return
+
+    const target = document.getElementById('main-content') || document.body
+    const sentinel = document.createElement('div')
+    sentinel.style.cssText =
+      'position:absolute;top:80px;left:0;height:1px;width:1px;pointer-events:none;z-index:-1;'
+    target.prepend(sentinel)
+
+    const observer = new IntersectionObserver(([entry]) => setHasScrolled(!entry.isIntersecting), {
+      threshold: 0,
+    })
+    observer.observe(sentinel)
+
+    return () => {
+      observer.disconnect()
+      sentinel.remove()
     }
+  }, [isTransparentPage])
 
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [scrolled])
-
-  const iconColor = scrolled ? '#30299A' : '#FFFFFF'
+  const showWhite = !isTransparentPage || hasScrolled
+  const iconColor = showWhite ? '#30299A' : '#FFFFFF'
 
   return (
     <>
@@ -49,8 +63,8 @@ const MobileHeader = ({ children, hideIcons = false }: MobileHeaderProps) => {
           justifyContent: 'space-between',
           px: '16px',
           boxSizing: 'border-box',
-          backgroundColor: scrolled ? '#FFFFFF' : 'transparent',
-          boxShadow: scrolled ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
+          backgroundColor: showWhite ? '#FFFFFFE5' : 'transparent',
+          boxShadow: showWhite ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
           transition: 'background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
         }}
       >
@@ -81,7 +95,7 @@ const MobileHeader = ({ children, hideIcons = false }: MobileHeaderProps) => {
           }}
         >
           <Image
-            src={scrolled ? fortisLogoBlue : fortisLogoTransparent}
+            src={showWhite ? fortisLogoBlue : fortisLogoTransparent}
             alt="Fortis Life Sciences"
             width={100}
             height={26}

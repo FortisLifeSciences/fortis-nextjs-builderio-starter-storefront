@@ -1,11 +1,11 @@
-import React, { ReactElement, useEffect } from 'react'
+import React, { ReactElement, useEffect, useRef, useState } from 'react'
 
-import { Box, Stack } from '@mui/material'
+import { Box, Container, Stack } from '@mui/material'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider } from '@mui/material/styles'
 import { HydrationBoundary } from '@tanstack/react-query'
 import creditCardType from 'credit-card-type'
-import Router from 'next/router'
+import Router, { useRouter } from 'next/router'
 
 import { AnnouncementBar, GlobalFetchingIndicator } from '@/components/common'
 import { Footer, FortisHeader, KiboHeader } from '@/components/layout'
@@ -26,7 +26,30 @@ creditCardType.updateCard('american-express', {
   niceType: 'AMEX',
 })
 
+const TRANSPARENT_PAGES = [
+  '/',
+  '/new-home-page',
+  '/new-about',
+  '/new-services-page',
+  '/fortis-grant-2026-abnano-vhh-discovery',
+  '/data-in-focus',
+]
+
 const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: ReactElement }) => {
+  const router = useRouter()
+  const headerRef = useRef<HTMLDivElement>(null)
+  const [headerHeight, setHeaderHeight] = useState(0)
+  const isTransparentPage = TRANSPARENT_PAGES.includes(router.asPath.split('?')[0])
+
+  useEffect(() => {
+    const el = headerRef.current
+    if (!el) return
+    const observer = new ResizeObserver(() => setHeaderHeight(el.offsetHeight))
+    observer.observe(el)
+    setHeaderHeight(el.offsetHeight)
+    return () => observer.disconnect()
+  }, [])
+
   useEffect(() => {
     const handleRouteChange = (url: any) => {
       const isMyAccountPage = url.includes('/my-account')
@@ -70,6 +93,7 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
                   isSticky={true}
                 /> */}
                 <Stack
+                  ref={headerRef}
                   id="fixed-header-wrapper"
                   sx={{
                     position: 'fixed',
@@ -95,8 +119,25 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
                 </Stack>
                 <DialogRoot />
                 <SnackbarRoot />
-                <Box id="main-content" sx={{ flex: '1 0 auto', width: '100%', pt: 0 }}>
-                  {children}
+                <Box
+                  id="main-content"
+                  sx={{
+                    flex: '1 0 auto',
+                    width: '100%',
+                    position: 'relative',
+                    pt: isTransparentPage ? 0 : `${headerHeight}px`,
+                  }}
+                >
+                  {isTransparentPage ? (
+                    children
+                  ) : (
+                    <Container
+                      disableGutters
+                      sx={{ maxWidth: '1200px !important', mx: 'auto', px: { xs: 2, md: 0 } }}
+                    >
+                      {children}
+                    </Container>
+                  )}
                 </Box>
                 <Footer />
               </Stack>
