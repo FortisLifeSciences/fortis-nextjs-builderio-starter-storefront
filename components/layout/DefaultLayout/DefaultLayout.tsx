@@ -26,7 +26,14 @@ creditCardType.updateCard('american-express', {
   niceType: 'AMEX',
 })
 
-const TRANSPARENT_PAGES = ['/', '/new-home-page']
+const TRANSPARENT_PAGES = [
+  '/',
+  '/new-home-page',
+  '/new-about',
+  '/new-services-page',
+  '/fortis-grant-2026-abnano-vhh-discovery',
+  '/data-in-focus',
+]
 
 const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: ReactElement }) => {
   const router = useRouter()
