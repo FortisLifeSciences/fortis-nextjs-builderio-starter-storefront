@@ -259,7 +259,7 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
         productVariations,
         baseUrl,
         organizationConfig: {
-          id: 'https://fortislife.com/#organization',
+          id: 'https://www.fortislife.com/#organization',
           name: 'Fortis Life Sciences',
           url: 'https://www.fortislife.com/',
           logo: 'https://cdn.builder.io/api/v1/assets/bea8d49fc591467587ef6a596924214c/fortis-life-science-logo',

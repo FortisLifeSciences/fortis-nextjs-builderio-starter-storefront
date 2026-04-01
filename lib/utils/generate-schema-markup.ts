@@ -98,7 +98,7 @@ function generateOrganizationSchema(
 function generateWebSiteSchema(config: WebSiteConfig, organizationId: string): Record<string, any> {
   return {
     '@type': 'WebSite',
-    '@id': `${config.url}/#website`,
+    '@id': `${config.url.replace(/\/$/, '')}/#website`,
     name: config.name,
     url: config.url,
     publisher: {
@@ -120,21 +120,46 @@ function generateBrandSchema(
     '@type': 'Brand',
     '@id': config.id || `${baseUrl}/#brand-${brandSlug}`,
     name: config.name,
-    logo: config.logo,
-    memberOf: {
-      '@id': organizationId,
-    },
   }
 
   if (config.slogan) {
     schema.slogan = config.slogan
   }
 
+  schema.logo = config.logo
+
   if (config.sameAs && config.sameAs.length > 0) {
     schema.sameAs = config.sameAs
   }
 
+  schema.owner = { '@id': organizationId }
+
   return schema
+}
+
+/**
+ * Generates WebPage schema
+ */
+function generateWebPageSchema(
+  productUrl: string,
+  productName: string,
+  websiteId: string
+): Record<string, any> {
+  return {
+    '@type': 'WebPage',
+    '@id': `${productUrl}#webpage`,
+    url: productUrl,
+    name: productName,
+    isPartOf: {
+      '@id': websiteId,
+    },
+    breadcrumb: {
+      '@id': `${productUrl}#breadcrumb`,
+    },
+    mainEntity: {
+      '@id': `${productUrl}#product`,
+    },
+  }
 }
 
 /**
@@ -143,12 +168,22 @@ function generateBrandSchema(
 function generateBreadcrumbSchema(
   breadcrumbs: BreadCrumb[],
   baseUrl: string,
-  productUrl: string
+  productUrl: string,
+  productName: string
 ): Record<string, any> {
+  // Check if the last breadcrumb already points to the product page
+  const lastCrumb = breadcrumbs[breadcrumbs.length - 1]
+  const lastCrumbUrl = lastCrumb?.link ? baseUrl + lastCrumb.link : ''
+  const productAlreadyPresent = lastCrumbUrl === productUrl
+
+  const allCrumbs = productAlreadyPresent
+    ? breadcrumbs
+    : [...breadcrumbs, { text: productName, link: productUrl.replace(baseUrl, '') }]
+
   return {
     '@type': 'BreadcrumbList',
     '@id': `${productUrl}#breadcrumb`,
-    itemListElement: breadcrumbs.map((crumb, index) => {
+    itemListElement: allCrumbs.map((crumb, index) => {
       const item: Record<string, any> = {
         '@type': 'ListItem',
         position: index + 1,
@@ -156,7 +191,7 @@ function generateBreadcrumbSchema(
       }
 
       if (crumb.link) {
-        item.item = baseUrl + crumb.link
+        item.item = crumb.link.startsWith('http') ? crumb.link : baseUrl + crumb.link
       }
 
       return item
@@ -214,6 +249,7 @@ function extractAdditionalProperties(product: Product): Array<Record<string, any
     contents: 'Contents',
     'contents-variant': 'Contents',
     'country-of-origin': 'Country of Origin',
+    'product-type': 'Product Type',
     // Applications & assay
     'applications-variant': 'Applications',
     'application-text': 'Application Details',
@@ -284,23 +320,55 @@ function extractAdditionalProperties(product: Product): Array<Record<string, any
       }
 
       const attributeName = prop?.attributeFQN?.split('~')[1] || prop?.attributeFQN
-      const displayName = propertyMap[attributeName] || attributeName
+
+      // Only include attributes explicitly listed in the propertyMap (whitelist)
+      if (!propertyMap[attributeName]) {
+        return
+      }
+
+      const displayName = propertyMap[attributeName]
 
       const propValue = prop?.values?.[0]
-      const value =
+      let value: string | undefined =
         typeof propValue === 'object' && propValue !== null && 'stringValue' in propValue
           ? propValue.stringValue
           : typeof propValue === 'string'
           ? propValue
           : undefined
 
-      if (value) {
-        additionalProperties.push({
-          '@type': 'PropertyValue',
-          name: displayName,
-          value: HTML_ATTRIBUTES.has(prop?.attributeFQN) ? stripHtml(value) : value,
-        })
+      if (!value) return
+
+      // Strip HTML for known HTML attributes
+      if (HTML_ATTRIBUTES.has(prop?.attributeFQN)) {
+        value = stripHtml(value)
       }
+
+      // If the value is a JSON array string (e.g. Dilution Range), flatten to readable text
+      if (value.trimStart().startsWith('[')) {
+        try {
+          const parsed = JSON.parse(value)
+          if (Array.isArray(parsed)) {
+            value = parsed
+              .map((entry: Record<string, string>) =>
+                Object.entries(entry)
+                  .map(([k, v]) => `${k}: ${v}`)
+                  .join(', ')
+              )
+              .join('; ')
+          }
+        } catch {
+          // leave value as-is if parsing fails
+        }
+      }
+
+      // Skip blank or obviously invalid values
+      if (!value || value === '0') return
+
+      additionalProperties.push({
+        '@type': 'PropertyValue',
+        name: displayName,
+        value,
+      })
     })
   }
 
@@ -335,12 +403,9 @@ function generateProductSchema(
     manufacturer: {
       '@id': organizationId,
     },
-  }
-
-  // Add additional properties
-  const additionalProps = extractAdditionalProperties(product)
-  if (additionalProps.length > 0) {
-    schema.additionalProperty = additionalProps
+    mainEntityOfPage: {
+      '@id': `${productUrl}#webpage`,
+    },
   }
 
   // Add product images — ensure absolute URLs (CDN may return protocol-relative //cdn...)
@@ -356,41 +421,44 @@ function generateProductSchema(
     schema.image = images
   }
 
-  // Required by Google for Product rich results eligibility.
-  // No public list price — priceSpecification signals pricing exists without committing to a value.
-  schema.offers = {
-    '@type': 'Offer',
-    url: productUrl,
-    availability: 'https://schema.org/InStock',
-    priceSpecification: {
-      '@type': 'PriceSpecification',
-      priceCurrency: 'USD',
-    },
+  // Add additional properties
+  const additionalProps = extractAdditionalProperties(product)
+  if (additionalProps.length > 0) {
+    schema.additionalProperty = additionalProps
   }
 
-  // Add variants if available
+  // Add variants as isSimilarTo — only include variants that have their own canonical
+  // SEO URL (not a ?selected= query-param URL and not identical to the current page URL).
   if (productVariations && productVariations.length > 0) {
-    schema.hasVariant = productVariations.map((variant) => {
-      const variantUrl = `${productUrl}?selected=${variant.variationProductCode}`
+    const similarProducts = productVariations.reduce<Array<Record<string, any>>>((acc, variant) => {
+      const variantSeoPath = getProductSeoLink(variant)
+      // Skip variants that resolve to a ?selected= URL or have no distinct path
+      if (!variantSeoPath || variantSeoPath.includes('?selected=')) return acc
 
-      return {
+      const variantUrl = baseUrl + variantSeoPath
+      // Skip if the variant URL is the same as the current product page
+      if (variantUrl === productUrl) return acc
+
+      const variantCode = variant?.productCode || variant?.variationProductCode
+      const variantName = variant?.content?.productName || ''
+
+      // Skip if there's no meaningful name, SKU, or the URL doesn't include a product code
+      // (guards against variants that resolved to a bare /products/ base path)
+      if (!variantName || !variantCode || !variantUrl.includes(variantCode)) return acc
+
+      acc.push({
         '@type': 'Product',
-        '@id': `${variantUrl}#variant`,
-        name: `${product?.content?.productName} — ${variant.variationProductCode}`,
-        sku: variant.variationProductCode,
-        mpn: variant.variationProductCode,
+        name: variantName,
         url: variantUrl,
-        brand: {
-          '@id': brandId,
-        },
-        manufacturer: {
-          '@id': organizationId,
-        },
-        isVariantOf: {
-          '@id': `${productUrl}#product`,
-        },
-      }
-    })
+        sku: variantCode,
+        mpn: variantCode,
+      })
+      return acc
+    }, [])
+
+    if (similarProducts.length > 0) {
+      schema.isSimilarTo = similarProducts
+    }
   }
 
   return schema
@@ -451,10 +519,23 @@ export function generateSchemaMarkups(options: SchemaMarkupOptions): string {
 
   // 4. BreadcrumbList
   if (breadcrumbs && breadcrumbs.length > 0) {
-    graph.push(generateBreadcrumbSchema(breadcrumbs, baseUrl, productUrl))
+    graph.push(
+      generateBreadcrumbSchema(
+        breadcrumbs,
+        baseUrl,
+        productUrl,
+        product?.content?.productName || ''
+      )
+    )
   }
 
-  // 5. Product
+  // 5. WebPage
+  const websiteId = websiteConfig
+    ? `${websiteConfig.url.replace(/\/$/, '')}/#website`
+    : `${baseUrl}/#website`
+  graph.push(generateWebPageSchema(productUrl, product?.content?.productName || '', websiteId))
+
+  // 6. Product
   graph.push(generateProductSchema(product, productVariations, baseUrl, brandId, organizationId))
 
   const schemaData = {
