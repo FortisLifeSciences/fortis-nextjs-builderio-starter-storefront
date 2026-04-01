@@ -74,8 +74,11 @@ const AlgoliaAutocomplete = () => {
       if (wrapper) {
         const panel = getPanel()
         if (panel) {
-          const top = wrapper.getBoundingClientRect().top
-          panel.style.top = `${top + 24}px`
+          const navbar = document.querySelector<HTMLElement>('[data-testid="header-container"]')
+          const navbarBottom = navbar
+            ? navbar.getBoundingClientRect().bottom
+            : wrapper.getBoundingClientRect().bottom + 8
+          panel.style.top = `${navbarBottom}px`
         }
       }
     }
@@ -480,7 +483,7 @@ const AlgoliaAutocomplete = () => {
 
     const search = autocomplete<QuickAccessHit>({
       container: containerRef.current,
-      placeholder: 'SEARCH',
+      placeholder: 'Search',
       openOnFocus: true,
       insights: true,
       plugins: [querySuggestionsPlugin, popularPlugin, quickAccessPlugin],
@@ -490,9 +493,11 @@ const AlgoliaAutocomplete = () => {
       },
       shouldPanelOpen({ state }) {
         if (justRedirected) {
-          return false // Prevent panel opening just after redirect
+          return false
         }
-        // Default behavior: open if there are items
+        if (!state.query) {
+          return false
+        }
         return state.collections.some((collection) => collection.items.length > 0)
       },
       onStateChange({ state }) {

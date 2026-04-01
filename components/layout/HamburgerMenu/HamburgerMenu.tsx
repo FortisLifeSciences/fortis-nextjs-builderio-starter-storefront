@@ -85,10 +85,14 @@ const HamburgerMenu = (props: HamburgerMenuProps) => {
         onClose={() => toggleDrawer(false)}
         onOpen={() => toggleDrawer(true)}
         data-testid="hamburger-menu"
+        disableSwipeToOpen
+        disableScrollLock
+        swipeAreaWidth={0}
         PaperProps={{
           sx: {
-            height: '100vh', // Full viewport height
+            height: '100vh',
             overflow: 'hidden',
+            width: '100vw',
           },
         }}
       >

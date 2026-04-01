@@ -1,11 +1,11 @@
-import React, { ReactElement, useEffect } from 'react'
+import React, { ReactElement, useEffect, useRef, useState } from 'react'
 
-import { Container, Stack } from '@mui/material'
+import { Box, Container, Stack } from '@mui/material'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider } from '@mui/material/styles'
 import { HydrationBoundary } from '@tanstack/react-query'
 import creditCardType from 'credit-card-type'
-import Router from 'next/router'
+import Router, { useRouter } from 'next/router'
 
 import { AnnouncementBar, GlobalFetchingIndicator } from '@/components/common'
 import { Footer, FortisHeader, KiboHeader } from '@/components/layout'
@@ -26,7 +26,32 @@ creditCardType.updateCard('american-express', {
   niceType: 'AMEX',
 })
 
+const TRANSPARENT_PAGES = [
+  '/',
+  '/new-home-page',
+  '/new-about',
+  '/about',
+  '/our-company',
+  '/new-services-page',
+  '/fortis-grant-2026-abnano-vhh-discovery',
+  '/data-in-focus',
+]
+
 const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: ReactElement }) => {
+  const router = useRouter()
+  const headerRef = useRef<HTMLDivElement>(null)
+  const [headerHeight, setHeaderHeight] = useState(0)
+  const isTransparentPage = TRANSPARENT_PAGES.includes(router.asPath.split('?')[0])
+
+  useEffect(() => {
+    const el = headerRef.current
+    if (!el) return
+    const observer = new ResizeObserver(() => setHeaderHeight(el.offsetHeight))
+    observer.observe(el)
+    setHeaderHeight(el.offsetHeight)
+    return () => observer.disconnect()
+  }, [])
+
   useEffect(() => {
     const handleRouteChange = (url: any) => {
       const isMyAccountPage = url.includes('/my-account')
@@ -46,32 +71,6 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
     }
   }, [])
 
-  useEffect(() => {
-    const wrapper = document.getElementById('fixed-header-wrapper')
-    const content = document.getElementById('main-content')
-
-    const updateContentOffset = () => {
-      if (wrapper && content) {
-        const height = wrapper.getBoundingClientRect().height
-        content.style.marginTop = `${height}px`
-      }
-    }
-
-    if (wrapper) {
-      // ResizeObserver watches for any size changes in the wrapper
-      const observer = new ResizeObserver(() => {
-        updateContentOffset()
-      })
-
-      observer.observe(wrapper)
-      // Initial call
-      updateContentOffset()
-
-      return () => {
-        observer.disconnect()
-      }
-    }
-  }, [])
   return (
     <HydrationBoundary state={pageProps.dehydratedState}>
       <ThemeProvider theme={theme}>
@@ -80,7 +79,7 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
           <AuthContextProvider>
             <HeaderContextProvider>
               <GlobalFetchingIndicator />
-              <Stack sx={{ minHeight: '100vh' }}>
+              <Stack sx={{ minHeight: '100vh', width: '100%' }}>
                 {/* <KiboHeader
                   navLinks={[
                     {
@@ -96,6 +95,7 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
                   isSticky={true}
                 /> */}
                 <Stack
+                  ref={headerRef}
                   id="fixed-header-wrapper"
                   sx={{
                     position: 'fixed',
@@ -121,12 +121,26 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
                 </Stack>
                 <DialogRoot />
                 <SnackbarRoot />
-                <Container
+                <Box
                   id="main-content"
-                  sx={{ py: 2, flex: '1 0 auto', maxWidth: '1200px', px: { lg: 0 } }}
+                  sx={{
+                    flex: '1 0 auto',
+                    width: '100%',
+                    position: 'relative',
+                    pt: isTransparentPage ? 0 : `${headerHeight}px`,
+                  }}
                 >
-                  {children}
-                </Container>
+                  {isTransparentPage ? (
+                    children
+                  ) : (
+                    <Container
+                      disableGutters
+                      sx={{ maxWidth: '1200px !important', mx: 'auto', px: { xs: 2, md: 0 } }}
+                    >
+                      {children}
+                    </Container>
+                  )}
+                </Box>
                 <Footer />
               </Stack>
             </HeaderContextProvider>
