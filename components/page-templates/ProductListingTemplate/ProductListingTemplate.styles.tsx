@@ -9,7 +9,7 @@ export const PLPStyles = {
       xs: '0 1rem',
     },
     paddingBottom: { lg: '16px' },
-    paddingTop: { lg: '4px' },
+    paddingTop: { lg: '16px' },
   },
   navBar: {
     display: 'flex',
