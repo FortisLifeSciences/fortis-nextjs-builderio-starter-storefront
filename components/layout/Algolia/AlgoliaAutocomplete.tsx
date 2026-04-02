@@ -420,7 +420,10 @@ const AlgoliaAutocomplete = () => {
               return html`<h4>More from Fortis</h4>`
             },
             item({ item, html }: { item: any; html: any }) {
-              const link = (item.meta && item.meta.lastPreviewUrl) || '#'
+              const link =
+                (item?.query && item?.query?.[0]?.value) ||
+                (item.meta && item.meta.lastPreviewUrl) ||
+                '#'
               const title =
                 typeof (item.data && item.data.title) === 'string'
                   ? item.data.title.split(' | ')[0]
