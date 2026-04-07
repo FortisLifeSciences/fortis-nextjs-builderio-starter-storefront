@@ -45,9 +45,12 @@ function generateSiteMap(categoryItems: any) {
     const destinationPath = new URL(redirect.destination).pathname
     redirectMap.set(sourcePath, destinationPath)
   })
+
+  const lastmod = new Date().toISOString().split('T')[0]
+
   return `<?xml version="1.0" encoding="UTF-8"?>
   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  
+
      ${(categoryItems?.items || [])
        .map((product: Product) => {
          let productUrl = process.env.NEXT_PUBLIC_URL + 'product/' + product.productCode
@@ -75,8 +78,7 @@ function generateSiteMap(categoryItems: any) {
          return `
          <url>
            <loc>${productUrl}</loc>
-           <changefreq>daily</changefreq>
-           <priority>0.7</priority>
+           <lastmod>${lastmod}</lastmod>
          </url>`
        })
        .join('')}

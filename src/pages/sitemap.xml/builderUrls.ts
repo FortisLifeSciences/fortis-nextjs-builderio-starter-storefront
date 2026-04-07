@@ -37,6 +37,8 @@ export const generateSiteMap = (builderPages: string[]): string => {
   const baseUrl = process.env.NEXT_PUBLIC_URL?.replace(/\/+$/, '') || 'https://www.fortislife.com'
 
   // Recursive function to generate category URLs
+  const lastmod = new Date().toISOString().split('T')[0]
+
   const generateCategoryUrls = (builderPages: string[] = []): string => {
     return builderPages
       .map((pageUrl) => {
@@ -44,8 +46,7 @@ export const generateSiteMap = (builderPages: string[]): string => {
         return `
              <url>
               <loc>${baseUrl}/${cleanPageUrl}</loc>
-              <changefreq>daily</changefreq>
-              <priority>0.7</priority>
+              <lastmod>${lastmod}</lastmod>
             </url>
           `
       })

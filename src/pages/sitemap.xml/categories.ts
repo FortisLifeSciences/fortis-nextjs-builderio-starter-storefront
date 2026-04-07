@@ -9,6 +9,8 @@ export const generateSiteMap = (categoryItems: Array<PrCategory>): string => {
   const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://www.fortislife.com/'
 
   // Recursive function to generate category URLs
+  const lastmod = new Date().toISOString().split('T')[0]
+
   const generateCategoryUrls = (categories: Maybe<PrCategory>[] = []): string => {
     return categories
       .filter((category): category is PrCategory => category !== null) // Remove null values
@@ -19,8 +21,7 @@ export const generateSiteMap = (categoryItems: Array<PrCategory>): string => {
         return `
             <url>
               <loc>${categoryUrl}</loc>
-              <changefreq>daily</changefreq>
-              <priority>0.7</priority>
+              <lastmod>${lastmod}</lastmod>
             </url>
             ${generateCategoryUrls(
               category.childrenCategories?.filter((c): c is PrCategory => c !== null) ?? []
