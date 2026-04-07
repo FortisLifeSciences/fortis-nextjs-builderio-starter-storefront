@@ -45,8 +45,8 @@ const PdpIconAttributes = (props: any) => {
   const handleScroll = (id: string) => {
     const element = document.getElementById(id)
     if (element) {
-      const yOffset = -125
-      const yPosition = element.getBoundingClientRect().top + window.scrollY + yOffset
+      const headerHeight = document.getElementById('fixed-header-wrapper')?.offsetHeight || 125
+      const yPosition = element.getBoundingClientRect().top + window.scrollY - headerHeight
       window.scrollTo({ top: yPosition, behavior: 'smooth' })
     }
   }
