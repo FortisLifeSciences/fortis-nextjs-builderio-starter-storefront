@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+import CloseIcon from '@mui/icons-material/Close'
 import SearchIcon from '@mui/icons-material/Search'
 import { Box } from '@mui/material'
 import Image from 'next/image'
@@ -66,6 +67,26 @@ const NavigationBar = (props: any) => {
   }, [isCheckoutPage, isTransparentPage])
 
   const showWhite = !isTransparentPage || isCheckoutPage || hasScrolled
+  const iconColor = showWhite ? '#111' : '#FFFFFF'
+
+  const [hasQuery, setHasQuery] = useState(false)
+
+  useEffect(() => {
+    const el = document.querySelector<HTMLInputElement>('#autocomplete input')
+    if (!el) return
+    const onInput = () => setHasQuery(el.value.length > 0)
+    el.addEventListener('input', onInput)
+    return () => el.removeEventListener('input', onInput)
+  })
+
+  const clearSearch = () => {
+    const el = document.querySelector<HTMLInputElement>('#autocomplete input')
+    if (!el) return
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set
+    setter?.call(el, '')
+    el.dispatchEvent(new Event('input', { bubbles: true }))
+    setHasQuery(false)
+  }
 
   return (
     <Box
@@ -101,16 +122,30 @@ const NavigationBar = (props: any) => {
             {/* Search — pill ghost with plain icon */}
             <Box sx={searchWrapperStyles}>
               <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
-                <SearchIcon
-                  sx={{
-                    position: 'absolute',
-                    left: '20px',
-                    zIndex: 1,
-                    fontSize: '20px',
-                    color: showWhite ? '#111' : '#FFFFFF',
-                    pointerEvents: 'none',
-                  }}
-                />
+                {hasQuery ? (
+                  <CloseIcon
+                    onClick={clearSearch}
+                    sx={{
+                      position: 'absolute',
+                      left: '20px',
+                      zIndex: 1,
+                      fontSize: '20px',
+                      color: iconColor,
+                      cursor: 'pointer',
+                    }}
+                  />
+                ) : (
+                  <SearchIcon
+                    sx={{
+                      position: 'absolute',
+                      left: '20px',
+                      zIndex: 1,
+                      fontSize: '20px',
+                      color: iconColor,
+                      pointerEvents: 'none',
+                    }}
+                  />
+                )}
                 <AlgoliaAutocomplete />
               </Box>
             </Box>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 
+import CloseIcon from '@mui/icons-material/Close'
 import SearchIcon from '@mui/icons-material/Search'
 import { Box, IconButton } from '@mui/material'
 import Image from 'next/image'
@@ -10,6 +11,7 @@ import fortisLogoTransparent from '@/assets/fortislogo-transparent.png'
 import fortisLogoBlue from '@/assets/fortisLogo.png'
 import { CartIcon } from '@/components/layout'
 import { HamburgerIcon } from '@/components/layout'
+import AlgoliaAutocomplete from '@/components/layout/Algolia/AlgoliaAutocomplete'
 
 interface MobileHeaderProps {
   children?: React.ReactNode
@@ -51,6 +53,12 @@ const MobileHeader = ({ children, hideIcons = false }: MobileHeaderProps) => {
   const showWhite = !isTransparentPage || hasScrolled
   const iconColor = showWhite ? '#30299A' : '#FFFFFF'
 
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+
+  useEffect(() => {
+    setIsSearchOpen(false)
+  }, [router.asPath])
+
   return (
     <>
       <Box
@@ -72,11 +80,11 @@ const MobileHeader = ({ children, hideIcons = false }: MobileHeaderProps) => {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           <IconButton
             size="small"
-            onClick={() => router.push('/search')}
+            onClick={() => setIsSearchOpen((prev) => !prev)}
             sx={{ color: iconColor }}
             aria-label="Search"
           >
-            <SearchIcon fontSize="medium" />
+            {isSearchOpen ? <CloseIcon fontSize="medium" /> : <SearchIcon fontSize="medium" />}
           </IconButton>
           <Box sx={{ '& svg path': { fill: iconColor }, '& svg': { color: iconColor } }}>
             <CartIcon size="medium" mobileIconColor={iconColor} />
@@ -113,6 +121,55 @@ const MobileHeader = ({ children, hideIcons = false }: MobileHeaderProps) => {
           />
         </Box>
       </Box>
+
+      {isSearchOpen && (
+        <Box
+          sx={{
+            width: '100%',
+            px: '16px',
+            py: '8px',
+            boxSizing: 'border-box',
+            backgroundColor: '#FFFFFFE5',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            '& #autocomplete': { width: '100%' },
+            '& .aa-Autocomplete': { width: '100%' },
+            '& .aa-Form': {
+              background: '#F5F5F5',
+              border: '1px solid rgba(0,0,0,0.1)',
+              borderRadius: '100px',
+              height: '42px',
+              padding: '0 16px',
+              display: 'flex',
+              alignItems: 'center',
+              overflow: 'hidden',
+              width: '100%',
+              boxSizing: 'border-box',
+            },
+            '& .aa-InputWrapperPrefix': { display: 'none' },
+            '& .aa-InputWrapper': { flex: 1, minWidth: 0 },
+            '& .aa-Input': {
+              background: 'none',
+              border: 'none',
+              outline: 'none',
+              color: '#111',
+              fontFamily: 'Poppins, sans-serif',
+              fontSize: '15px',
+              width: '100%',
+              height: '42px',
+              '&::placeholder': { color: '#999' },
+            },
+            '& .aa-InputWrapperSuffix': { display: 'none' },
+            '& .aa-Panel': {
+              zIndex: 1400,
+              borderRadius: '12px',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+              overflow: 'hidden',
+            },
+          }}
+        >
+          <AlgoliaAutocomplete />
+        </Box>
+      )}
 
       {children}
     </>
