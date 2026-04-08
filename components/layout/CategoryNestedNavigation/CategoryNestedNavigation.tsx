@@ -246,7 +246,9 @@ const CategoryNestedNavigation = (props: CategoryNestedNavigationProps) => {
                             variant={category?.typeOfMenu ? 'h4' : 'body2'}
                             color="primary"
                           >
-                            {category?.categoryName}
+                            {category?.categoryName === 'About Fortis'
+                              ? 'About'
+                              : category?.categoryName}
                           </Typography>
                         }
                       />
@@ -264,7 +266,9 @@ const CategoryNestedNavigation = (props: CategoryNestedNavigationProps) => {
                               sx={styles.directLinks}
                               color="primary"
                             >
-                              {category?.categoryName}
+                              {category?.categoryName === 'About Fortis'
+                                ? 'About'
+                                : category?.categoryName}
                             </Typography>
                           }
                           onClick={() => handleClose(true)}
