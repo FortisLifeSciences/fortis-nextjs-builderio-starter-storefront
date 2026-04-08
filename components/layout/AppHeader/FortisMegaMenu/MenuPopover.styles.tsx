@@ -44,8 +44,8 @@ export const menuItem = {
 
 export const subMenuSection = {
   height: '100%',
-  paddingTop: '28px !important',
-  paddingBottom: '28px !important',
+  paddingTop: '16px !important',
+  paddingBottom: '0 !important',
   backgroundColor: 'secondary.main',
 }
 
