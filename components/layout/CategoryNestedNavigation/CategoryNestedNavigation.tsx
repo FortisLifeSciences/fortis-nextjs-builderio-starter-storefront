@@ -21,8 +21,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
-import { findParentNode } from '@/lib/helpers'
-
 import type { Maybe, MenuItem, PrCategory } from '@/lib/gql/types'
 
 interface CategoryNestedNavigationProps {
@@ -91,6 +89,7 @@ const CategoryNestedNavigation = (props: CategoryNestedNavigationProps) => {
   const [subHeader, setSubHeader] = useState<typeof initialSubHeader>(initialSubHeader)
   const [activeCategory, setActiveCategory] = useState<MenuItem[] | null>(menuContent)
   const [parentCategory, setParentCategory] = useState<MenuItem | null | undefined>(null)
+  const [categoryStack, setCategoryStack] = useState<MenuItem[]>([])
 
   const gotoCart = () => {
     router.push('/cart')
@@ -107,6 +106,7 @@ const CategoryNestedNavigation = (props: CategoryNestedNavigationProps) => {
   const reset = () => {
     setActiveCategory(menuContent)
     setSubHeader(initialSubHeader)
+    setCategoryStack([])
   }
 
   const handleCategoryClick = (clickedCategory: Maybe<MenuItem>) => {
@@ -124,35 +124,33 @@ const CategoryNestedNavigation = (props: CategoryNestedNavigationProps) => {
       })
 
       setParentCategory(selectedCategory)
+      setCategoryStack((prev) => [...prev, selectedCategory as MenuItem])
     } else {
       null
     }
   }
 
   const handleBackClick = () => {
-    const previousCategory: Maybe<MenuItem | undefined | null> = findParentNode(
-      menuContent,
-      subHeader.categoryCode
-    )
+    // Pop the current level off the stack; the new top is the previous parent
+    const newStack = categoryStack.slice(0, -1)
+    setCategoryStack(newStack)
+
+    const previousCategory = newStack.length > 0 ? newStack[newStack.length - 1] : null
+
+    if (!previousCategory) {
+      // Back at root
+      setParentCategory(null)
+      reset()
+      return
+    }
 
     setParentCategory(previousCategory)
-
-    if (previousCategory === null) reset()
-    if (previousCategory === undefined) handleClose(false)
-    if (previousCategory) {
-      setActiveCategory(previousCategory?.childCategory as MenuItem[])
-
-      // const parentCategory: Maybe<MenuItem | undefined | null> = findParentNode(
-      //   menuContent,
-      //   previousCategory?.categoryCode
-      // )
-
-      setSubHeader({
-        backLink: t('back'),
-        label: previousCategory?.categoryName as string,
-        categoryCode: previousCategory?.categoryCode as string,
-      })
-    }
+    setActiveCategory(previousCategory?.childCategory as MenuItem[])
+    setSubHeader({
+      backLink: t('back'),
+      label: previousCategory?.categoryName as string,
+      categoryCode: previousCategory?.categoryCode as string,
+    })
   }
 
   useEffect(() => {
@@ -281,22 +279,24 @@ const CategoryNestedNavigation = (props: CategoryNestedNavigationProps) => {
             </>
           )
         })}
-        {parentCategory && parentCategory !== undefined && (
-          <ListItemButton sx={{ paddingInline: 2 }}>
-            <Link href={parentCategory?.categoryLink || '#'} passHref legacyBehavior>
-              <ListItemText
-                primary={
-                  <Typography variant={'body2'} sx={styles.directLinks} color="primary">
-                    {parentCategory?.viewAllText
-                      ? parentCategory.viewAllText
-                      : `View All ${parentCategory?.categoryName}`}
-                  </Typography>
-                }
-                onClick={() => handleClose(true)}
-              />
-            </Link>
-          </ListItemButton>
-        )}
+        {parentCategory &&
+          parentCategory !== undefined &&
+          parentCategory?.categoryName !== 'Services' && (
+            <ListItemButton sx={{ paddingInline: 2 }}>
+              <Link href={parentCategory?.categoryLink || '#'} passHref legacyBehavior>
+                <ListItemText
+                  primary={
+                    <Typography variant={'body2'} sx={styles.directLinks} color="primary">
+                      {parentCategory?.viewAllText
+                        ? parentCategory.viewAllText
+                        : `View All ${parentCategory?.categoryName}`}
+                    </Typography>
+                  }
+                  onClick={() => handleClose(true)}
+                />
+              </Link>
+            </ListItemButton>
+          )}
         {children && subHeader.label === initialSubHeader.label && (
           <>
             <Divider variant="middle" sx={{ paddingTop: '12px', marginBottom: '16px' }} />
