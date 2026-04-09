@@ -120,7 +120,7 @@ const ResourceSearchSliders: React.FC<Props> = ({
               {nonResourceHits.map((hit: any, i: number) => (
                 <SwiperSlide key={`non-res-${index}-${i}`} className={styles.swiperSlide}>
                   <a
-                    href={hit.meta?.lastPreviewUrl || '#'}
+                    href={(hit?.query && hit?.query?.[0]?.value) || hit.meta?.lastPreviewUrl || '#'}
                     target="_self"
                     rel="noopener noreferrer"
                     className={`${styles.link} resource-card-search`}
@@ -195,7 +195,7 @@ const ResourceSearchSliders: React.FC<Props> = ({
               {resourceHits.map((hit: any, i: number) => (
                 <SwiperSlide key={`res-${index}-${i}`} className={styles.swiperSlide}>
                   <a
-                    href={hit.meta?.lastPreviewUrl || '#'}
+                    href={(hit?.query && hit?.query?.[0]?.value) || hit.meta?.lastPreviewUrl || '#'}
                     target="_self"
                     rel="noopener noreferrer"
                     className={`${styles.link} resource-card-search`}
