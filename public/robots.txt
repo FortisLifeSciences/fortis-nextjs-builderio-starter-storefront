@@ -32,9 +32,6 @@ Disallow: /nomore*
 Disallow: /registrations-sign-in*
 Disallow: /home-temp*
 Disallow: /test-pricelist*
-Disallow: /products/products
-Disallow: /products/immunoassay-buffers
-Disallow: /products/articles
 # Disallow: /*?*
 
 # AhrefsSiteAudit
