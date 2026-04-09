@@ -279,24 +279,22 @@ const CategoryNestedNavigation = (props: CategoryNestedNavigationProps) => {
             </>
           )
         })}
-        {parentCategory &&
-          parentCategory !== undefined &&
-          parentCategory?.categoryName !== 'Services' && (
-            <ListItemButton sx={{ paddingInline: 2 }}>
-              <Link href={parentCategory?.categoryLink || '#'} passHref legacyBehavior>
-                <ListItemText
-                  primary={
-                    <Typography variant={'body2'} sx={styles.directLinks} color="primary">
-                      {parentCategory?.viewAllText
-                        ? parentCategory.viewAllText
-                        : `View All ${parentCategory?.categoryName}`}
-                    </Typography>
-                  }
-                  onClick={() => handleClose(true)}
-                />
-              </Link>
-            </ListItemButton>
-          )}
+        {parentCategory && parentCategory !== undefined && (
+          <ListItemButton sx={{ paddingInline: 2 }}>
+            <Link href={parentCategory?.categoryLink || '#'} passHref legacyBehavior>
+              <ListItemText
+                primary={
+                  <Typography variant={'body2'} sx={styles.directLinks} color="primary">
+                    {parentCategory?.viewAllText
+                      ? parentCategory.viewAllText
+                      : `View All ${parentCategory?.categoryName}`}
+                  </Typography>
+                }
+                onClick={() => handleClose(true)}
+              />
+            </Link>
+          </ListItemButton>
+        )}
         {children && subHeader.label === initialSubHeader.label && (
           <>
             <Divider variant="middle" sx={{ paddingTop: '12px', marginBottom: '16px' }} />
