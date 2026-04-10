@@ -111,22 +111,16 @@ const CategoryNestedNavigation = (props: CategoryNestedNavigationProps) => {
 
   const handleCategoryClick = (clickedCategory: Maybe<MenuItem>) => {
     if (clickedCategory?.childCategory?.length) {
-      const selectedCategory: Maybe<MenuItem> = activeCategory?.find(
-        (category) => category?.categoryCode === clickedCategory?.categoryCode
-      ) as Maybe<MenuItem>
-
-      setActiveCategory(selectedCategory?.childCategory as [])
+      setActiveCategory(clickedCategory?.childCategory as [])
 
       setSubHeader({
         backLink: t('back'),
-        label: selectedCategory?.categoryName as string,
-        categoryCode: selectedCategory?.categoryCode as string,
+        label: clickedCategory?.categoryName as string,
+        categoryCode: clickedCategory?.categoryCode as string,
       })
 
-      setParentCategory(selectedCategory)
-      setCategoryStack((prev) => [...prev, selectedCategory as MenuItem])
-    } else {
-      null
+      setParentCategory(clickedCategory)
+      setCategoryStack((prev) => [...prev, clickedCategory as MenuItem])
     }
   }
 
