@@ -133,7 +133,7 @@ export const FortisMegaMenu: React.FC<MegaMenuProps> = ({ scrolled }) => {
                 <MenuPopover
                   parentName={menu.categoryName}
                   parentLink={menu.categoryLink}
-                  viewAllText={menu.viewAllText}
+                  viewAllText={menu.categoryName === 'Services' ? '' : menu.viewAllText}
                   childCategory={menu.childCategory}
                   featuredContent={menu.featuredContent}
                   typeOfMenu={menu.typeOfMenu}
@@ -145,20 +145,20 @@ export const FortisMegaMenu: React.FC<MegaMenuProps> = ({ scrolled }) => {
           </AnimatePresence>
         </React.Fragment>
       ))}
-
-      {/* Contact link */}
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: '8px',
-          gap: '8px',
-          cursor: 'pointer',
-        }}
-      >
-        <Link href="/contact-us" style={{ textDecoration: 'none' }}>
+      <Link href="/contact-us" passHref legacyBehavior>
+        <Box
+          component="a"
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '8px',
+            gap: '8px',
+            cursor: 'pointer',
+            textDecoration: 'none',
+          }}
+        >
           <Typography
             sx={{
               fontFamily: 'Poppins, sans-serif',
@@ -172,8 +172,8 @@ export const FortisMegaMenu: React.FC<MegaMenuProps> = ({ scrolled }) => {
           >
             Contact
           </Typography>
-        </Link>
-      </Box>
+        </Box>
+      </Link>
     </Box>
   )
 }
