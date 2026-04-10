@@ -75,13 +75,15 @@ function generateSiteMap(categoryItems: any) {
          return `
          <url>
            <loc>${productUrl}</loc>
-           <changefreq>daily</changefreq>
-           <priority>0.7</priority>
+           <lastmod>${getLastModDate()}</lastmod>
          </url>`
        })
        .join('')}
   </urlset>
 `
+}
+const getLastModDate = (): string => {
+  return new Date().toISOString().split('T')[0]
 }
 
 function SiteMap() {

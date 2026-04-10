@@ -44,8 +44,7 @@ export const generateSiteMap = (builderPages: string[]): string => {
         return `
              <url>
               <loc>${baseUrl}/${cleanPageUrl}</loc>
-              <changefreq>daily</changefreq>
-              <priority>0.7</priority>
+              <lastmod>${getLastModDate()}</lastmod>
             </url>
           `
       })
@@ -56,6 +55,9 @@ export const generateSiteMap = (builderPages: string[]): string => {
     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
       ${generateCategoryUrls(builderPages)}
     </urlset>`
+}
+const getLastModDate = (): string => {
+  return new Date().toISOString().split('T')[0]
 }
 
 function SiteMap() {
