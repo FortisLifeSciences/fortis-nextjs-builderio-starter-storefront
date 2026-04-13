@@ -42,13 +42,6 @@ Allow: /
 User-agent: Baiduspider
 Allow: /
 
-# *
-User-agent: *
-Crawl-delay: 5
-
-# Host
-Host: https://www.fortislife.com/
-
 # Sitemaps
 Sitemap: https://www.fortislife.com/sitemap.xml
 
