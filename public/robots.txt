@@ -32,9 +32,6 @@ Disallow: /nomore*
 Disallow: /registrations-sign-in*
 Disallow: /home-temp*
 Disallow: /test-pricelist*
-Disallow: /products/products
-Disallow: /products/immunoassay-buffers
-Disallow: /products/articles
 # Disallow: /*?*
 
 # AhrefsSiteAudit
@@ -44,13 +41,6 @@ Allow: /
 # Baiduspider
 User-agent: Baiduspider
 Allow: /
-
-# *
-User-agent: *
-Crawl-delay: 5
-
-# Host
-Host: https://www.fortislife.com/
 
 # Sitemaps
 Sitemap: https://www.fortislife.com/sitemap.xml
