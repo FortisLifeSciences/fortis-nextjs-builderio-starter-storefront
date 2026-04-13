@@ -8,7 +8,7 @@ import { ProductSearchRandomAccessCursor } from '@/lib/gql/types'
 async function fetchCursorsData() {
   const authToken = await apiAuthClient.getAccessToken()
   const baseUrl = process.env.KIBO_API_HOST
-  const url = `https://${baseUrl}/api/commerce/catalog/storefront/productsearch/randomAccessCursor?pageSize=2000`
+  const url = `https://${baseUrl}/api/commerce/catalog/storefront/productsearch/randomAccessCursor?pageSize=200`
 
   try {
     const response = await fetch(url, {

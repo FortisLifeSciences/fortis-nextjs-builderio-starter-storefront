@@ -19,8 +19,7 @@ export const generateSiteMap = (categoryItems: Array<PrCategory>): string => {
         return `
             <url>
               <loc>${categoryUrl}</loc>
-              <changefreq>daily</changefreq>
-              <priority>0.7</priority>
+              <lastmod>${getLastModDate()}</lastmod>
             </url>
             ${generateCategoryUrls(
               category.childrenCategories?.filter((c): c is PrCategory => c !== null) ?? []
@@ -34,6 +33,10 @@ export const generateSiteMap = (categoryItems: Array<PrCategory>): string => {
     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
       ${generateCategoryUrls(categoryItems)}
     </urlset>`
+}
+
+const getLastModDate = (): string => {
+  return new Date().toISOString().split('T')[0]
 }
 
 function SiteMap() {
