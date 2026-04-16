@@ -71,7 +71,7 @@ const MobileHeader = ({ children, hideIcons = false }: MobileHeaderProps) => {
           justifyContent: 'space-between',
           px: '16px',
           boxSizing: 'border-box',
-          backgroundColor: showWhite ? '#FFFFFFE5' : 'transparent',
+          backgroundColor: showWhite ? '#FFFFFF' : 'transparent',
           boxShadow: showWhite ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
           transition: 'background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
         }}
