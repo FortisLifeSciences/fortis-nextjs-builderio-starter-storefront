@@ -36,9 +36,7 @@ export const navWrapperStyles: SxProps = {
     paddingLeft: '32px', // 20px icon + 12px gap
     '&::placeholder': { color: 'rgba(255,255,255,0.7)' },
   },
-  '& .aa-InputWrapperSuffix': { display: 'flex', alignItems: 'center' },
-  '& .aa-ClearButton': { background: 'none', border: 'none', cursor: 'pointer', padding: 0 },
-  '& .aa-ClearButton svg': { color: '#FFFFFF', fill: '#FFFFFF', width: '16px', height: '16px' },
+  '& .aa-InputWrapperSuffix': { display: 'none' },
 
   // Algolia panel — appears below the navbar
   '& .aa-Panel': {
