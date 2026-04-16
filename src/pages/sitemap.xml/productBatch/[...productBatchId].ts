@@ -16,7 +16,7 @@ interface RedirectEntry {
 async function fetchCursorsData(cursorMark: any) {
   const authToken = await apiAuthClient.getAccessToken()
   const baseUrl = process.env.KIBO_API_HOST
-  const url = `https://${baseUrl}/api/commerce/catalog/storefront/productsearch/search?collapse=true&pageSize=2000&startIndex=0&enableSearchTuningRules=true&cursorMark=${cursorMark}&includeAllImages=false&spellcorrectOverride=Default&useSubscriptionPricing=false`
+  const url = `https://${baseUrl}/api/commerce/catalog/storefront/productsearch/search?collapse=true&pageSize=200&startIndex=0&enableSearchTuningRules=true&cursorMark=${cursorMark}&includeAllImages=false&spellcorrectOverride=Default&useSubscriptionPricing=false`
 
   try {
     const response = await fetch(url, {
