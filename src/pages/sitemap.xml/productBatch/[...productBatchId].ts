@@ -71,11 +71,13 @@ function generateSiteMap(categoryItems: any) {
          } else {
            console.log(`[Sitemap Redirect] NO MATCH (kept as-is): ${productPath}`)
          }
-
+         const lastmod = product?.updateDate
+           ? new Date(product?.updateDate).toISOString().split('T')[0]
+           : new Date().toISOString().split('T')[0]
          return `
          <url>
            <loc>${productUrl}</loc>
-           <lastmod>${getLastModDate()}</lastmod>
+           <lastmod>${lastmod}</lastmod>
          </url>`
        })
        .join('')}

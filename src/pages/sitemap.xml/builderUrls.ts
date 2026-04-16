@@ -1,24 +1,31 @@
 import { GetServerSideProps } from 'next'
 
 //pages/sitemap.xml.js
+type BuilderPage = {
+  url: string
+  lastUpdated: string
+}
 
 async function fetchBuilderPages() {
   const builderApiKey = process.env.BUILDER_IO_API_KEY
-  let allPages: string | any[] = []
+  let allPages: BuilderPage[] = []
   let offset = 0
   const limit = 500 // Adjust as needed (Builder.io allows higher limits)
 
   try {
     while (true) {
-      const url = `https://cdn.builder.io/api/v2/content/page?apiKey=${builderApiKey}&fields=data.url,data.noIndex&query.data.includeInSitemap.$ne=false&limit=${limit}&offset=${offset}`
+      const url = `https://cdn.builder.io/api/v2/content/page?apiKey=${builderApiKey}&fields=data.url,data.noIndex,lastUpdated&query.data.includeInSitemap.$ne=false&limit=${limit}&offset=${offset}`
       const response = await fetch(url)
       const data = await response.json()
 
       if (!data?.results?.length) break // Stop if no more results
 
       const pageUrls = data.results
-        .filter((page: { data: { noIndex: any } }) => !page.data?.noIndex) // Exclude pages where noIndex = true
-        .map((page: { data: { url: any } }) => page.data.url)
+        .filter((page: any) => !page.data?.noIndex) // Exclude pages where noIndex = true
+        .map((page: any) => ({
+          url: page.data.url,
+          lastUpdated: page.lastUpdated,
+        }))
 
       allPages = [...allPages, ...pageUrls]
 
@@ -33,20 +40,25 @@ async function fetchBuilderPages() {
   return allPages
 }
 
-export const generateSiteMap = (builderPages: string[]): string => {
+export const generateSiteMap = (builderPages: BuilderPage[]): string => {
   const baseUrl = process.env.NEXT_PUBLIC_URL?.replace(/\/+$/, '') || 'https://www.fortislife.com'
 
   // Recursive function to generate category URLs
-  const generateCategoryUrls = (builderPages: string[] = []): string => {
+  const generateCategoryUrls = (builderPages: BuilderPage[] = []): string => {
     return builderPages
-      .map((pageUrl) => {
-        const cleanPageUrl = pageUrl.replace(/^\/+/, '') // Remove leading slashes
+      .map((page) => {
+        const cleanPageUrl = page?.url.replace(/^\/+/, '') //Remove leading slashes
+
+        const lastmod = page.lastUpdated
+          ? new Date(page.lastUpdated).toISOString().split('T')[0]
+          : new Date().toISOString().split('T')[0]
+
         return `
-             <url>
-              <loc>${baseUrl}/${cleanPageUrl}</loc>
-              <lastmod>${getLastModDate()}</lastmod>
-            </url>
-          `
+      <url>
+        <loc>${baseUrl}/${cleanPageUrl}</loc>
+        <lastmod>${lastmod}</lastmod>
+      </url>
+    `
       })
       .join('')
   }
