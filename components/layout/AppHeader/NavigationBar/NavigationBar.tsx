@@ -92,7 +92,7 @@ const NavigationBar = (props: any) => {
     <Box
       sx={{
         ...navWrapperStyles,
-        backgroundColor: showWhite ? '#FFFFFFE5' : 'transparent',
+        backgroundColor: showWhite ? '#FFFFFF' : 'transparent',
         boxShadow: showWhite ? '0 2px 10px rgba(0, 0, 0, 0.1)' : 'none',
       }}
       className={showWhite ? 'scrolled' : ''}
