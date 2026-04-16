@@ -4,6 +4,7 @@ export const categoryInfo = /* GraphQL */ `
     categoryId
     categoryCode
     isDisplayed
+    updateDate
     content {
       name
       slug
