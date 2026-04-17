@@ -286,7 +286,7 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                   </Link>
                 </Box>
               ))}
-              <Box sx={submenuItem}>
+              <Box sx={{ ...submenuItem, marginTop: '24px' }}>
                 <Link
                   href={activeCategory.categoryLink}
                   passHref

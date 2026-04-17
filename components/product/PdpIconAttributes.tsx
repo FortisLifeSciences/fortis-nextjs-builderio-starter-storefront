@@ -46,8 +46,8 @@ const PdpIconAttributes = (props: any) => {
     const element = document.getElementById(id)
     if (element) {
       const headerHeight = document.getElementById('fixed-header-wrapper')?.offsetHeight || 125
-      const yPosition = element.getBoundingClientRect().top + window.scrollY - headerHeight
-      window.scrollTo({ top: yPosition, behavior: 'smooth' })
+      element.style.scrollMarginTop = `${headerHeight}px`
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }
 
@@ -89,15 +89,17 @@ const PdpIconAttributes = (props: any) => {
       )}
 
       {/* Documents Link */}
-      <Box
-        sx={{ ...styles.iconCss, cursor: 'pointer' }}
-        onClick={() => handleScroll('document-section')}
-      >
-        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
-          draft
-        </span>
-        <Box sx={{ ...styles.iconText, ...styles.linkUnderlineStyle }}>Documents</Box>
-      </Box>
+      {props.hasDocuments && (
+        <Box
+          sx={{ ...styles.iconCss, cursor: 'pointer' }}
+          onClick={() => handleScroll('document-section')}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+            draft
+          </span>
+          <Box sx={{ ...styles.iconText, ...styles.linkUnderlineStyle }}>Documents</Box>
+        </Box>
+      )}
 
       {/* Citations */}
       {properties?.map((data: any) =>
