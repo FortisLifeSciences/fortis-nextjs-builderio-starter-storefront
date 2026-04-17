@@ -15,11 +15,13 @@ export const generateSiteMap = (categoryItems: Array<PrCategory>): string => {
       .filter((category) => category.isDisplayed) // Exclude hidden categories
       .map((category) => {
         const categoryUrl = `${baseUrl}products/${category.categoryCode}/`
-
+        const lastmod = category?.updateDate
+          ? new Date(category?.updateDate).toISOString().split('T')[0]
+          : new Date().toISOString().split('T')[0]
         return `
             <url>
               <loc>${categoryUrl}</loc>
-              <lastmod>${getLastModDate()}</lastmod>
+              <lastmod>${lastmod}</lastmod>
             </url>
             ${generateCategoryUrls(
               category.childrenCategories?.filter((c): c is PrCategory => c !== null) ?? []
