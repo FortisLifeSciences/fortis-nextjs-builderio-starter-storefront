@@ -53,7 +53,7 @@ export const navWrapperStyles: SxProps = {
 
   // Scrolled — white background
   '&.scrolled': {
-    backgroundColor: '#FFFFFFE5',
+    backgroundColor: '#FFFFFF',
     boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
 
     '& .aa-Form': {
