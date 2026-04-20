@@ -21,8 +21,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
-import { findParentNode } from '@/lib/helpers'
-
 import type { Maybe, MenuItem, PrCategory } from '@/lib/gql/types'
 
 interface CategoryNestedNavigationProps {
@@ -91,6 +89,7 @@ const CategoryNestedNavigation = (props: CategoryNestedNavigationProps) => {
   const [subHeader, setSubHeader] = useState<typeof initialSubHeader>(initialSubHeader)
   const [activeCategory, setActiveCategory] = useState<MenuItem[] | null>(menuContent)
   const [parentCategory, setParentCategory] = useState<MenuItem | null | undefined>(null)
+  const [categoryStack, setCategoryStack] = useState<MenuItem[]>([])
 
   const gotoCart = () => {
     router.push('/cart')
@@ -107,52 +106,45 @@ const CategoryNestedNavigation = (props: CategoryNestedNavigationProps) => {
   const reset = () => {
     setActiveCategory(menuContent)
     setSubHeader(initialSubHeader)
+    setCategoryStack([])
   }
 
   const handleCategoryClick = (clickedCategory: Maybe<MenuItem>) => {
     if (clickedCategory?.childCategory?.length) {
-      const selectedCategory: Maybe<MenuItem> = activeCategory?.find(
-        (category) => category?.categoryCode === clickedCategory?.categoryCode
-      ) as Maybe<MenuItem>
-
-      setActiveCategory(selectedCategory?.childCategory as [])
+      setActiveCategory(clickedCategory?.childCategory as [])
 
       setSubHeader({
         backLink: t('back'),
-        label: selectedCategory?.categoryName as string,
-        categoryCode: selectedCategory?.categoryCode as string,
+        label: clickedCategory?.categoryName as string,
+        categoryCode: clickedCategory?.categoryCode as string,
       })
 
-      setParentCategory(selectedCategory)
-    } else {
-      null
+      setParentCategory(clickedCategory)
+      setCategoryStack((prev) => [...prev, clickedCategory as MenuItem])
     }
   }
 
   const handleBackClick = () => {
-    const previousCategory: Maybe<MenuItem | undefined | null> = findParentNode(
-      menuContent,
-      subHeader.categoryCode
-    )
+    // Pop the current level off the stack; the new top is the previous parent
+    const newStack = categoryStack.slice(0, -1)
+    setCategoryStack(newStack)
+
+    const previousCategory = newStack.length > 0 ? newStack[newStack.length - 1] : null
+
+    if (!previousCategory) {
+      // Back at root
+      setParentCategory(null)
+      reset()
+      return
+    }
 
     setParentCategory(previousCategory)
-
-    if (previousCategory === null) reset()
-    if (previousCategory === undefined) handleClose(false)
-    if (previousCategory) {
-      setActiveCategory(previousCategory?.childCategory as MenuItem[])
-
-      // const parentCategory: Maybe<MenuItem | undefined | null> = findParentNode(
-      //   menuContent,
-      //   previousCategory?.categoryCode
-      // )
-
-      setSubHeader({
-        backLink: t('back'),
-        label: previousCategory?.categoryName as string,
-        categoryCode: previousCategory?.categoryCode as string,
-      })
-    }
+    setActiveCategory(previousCategory?.childCategory as MenuItem[])
+    setSubHeader({
+      backLink: t('back'),
+      label: previousCategory?.categoryName as string,
+      categoryCode: previousCategory?.categoryCode as string,
+    })
   }
 
   useEffect(() => {
@@ -246,7 +238,9 @@ const CategoryNestedNavigation = (props: CategoryNestedNavigationProps) => {
                             variant={category?.typeOfMenu ? 'h4' : 'body2'}
                             color="primary"
                           >
-                            {category?.categoryName}
+                            {category?.categoryName === 'About Fortis'
+                              ? 'About'
+                              : category?.categoryName}
                           </Typography>
                         }
                       />
@@ -264,7 +258,9 @@ const CategoryNestedNavigation = (props: CategoryNestedNavigationProps) => {
                               sx={styles.directLinks}
                               color="primary"
                             >
-                              {category?.categoryName}
+                              {category?.categoryName === 'About Fortis'
+                                ? 'About'
+                                : category?.categoryName}
                             </Typography>
                           }
                           onClick={() => handleClose(true)}

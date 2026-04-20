@@ -1109,7 +1109,10 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                 }
               })}
             </Box>
-            <PdpIconAttributes product={updatedProduct} />
+            <PdpIconAttributes
+              product={updatedProduct}
+              hasDocuments={digitalDocumentData && digitalDocumentData.length > 0}
+            />
             {((countryCode && countryCode === 'US') ||
               !countryCode ||
               (typeof countryCode === 'string' && countryCode.trim() === '')) && (
