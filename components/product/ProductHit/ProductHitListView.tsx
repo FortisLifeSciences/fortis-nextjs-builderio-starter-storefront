@@ -182,6 +182,18 @@ const ProductHitListView = ({
   }`
   truncatedTitle = truncatedTitle + `${uniqueVal}`
 
+  // Ensure Next.js <Link> gets a relative path — absolute URLs trigger a full page reload
+  const productHref = (() => {
+    const url = hit?.product_url || '#'
+    if (!url.startsWith('http')) return url
+    try {
+      const u = new URL(url)
+      return u.pathname + u.search + u.hash
+    } catch {
+      return url
+    }
+  })()
+
   return (
     <>
       <Box
@@ -191,7 +203,8 @@ const ProductHitListView = ({
         data-index={algoliaIndex || 'products'} // <-- Add index as a data attribute if needed
       >
         <Link
-          href={hit.product_url}
+          href={`/product/${productCode}`}
+          as={productHref}
           passHref
           data-testid="product-card-link"
           aria-label={title ? `View details for ${title}` : 'Product details'}
