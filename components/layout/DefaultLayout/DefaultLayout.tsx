@@ -71,6 +71,32 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
     }
   }, [])
 
+  // Force scroll to top on every page path change
+  // Note: body and #__next are the actual scroll containers here (not window)
+  // because global.css sets height:100% + overflow-x:hidden on both.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (window.location.hash) return
+    const forceTop = () => {
+      window.scrollTo(0, 0)
+      if (document.documentElement) document.documentElement.scrollTop = 0
+      if (document.body) document.body.scrollTop = 0
+      const next = document.getElementById('__next')
+      if (next) next.scrollTop = 0
+      const mainContent = document.getElementById('main-content')
+      if (mainContent) mainContent.scrollTop = 0
+    }
+    forceTop()
+    const timers = [
+      setTimeout(forceTop, 0),
+      setTimeout(forceTop, 50),
+      setTimeout(forceTop, 200),
+      setTimeout(forceTop, 500),
+      setTimeout(forceTop, 1000),
+    ]
+    return () => timers.forEach(clearTimeout)
+  }, [router.asPath])
+
   return (
     <HydrationBoundary state={pageProps.dehydratedState}>
       <ThemeProvider theme={theme}>
