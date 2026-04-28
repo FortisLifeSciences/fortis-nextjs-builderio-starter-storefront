@@ -168,6 +168,34 @@ const NavigationBar = (props: any) => {
                 <AccountIcon size="medium" onAccountIconClick={onAccountIconClick} />
               </button>
             </Box>
+
+            {/* Contact CTA button */}
+            <Link href="/contact-us" passHref legacyBehavior>
+              <Box
+                component="a"
+                sx={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  px: '20px',
+                  py: '10px',
+                  bgcolor: '#30299A',
+                  color: '#FFFFFF',
+                  borderRadius: '0px 20px 0px 20px',
+                  fontFamily: 'Poppins, sans-serif',
+                  fontWeight: 400,
+                  fontSize: '15px',
+                  lineHeight: '150%',
+                  letterSpacing: '-0.005em',
+                  whiteSpace: 'nowrap',
+                  textDecoration: 'none',
+                  flexShrink: 0,
+                  '&:hover': { bgcolor: 'rgb(10, 17, 56)' },
+                }}
+              >
+                Contact
+              </Box>
+            </Link>
           </Box>
         )}
       </Box>
