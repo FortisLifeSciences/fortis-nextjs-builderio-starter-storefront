@@ -120,10 +120,11 @@ export const navLinksStyles: SxProps = {
   flexShrink: 0,
 }
 
-// Search — exactly 335px per Figma
+// Search — up to 335px but shrinks on smaller screens
 export const searchWrapperStyles: SxProps = {
-  flex: '0 0 335px',
-  width: '335px',
+  flex: '1 1 200px',
+  maxWidth: { lg: '250px', xl: '200px' },
+  minWidth: '0',
   overflow: 'visible',
   position: 'relative',
 }
