@@ -7,10 +7,14 @@ export const navWrapperStyles: SxProps = {
   transition: 'background-color 0.3s ease-in-out',
 
   // Algolia search — pill ghost style
-  '& .aa-Autocomplete': { width: '100%' },
+  '& #autocomplete': { width: '100%', maxWidth: '100%', minWidth: 0 },
+  '& .aa-Autocomplete': { width: '100%', maxWidth: '100%', minWidth: 0 },
   '& .aa-DetachedSearchButton': { width: '100%' },
   '& .aa-Form': {
     left: '0 !important',
+    right: '0 !important',
+    width: '100%',
+    maxWidth: '100%',
     background: 'rgba(255, 255, 255, 0.08)',
     border: '1px solid rgba(255, 255, 255, 0.1)',
     borderRadius: '100px !important',
@@ -20,9 +24,11 @@ export const navWrapperStyles: SxProps = {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
+    boxSizing: 'border-box',
+    overflow: 'hidden',
   },
   '& .aa-InputWrapperPrefix': { display: 'none' },
-  '& .aa-InputWrapper': { flex: 1 },
+  '& .aa-InputWrapper': { flex: 1, minWidth: 0, overflow: 'hidden' },
   '& .aa-Input': {
     background: 'none',
     border: 'none',
@@ -33,6 +39,7 @@ export const navWrapperStyles: SxProps = {
     fontSize: '15px',
     letterSpacing: '-0.005em',
     width: '100%',
+    minWidth: 0,
     paddingLeft: '32px', // 20px icon + 12px gap
     '&::placeholder': { color: 'rgba(255,255,255,0.7)' },
   },
@@ -120,11 +127,13 @@ export const navLinksStyles: SxProps = {
   flexShrink: 0,
 }
 
-// Search — exactly 335px per Figma
+// Search — up to 335px but shrinks on smaller screens
 export const searchWrapperStyles: SxProps = {
-  flex: '0 0 335px',
-  width: '335px',
-  overflow: 'visible',
+  flex: '0 1 250px',
+  width: '250px',
+  maxWidth: '250px',
+  minWidth: 0,
+  overflow: 'hidden',
   position: 'relative',
 }
 
