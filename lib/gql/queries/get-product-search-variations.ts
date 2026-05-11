@@ -13,6 +13,11 @@ const getProductSearchVariationsQuery = /* GraphQL */ `
         sliceValue
         price {
           price
+          salePrice
+        }
+        inventoryInfo {
+          onlineStockAvailable
+          outOfStockBehavior
         }
         properties {
           attributeFQN
