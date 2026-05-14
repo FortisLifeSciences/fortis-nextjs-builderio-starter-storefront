@@ -6,6 +6,7 @@ import { useTranslation } from 'next-i18next'
 
 const checkoutHeaderStyles = {
   container: {
+    backgroundColor: '#E3E2FF',
     height: '40px',
     display: 'flex',
     justifyContent: 'flex-end',
