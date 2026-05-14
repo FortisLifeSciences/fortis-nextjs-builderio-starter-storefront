@@ -61,6 +61,7 @@ function CustomRefinementList({ attribute, searchableAttributes }: CustomRefinem
       attribute,
       showMore: true,
       limit: 6,
+      showMoreLimit: 100, //useRefinementList sends only 20 values by default when clicking “View More”, so I increased the limit to 100 using the showMoreLimit attribute.
     })
 
   const [query, setQuery] = useState('')
