@@ -84,8 +84,9 @@ export const navInnerStyles: SxProps = {
   flexDirection: 'row',
   justifyContent: 'space-between',
   alignItems: 'center',
-  padding: '16px 0',
-  gap: '20px',
+  // 16px horizontal padding on tablet (900-1199px), no padding on desktop (1200px+)
+  padding: { md: '16px 16px', lg: '16px 0' },
+  gap: { md: '12px', lg: '20px' },
   maxWidth: '1200px',
   width: '100%',
   margin: '0 auto',
@@ -94,7 +95,7 @@ export const navInnerStyles: SxProps = {
   transition: 'height 0.3s ease-in-out, padding 0.3s ease-in-out',
   '.scrolled &': {
     height: '66px',
-    padding: '18px 0',
+    padding: { md: '18px 16px', lg: '18px 0' },
   },
 }
 
@@ -114,8 +115,9 @@ export const navRightContainerStyles: SxProps = {
   flexDirection: 'row',
   alignItems: 'center',
   justifyContent: 'flex-end',
-  gap: '24px',
+  gap: { md: '8px', lg: '24px' },
   flex: 1,
+  minWidth: 0,
 }
 
 // Nav links — gap: 4px between items per Figma
@@ -127,11 +129,11 @@ export const navLinksStyles: SxProps = {
   flexShrink: 0,
 }
 
-// Search — up to 335px but shrinks on smaller screens
+// Search — shrinks on tablet (900-1199px), full width on desktop (1200px+)
 export const searchWrapperStyles: SxProps = {
-  flex: '0 1 250px',
-  width: '250px',
-  maxWidth: '250px',
+  flex: { md: '0 1 120px', lg: '0 1 250px' },
+  width: { md: '120px', lg: '250px' },
+  maxWidth: { md: '120px', lg: '250px' },
   minWidth: 0,
   overflow: 'hidden',
   position: 'relative',
@@ -142,6 +144,6 @@ export const iconGroupStyles: SxProps = {
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'center',
-  gap: '24px',
+  gap: { md: '8px', lg: '24px' },
   flexShrink: 0,
 }
