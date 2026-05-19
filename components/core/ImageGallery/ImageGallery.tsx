@@ -258,8 +258,9 @@ const ImageGallery = (props: ImageGalleryProps) => {
       onTouchStartCapture={handleSwipe}
       data-testid="gestureZone"
     >
+      {/* Due to WEB-1659, we are commenting out this code because it is no longer needed and has no use.*/}
       {/* Title section */}
-      <Box
+      {/* <Box
         display={isZoomed ? 'flex' : 'none'}
         justifyContent="space-between"
         alignItems={'center'}
@@ -269,7 +270,7 @@ const ImageGallery = (props: ImageGalleryProps) => {
           {title}
         </Typography>
         <Clear color="action" />
-      </Box>
+      </Box> */}
 
       {/* Gallary Section start */}
       <Stack direction="row" spacing={{ xs: 0, md: images?.length ? 2 : 0 }} maxHeight={maxHeight}>
