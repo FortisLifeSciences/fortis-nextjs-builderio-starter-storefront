@@ -94,7 +94,7 @@ export const FortisMegaMenu: React.FC<MegaMenuProps> = ({ scrolled }) => {
               onFocus={() => handleMouseEnter(menu)}
               onBlur={handleMouseLeave}
             >
-              {menu.categoryName === 'About Fortis' ? 'About' : menu.categoryName}
+              {menu.categoryName === 'About Fortis' ? 'About Fortis' : menu.categoryName}
             </Typography>
             {hoveredMenu === menu ? (
               <KeyboardArrowUpIcon
@@ -145,35 +145,6 @@ export const FortisMegaMenu: React.FC<MegaMenuProps> = ({ scrolled }) => {
           </AnimatePresence>
         </React.Fragment>
       ))}
-      <Link href="/contact-us" passHref legacyBehavior>
-        <Box
-          component="a"
-          sx={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: '8px',
-            gap: '8px',
-            cursor: 'pointer',
-            textDecoration: 'none',
-          }}
-        >
-          <Typography
-            sx={{
-              fontFamily: 'Poppins, sans-serif',
-              fontWeight: 500,
-              fontSize: '15px',
-              lineHeight: '150%',
-              letterSpacing: '-0.005em',
-              color: scrolled ? 'primary.main' : 'common.white',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            Contact
-          </Typography>
-        </Box>
-      </Link>
     </Box>
   )
 }

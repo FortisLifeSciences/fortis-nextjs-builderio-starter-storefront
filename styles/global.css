@@ -315,7 +315,9 @@ body {
 }
 
 .aa-Autocomplete .aa-Input {
-  width: 496px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
   box-shadow: none !important;
   height: 22px;
   background-color: #fff;
