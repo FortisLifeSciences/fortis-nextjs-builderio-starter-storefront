@@ -84,6 +84,7 @@ export const kiboHeaderStyles = {
     background: 'none',
     display: {
       xs: 'none',
+      sm: 'none',
       md: 'block',
     },
   },
