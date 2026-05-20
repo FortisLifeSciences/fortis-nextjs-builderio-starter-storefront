@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from 'react'
 
 import { autocomplete, getAlgoliaResults } from '@algolia/autocomplete-js'
 import { createQuerySuggestionsPlugin } from '@algolia/autocomplete-plugin-query-suggestions'
-import algoliasearch from 'algoliasearch'
+import { liteClient as algoliasearch } from 'algoliasearch/lite'
 import '@algolia/autocomplete-theme-classic'
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
@@ -55,7 +55,7 @@ const brandLogos: Record<string, string> = {
 const { publicRuntimeConfig } = getConfig()
 const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || publicRuntimeConfig?.ALGOLIA_APP_ID
 const apiKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || publicRuntimeConfig?.ALGOLIA_SEARCH_KEY
-const searchClient = algoliasearch(appId, apiKey)
+const searchClient = algoliasearch(appId, apiKey) as any
 
 const AlgoliaAutocomplete = () => {
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -125,7 +125,7 @@ const AlgoliaAutocomplete = () => {
                     ruleContexts: ['autocomplete'],
                   },
                 },
-              ],
+              ] as any,
               transformResponse({ results }) {
                 const userDataSections = results
                   .map((result) => {
@@ -276,10 +276,13 @@ const AlgoliaAutocomplete = () => {
                 {
                   indexName: 'products',
                   query,
-                  params: { hitsPerPage: 4 },
+                  params: {
+                    hitsPerPage: 4,
+                  },
                 },
-              ],
+              ] as any,
               transformResponse({ results, hits }) {
+                console.log('hits count:', (results[0] as any)?.hits?.length)
                 if ('nbHits' in results[0]) {
                   setContext({
                     productHits: results[0].nbHits,
@@ -393,9 +396,11 @@ const AlgoliaAutocomplete = () => {
                 {
                   indexName: 'builder-page',
                   query,
-                  params: { hitsPerPage: 3 },
+                  params: {
+                    hitsPerPage: 3,
+                  },
                 },
-              ],
+              ] as any,
               transformResponse({ results, hits }) {
                 if ('nbHits' in results[0]) {
                   setContext({
