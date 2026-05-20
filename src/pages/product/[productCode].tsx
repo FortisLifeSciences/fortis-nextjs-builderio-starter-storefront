@@ -12,6 +12,7 @@ import {
   getCategoryTree,
   productSearch,
   getProductSearchVariations,
+  configureProduct,
 } from '@/lib/api/operations'
 import { productGetters } from '@/lib/getters'
 import { buildProductPath } from '@/lib/helpers'
@@ -36,6 +37,7 @@ interface ProductPageType extends PageWithMetaData {
   section?: any
   PDPCustomAndBulkDisplayContentSection?: any
   PDPCustomAndBulkDisplaySectionKey?: string
+  schemaJson?: string
 }
 
 const { publicRuntimeConfig } = getConfig()
@@ -84,7 +86,30 @@ export async function getStaticProps(
   } catch (error) {
     console.error(`Failed to fetch product: ${productCode}`, error)
   }
-  // console.log('product api call returns product in getstaticprops as:', product)
+  // If the parent product has no images, configure the first variation to get its images
+  if (product && !product.content?.productImages?.length && product.options?.length) {
+    const defaultOptions = product.options
+      .map((opt: any) => ({
+        attributeFQN: opt.attributeFQN,
+        value: opt.values?.find((v: any) => v.isEnabled)?.value ?? opt.values?.[0]?.value,
+      }))
+      .filter((opt: any) => opt.value != null)
+
+    if (defaultOptions.length > 0) {
+      try {
+        const configured = await configureProduct(productCode, defaultOptions)
+        if (configured?.productImages?.length) {
+          product = {
+            ...product,
+            content: { ...product.content, productImages: configured.productImages },
+          }
+        }
+      } catch (e) {
+        console.error(`Failed to configure product for schema images: ${productCode}`, e)
+      }
+    }
+  }
+
   const variantCodes = product?.variations
   const relatedProducts = []
   const relatedProductData =
@@ -166,70 +191,13 @@ export async function getStaticProps(
     PDPCustomAndBulkDisplayContentSection = null
   }
 
-  return {
-    props: {
-      product,
-      productVariations,
-      metaData: getMetaData(product),
-      categoriesTree,
-      section: section || null,
-      PDPCustomAndBulkDisplayContentSection: PDPCustomAndBulkDisplayContentSection || null,
-      PDPCustomAndBulkDisplaySectionKey: PDPCustomAndBulkDisplaySectionKey || '',
-      relatedProducts,
-      ...(await serverSideTranslations(locale as string, ['common'])),
-    },
-    revalidate: parseInt(serverRuntimeConfig.revalidate),
-  }
-}
-
-export async function getStaticPaths(): Promise<GetStaticPathsResult> {
-  const { serverRuntimeConfig } = getConfig()
-  const { staticPathsMaxSize } = serverRuntimeConfig?.pageConfig?.productDetail || {}
-  const searchResult = await productSearch({
-    pageSize: parseInt(staticPathsMaxSize),
-  } as CategorySearchParams)
-  const items = searchResult?.data?.products?.items || []
-  const paths: string[] = items.map(buildProductPath)
-  return { paths, fallback: 'blocking' }
-}
-
-const ProductDetailPage: NextPage<ProductPageType> = (props) => {
-  const {
-    product,
-    productVariations,
-    relatedProducts,
-    PDPCustomAndBulkDisplayContentSection,
-    PDPCustomAndBulkDisplaySectionKey,
-  } = props
-
-  // const metaSource = (props.metaData || product || {}) as Record<string, unknown>
-  const metaTitle = props?.metaData?.title || product?.content?.metaTagTitle
-  const metaDescription = props?.metaData?.description || product?.content?.metaTagDescription
-  const router = useRouter()
-  const { isFallback, query } = router
-
-  const {
-    data: productResponseData,
-    isLoading: isProductLoading,
-    queryParams: queryParams,
-  } = useGetProduct(query)
-
-  const { sliceValue } = queryParams
-  const { selected } = queryParams
-
-  if (isFallback || isProductLoading) {
-    return <ProductDetailSkeleton />
-  }
-  const pdpBuilderSectionKey = publicRuntimeConfig?.builderIO?.modelKeys?.productDetailSection || ''
   const breadcrumbs = product ? productGetters.getBreadcrumbs(product) : []
-
   const baseUrl = (publicRuntimeConfig?.baseUrl || 'https://www.fortislife.com/').replace(/\/$/, '')
 
   const brandValue = product?.properties?.find(
     (prop: any) => prop?.attributeFQN?.toLowerCase() === publicRuntimeConfig?.brandAttrName
   )?.values?.[0]?.stringValue
 
-  // Per-brand config — @id, logo and LinkedIn must be exact for each brand
   const BRAND_CONFIGS: Record<string, { id: string; logo: string; sameAs: string[] }> = {
     'Bethyl Laboratories': {
       id: 'https://www.fortislife.com/#brand-bethyl-laboratories',
@@ -263,13 +231,7 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
           url: 'https://www.fortislife.com/',
           logo: 'https://cdn.builder.io/api/v1/assets/bea8d49fc591467587ef6a596924214c/fortis-life-science-logo',
           sameAs: ['https://www.linkedin.com/company/fortis-life-sci/'],
-          contactPoint: [
-            {
-              telephone: '+1-800-338-9579',
-              contactType: 'sales',
-              areaServed: 'US',
-            },
-          ],
+          contactPoint: [{ telephone: '+1-800-338-9579', contactType: 'sales', areaServed: 'US' }],
           address: {
             streetAddress: '7 Whittier Place, Suite 108 PMB 173',
             addressLocality: 'Boston',
@@ -278,10 +240,7 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
             addressCountry: 'US',
           },
         },
-        websiteConfig: {
-          name: 'Fortis Life Sciences',
-          url: 'https://www.fortislife.com/',
-        },
+        websiteConfig: { name: 'Fortis Life Sciences', url: 'https://www.fortislife.com/' },
         brandConfig: {
           id: resolvedBrand?.id,
           name: brandKey || 'Fortis Life Sciences',
@@ -293,6 +252,65 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
         },
       })
     : ''
+
+  return {
+    props: {
+      product,
+      productVariations,
+      metaData: getMetaData(product),
+      categoriesTree,
+      section: section || null,
+      PDPCustomAndBulkDisplayContentSection: PDPCustomAndBulkDisplayContentSection || null,
+      PDPCustomAndBulkDisplaySectionKey: PDPCustomAndBulkDisplaySectionKey || '',
+      relatedProducts,
+      schemaJson: schemaJson || '',
+      ...(await serverSideTranslations(locale as string, ['common'])),
+    },
+    revalidate: parseInt(serverRuntimeConfig.revalidate),
+  }
+}
+
+export async function getStaticPaths(): Promise<GetStaticPathsResult> {
+  const { serverRuntimeConfig } = getConfig()
+  const { staticPathsMaxSize } = serverRuntimeConfig?.pageConfig?.productDetail || {}
+  const searchResult = await productSearch({
+    pageSize: parseInt(staticPathsMaxSize),
+  } as CategorySearchParams)
+  const items = searchResult?.data?.products?.items || []
+  const paths: string[] = items.map(buildProductPath)
+  return { paths, fallback: 'blocking' }
+}
+
+const ProductDetailPage: NextPage<ProductPageType> = (props) => {
+  const {
+    product,
+    productVariations,
+    relatedProducts,
+    PDPCustomAndBulkDisplayContentSection,
+    PDPCustomAndBulkDisplaySectionKey,
+    schemaJson,
+  } = props
+
+  // const metaSource = (props.metaData || product || {}) as Record<string, unknown>
+  const metaTitle = props?.metaData?.title || product?.content?.metaTagTitle
+  const metaDescription = props?.metaData?.description || product?.content?.metaTagDescription
+  const router = useRouter()
+  const { isFallback, query } = router
+
+  const {
+    data: productResponseData,
+    isLoading: isProductLoading,
+    queryParams: queryParams,
+  } = useGetProduct(query)
+
+  const { sliceValue } = queryParams
+  const { selected } = queryParams
+
+  if (isFallback || isProductLoading) {
+    return <ProductDetailSkeleton />
+  }
+  const pdpBuilderSectionKey = publicRuntimeConfig?.builderIO?.modelKeys?.productDetailSection || ''
+  const breadcrumbs = product ? productGetters.getBreadcrumbs(product) : []
 
   return (
     <>
