@@ -98,21 +98,26 @@ function getMetaData(data: unknown): MetaData {
 // }
 
 export async function getStaticPaths() {
-  const response = await productIndex.search('', {
-    facets: ['category_pages'],
-  })
+  try {
+    const response = await productIndex.search('', {
+      facets: ['category_pages'],
+    })
 
-  // const categories = response?.facets?.category_pages
-  //updated for alogia version update -WEB-1657
-  const categories = (response?.facets as Record<string, Record<string, number>>)?.category_pages
+    // const categories = response?.facets?.category_pages
+    //updated for alogia version update -WEB-1657
+    const categories = (response?.facets as Record<string, Record<string, number>>)?.category_pages
 
-  const paths = categories
-    ? Object.keys(categories).map((categoryCode) => ({
-        params: { categoryCode },
-      }))
-    : []
+    const paths = categories
+      ? Object.keys(categories).map((categoryCode) => ({
+          params: { categoryCode },
+        }))
+      : []
 
-  return { paths, fallback: 'blocking' }
+    return { paths, fallback: 'blocking' }
+  } catch (error) {
+    console.error('getStaticPaths error:', error)
+    return { paths: [], fallback: 'blocking' }
+  }
 }
 
 export async function getStaticProps(
@@ -127,10 +132,17 @@ export async function getStaticProps(
       userAttributes: { slug: `category-${categoryCode}`, urlPath: `/products/${categoryCode}` },
     })
     .promise()
-  const { hits: products, facets } = await productIndex.search('', {
+  //updated for WEB-1657 - algolia version update
+  //const { hits: products, facets } = await productIndex.search('', {
+  //filters: `category_pages:${categoryCode}`,
+  //facets: ['*'],
+  //})
+  const result = await productIndex.search('', {
     filters: `category_pages:${categoryCode}`,
     facets: ['*'],
   })
+  const facets = (result.facets as Record<string, Record<string, number>>) || {}
+
   const searchableAttributes = getStaticSearchableFacets()
 
   return {
