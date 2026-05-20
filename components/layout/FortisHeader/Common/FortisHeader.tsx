@@ -249,7 +249,9 @@ const KiboHeader = (props: KiboHeaderProps) => {
         <Backdrop open={isBackdropOpen} data-testid="backdrop" />
 
         <Box component={'section'} sx={{ ...kiboHeaderStyles.topBarStyles }}>
-          <Box sx={{ width: '100%' }}>{getSection()}</Box>
+          <Box sx={{ width: '100%', backgroundColor: { xs: 'transparent', md: '#E3E2FF' } }}>
+            {getSection()}
+          </Box>
         </Box>
 
         <Box
