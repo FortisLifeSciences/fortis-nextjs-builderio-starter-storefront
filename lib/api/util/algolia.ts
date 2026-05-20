@@ -12,7 +12,20 @@ const ALGOLIA_INDEX_NAME = 'products'
 // Initialize the Algolia client
 const searchClient = algoliasearch(ALGOLIA_APP_ID, ALGOLIA_SEARCH_KEY)
 
-const instantSearchClient = liteClient(ALGOLIA_APP_ID, ALGOLIA_SEARCH_KEY)
+const _liteClient = liteClient(ALGOLIA_APP_ID, ALGOLIA_SEARCH_KEY)
+
+const instantSearchClient = {
+  search: _liteClient.search.bind(_liteClient),
+  searchForFacetValues: (_liteClient as any).searchForFacetValues?.bind(_liteClient),
+  transporter: {
+    headers: {
+      'x-algolia-application-id': ALGOLIA_APP_ID,
+      'x-algolia-api-key': ALGOLIA_SEARCH_KEY,
+    },
+  },
+}
+
+//const instantSearchClient = liteClient(ALGOLIA_APP_ID, ALGOLIA_SEARCH_KEY)
 
 /*const productIndex = searchClient.initIndex(ALGOLIA_INDEX_NAME)
 
