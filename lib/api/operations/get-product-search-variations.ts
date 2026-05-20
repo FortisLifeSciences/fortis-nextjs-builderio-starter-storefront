@@ -62,7 +62,7 @@ export default async function getProductSearchVariations(
         option: selectedValues,
         price: product.price,
         childPriority: childPriorityProperty ? Number(childPriorityProperty.values[0].value) : null,
-        inventoryInfo: (product as any).inventoryInfo,
+        inventoryInfo: (product as any).inventoryInfo ?? null,
       }
     })
   } else {
@@ -103,7 +103,7 @@ export default async function getProductSearchVariations(
           childPriority: childPriorityProperty
             ? Number(childPriorityProperty.values[0].value)
             : null,
-          inventoryInfo: (variationProduct as any).inventoryInfo,
+          inventoryInfo: (variationProduct as any).inventoryInfo ?? null,
         })
       }
     }
