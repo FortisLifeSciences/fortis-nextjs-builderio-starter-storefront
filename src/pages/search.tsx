@@ -15,7 +15,7 @@ import {
   useMediaQuery,
 } from '@mui/material'
 import { CircularProgress } from '@mui/material'
-import algoliasearch from 'algoliasearch/lite'
+import { liteClient as algoliasearch } from 'algoliasearch/lite'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import getConfig from 'next/config'
@@ -172,7 +172,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
         .map(([facet, values]) => values.map((v) => `${facet}:"${v}"`).join(' OR '))
         .join(' AND ')
 
-      searchClient
+      /* searchClient
         .search([
           {
             indexName: 'builder-page',
@@ -191,17 +191,37 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
               clickAnalytics: true, // Enable click analytics
             },
           },
-        ])
+        ])*/
+      //upodated for algolia version update -WEB-1657
+      searchClient
+        .search({
+          requests: [
+            {
+              indexName: 'builder-page',
+              query,
+            },
+            {
+              indexName: sortIndex,
+              query,
+              hitsPerPage: 15,
+              page: pagination.productsPage,
+              facets: ['*'],
+              filters,
+              clickAnalytics: true,
+            },
+          ],
+        })
         .then((res) => {
           //console.log('Manual multi-index search results:', res)
           const filteredResults = res.results.filter(
             (result) => (result as SearchResponse<unknown>).hits !== undefined
           )
-          const facets = (res.results[1] as SearchResponse<unknown>)?.facets
 
+          //updated for algolia version update -WEB-1657
+
+          const facets = (res.results[1] as any)?.facets
           const facetOrdering =
-            (res.results[1] as SearchResponse<unknown>)?.renderingContent?.facetOrdering?.facets
-              ?.order || []
+            (res.results[1] as any)?.renderingContent?.facetOrdering?.facets?.order || []
 
           const ordered = facetOrdering.filter((facet: string) => facets?.[facet])
           setOrderedFacets(ordered)
@@ -389,7 +409,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
           return (
             <>
               {/* Search summary title */}
-              {result.nbHits > 0 ? (
+              {(result.nbHits ?? 0) > 0 ? (
                 <>
                   <h1 className="searchProductsTitle">
                     {`${result.nbHits} Products for "${result.query}"`}
@@ -587,7 +607,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
                                   hit={hit}
                                   position={i}
                                   algoliaIndex={result?.index}
-                                  queryId={result?.queryID}
+                                  queryId={result?.queryID ?? ''}
                                   dataInsideMethod={'clickedObjectIDsAfterSearch'}
                                 />
                               ) : isListView ? (
@@ -595,7 +615,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
                                   hit={hit}
                                   position={i}
                                   algoliaIndex={result?.index}
-                                  queryId={result?.queryID}
+                                  queryId={result?.queryID ?? ''}
                                   dataInsideMethod={'clickedObjectIDsAfterSearch'}
                                 />
                               ) : (
@@ -603,7 +623,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
                                   hit={hit}
                                   position={i}
                                   algoliaIndex={result?.index}
-                                  queryId={result?.queryID}
+                                  queryId={result?.queryID ?? ''}
                                   dataInsideMethod={'clickedObjectIDsAfterSearch'}
                                 />
                               )}
@@ -613,8 +633,8 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
                       </Box>
                       {/* pagination */}
                       <AlgoliaPagination
-                        currentPage={result.page}
-                        totalPages={result.nbPages}
+                        currentPage={result.page ?? 0}
+                        totalPages={result.nbPages ?? 0}
                         onPageChange={(page) => {
                           setPagination((prev) => ({ ...prev, productsPage: page }))
                           handlePaginationClick() // scroll to rightSearchContainer
@@ -627,7 +647,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
               ) : (
                 <Box>
                   <h1 className="searchProductsTitle">
-                    {`${result.nbHits} Products for "${result.query}"`}
+                    {`${result.nbHits ?? 0} Products for "${result.query ?? ''}"`}
                   </h1>
                   <BuilderComponent
                     model={publicRuntimeConfig?.builderIO?.modelKeys?.emptyProductSearchResults}
