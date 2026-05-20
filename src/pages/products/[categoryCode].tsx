@@ -5,7 +5,7 @@ import { Add, ExpandLess, ExpandMore } from '@mui/icons-material'
 import Apps from '@mui/icons-material/Apps'
 import ReorderRounded from '@mui/icons-material/ReorderRounded'
 import { Box, Button, Typography, useMediaQuery } from '@mui/material'
-import algoliasearch from 'algoliasearch'
+import { algoliasearch } from 'algoliasearch'
 import getConfig from 'next/config'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
@@ -28,7 +28,12 @@ import { ProductHitListView, ProductHitGridView } from '@/components/product'
 import CustomRefinementList from '@/components/product/AlgoliaFacets/CustomRefinementList'
 import CustomSortBy from '@/components/product/AlgoliaFacets/CustomSortBy'
 import DesktopRefinement from '@/components/product/AlgoliaFacets/DesktopRefinment'
-import { getStaticSearchableFacets, productIndex, searchClient } from '@/lib/api/util/algolia'
+import {
+  getStaticSearchableFacets,
+  productIndex,
+  searchClient,
+  instantSearchClient,
+} from '@/lib/api/util/algolia'
 import { getFacetLabel } from '@/lib/helpers/facetMapping'
 import type { MetaData, PageWithMetaData } from '@/lib/types'
 
@@ -97,7 +102,9 @@ export async function getStaticPaths() {
     facets: ['category_pages'],
   })
 
-  const categories = response?.facets?.category_pages
+  // const categories = response?.facets?.category_pages
+  //updated for alogia version update -WEB-1657
+  const categories = (response?.facets as Record<string, Record<string, number>>)?.category_pages
 
   const paths = categories
     ? Object.keys(categories).map((categoryCode) => ({
@@ -472,7 +479,7 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
       />
 
       <InstantSearch
-        searchClient={searchClient}
+        searchClient={instantSearchClient}
         indexName="products"
         insights={{
           onEvent(event) {
