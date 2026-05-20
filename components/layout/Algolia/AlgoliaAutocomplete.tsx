@@ -63,7 +63,8 @@ const AlgoliaAutocomplete = () => {
   //redirect to search page
   const router = useRouter()
   const handleEnterSearch = (value: string) => {
-    router.push({ pathname: '/search', query: { query: value } }) // 👈 updated
+    const safeValue = String(value || '').slice(0, 512)
+    router.push({ pathname: '/search', query: { query: safeValue } })
   }
   useEffect(() => {
     const wrapper = document.getElementById('autocomplete') as HTMLElement | null
@@ -262,8 +263,9 @@ const AlgoliaAutocomplete = () => {
       searchClient: any
     }) => {
       const sources: any[] = []
+      const safeQuery = String(query || '').slice(0, 512)
 
-      if (query.length < 1) return sources
+      if (safeQuery.length < 1) return sources
 
       sources.push(
         // Products source
@@ -275,14 +277,13 @@ const AlgoliaAutocomplete = () => {
               queries: [
                 {
                   indexName: 'products',
-                  query,
+                  query: safeQuery,
                   params: {
                     hitsPerPage: 4,
                   },
                 },
               ] as any,
               transformResponse({ results, hits }) {
-                console.log('hits count:', (results[0] as any)?.hits?.length)
                 if ('nbHits' in results[0]) {
                   setContext({
                     productHits: results[0].nbHits,
@@ -300,8 +301,15 @@ const AlgoliaAutocomplete = () => {
               },
             })
           },
-          getItemInputValue(query: string) {
-            return query
+          //updated for algolia version update -WEB-1657
+          //getItemInputValue(query: string) {
+          // return query
+          //},
+          getItemInputValue() {
+            return ''
+          },
+          getItemUrl({ item }: { item: any }) {
+            return item?.product_url || '#'
           },
           templates: {
             header({ html }: { html: any }) {
@@ -372,7 +380,7 @@ const AlgoliaAutocomplete = () => {
             },
             footer({ state, html }: { state: any; html: any }) {
               const totalHits = state.context.productHits
-              const encodedQuery = encodeURIComponent(query)
+              const encodedQuery = encodeURIComponent(safeQuery)
               if (totalHits > 4) {
                 return html`
                   <a class="aa-products-see-all" href="/search?query=${encodedQuery}">
@@ -395,7 +403,7 @@ const AlgoliaAutocomplete = () => {
               queries: [
                 {
                   indexName: 'builder-page',
-                  query,
+                  query: safeQuery,
                   params: {
                     hitsPerPage: 3,
                   },
@@ -417,8 +425,15 @@ const AlgoliaAutocomplete = () => {
               },
             })
           },
-          getItemInputValue(query: string) {
-            return query
+          //updated for website search algolia version update - WEB-1657
+          //getItemInputValue(query: string) {
+          //return query
+          //},
+          getItemInputValue() {
+            return ''
+          },
+          getItemUrl({ item }: { item: any }) {
+            return item?.query?.[0]?.value || item?.meta?.lastPreviewUrl || '#'
           },
           templates: {
             header({ html }: { html: any }) {
@@ -471,7 +486,7 @@ const AlgoliaAutocomplete = () => {
             },
             footer({ state, html }: { state: any; html: any }) {
               const totalHits = state.context.pageHits
-              const encodedQuery = encodeURIComponent(query)
+              const encodedQuery = encodeURIComponent(safeQuery)
 
               if (typeof totalHits === 'number' && totalHits > 3) {
                 return html`<a class="aa-builder-see-all" href="/search?query=${encodedQuery}">
@@ -494,10 +509,17 @@ const AlgoliaAutocomplete = () => {
       placeholder: 'Search',
       openOnFocus: true,
       insights: true,
+      navigator: {
+        navigate({ itemUrl }: { itemUrl: string }) {
+          window.location.assign(itemUrl)
+        },
+      },
       plugins: [querySuggestionsPlugin, popularPlugin, quickAccessPlugin],
       onSubmit({ state }) {
         justRedirected = true
-        handleEnterSearch(state.query) // 👈 This runs on enter
+        //handleEnterSearch(state.query) // 👈 This runs on enter
+        //updated for algolia version update -WEB-1657
+        handleEnterSearch(String(state.query || '').slice(0, 512))
       },
       shouldPanelOpen({ state }) {
         if (justRedirected) {
@@ -521,7 +543,13 @@ const AlgoliaAutocomplete = () => {
           )
         }
       },
-      getSources: ({ query }) => getSourcesForAlgolia({ query, searchClient }),
+      //update for algolia version update -WEB-1657
+      //getSources: ({ query }) => getSourcesForAlgolia({ query, searchClient }),
+      getSources: ({ query }) =>
+        getSourcesForAlgolia({
+          query: String(query || '').slice(0, 512),
+          searchClient,
+        }),
     })
     return () => search.destroy()
   }, [])

@@ -166,7 +166,14 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
   useEffect(() => {
     setLoading(true)
     if (searchQuery) {
-      const query = Array.isArray(searchQuery) ? searchQuery.join(' ') : searchQuery
+      //const query = Array.isArray(searchQuery) ? searchQuery.join(' ') : searchQuery
+      //updated for algolia version update -WEB-1657
+      // Truncate to 512 bytes max
+      const rawQuery = Array.isArray(searchQuery)
+        ? searchQuery.join(' ')
+        : String(searchQuery || '')
+      const query = rawQuery.slice(0, 512)
+
       const filters = Object.entries(selectedFilters)
         .filter(([_, values]) => values.length > 0) // Skip empty selections
         .map(([facet, values]) => values.map((v) => `${facet}:"${v}"`).join(' OR '))
