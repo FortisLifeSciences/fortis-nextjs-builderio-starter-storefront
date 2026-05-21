@@ -20,7 +20,7 @@ import { buildProductPath } from '@/lib/helpers'
 import type { CategorySearchParams, MetaData, PageWithMetaData } from '@/lib/types'
 import { generateSchemaMarkups, renderSchemaMarkup } from '@/lib/utils/generate-schema-markup'
 
-import { PrCategory, Product } from '@/lib/gql/types'
+import { FilteredProduct, PrCategory, Product } from '@/lib/gql/types'
 import type {
   GetStaticPathsResult,
   GetStaticPropsContext,
@@ -34,7 +34,7 @@ interface ProductPageType extends PageWithMetaData {
   categoriesTree?: PrCategory[]
   product?: Product
   relatedProducts: any
-  productVariations?: Product[]
+  productVariations?: FilteredProduct[]
   section?: any
   PDPCustomAndBulkDisplayContentSection?: any
   PDPCustomAndBulkDisplaySectionKey?: string

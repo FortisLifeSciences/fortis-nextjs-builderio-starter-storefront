@@ -199,11 +199,13 @@ function generateBreadcrumbSchema(
   }
 }
 
-function toSchemaAvailability(inventoryInfo?: {
-  onlineStockAvailable?: number | null
-  outOfStockBehavior?: string | null
-}): string {
-  if (!inventoryInfo) return 'https://schema.org/InStock'
+function toSchemaAvailability(
+  inventoryInfo?: {
+    onlineStockAvailable?: number | null
+    outOfStockBehavior?: string | null
+  } | null
+): string {
+  if (!inventoryInfo) return 'https://schema.org/OutOfStock'
   if ((inventoryInfo.onlineStockAvailable ?? 0) > 0) return 'https://schema.org/InStock'
   if (inventoryInfo.outOfStockBehavior === 'AllowBackOrder') return 'https://schema.org/BackOrder'
   return 'https://schema.org/OutOfStock'
@@ -216,6 +218,7 @@ function generateOfferSchema(
   price: number | null | undefined,
   inventoryInfo:
     | { onlineStockAvailable?: number | null; outOfStockBehavior?: string | null }
+    | null
     | undefined,
   organizationId: string
 ): Record<string, any> {
@@ -458,12 +461,11 @@ function generateProductSchema(
 
   if (productVariations && productVariations.length > 0) {
     for (const variant of productVariations) {
-      const variantCode = (variant as any).variationProductCode
+      const variantCode = variant.variationProductCode
       if (!variantCode) continue
 
       const variantLabel: string =
-        ((variant as any).option as any[])?.find((v: any) => v.isSelected !== false)?.stringValue ??
-        ''
+        (variant.option as any[])?.find((v: any) => v.isSelected !== false)?.stringValue ?? ''
 
       offers.push(
         generateOfferSchema(
@@ -471,7 +473,7 @@ function generateProductSchema(
           variantCode,
           `${productUrl}?selected=${variantCode}`,
           (variant as any).price?.price,
-          (variant as any).inventoryInfo,
+          variant.inventoryInfo,
           organizationId
         )
       )
