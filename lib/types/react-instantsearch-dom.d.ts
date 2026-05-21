@@ -1,3 +1,5 @@
+declare module '@algolia/autocomplete-theme-classic'
+
 declare module 'react-instantsearch-dom' {
   export const InstantSearch: React.FC<any>
   export const SearchBox: React.FC<any>
