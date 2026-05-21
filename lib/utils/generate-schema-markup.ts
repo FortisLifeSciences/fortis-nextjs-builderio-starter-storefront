@@ -422,7 +422,8 @@ function generateProductSchema(
   productVariations: FilteredProduct[] | undefined,
   baseUrl: string,
   brandId: string,
-  organizationId: string
+  organizationId: string,
+  brandSlug: string
 ): Record<string, any> {
   const { getProductSeoLink } = uiHelpers()
   const productUrl = baseUrl + getProductSeoLink(product)
@@ -459,6 +460,8 @@ function generateProductSchema(
   // Build offers — one per sellable variation
   const offers: Array<Record<string, any>> = []
 
+  const isBethyl = brandSlug.toLowerCase().includes('bethyl')
+
   if (productVariations && productVariations.length > 0) {
     for (const variant of productVariations) {
       const variantCode = variant.variationProductCode
@@ -472,7 +475,7 @@ function generateProductSchema(
           variantLabel,
           variantCode,
           `${productUrl}?selected=${variantCode}`,
-          (variant as any).price?.price,
+          isBethyl ? (variant as any).price?.price : undefined,
           variant.inventoryInfo,
           organizationId
         )
@@ -598,7 +601,9 @@ export function generateSchemaMarkups(options: SchemaMarkupOptions): string {
   graph.push(generateWebPageSchema(productUrl, product?.content?.productName || '', websiteId))
 
   // 6. Product
-  graph.push(generateProductSchema(product, productVariations, baseUrl, brandId, organizationId))
+  graph.push(
+    generateProductSchema(product, productVariations, baseUrl, brandId, organizationId, brandSlug)
+  )
 
   const schemaData = {
     '@context': 'https://schema.org',
