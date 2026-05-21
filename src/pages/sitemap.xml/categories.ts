@@ -37,10 +37,6 @@ export const generateSiteMap = (categoryItems: Array<PrCategory>): string => {
     </urlset>`
 }
 
-const getLastModDate = (): string => {
-  return new Date().toISOString().split('T')[0]
-}
-
 function SiteMap() {
   // getServerSideProps will do the heavy lifting
 }
