@@ -7,10 +7,14 @@ export const navWrapperStyles: SxProps = {
   transition: 'background-color 0.3s ease-in-out',
 
   // Algolia search — pill ghost style
-  '& .aa-Autocomplete': { width: '100%' },
+  '& #autocomplete': { width: '100%', maxWidth: '100%', minWidth: 0 },
+  '& .aa-Autocomplete': { width: '100%', maxWidth: '100%', minWidth: 0 },
   '& .aa-DetachedSearchButton': { width: '100%' },
   '& .aa-Form': {
     left: '0 !important',
+    right: '0 !important',
+    width: '100%',
+    maxWidth: '100%',
     background: 'rgba(255, 255, 255, 0.08)',
     border: '1px solid rgba(255, 255, 255, 0.1)',
     borderRadius: '100px !important',
@@ -20,9 +24,11 @@ export const navWrapperStyles: SxProps = {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
+    boxSizing: 'border-box',
+    overflow: 'hidden',
   },
   '& .aa-InputWrapperPrefix': { display: 'none' },
-  '& .aa-InputWrapper': { flex: 1 },
+  '& .aa-InputWrapper': { flex: 1, minWidth: 0, overflow: 'hidden' },
   '& .aa-Input': {
     background: 'none',
     border: 'none',
@@ -33,6 +39,7 @@ export const navWrapperStyles: SxProps = {
     fontSize: '15px',
     letterSpacing: '-0.005em',
     width: '100%',
+    minWidth: 0,
     paddingLeft: '32px', // 20px icon + 12px gap
     '&::placeholder': { color: 'rgba(255,255,255,0.7)' },
   },
@@ -77,8 +84,9 @@ export const navInnerStyles: SxProps = {
   flexDirection: 'row',
   justifyContent: 'space-between',
   alignItems: 'center',
-  padding: '16px 0',
-  gap: '20px',
+  // 16px horizontal padding on tablet (900-1199px), no padding on desktop (1200px+)
+  padding: { md: '16px 16px', lg: '16px 0' },
+  gap: { md: '12px', lg: '20px' },
   maxWidth: '1200px',
   width: '100%',
   margin: '0 auto',
@@ -87,7 +95,7 @@ export const navInnerStyles: SxProps = {
   transition: 'height 0.3s ease-in-out, padding 0.3s ease-in-out',
   '.scrolled &': {
     height: '66px',
-    padding: '18px 0',
+    padding: { md: '18px 16px', lg: '18px 0' },
   },
 }
 
@@ -107,8 +115,9 @@ export const navRightContainerStyles: SxProps = {
   flexDirection: 'row',
   alignItems: 'center',
   justifyContent: 'flex-end',
-  gap: '24px',
+  gap: { md: '8px', lg: '24px' },
   flex: 1,
+  minWidth: 0,
 }
 
 // Nav links — gap: 4px between items per Figma
@@ -120,11 +129,13 @@ export const navLinksStyles: SxProps = {
   flexShrink: 0,
 }
 
-// Search — exactly 335px per Figma
+// Search — shrinks on tablet (900-1199px), full width on desktop (1200px+)
 export const searchWrapperStyles: SxProps = {
-  flex: '0 0 335px',
-  width: '335px',
-  overflow: 'visible',
+  flex: { md: '0 1 120px', lg: '0 1 250px' },
+  width: { md: '120px', lg: '250px' },
+  maxWidth: { md: '120px', lg: '250px' },
+  minWidth: 0,
+  overflow: 'hidden',
   position: 'relative',
 }
 
@@ -133,6 +144,6 @@ export const iconGroupStyles: SxProps = {
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'center',
-  gap: '24px',
+  gap: { md: '8px', lg: '24px' },
   flexShrink: 0,
 }

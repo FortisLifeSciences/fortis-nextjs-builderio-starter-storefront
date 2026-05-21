@@ -415,7 +415,7 @@ function extractAdditionalProperties(product: Product): Array<Record<string, any
 }
 
 /**
- * Generates Product schema with variants
+ * Generates Product schema with variants and offers
  */
 function generateProductSchema(
   product: Product,

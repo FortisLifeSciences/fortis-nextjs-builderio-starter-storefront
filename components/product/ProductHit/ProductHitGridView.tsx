@@ -135,6 +135,17 @@ const ProductHitGridView = ({
   }`
   truncatedTitle = truncatedTitle + `${uniqueVal}`
 
+  // Ensure Next.js <Link> gets a relative path — absolute URLs trigger a full page reload
+  const productHref = (() => {
+    const url = hit?.product_url || '#'
+    if (!url.startsWith('http')) return url
+    try {
+      return new URL(url).pathname + new URL(url).search + new URL(url).hash
+    } catch {
+      return url
+    }
+  })()
+
   return (
     <>
       <Box
@@ -144,7 +155,8 @@ const ProductHitGridView = ({
         data-index={algoliaIndex || 'products'}
       >
         <Link
-          href={hit.product_url}
+          href={`/product/${productCode}`}
+          as={productHref}
           passHref
           data-testid="product-card-link"
           aria-label={title ? `View details for ${title}` : 'Product details'}
