@@ -9955,7 +9955,7 @@ export type FilteredProduct = {
   inventoryInfo?: {
     onlineStockAvailable?: number | null
     outOfStockBehavior?: string | null
-  }
+  } | null
 }
 
 export type Product_GetArgs = {

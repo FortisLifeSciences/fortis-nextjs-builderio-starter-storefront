@@ -199,11 +199,13 @@ function generateBreadcrumbSchema(
   }
 }
 
-function toSchemaAvailability(inventoryInfo?: {
-  onlineStockAvailable?: number | null
-  outOfStockBehavior?: string | null
-}): string {
-  if (!inventoryInfo) return 'https://schema.org/InStock'
+function toSchemaAvailability(
+  inventoryInfo?: {
+    onlineStockAvailable?: number | null
+    outOfStockBehavior?: string | null
+  } | null
+): string {
+  if (!inventoryInfo) return 'https://schema.org/OutOfStock'
   if ((inventoryInfo.onlineStockAvailable ?? 0) > 0) return 'https://schema.org/InStock'
   if (inventoryInfo.outOfStockBehavior === 'AllowBackOrder') return 'https://schema.org/BackOrder'
   return 'https://schema.org/OutOfStock'
@@ -216,6 +218,7 @@ function generateOfferSchema(
   price: number | null | undefined,
   inventoryInfo:
     | { onlineStockAvailable?: number | null; outOfStockBehavior?: string | null }
+    | null
     | undefined,
   organizationId: string
 ): Record<string, any> {
@@ -419,7 +422,8 @@ function generateProductSchema(
   productVariations: FilteredProduct[] | undefined,
   baseUrl: string,
   brandId: string,
-  organizationId: string
+  organizationId: string,
+  brandSlug: string
 ): Record<string, any> {
   const { getProductSeoLink } = uiHelpers()
   const productUrl = baseUrl + getProductSeoLink(product)
@@ -456,22 +460,23 @@ function generateProductSchema(
   // Build offers — one per sellable variation
   const offers: Array<Record<string, any>> = []
 
+  const isBethyl = brandSlug.toLowerCase().includes('bethyl')
+
   if (productVariations && productVariations.length > 0) {
     for (const variant of productVariations) {
-      const variantCode = (variant as any).variationProductCode
+      const variantCode = variant.variationProductCode
       if (!variantCode) continue
 
       const variantLabel: string =
-        ((variant as any).option as any[])?.find((v: any) => v.isSelected !== false)?.stringValue ??
-        ''
+        (variant.option as any[])?.find((v: any) => v.isSelected !== false)?.stringValue ?? ''
 
       offers.push(
         generateOfferSchema(
           variantLabel,
           variantCode,
           `${productUrl}?selected=${variantCode}`,
-          (variant as any).price?.price,
-          (variant as any).inventoryInfo,
+          isBethyl ? (variant as any).price?.price : undefined,
+          variant.inventoryInfo,
           organizationId
         )
       )
@@ -596,7 +601,9 @@ export function generateSchemaMarkups(options: SchemaMarkupOptions): string {
   graph.push(generateWebPageSchema(productUrl, product?.content?.productName || '', websiteId))
 
   // 6. Product
-  graph.push(generateProductSchema(product, productVariations, baseUrl, brandId, organizationId))
+  graph.push(
+    generateProductSchema(product, productVariations, baseUrl, brandId, organizationId, brandSlug)
+  )
 
   const schemaData = {
     '@context': 'https://schema.org',
