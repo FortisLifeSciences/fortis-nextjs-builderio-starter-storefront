@@ -33,6 +33,7 @@ interface KiboHeaderProps {
   navLinks: NavigationLink[]
   categoriesTree: Maybe<PrCategory>[]
   isSticky?: boolean
+  isTransparentPage?: boolean
 }
 
 interface HeaderActionAreaProps {
@@ -110,7 +111,7 @@ const HeaderActionArea = (props: HeaderActionAreaProps) => {
 }
 
 const KiboHeader = (props: KiboHeaderProps) => {
-  const { navLinks, isSticky = true } = props
+  const { navLinks, isSticky = true, isTransparentPage } = props
   const { headerState, toggleMobileSearchPortal, toggleHamburgerMenu } = useHeaderContext()
   const { isAuthenticated, user } = useAuthContext()
   const { showModal, closeModal } = useModalContext()
@@ -214,7 +215,7 @@ const KiboHeader = (props: KiboHeaderProps) => {
 
     if (!mdScreen)
       return (
-        <MobileHeader hideIcons={isHamburgerMenuVisible}>
+        <MobileHeader hideIcons={isHamburgerMenuVisible} isTransparentPage={isTransparentPage}>
           <Collapse in={isMobileSearchPortalVisible}>
             <Box
               height={'80px'}
@@ -264,6 +265,7 @@ const KiboHeader = (props: KiboHeaderProps) => {
           <NavigationBar
             isCheckoutPage={isCheckoutPage}
             onAccountIconClick={handleAccountIconClick}
+            isTransparentPage={isTransparentPage}
           />
         </Box>
       </AppBar>
