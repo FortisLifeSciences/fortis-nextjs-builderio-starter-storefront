@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { BuilderComponent, builder } from '@builder.io/react'
+import { setPixelProperties } from '@builder.io/utils'
 import '@builder.io/widgets'
 import getConfig from 'next/config'
 import Head from 'next/head'
@@ -24,7 +25,10 @@ const Custom404 = () => {
       })
       .toPromise()
       .then((res) => {
-        if (res) setPage(res)
+        if (res) {
+          setPixelProperties(res, { alt: 'pixel tag from builder' })
+          setPage(res)
+        }
       })
   }, [])
 
