@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, PropsWithChildren, useCallback } from 'react'
 
 import { BuilderComponent, builder } from '@builder.io/react'
+import { setPixelProperties } from '@builder.io/utils'
 import { Add, ExpandLess, ExpandMore } from '@mui/icons-material'
 import Apps from '@mui/icons-material/Apps'
 import ReorderRounded from '@mui/icons-material/ReorderRounded'

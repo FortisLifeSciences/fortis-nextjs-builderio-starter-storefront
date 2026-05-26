@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import { BuilderComponent, builder, Builder } from '@builder.io/react'
+import { setPixelProperties } from '@builder.io/utils'
 import getConfig from 'next/config'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
@@ -100,8 +101,14 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const { cartTopSection, cartBottomSection, cartEmptySection } =
     publicRuntimeConfig?.builderIO?.modelKeys || {}
   const cartTopContentSection = await builder.get(cartBottomSection).promise()
+  if (cartTopContentSection)
+    setPixelProperties(cartTopContentSection, { alt: 'pixel tag from builder' })
   const cartBottomContentSection = await builder.get(cartTopSection).promise()
+  if (cartBottomContentSection)
+    setPixelProperties(cartBottomContentSection, { alt: 'pixel tag from builder' })
   const cartEmptyContentSection = await builder.get(cartEmptySection).promise()
+  if (cartEmptyContentSection)
+    setPixelProperties(cartEmptyContentSection, { alt: 'pixel tag from builder' })
   let productCodes: string[] = []
 
   if (response?.currentCart?.items) {
