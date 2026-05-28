@@ -457,12 +457,11 @@ function generateProductSchema(
         return url.startsWith('//') ? `https:${url}` : url
       }) || []
 
-  // Build offers — one per sellable variation
+  // Build offers — only for Bethyl products
+  const isBethyl = brandSlug.toLowerCase().includes('bethyl')
   const offers: Array<Record<string, any>> = []
 
-  const isBethyl = brandSlug.toLowerCase().includes('bethyl')
-
-  if (productVariations && productVariations.length > 0) {
+  if (isBethyl && productVariations && productVariations.length > 0) {
     for (const variant of productVariations) {
       const variantCode = variant.variationProductCode
       if (!variantCode) continue
@@ -475,7 +474,7 @@ function generateProductSchema(
           variantLabel,
           variantCode,
           `${productUrl}?selected=${variantCode}`,
-          isBethyl ? (variant as any).price?.price : undefined,
+          (variant as any).price?.price,
           variant.inventoryInfo,
           organizationId
         )
