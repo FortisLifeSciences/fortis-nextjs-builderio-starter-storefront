@@ -78,9 +78,14 @@ const ProductApplications = ({ product, currentProduct }: any) => {
 
     setApplicationText(getApplicationText?.values[0]?.stringValue || null)
     setApplicationTextVariant(getApplicationTextVariant?.values[0]?.stringValue || null)
-    setApplicationDilutionRange(
-      JSON.parse(getApplicationDilutionRange?.values[0]?.stringValue || '[]')
-    )
+    try {
+      setApplicationDilutionRange(
+        JSON.parse(getApplicationDilutionRange?.values[0]?.stringValue || '[]')
+      )
+    } catch (e) {
+      console.error('Failed to parse application-dilution-range:', e)
+      setApplicationDilutionRange([])
+    }
 
     const hasRelevantData =
       !!getApplicationText || !!getApplicationTextVariant || !!getApplicationDilutionRange
