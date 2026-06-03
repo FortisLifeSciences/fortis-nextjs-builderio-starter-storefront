@@ -7,7 +7,7 @@ import { InstantSearch, Configure } from 'react-instantsearch-hooks-web'
 
 import ResourcesHitComponent from '@/components/product/ProductHit/resources/ResourcesHitComponent'
 import getCategoryTree from '@/lib/api/operations/get-category-tree'
-import { productIndex, searchClient } from '@/lib/api/util/algolia'
+import { productIndex, searchClient, instantSearchClient } from '@/lib/api/util/algolia'
 import type { CategoryTreeResponse } from '@/lib/types'
 import type { MetaData } from '@/lib/types'
 
@@ -91,6 +91,21 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   let facets
 
   if (resourcesPage && resourceCategoryCode) {
+    /*const result = await productIndex.search('', {
+      filters: `category_url:"${
+        pathLength === 1
+          ? resourceCategoryCode
+          : pCategory !== null
+          ? `${pCategory}/${resourceCategoryCode}`
+          : ''
+      }"`,
+      facets: ['*'],
+    })
+    products = result.hits
+    facets = result.facets 
+*/
+    //updated fro algolia version update - WEB-1657
+    // ✅ Fix
     const result = await productIndex.search('', {
       filters: `category_url:"${
         pathLength === 1
@@ -102,7 +117,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       facets: ['*'],
     })
     products = result.hits
-    facets = result.facets
+    facets = result.facets as Record<string, Record<string, number>>
 
     section = await builder
       .get(categoryTopSection, {
@@ -211,7 +226,7 @@ const Page = (props: any) => {
           model={publicRuntimeConfig?.builderIO?.modelKeys?.categoryTopSection}
           content={section}
         />
-        <InstantSearch searchClient={searchClient} indexName="builder-page_newest-first">
+        <InstantSearch searchClient={instantSearchClient} indexName="builder-page_newest-first">
           <Configure
             {...({
               hitsPerPage: 15,
