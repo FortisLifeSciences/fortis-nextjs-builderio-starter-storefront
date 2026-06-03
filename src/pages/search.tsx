@@ -96,7 +96,7 @@ export const getServerSideProps: GetServerSideProps = async (
       },
     })
     .toPromise()
-  if (page) setPixelProperties(page, { alt: 'pixel tag from builder' })
+  if (page) setPixelProperties(page, { alt: '' })
 
   return {
     props: {

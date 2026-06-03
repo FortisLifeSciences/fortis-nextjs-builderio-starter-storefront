@@ -35,7 +35,7 @@ export async function getStaticProps(context: GetStaticPropsContext) {
       },
     })
     .toPromise()
-  if (page) setPixelProperties(page, { alt: 'pixel tag from builder' })
+  if (page) setPixelProperties(page, { alt: '' })
   const themeSetting = await builder.get('theme-setting').promise()
   return {
     props: {

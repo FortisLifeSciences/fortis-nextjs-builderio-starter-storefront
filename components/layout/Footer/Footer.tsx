@@ -13,7 +13,7 @@ const FooterSection = () => {
   useEffect(() => {
     async function fetchFooterContent() {
       const content = await builder.get('footer').toPromise()
-      if (content) setPixelProperties(content, { alt: 'pixel tag from builder' })
+      if (content) setPixelProperties(content, { alt: '' })
       setFooterContent(content)
     }
 

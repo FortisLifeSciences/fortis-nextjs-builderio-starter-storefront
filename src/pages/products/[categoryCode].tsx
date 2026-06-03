@@ -133,7 +133,7 @@ export async function getStaticProps(
       userAttributes: { slug: `category-${categoryCode}`, urlPath: `/products/${categoryCode}` },
     })
     .promise()
-  if (builderSection) setPixelProperties(builderSection, { alt: 'pixel tag from builder' })
+  if (builderSection) setPixelProperties(builderSection, { alt: '' })
   //updated for WEB-1657 - algolia version update
   //const { hits: products, facets } = await productIndex.search('', {
   //filters: `category_pages:${categoryCode}`,
