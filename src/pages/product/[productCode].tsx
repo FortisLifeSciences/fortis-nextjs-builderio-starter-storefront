@@ -172,7 +172,7 @@ export async function getStaticProps(
     section = await builder
       .get(pdpBuilderSectionKey, { userAttributes: { slug: `product-${productCode}` } })
       .promise()
-    if (section) setPixelProperties(section, { alt: 'pixel tag from builder' })
+    if (section) setPixelProperties(section, { alt: '' })
   } catch (error) {
     console.error(`Failed to fetch Builder section for ${productCode}:`, error)
     section = null
@@ -189,7 +189,7 @@ export async function getStaticProps(
       })
       .promise()
     if (PDPCustomAndBulkDisplayContentSection)
-      setPixelProperties(PDPCustomAndBulkDisplayContentSection, { alt: 'pixel tag from builder' })
+      setPixelProperties(PDPCustomAndBulkDisplayContentSection, { alt: '' })
   } catch (error) {
     console.error(`Failed to fetch Builder custom section for ${targetingBrandName}:`, error)
     PDPCustomAndBulkDisplayContentSection = null
