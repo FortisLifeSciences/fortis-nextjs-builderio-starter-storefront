@@ -1,22 +1,9 @@
 #robots.txt for https://www.fortislife.com/ updated 2025-02-24T09:04:29.215Z
 
 
-# Googlebot
-User-agent: Googlebot
-Allow: /
-
 # *
 User-agent: *
 Allow: /
-Allow: /images/
-Allow: /icons/
-Allow: /logos/
-Allow: /uploads/
-Allow: /*.png$
-Allow: /*.jpg$
-Allow: /*.jpeg$
-Allow: /*.svg$
-Allow: /*.webp$
 Disallow: /admin*
 Disallow: /cart*
 Disallow: /checkout*
@@ -34,14 +21,5 @@ Disallow: /home-temp*
 Disallow: /test-pricelist*
 # Disallow: /*?*
 
-# AhrefsSiteAudit
-User-agent: AhrefsSiteAudit
-Allow: /
-
-# Baiduspider
-User-agent: Baiduspider
-Allow: /
-
 # Sitemaps
 Sitemap: https://www.fortislife.com/sitemap.xml
-
