@@ -101,14 +101,11 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const { cartTopSection, cartBottomSection, cartEmptySection } =
     publicRuntimeConfig?.builderIO?.modelKeys || {}
   const cartTopContentSection = await builder.get(cartBottomSection).promise()
-  if (cartTopContentSection)
-    setPixelProperties(cartTopContentSection, { alt: 'pixel tag from builder' })
+  if (cartTopContentSection) setPixelProperties(cartTopContentSection, { alt: '' })
   const cartBottomContentSection = await builder.get(cartTopSection).promise()
-  if (cartBottomContentSection)
-    setPixelProperties(cartBottomContentSection, { alt: 'pixel tag from builder' })
+  if (cartBottomContentSection) setPixelProperties(cartBottomContentSection, { alt: '' })
   const cartEmptyContentSection = await builder.get(cartEmptySection).promise()
-  if (cartEmptyContentSection)
-    setPixelProperties(cartEmptyContentSection, { alt: 'pixel tag from builder' })
+  if (cartEmptyContentSection) setPixelProperties(cartEmptyContentSection, { alt: '' })
   let productCodes: string[] = []
 
   if (response?.currentCart?.items) {

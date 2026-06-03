@@ -131,7 +131,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
         },
       })
       .toPromise()
-    if (section) setPixelProperties(section, { alt: 'pixel tag from builder' })
+    if (section) setPixelProperties(section, { alt: '' })
   } else {
     page = await builder
       .get(publicRuntimeConfig?.builderIO?.modelKeys?.defaultPage, {
@@ -140,7 +140,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
         },
       })
       .toPromise()
-    if (page) setPixelProperties(page, { alt: 'pixel tag from builder' })
+    if (page) setPixelProperties(page, { alt: '' })
 
     if (!page) {
       return { notFound: true } // This will render `pages/404.tsx`
