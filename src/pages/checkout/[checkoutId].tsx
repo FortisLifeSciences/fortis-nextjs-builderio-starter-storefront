@@ -31,7 +31,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     : await getCheckout(checkoutId, req as NextApiRequest, res as NextApiResponse)
 
   const builderContent = await builder.get('checkout-order-summary-section').toPromise()
-  if (builderContent) setPixelProperties(builderContent, { alt: 'pixel tag from builder' })
+  if (builderContent) setPixelProperties(builderContent, { alt: '' })
 
   if (!checkout) {
     return { notFound: true }

@@ -26,7 +26,7 @@ const Custom404 = () => {
       .toPromise()
       .then((res) => {
         if (res) {
-          setPixelProperties(res, { alt: 'pixel tag from builder' })
+          setPixelProperties(res, { alt: '' })
           setPage(res)
         }
       })
