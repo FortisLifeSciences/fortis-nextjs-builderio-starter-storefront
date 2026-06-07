@@ -65,6 +65,37 @@ export default async function getProductSearchVariations(
         inventoryInfo: (product as any).inventoryInfo ?? null,
       }
     })
+
+    // productSearch doesn't return live inventory — fall back to individual product queries
+    // for any variant where inventoryInfo is missing or onlineStockAvailable is null
+    const inventoryFallbacks = result
+      .filter(
+        (v) =>
+          !v.inventoryInfo ||
+          (v.inventoryInfo as any).onlineStockAvailable == null ||
+          (v.inventoryInfo as any).outOfStockBehavior == null
+      )
+      .map((v) =>
+        fetcher(
+          {
+            query: getProductVariationQuery,
+            variables: { productCode, variationProductCode: v.variationProductCode },
+          },
+          { headers }
+        )
+          .then((res) => ({
+            variationProductCode: v.variationProductCode,
+            inventoryInfo: res.data?.product?.inventoryInfo ?? null,
+          }))
+          .catch(() => null)
+      )
+
+    const inventoryResults = await Promise.all(inventoryFallbacks)
+    for (const inv of inventoryResults) {
+      if (!inv) continue
+      const variant = result.find((v) => v.variationProductCode === inv.variationProductCode)
+      if (variant) variant.inventoryInfo = inv.inventoryInfo
+    }
   } else {
     console.log('Entered else statement')
     result = []
