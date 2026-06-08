@@ -69,7 +69,12 @@ export default async function getProductSearchVariations(
     // productSearch doesn't return live inventory — fall back to individual product queries
     // for any variant where inventoryInfo is missing or onlineStockAvailable is null
     const inventoryFallbacks = result
-      .filter((v) => !v.inventoryInfo || (v.inventoryInfo as any).onlineStockAvailable == null)
+      .filter(
+        (v) =>
+          !v.inventoryInfo ||
+          (v.inventoryInfo as any).onlineStockAvailable == null ||
+          (v.inventoryInfo as any).outOfStockBehavior == null
+      )
       .map((v) =>
         fetcher(
           {
