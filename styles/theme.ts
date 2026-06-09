@@ -79,6 +79,15 @@ const buttonStyleOverrides = {
 }
 // Create a base theme instance and define the basic design options
 let theme = createTheme({
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 600,
+      md: 1200,
+      lg: 1536,
+      xl: 1920,
+    },
+  },
   typography: {
     fontFamily: 'Poppins',
     htmlFontSize: 16,
