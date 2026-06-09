@@ -88,15 +88,21 @@ function SiteMap() {
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
-  // We make an API call to gather the URLs for our site
-  const builderPages = await fetchBuilderPages()
-  // We generate the XML sitemap with the posts data
-  //const sitemap = generateSiteMap()
+  const { pages, ok } = await fetchBuilderPages()
 
-  res.setHeader('Content-Type', 'text/xml')
-  // we send the XML to the browser
-  //res.write(sitemap)
-  res.end()
+  res.setHeader('Content-Type', 'application/xml')
+  res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=86400, stale-while-revalidate=604800, stale-if-error=604800'
+  )
+
+  if (ok && pages.length > 0) {
+    const sitemap = generateSiteMap(pages)
+    await setCachedSitemap(CACHE_KEY, sitemap)
+    res.write(sitemap)
+    res.end()
+    return { props: {} }
+  }
 
   const cached = await getCachedSitemap(CACHE_KEY)
   if (cached) {
