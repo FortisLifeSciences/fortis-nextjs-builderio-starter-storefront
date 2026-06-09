@@ -17,13 +17,22 @@ interface MobileHeaderProps {
   children?: React.ReactNode
   hideIcons?: boolean
   onAccountIconClick?: () => void
+  isTransparentPage?: boolean
 }
 
+// Legacy URL-based fallback used only when `isTransparentPage` is not passed in.
 const TRANSPARENT_PAGES = ['/', '/new-home-page']
 
-const MobileHeader = ({ children, hideIcons = false }: MobileHeaderProps) => {
+const MobileHeader = ({
+  children,
+  hideIcons = false,
+  isTransparentPage: isTransparentPageProp,
+}: MobileHeaderProps) => {
   const router = useRouter()
-  const isTransparentPage = TRANSPARENT_PAGES.includes(router.asPath.split('?')[0])
+  const isTransparentPage =
+    typeof isTransparentPageProp === 'boolean'
+      ? isTransparentPageProp
+      : TRANSPARENT_PAGES.includes(router.asPath.split('?')[0])
   const [hasScrolled, setHasScrolled] = useState(false)
 
   useEffect(() => {

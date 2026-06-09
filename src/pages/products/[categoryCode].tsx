@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, PropsWithChildren, useCallback } from 'react'
 
 import { BuilderComponent, builder } from '@builder.io/react'
+import { setPixelProperties } from '@builder.io/utils'
 import { Add, ExpandLess, ExpandMore } from '@mui/icons-material'
 import Apps from '@mui/icons-material/Apps'
 import ReorderRounded from '@mui/icons-material/ReorderRounded'
@@ -132,6 +133,7 @@ export async function getStaticProps(
       userAttributes: { slug: `category-${categoryCode}`, urlPath: `/products/${categoryCode}` },
     })
     .promise()
+  if (builderSection) setPixelProperties(builderSection, { alt: '' })
   //updated for WEB-1657 - algolia version update
   //const { hits: products, facets } = await productIndex.search('', {
   //filters: `category_pages:${categoryCode}`,
@@ -141,12 +143,6 @@ export async function getStaticProps(
     filters: `category_pages:${categoryCode}`,
     facets: ['*'],
   })
-  // INVALID CATEGORY -> 404
-  if (!result.hits || result.hits.length === 0) {
-    return {
-      notFound: true,
-    }
-  }
   const facets = (result.facets as Record<string, Record<string, number>>) || {}
 
   const searchableAttributes = getStaticSearchableFacets()

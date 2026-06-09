@@ -9952,6 +9952,10 @@ export type FilteredProduct = {
   price: Price
   childPriority: number | null
   response?: any
+  inventoryInfo?: {
+    onlineStockAvailable?: number | null
+    outOfStockBehavior?: string | null
+  } | null
 }
 
 export type Product_GetArgs = {
