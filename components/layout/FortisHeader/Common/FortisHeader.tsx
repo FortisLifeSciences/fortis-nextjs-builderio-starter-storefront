@@ -251,12 +251,17 @@ const KiboHeader = (props: KiboHeaderProps) => {
       >
         <Backdrop open={isBackdropOpen} data-testid="backdrop" />
 
-        <Box component={'section'} sx={{ ...kiboHeaderStyles.topBarStyles }}>
+        <Box
+          component={'section'}
+          className="fortis-mobile-header-slot"
+          sx={{ ...kiboHeaderStyles.topBarStyles }}
+        >
           <Box sx={{ width: '100%' }}>{getSection()}</Box>
         </Box>
 
         <Box
           component={'section'}
+          className="fortis-desktop-header-slot"
           sx={{
             ...kiboHeaderStyles.megaMenuStyles,
           }}
