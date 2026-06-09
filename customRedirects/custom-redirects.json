@@ -1143,5 +1143,110 @@
     "source": "/products/articles",
     "destination": "/products",
     "permanent": true
+  },
+  {
+    "source": "/products/antisera_igg_fractions/goat-anti-apoa1-antiserum/BETHYL-A81-104S",
+    "destination": "/products/antisera-igg-fractions/goat-anti-apoa1-antiserum/BETHYL-A81-104S",
+    "permanent": true
+  },
+  {
+    "source": "/products/antisera_igg_fractions/goat-anti-human-albumin-antiserum/BETHYL-A80-129S",
+    "destination": "/products/antisera-igg-fractions/goat-anti-human-albumin-antiserum/BETHYL-A80-129S",
+    "permanent": true
+  },
+  {
+    "source": "/products/antisera_igg_fractions/goat-anti-human-alpha-1-antitrypsin-antiserum/BETHYL-A80-122S",
+    "destination": "/products/antisera-igg-fractions/goat-anti-human-alpha-1-antitrypsin-antiserum/BETHYL-A80-122S",
+    "permanent": true
+  },
+  {
+    "source": "/products/antisera_igg_fractions/goat-anti-human-transferrin-antiserum/BETHYL-A80-128S",
+    "destination": "/products/antisera-igg-fractions/goat-anti-human-transferrin-antiserum/BETHYL-A80-128S",
+    "permanent": true
+  },
+  {
+    "source": "/products/antisera_igg_fractions/goat-anti-human-iga-antiserum/BETHYL-A80-102S",
+    "destination": "/products/antisera-igg-fractions/goat-anti-human-iga-antiserum/BETHYL-A80-102S",
+    "permanent": true
+  },
+  {
+    "source": "/products/antisera_igg_fractions/goat-anti-human-igg-fc-fragment-antiserum/BETHYL-A80-104S",
+    "destination": "/products/antisera-igg-fractions/goat-anti-human-igg-fc-fragment-antiserum/BETHYL-A80-104S",
+    "permanent": true
+  },
+  {
+    "source": "/products/antisera_igg_fractions/goat-anti-human-c-reactive-protein-crp-igg-fraction/BETHYL-A80-125S",
+    "destination": "/products/antisera-igg-fractions/goat-anti-human-c-reactive-protein-crp-igg-fraction/BETHYL-A80-125S",
+    "permanent": true
+  },
+  {
+    "source": "/products/antisera_igg_fractions/donkey-anti-mouse-igg-heavy-and-light-chain-antiserum/BETHYL-A90-137S",
+    "destination": "/products/antisera-igg-fractions/donkey-anti-mouse-igg-heavy-and-light-chain-antiserum/BETHYL-A90-137S",
+    "permanent": true
+  },
+  {
+    "source": "/products/antisera_igg_fractions/goat-anti-human-ceruloplasmin-antibody-igg-fraction/BETHYL-A80-124S",
+    "destination": "/products/antisera-igg-fractions/goat-anti-human-ceruloplasmin-antibody-igg-fraction/BETHYL-A80-124S",
+    "permanent": true
+  },
+  {
+    "source": "/products/antisera_igg_fractions/goat-anti-human-hemoglobin-antiserum/BETHYL-A80-134S",
+    "destination": "/products/antisera-igg-fractions/goat-anti-human-hemoglobin-antiserum/BETHYL-A80-134S",
+    "permanent": true
+  },
+  {
+    "source": "/products/antisera_igg_fractions/goat-anti-human-igg-fab-fragment-antiserum/BETHYL-A80-114S",
+    "destination": "/products/antisera-igg-fractions/goat-anti-human-igg-fab-fragment-antiserum/BETHYL-A80-114S",
+    "permanent": true
+  },
+  {
+    "source": "/products/antisera_igg_fractions/goat-anti-human-igg-heavy-and-light-chain-antiserum/BETHYL-A80-119S",
+    "destination": "/products/antisera-igg-fractions/goat-anti-human-igg-heavy-and-light-chain-antiserum/BETHYL-A80-119",
+    "permanent": true
+  },
+  {
+    "source": "/products/antisera_igg_fractions/goat-anti-human-kappa-light-chain-antibody-igg-fraction/BETHYL-A80-115S",
+    "destination": "/products/antisera-igg-fractions/goat-anti-human-kappa-light-chain-antibody-igg-fraction/BETHYL-A80-115S",
+    "permanent": true
+  },
+  {
+    "source": "/products/antisera_igg_fractions/goat-anti-human-lambda-light-chain-antibody-igg-fraction/BETHYL-A80-116S",
+    "destination": "/products/antisera-igg-fractions/goat-anti-human-lambda-light-chain-antibody-igg-fraction/BETHYL-A80-116S",
+    "permanent": true
+  },
+  {
+    "source": "/products/antisera_igg_fractions/goat-anti-mouse-albumin-antiserum/BETHYL-A90-134S",
+    "destination": "/products/antisera-igg-fractions/goat-anti-mouse-albumin-antiserum/BETHYL-A90-134S",
+    "permanent": true
+  },
+  {
+    "source": "/products/antisera_igg_fractions/rabbit-anti-human-igg-heavy-and-light-chain-antiserum/BETHYL-A80-118S",
+    "destination": "/products/antisera-igg-fractions/rabbit-anti-human-igg-heavy-and-light-chain-antiserum/BETHYL-A80-118S",
+    "permanent": true
+  },
+  {
+    "source": "/products/antisera_igg_fractions/rabbit-anti-human-kappa-light-chain-antiserum/BETHYL-A80-111S",
+    "destination": "/products/antisera-igg-fractions/rabbit-anti-human-kappa-light-chain-antiserum/BETHYL-A80-111S",
+    "permanent": true
+  },
+  {
+    "source": "/products/antisera_igg_fractions/rabbit-anti-human-lambda-light-chain-antibody-igg-fraction/BETHYL-A80-112S",
+    "destination": "/products/antisera-igg-fractions/rabbit-anti-human-lambda-light-chain-antibody-igg-fraction/BETHYL-A80-112S",
+    "permanent": true
+  },
+  {
+    "source": "/products/antisera_igg_fractions/rabbit-anti-mouse-igg-heavy-and-light-chain-antiserum/BETHYL-A90-117S",
+    "destination": "/products/antisera-igg-fractions/rabbit-anti-mouse-igg-heavy-and-light-chain-antiserum/BETHYL-A90-117S",
+    "permanent": true
+  },
+  {
+    "source": "/products/antisera_igg_fractions/sheep-anti-human-hemoglobin-f-antibody-igg-fraction/BETHYL-A80-136S",
+    "destination": "/products/antisera-igg-fractions/sheep-anti-human-hemoglobin-f-antibody-igg-fraction/BETHYL-A80-136S",
+    "permanent": true
+  },
+  {
+    "source": "/products/antisera_igg_fractions/sheep-anti-human-lambda-free-light-chain-antibody-igg-fraction/BETHYL-A80-127S",
+    "destination": "/products/antisera-igg-fractions/sheep-anti-human-lambda-free-light-chain-antibody-igg-fraction/BETHYL-A80-127S",
+    "permanent": true
   }
 ]
