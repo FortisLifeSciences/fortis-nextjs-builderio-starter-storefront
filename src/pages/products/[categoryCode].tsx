@@ -141,6 +141,12 @@ export async function getStaticProps(
     filters: `category_pages:${categoryCode}`,
     facets: ['*'],
   })
+  // INVALID CATEGORY -> 404
+  if (!result.hits || result.hits.length === 0) {
+    return {
+      notFound: true,
+    }
+  }
   const facets = (result.facets as Record<string, Record<string, number>>) || {}
 
   const searchableAttributes = getStaticSearchableFacets()
