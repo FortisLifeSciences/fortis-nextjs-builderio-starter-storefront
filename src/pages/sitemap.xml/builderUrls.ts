@@ -9,38 +9,51 @@ type BuilderPage = {
   lastUpdated: string
 }
 
+// Models that hold sitemap pages. category-section = the Protocols/Resources landing pages.
+const BUILDER_MODELS = ['page', 'category-section']
+
+function resolveUrl(entry: any): string | undefined {
+  // page → data.url ; category-section → urlPath targeting rule
+  return entry?.data?.url ?? entry?.query?.find((q: any) => q.property === 'urlPath')?.value
+}
+
 async function fetchBuilderPages(): Promise<{ pages: BuilderPage[]; ok: boolean }> {
   const builderApiKey = process.env.BUILDER_IO_API_KEY
   let allPages: BuilderPage[] = []
-  let offset = 0
-  const limit = 500
+  const limit = 100 // Builder.io caps results per request at 100
   const MAX_BATCHES = 100
 
   try {
-    for (let i = 0; i < MAX_BATCHES; i++) {
-      const url = `https://cdn.builder.io/api/v2/content/page?apiKey=${builderApiKey}&fields=data.url,data.noIndex,lastUpdated&query.data.includeInSitemap.$ne=false&limit=${limit}&offset=${offset}`
-      const response = await fetch(url)
+    for (const model of BUILDER_MODELS) {
+      let offset = 0
+      for (let i = 0; i < MAX_BATCHES; i++) {
+        const url = `https://cdn.builder.io/api/v2/content/${model}?apiKey=${builderApiKey}&fields=data.url,data.noIndex,query,lastUpdated&query.data.includeInSitemap.$ne=false&limit=${limit}&offset=${offset}`
+        const response = await fetch(url)
 
-      if (!response.ok) {
-        console.error(`Builder.io returned ${response.status}`)
-        return { pages: [], ok: false }
+        if (!response.ok) {
+          console.error(`Builder.io (${model}) returned ${response.status}`)
+          return { pages: [], ok: false }
+        }
+
+        const data = await response.json()
+        const results = data?.results ?? []
+        if (!results.length) break
+
+        const pageUrls = results
+          .filter((page: any) => !page.data?.noIndex)
+          .map((page: any) => ({ url: resolveUrl(page), lastUpdated: page.lastUpdated }))
+          .filter((p: any) => !!p.url)
+
+        allPages = [...allPages, ...pageUrls]
+        if (results.length < limit) break
+        offset += limit
       }
-
-      const data = await response.json()
-      if (!data?.results?.length) break
-
-      const pageUrls = data.results
-        .filter((page: any) => !page.data?.noIndex && page.data?.url)
-        .map((page: any) => ({
-          url: page.data.url,
-          lastUpdated: page.lastUpdated,
-        }))
-
-      allPages = [...allPages, ...pageUrls]
-      if (data.results.length < limit) break
-      offset += limit
     }
-    return { pages: allPages, ok: true }
+
+    // de-dupe in case a URL exists in more than one model
+    const seen = new Set<string>()
+    const unique = allPages.filter((p) => (seen.has(p.url) ? false : seen.add(p.url)))
+    return { pages: unique, ok: true }
   } catch (error) {
     console.error('Error fetching Builder.io pages', error)
     return { pages: [], ok: false }
@@ -75,21 +88,15 @@ function SiteMap() {
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
-  const { pages, ok } = await fetchBuilderPages()
+  // We make an API call to gather the URLs for our site
+  const builderPages = await fetchBuilderPages()
+  // We generate the XML sitemap with the posts data
+  //const sitemap = generateSiteMap()
 
-  res.setHeader('Content-Type', 'application/xml')
-  res.setHeader(
-    'Cache-Control',
-    'public, s-maxage=86400, stale-while-revalidate=604800, stale-if-error=604800'
-  )
-
-  if (ok && pages.length > 0) {
-    const sitemap = generateSiteMap(pages)
-    await setCachedSitemap(CACHE_KEY, sitemap)
-    res.write(sitemap)
-    res.end()
-    return { props: {} }
-  }
+  res.setHeader('Content-Type', 'text/xml')
+  // we send the XML to the browser
+  //res.write(sitemap)
+  res.end()
 
   const cached = await getCachedSitemap(CACHE_KEY)
   if (cached) {
