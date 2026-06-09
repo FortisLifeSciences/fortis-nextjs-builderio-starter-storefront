@@ -36,8 +36,11 @@ const TRANSPARENT_PAGES = [
 
 const NavigationBar = (props: any) => {
   const router = useRouter()
-  const { isCheckoutPage, onAccountIconClick } = props
-  const isTransparentPage = TRANSPARENT_PAGES.includes(router.asPath.split('?')[0])
+  const { isCheckoutPage, onAccountIconClick, isTransparentPage: isTransparentPageProp } = props
+  const isTransparentPage =
+    typeof isTransparentPageProp === 'boolean'
+      ? isTransparentPageProp
+      : TRANSPARENT_PAGES.includes(router.asPath.split('?')[0])
   const [hasScrolled, setHasScrolled] = useState(false)
 
   useEffect(() => {
