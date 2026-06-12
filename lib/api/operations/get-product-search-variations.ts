@@ -67,14 +67,18 @@ export default async function getProductSearchVariations(
     })
 
     // productSearch doesn't return live inventory — fall back to individual product queries
-    // for any variant where inventoryInfo is missing or onlineStockAvailable is null
+    // for any variant where inventory data is missing, incomplete, or would compute to OutOfStock
+    // (productSearch may return stale/wrong outOfStockBehavior, so verify whenever schema would show OutOfStock)
     const inventoryFallbacks = result
-      .filter(
-        (v) =>
-          !v.inventoryInfo ||
-          (v.inventoryInfo as any).onlineStockAvailable == null ||
-          (v.inventoryInfo as any).outOfStockBehavior == null
-      )
+      .filter((v) => {
+        if (!v.inventoryInfo) return true
+        const inv = v.inventoryInfo as any
+        if (inv.onlineStockAvailable == null || inv.outOfStockBehavior == null) return true
+        // also fallback when productSearch computes to OutOfStock — its outOfStockBehavior is unreliable
+        const stockAvailable = (inv.onlineStockAvailable ?? 0) > 0
+        const backorderAllowed = inv.outOfStockBehavior === 'AllowBackOrder'
+        return !stockAvailable && !backorderAllowed
+      })
       .map((v) =>
         fetcher(
           {
