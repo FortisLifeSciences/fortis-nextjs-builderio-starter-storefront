@@ -13,8 +13,17 @@ type BuilderPage = {
 const BUILDER_MODELS = ['page', 'category-section']
 
 function resolveUrl(entry: any): string | undefined {
-  // page → data.url ; category-section → urlPath targeting rule
-  return entry?.data?.url ?? entry?.query?.find((q: any) => q.property === 'urlPath')?.value
+  // page → data.url (string)
+  const direct = entry?.data?.url
+  if (typeof direct === 'string') return direct
+
+  // category-section → urlPath targeting rule.
+  // Builder.io stores targeting-rule values as either a string or an array of strings.
+  const value = entry?.query?.find((q: any) => q.property === 'urlPath')?.value
+  if (typeof value === 'string') return value
+  if (Array.isArray(value)) return value.find((v) => typeof v === 'string')
+
+  return undefined
 }
 
 async function fetchBuilderPages(): Promise<{ pages: BuilderPage[]; ok: boolean }> {
@@ -42,7 +51,8 @@ async function fetchBuilderPages(): Promise<{ pages: BuilderPage[]; ok: boolean 
         const pageUrls = results
           .filter((page: any) => !page.data?.noIndex)
           .map((page: any) => ({ url: resolveUrl(page), lastUpdated: page.lastUpdated }))
-          .filter((p: any) => !!p.url)
+          // resolveUrl now always yields a string or undefined; keep only strings
+          .filter((p: any) => typeof p.url === 'string' && p.url.length > 0)
 
         allPages = [...allPages, ...pageUrls]
         if (results.length < limit) break
@@ -64,8 +74,10 @@ export const generateSiteMap = (builderPages: BuilderPage[] = []): string => {
   const baseUrl = process.env.NEXT_PUBLIC_URL?.replace(/\/+$/, '') || 'https://www.fortislife.com'
 
   const urls = builderPages
+    // Safety net: never let a single malformed entry 500 the whole sitemap.
+    .filter((page) => typeof page?.url === 'string')
     .map((page) => {
-      const cleanPageUrl = page?.url?.replace(/^\/+/, '') ?? ''
+      const cleanPageUrl = page.url.replace(/^\/+/, '')
       const lastmod = page.lastUpdated
         ? new Date(page.lastUpdated).toISOString().split('T')[0]
         : new Date().toISOString().split('T')[0]
