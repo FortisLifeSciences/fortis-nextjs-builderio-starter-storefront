@@ -62,8 +62,44 @@ export default async function getProductSearchVariations(
         option: selectedValues,
         price: product.price,
         childPriority: childPriorityProperty ? Number(childPriorityProperty.values[0].value) : null,
+        inventoryInfo: (product as any).inventoryInfo ?? null,
       }
     })
+
+    // productSearch doesn't return live inventory — fall back to individual product queries
+    // for any variant where inventory data is missing, incomplete, or would compute to OutOfStock
+    // (productSearch may return stale/wrong outOfStockBehavior, so verify whenever schema would show OutOfStock)
+    const inventoryFallbacks = result
+      .filter((v) => {
+        if (!v.inventoryInfo) return true
+        const inv = v.inventoryInfo as any
+        if (inv.onlineStockAvailable == null || inv.outOfStockBehavior == null) return true
+        // also fallback when productSearch computes to OutOfStock — its outOfStockBehavior is unreliable
+        const stockAvailable = (inv.onlineStockAvailable ?? 0) > 0
+        const backorderAllowed = inv.outOfStockBehavior === 'AllowBackOrder'
+        return !stockAvailable && !backorderAllowed
+      })
+      .map((v) =>
+        fetcher(
+          {
+            query: getProductVariationQuery,
+            variables: { productCode, variationProductCode: v.variationProductCode },
+          },
+          { headers }
+        )
+          .then((res) => ({
+            variationProductCode: v.variationProductCode,
+            inventoryInfo: res.data?.product?.inventoryInfo ?? null,
+          }))
+          .catch(() => null)
+      )
+
+    const inventoryResults = await Promise.all(inventoryFallbacks)
+    for (const inv of inventoryResults) {
+      if (!inv) continue
+      const variant = result.find((v) => v.variationProductCode === inv.variationProductCode)
+      if (variant) variant.inventoryInfo = inv.inventoryInfo
+    }
   } else {
     console.log('Entered else statement')
     result = []
@@ -102,6 +138,7 @@ export default async function getProductSearchVariations(
           childPriority: childPriorityProperty
             ? Number(childPriorityProperty.values[0].value)
             : null,
+          inventoryInfo: (variationProduct as any).inventoryInfo ?? null,
         })
       }
     }

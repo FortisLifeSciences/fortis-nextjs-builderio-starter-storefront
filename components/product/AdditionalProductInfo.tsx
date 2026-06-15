@@ -88,7 +88,7 @@ const AdditionalProductInfo = (props: any) => {
                 <Grid sx={styles.value}>
                   <Typography variant="body2">
                     <Link
-                      href={`https://ncbi.nlm.nih.gov/gene/${geneId?.values[0]?.stringValue}`}
+                      href={`https://ncbi.nlm.nih.gov/datasets/gene/${geneId?.values[0]?.stringValue}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       sx={styles.link}

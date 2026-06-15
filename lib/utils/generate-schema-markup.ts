@@ -3,12 +3,12 @@ import React from 'react'
 import { BreadCrumb } from '../types'
 import { uiHelpers } from '@/lib/helpers'
 
-import type { Product } from '@/lib/gql/types'
+import type { FilteredProduct, Product } from '@/lib/gql/types'
 
 interface SchemaMarkupOptions {
   product: Product
   breadcrumbs?: BreadCrumb[]
-  productVariations?: Product[]
+  productVariations?: FilteredProduct[]
   baseUrl?: string
   organizationConfig?: OrganizationConfig
   websiteConfig?: WebSiteConfig
@@ -199,6 +199,45 @@ function generateBreadcrumbSchema(
   }
 }
 
+function toSchemaAvailability(
+  inventoryInfo?: {
+    onlineStockAvailable?: number | null
+    outOfStockBehavior?: string | null
+  } | null
+): string {
+  if (!inventoryInfo) return 'https://schema.org/OutOfStock'
+  if ((inventoryInfo.onlineStockAvailable ?? 0) > 0) return 'https://schema.org/InStock'
+  if (inventoryInfo.outOfStockBehavior === 'AllowBackOrder') return 'https://schema.org/BackOrder'
+  return 'https://schema.org/OutOfStock'
+}
+
+function generateOfferSchema(
+  offerName: string,
+  sku: string,
+  url: string,
+  price: number | null | undefined,
+  inventoryInfo:
+    | { onlineStockAvailable?: number | null; outOfStockBehavior?: string | null }
+    | null
+    | undefined,
+  organizationId: string
+): Record<string, any> {
+  const offer: Record<string, any> = { '@type': 'Offer' }
+
+  if (offerName) offer.name = offerName
+  offer.sku = sku
+  offer.mpn = sku
+  offer.url = url
+  offer.priceCurrency = 'USD'
+  if (price != null) offer.price = price.toFixed(2)
+  offer.availability = toSchemaAvailability(inventoryInfo)
+  offer.itemCondition = 'https://schema.org/NewCondition'
+  offer.seller = { '@id': organizationId }
+  offer.eligibleRegion = [{ '@type': 'Country', name: 'US' }]
+
+  return offer
+}
+
 // Attributes whose stringValue contains raw HTML — strip tags before use in schema
 const HTML_ATTRIBUTES = new Set([
   'tenant~target-sentence',
@@ -376,14 +415,15 @@ function extractAdditionalProperties(product: Product): Array<Record<string, any
 }
 
 /**
- * Generates Product schema with variants
+ * Generates Product schema with variants and offers
  */
 function generateProductSchema(
   product: Product,
-  productVariations: Product[] | undefined,
+  productVariations: FilteredProduct[] | undefined,
   baseUrl: string,
   brandId: string,
-  organizationId: string
+  organizationId: string,
+  brandSlug: string
 ): Record<string, any> {
   const { getProductSeoLink } = uiHelpers()
   const productUrl = baseUrl + getProductSeoLink(product)
@@ -409,7 +449,7 @@ function generateProductSchema(
   }
 
   // Add product images — ensure absolute URLs (CDN may return protocol-relative //cdn...)
-  const images =
+  schema.image =
     product?.content?.productImages
       ?.filter((img: any) => img?.imageUrl)
       .map((img: any) => {
@@ -417,21 +457,40 @@ function generateProductSchema(
         return url.startsWith('//') ? `https:${url}` : url
       }) || []
 
-  if (images.length > 0) {
-    schema.image = images
+  // Build offers — only for Bethyl products
+  const isBethyl = brandSlug.toLowerCase().includes('bethyl')
+  const offers: Array<Record<string, any>> = []
+
+  if (isBethyl && productVariations && productVariations.length > 0) {
+    for (const variant of productVariations) {
+      const variantCode = variant.variationProductCode
+      if (!variantCode) continue
+
+      const variantLabel: string =
+        (variant.option as any[])?.find((v: any) => v.isSelected !== false)?.stringValue ?? ''
+
+      offers.push(
+        generateOfferSchema(
+          variantLabel,
+          variantCode,
+          `${productUrl}?selected=${variantCode}`,
+          (variant as any).price?.price,
+          variant.inventoryInfo,
+          organizationId
+        )
+      )
+    }
   }
 
-  // Add additional properties
-  const additionalProps = extractAdditionalProperties(product)
-  if (additionalProps.length > 0) {
-    schema.additionalProperty = additionalProps
+  if (offers.length > 0) {
+    schema.offers = offers
   }
 
   // Add variants as isSimilarTo — only include variants that have their own canonical
   // SEO URL (not a ?selected= query-param URL and not identical to the current page URL).
   if (productVariations && productVariations.length > 0) {
     const similarProducts = productVariations.reduce<Array<Record<string, any>>>((acc, variant) => {
-      const variantSeoPath = getProductSeoLink(variant)
+      const variantSeoPath = getProductSeoLink(variant as any)
       // Skip variants that resolve to a ?selected= URL or have no distinct path
       if (!variantSeoPath || variantSeoPath.includes('?selected=')) return acc
 
@@ -439,8 +498,8 @@ function generateProductSchema(
       // Skip if the variant URL is the same as the current product page
       if (variantUrl === productUrl) return acc
 
-      const variantCode = variant?.productCode || variant?.variationProductCode
-      const variantName = variant?.content?.productName || ''
+      const variantCode = variant?.variationProductCode
+      const variantName = (variant as any)?.content?.productName || ''
 
       // Skip if there's no meaningful name, SKU, or the URL doesn't include a product code
       // (guards against variants that resolved to a bare /products/ base path)
@@ -459,6 +518,11 @@ function generateProductSchema(
     if (similarProducts.length > 0) {
       schema.isSimilarTo = similarProducts
     }
+  }
+
+  const additionalProps = extractAdditionalProperties(product)
+  if (additionalProps.length > 0) {
+    schema.additionalProperty = additionalProps
   }
 
   return schema
@@ -536,7 +600,9 @@ export function generateSchemaMarkups(options: SchemaMarkupOptions): string {
   graph.push(generateWebPageSchema(productUrl, product?.content?.productName || '', websiteId))
 
   // 6. Product
-  graph.push(generateProductSchema(product, productVariations, baseUrl, brandId, organizationId))
+  graph.push(
+    generateProductSchema(product, productVariations, baseUrl, brandId, organizationId, brandSlug)
+  )
 
   const schemaData = {
     '@context': 'https://schema.org',
