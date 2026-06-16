@@ -66,18 +66,14 @@ export default async function getProductSearchVariations(
       }
     })
 
-    // productSearch doesn't return live inventory — fall back to individual product queries
-    // for any variant where inventory data is missing, incomplete, or would compute to OutOfStock
-    // (productSearch may return stale/wrong outOfStockBehavior, so verify whenever schema would show OutOfStock)
+    // productSearch inventory is stale — always verify with live individual queries when stock <= 0.
+    // Trust productSearch only when it explicitly shows stock > 0 (InStock is safe to use as-is).
     const inventoryFallbacks = result
       .filter((v) => {
         if (!v.inventoryInfo) return true
         const inv = v.inventoryInfo as any
-        if (inv.onlineStockAvailable == null || inv.outOfStockBehavior == null) return true
-        // also fallback when productSearch computes to OutOfStock — its outOfStockBehavior is unreliable
-        const stockAvailable = (inv.onlineStockAvailable ?? 0) > 0
-        const backorderAllowed = inv.outOfStockBehavior === 'AllowBackOrder'
-        return !stockAvailable && !backorderAllowed
+        if (inv.onlineStockAvailable == null) return true
+        return (inv.onlineStockAvailable ?? 0) <= 0
       })
       .map((v) =>
         fetcher(
@@ -98,7 +94,7 @@ export default async function getProductSearchVariations(
     for (const inv of inventoryResults) {
       if (!inv) continue
       const variant = result.find((v) => v.variationProductCode === inv.variationProductCode)
-      if (variant) variant.inventoryInfo = inv.inventoryInfo
+      if (variant && inv.inventoryInfo != null) variant.inventoryInfo = inv.inventoryInfo
     }
   } else {
     console.log('Entered else statement')
