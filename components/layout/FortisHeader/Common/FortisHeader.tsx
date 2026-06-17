@@ -254,7 +254,10 @@ const KiboHeader = (props: KiboHeaderProps) => {
         <Box
           component={'section'}
           className="fortis-mobile-header-slot"
-          sx={{ ...kiboHeaderStyles.topBarStyles }}
+          sx={{
+            ...kiboHeaderStyles.topBarStyles,
+            [theme.breakpoints.up('md')]: { display: 'none !important' },
+          }}
         >
           <Box sx={{ width: '100%' }}>{getSection()}</Box>
         </Box>
@@ -264,6 +267,7 @@ const KiboHeader = (props: KiboHeaderProps) => {
           className="fortis-desktop-header-slot"
           sx={{
             ...kiboHeaderStyles.megaMenuStyles,
+            [theme.breakpoints.down('md')]: { display: 'none !important' },
           }}
           data-testid="mega-menu-container"
         >
