@@ -249,16 +249,22 @@ const KiboHeader = (props: KiboHeaderProps) => {
       >
         <Backdrop open={isBackdropOpen} data-testid="backdrop" />
 
-        <Box component={'section'} sx={{ ...kiboHeaderStyles.topBarStyles }}>
-          <Box sx={{ width: '100%', backgroundColor: { xs: 'transparent', md: '#E3E2FF' } }}>
-            {getSection()}
-          </Box>
+        <Box
+          component={'section'}
+          className="fortis-mobile-header-slot"
+          sx={{
+            ...kiboHeaderStyles.topBarStyles,
+            [theme.breakpoints.up('md')]: { display: 'none !important' },
+          }}
+        >
+          <Box sx={{ width: '100%' }}>{getSection()}</Box>
         </Box>
 
         <Box
           component={'section'}
           sx={{
             ...kiboHeaderStyles.megaMenuStyles,
+            [theme.breakpoints.down('md')]: { display: 'none !important' },
           }}
           data-testid="mega-menu-container"
         >
