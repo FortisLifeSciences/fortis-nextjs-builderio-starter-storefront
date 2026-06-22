@@ -11,6 +11,8 @@ const fetcher = async ({ query, variables }: any, options: any) => {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${authToken}`,
+      'x-vol-site': process.env.KIBO_SITE_ID,
+      'x-vol-tenant': process.env.KIBO_TENANT_ID,
       'x-vol-user-claims': options?.userClaims,
       'Content-Type': 'application/json',
       ...options.headers,
