@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 
 import { BuilderComponent, builder } from '@builder.io/react'
-import { setPixelProperties } from '@builder.io/utils'
 import '@builder.io/widgets'
 import { Add, Apps, ReorderRounded } from '@mui/icons-material'
 import {
@@ -96,7 +95,6 @@ export const getServerSideProps: GetServerSideProps = async (
       },
     })
     .toPromise()
-  if (page) setPixelProperties(page, { alt: '' })
 
   return {
     props: {

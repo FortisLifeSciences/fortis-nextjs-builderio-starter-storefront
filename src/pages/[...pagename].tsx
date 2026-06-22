@@ -1,5 +1,4 @@
 import { BuilderComponent, builder } from '@builder.io/react'
-import { setPixelProperties } from '@builder.io/utils'
 import '@builder.io/widgets'
 import getConfig from 'next/config'
 import Head from 'next/head'
@@ -131,7 +130,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
         },
       })
       .toPromise()
-    if (section) setPixelProperties(section, { alt: '' })
   } else {
     page = await builder
       .get(publicRuntimeConfig?.builderIO?.modelKeys?.defaultPage, {
@@ -140,7 +138,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
         },
       })
       .toPromise()
-    if (page) setPixelProperties(page, { alt: '' })
 
     if (!page) {
       return { notFound: true } // This will render `pages/404.tsx`

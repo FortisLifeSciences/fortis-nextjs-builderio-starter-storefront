@@ -1,5 +1,4 @@
 import { BuilderComponent, builder, Builder } from '@builder.io/react'
-import { setPixelProperties } from '@builder.io/utils'
 import getConfig from 'next/config'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
@@ -172,7 +171,6 @@ export async function getStaticProps(
     section = await builder
       .get(pdpBuilderSectionKey, { userAttributes: { slug: `product-${productCode}` } })
       .promise()
-    if (section) setPixelProperties(section, { alt: '' })
   } catch (error) {
     console.error(`Failed to fetch Builder section for ${productCode}:`, error)
     section = null
@@ -188,8 +186,6 @@ export async function getStaticProps(
         },
       })
       .promise()
-    if (PDPCustomAndBulkDisplayContentSection)
-      setPixelProperties(PDPCustomAndBulkDisplayContentSection, { alt: '' })
   } catch (error) {
     console.error(`Failed to fetch Builder custom section for ${targetingBrandName}:`, error)
     PDPCustomAndBulkDisplayContentSection = null

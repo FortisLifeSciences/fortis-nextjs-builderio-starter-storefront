@@ -1,5 +1,4 @@
 import { BuilderComponent, builder, Builder } from '@builder.io/react'
-import { setPixelProperties } from '@builder.io/utils'
 import '@builder.io/widgets'
 import getConfig from 'next/config'
 import Head from 'next/head'
@@ -35,7 +34,6 @@ export async function getStaticProps(context: GetStaticPropsContext) {
       },
     })
     .toPromise()
-  if (page) setPixelProperties(page, { alt: '' })
   const themeSetting = await builder.get('theme-setting').promise()
   return {
     props: {

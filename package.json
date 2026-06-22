@@ -29,7 +29,6 @@
     "@algolia/autocomplete-theme-classic": "^1.19.8",
     "@algolia/recommend": "^5.52.1",
     "@builder.io/react": "^2.0.9",
-    "@builder.io/utils": "^1.1.29",
     "@builder.io/widgets": "^1.2.24",
     "@dnd-kit/core": "^6.0.8",
     "@dnd-kit/sortable": "^7.0.2",

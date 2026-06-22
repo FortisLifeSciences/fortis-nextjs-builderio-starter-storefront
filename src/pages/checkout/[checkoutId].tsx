@@ -1,5 +1,4 @@
 import builder from '@builder.io/react'
-import { setPixelProperties } from '@builder.io/utils'
 import getConfig from 'next/config'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
@@ -31,7 +30,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     : await getCheckout(checkoutId, req as NextApiRequest, res as NextApiResponse)
 
   const builderContent = await builder.get('checkout-order-summary-section').toPromise()
-  if (builderContent) setPixelProperties(builderContent, { alt: '' })
 
   if (!checkout) {
     return { notFound: true }
