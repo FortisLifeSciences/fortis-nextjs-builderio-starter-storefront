@@ -38,10 +38,12 @@ const getUserClaimsFromRequest = async (
         authTicket = response
       }
     }
-    res.setHeader(
-      'Set-Cookie',
-      authCookieName + '=' + prepareSetCookieValue({ ...authTicket, accountId }) + ';path=/'
-    )
+    if (!res.headersSent) {
+      res.setHeader(
+        'Set-Cookie',
+        authCookieName + '=' + prepareSetCookieValue({ ...authTicket, accountId }) + ';path=/'
+      )
+    }
 
     return authTicket.accessToken
   } catch (err) {

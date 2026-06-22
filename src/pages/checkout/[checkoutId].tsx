@@ -42,7 +42,9 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     { ...checkout, ipAddress: ipAddress?.split(',')[0] } as CrOrderInput,
     req as NextApiRequest,
     res as NextApiResponse
-  )
+  ).catch((err) => {
+    console.error('Background updateOrder failed in checkout SSR:', err)
+  })
 
   return {
     props: {
