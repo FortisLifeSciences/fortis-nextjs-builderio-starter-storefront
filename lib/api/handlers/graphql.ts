@@ -25,10 +25,11 @@ class GraphQLError extends Error {
     operationMetaData: GraphQLOperation,
     correlationId?: string | null
   ) {
-    super(responseErrors[0]?.extensions?.response?.body?.message)
+    const first = responseErrors?.[0]
+    super(first?.extensions?.response?.body?.message || first?.message || 'GraphQL error')
 
-    this.name = 'GraphQLError' // Set the name of the error
-    this.code = responseErrors[0]?.extensions.response.status
+    this.name = 'GraphQLError'
+    this.code = first?.extensions?.response?.status
     this.rawErrors = responseErrors
     this.metadata = operationMetaData
     this.correlationId = correlationId
@@ -79,8 +80,20 @@ export default async function graphQLHandler(req: NextApiRequestWithLogger, res:
     if (error instanceof GraphQLError) {
       req.logger.error(error.dumpErrors(), error.toJson())
     } else {
-      req.logger.error(error)
+      req.logger.error('graphQLHandler unhandled error', {
+        err: {
+          name: error?.name,
+          message: error?.message,
+          stack: error?.stack,
+        },
+      })
     }
-    res.status(error?.code).json({ message: error?.message })
+
+    const rawCode = Number(error?.code)
+    const statusCode = Number.isInteger(rawCode) && rawCode >= 100 && rawCode <= 599 ? rawCode : 500
+
+    res.status(statusCode).json({
+      message: error?.message || 'Internal Server Error',
+    })
   }
 }
