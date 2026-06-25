@@ -12,37 +12,38 @@ export default class MyDocument extends Document {
     return (
       <Html lang="en">
         <Head>
+          <script
+            id="consent-mode-default"
+            dangerouslySetInnerHTML={{
+              __html: `
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('consent', 'default', {
+                  ad_storage: 'denied',
+                  ad_user_data: 'denied',
+                  ad_personalization: 'denied',
+                  analytics_storage: 'denied',
+                  functionality_storage: 'denied',
+                  personalization_storage: 'denied',
+                  security_storage: 'granted',
+                  wait_for_update: 500
+                });
+              `,
+            }}
+          />
+          <script
+            id="builder-no-track"
+            dangerouslySetInnerHTML={{ __html: `window.builderNoTrack = true;` }}
+          />
           {/* PWA primary color */}
           <meta name="theme-color" content={theme.palette.primary.main} />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" type="image/png" sizes="36x36" href="/faviconFortis.png"></link>
           <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-          {/* Microsoft Clarity */}
-          <script
-            type="text/javascript"
-            dangerouslySetInnerHTML={{
-              __html: `(function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "w46caxplwp");`,
-            }}
-          />
         </Head>
         <body>
           <Main />
           <NextScript />
-          {/* Start of HubSpot Embed Code */}
-          {
-            <script
-              type="text/javascript"
-              id="hs-script-loader"
-              async
-              defer
-              src="//js.hs-scripts.com/50701860.js"
-            ></script>
-          }
-          {/* End of HubSpot Embed Code */}
         </body>
       </Html>
     )

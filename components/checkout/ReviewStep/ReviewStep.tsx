@@ -284,6 +284,7 @@ const ReviewStep = (props: ReviewStepProps) => {
     }
   }
   const algoliaObjectData = () => {
+    if (typeof window === 'undefined' || !window.aa) return
     const queryIdArr: any[] = JSON.parse(localStorage.getItem('queryIdArray') || '[]')
 
     const products = checkout?.items
