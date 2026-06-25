@@ -23,7 +23,7 @@ import {
 } from '@/components/layout'
 import { useAuthContext, useHeaderContext, useModalContext } from '@/context'
 import { useCreateCustomerB2bAccountMutation } from '@/hooks'
-import { getAnalyticsConsentFromLocalStorage } from '@/lib/getAnalyticsConsent'
+import { hasAnalyticsConsent } from '@/lib/consent/consent'
 import { buildCreateCustomerB2bAccountParams } from '@/lib/helpers'
 import type { CreateCustomerB2bAccountParams, NavigationLink } from '@/lib/types'
 
@@ -128,7 +128,7 @@ const KiboHeader = (props: KiboHeaderProps) => {
   const isCheckoutPage = router.pathname.includes('checkout')
   const { publicRuntimeConfig } = getConfig()
   const isMultiShipEnabled = publicRuntimeConfig.isMultiShipEnabled
-  const hasConsent = getAnalyticsConsentFromLocalStorage()
+  const hasConsent = hasAnalyticsConsent()
   const randomToken = `anonymous-${uuidv4()}`
   const randomAuthToken = `anonymous-${uuidv4()}`
 
@@ -149,7 +149,7 @@ const KiboHeader = (props: KiboHeaderProps) => {
           }
         }
       } else {
-        if (!isAuthenticated) {
+        if (!isAuthenticated && window.aa) {
           aa('setAuthenticatedUserToken', undefined)
         }
         if (storedToken) {
@@ -165,6 +165,8 @@ const KiboHeader = (props: KiboHeaderProps) => {
         }
       }
     }
+
+    if (!window.aa) return
 
     if (isAuthenticated && user && user.userId != null && hasConsent) {
       aa('setAuthenticatedUserToken', user.userId)
