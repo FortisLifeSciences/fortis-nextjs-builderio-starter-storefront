@@ -35,6 +35,16 @@ a {
   text-decoration: none;
   color: inherit;
 }
+@media (min-width: 900px) {
+  .fortis-mobile-header-slot {
+    display: none !important;
+  }
+}
+@media (max-width: 899.95px) {
+  .fortis-desktop-header-slot {
+    display: none !important;
+  }
+}
 
 .nestable {
   position: relative;
