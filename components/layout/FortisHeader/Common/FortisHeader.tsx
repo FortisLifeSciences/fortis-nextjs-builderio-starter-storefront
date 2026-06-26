@@ -249,13 +249,17 @@ const KiboHeader = (props: KiboHeaderProps) => {
       >
         <Backdrop open={isBackdropOpen} data-testid="backdrop" />
 
+        {/*
+          Header mobile/desktop split is controlled by global.css at a fixed
+          900px boundary (.fortis-mobile-header-slot / .fortis-desktop-header-slot),
+          NOT by the theme `md` breakpoint — the theme redefines md=1200, which
+          would push the desktop header to 1200px+ and leave 900-1199px with no
+          header. Both slots render display:block; global.css hides one.
+        */}
         <Box
           component={'section'}
           className="fortis-mobile-header-slot"
-          sx={{
-            ...kiboHeaderStyles.topBarStyles,
-            [theme.breakpoints.up('md')]: { display: 'none !important' },
-          }}
+          sx={{ ...kiboHeaderStyles.topBarStyles }}
         >
           <Box sx={{ width: '100%' }}>{getSection()}</Box>
         </Box>
@@ -263,10 +267,7 @@ const KiboHeader = (props: KiboHeaderProps) => {
         <Box
           component={'section'}
           className="fortis-desktop-header-slot"
-          sx={{
-            ...kiboHeaderStyles.megaMenuStyles,
-            [theme.breakpoints.down('md')]: { display: 'none !important' },
-          }}
+          sx={{ ...kiboHeaderStyles.megaMenuStyles }}
           data-testid="mega-menu-container"
         >
           <NavigationBar
