@@ -33,6 +33,7 @@ interface KiboHeaderProps {
   navLinks: NavigationLink[]
   categoriesTree: Maybe<PrCategory>[]
   isSticky?: boolean
+  isTransparentPage?: boolean
 }
 
 interface HeaderActionAreaProps {
@@ -110,7 +111,7 @@ const HeaderActionArea = (props: HeaderActionAreaProps) => {
 }
 
 const KiboHeader = (props: KiboHeaderProps) => {
-  const { navLinks, isSticky = true } = props
+  const { navLinks, isSticky = true, isTransparentPage } = props
   const { headerState, toggleMobileSearchPortal, toggleHamburgerMenu } = useHeaderContext()
   const { isAuthenticated, user } = useAuthContext()
   const { showModal, closeModal } = useModalContext()
@@ -216,7 +217,7 @@ const KiboHeader = (props: KiboHeaderProps) => {
 
     if (!mdScreen)
       return (
-        <MobileHeader hideIcons={isHamburgerMenuVisible}>
+        <MobileHeader hideIcons={isHamburgerMenuVisible} isTransparentPage={isTransparentPage}>
           <Collapse in={isMobileSearchPortalVisible}>
             <Box
               height={'80px'}
@@ -250,20 +251,30 @@ const KiboHeader = (props: KiboHeaderProps) => {
       >
         <Backdrop open={isBackdropOpen} data-testid="backdrop" />
 
-        <Box component={'section'} sx={{ ...kiboHeaderStyles.topBarStyles }}>
+        <Box
+          component={'section'}
+          className="fortis-mobile-header-slot"
+          sx={{
+            ...kiboHeaderStyles.topBarStyles,
+            [theme.breakpoints.up('md')]: { display: 'none !important' },
+          }}
+        >
           <Box sx={{ width: '100%' }}>{getSection()}</Box>
         </Box>
 
         <Box
           component={'section'}
+          className="fortis-desktop-header-slot"
           sx={{
             ...kiboHeaderStyles.megaMenuStyles,
+            [theme.breakpoints.down('md')]: { display: 'none !important' },
           }}
           data-testid="mega-menu-container"
         >
           <NavigationBar
             isCheckoutPage={isCheckoutPage}
             onAccountIconClick={handleAccountIconClick}
+            isTransparentPage={isTransparentPage}
           />
         </Box>
       </AppBar>

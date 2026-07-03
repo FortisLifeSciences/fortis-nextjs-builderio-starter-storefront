@@ -5,6 +5,10 @@ const getProductVariationQuery = /* GraphQL */ `
       price {
         price
       }
+      inventoryInfo {
+        onlineStockAvailable
+        outOfStockBehavior
+      }
       properties {
         attributeFQN
         attributeDetail {

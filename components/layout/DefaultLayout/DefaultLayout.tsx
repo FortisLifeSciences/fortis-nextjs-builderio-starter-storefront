@@ -41,7 +41,11 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
   const router = useRouter()
   const headerRef = useRef<HTMLDivElement>(null)
   const [headerHeight, setHeaderHeight] = useState(0)
-  const isTransparentPage = TRANSPARENT_PAGES.includes(router.asPath.split('?')[0])
+  const builderTransparent = pageProps?.page?.data?.transparentNavbar
+  const isTransparentPage =
+    typeof builderTransparent === 'boolean'
+      ? builderTransparent
+      : TRANSPARENT_PAGES.includes(router.asPath.split('?')[0])
 
   useEffect(() => {
     const el = headerRef.current
@@ -143,6 +147,7 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
                     ]}
                     categoriesTree={pageProps.categoriesTree || []}
                     isSticky={true}
+                    isTransparentPage={isTransparentPage}
                   />
                 </Stack>
                 <DialogRoot />

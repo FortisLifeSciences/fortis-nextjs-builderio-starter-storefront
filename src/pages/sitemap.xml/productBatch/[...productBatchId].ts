@@ -118,6 +118,9 @@ function generateSiteMap(categoryItems: any) {
       .join('')}
   </urlset>`
 }
+const getLastModDate = (): string => {
+  return new Date().toISOString().split('T')[0]
+}
 
 function SiteMap() {
   // getServerSideProps will do the heavy lifting
