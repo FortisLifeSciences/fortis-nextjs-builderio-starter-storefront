@@ -57,7 +57,11 @@ const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || publicRuntimeConfig?.ALG
 const apiKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || publicRuntimeConfig?.ALGOLIA_SEARCH_KEY
 const searchClient = algoliasearch(appId, apiKey) as any
 
-const AlgoliaAutocomplete = () => {
+interface AlgoliaAutocompleteProps {
+  detachedMediaQuery?: string
+}
+
+const AlgoliaAutocomplete = ({ detachedMediaQuery }: AlgoliaAutocompleteProps = {}) => {
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   //redirect to search page
@@ -509,6 +513,8 @@ const AlgoliaAutocomplete = () => {
       placeholder: 'Search',
       openOnFocus: true,
       insights: true,
+      // only pass when provided so Algolia's default stays in effect otherwise
+      ...(detachedMediaQuery !== undefined && { detachedMediaQuery }),
       navigator: {
         navigate({ itemUrl }: { itemUrl: string }) {
           window.location.assign(itemUrl)
