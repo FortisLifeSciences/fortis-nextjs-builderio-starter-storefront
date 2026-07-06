@@ -793,7 +793,11 @@ section[data-autocomplete-source-id='builder-page'] {
   [data-autocomplete-source-id='popularPlugin'] .aa-ItemContentTitle {
     margin-right: 0;
   }
-  ::-webkit-scrollbar {
+
+  [data-autocomplete-source-id='popularPlugin'] .aa-List::-webkit-scrollbar,
+  [data-autocomplete-source-id='products'] .aa-List::-webkit-scrollbar,
+  [data-autocomplete-source-id='builder-page'] .aa-List::-webkit-scrollbar,
+  [data-autocomplete-source-id='quickAccessPlugin'] .aa-List::-webkit-scrollbar {
     display: block;
   }
   .aa-PanelLayout.aa-Panel--scrollable > section[data-autocomplete-source-id='products'] {
