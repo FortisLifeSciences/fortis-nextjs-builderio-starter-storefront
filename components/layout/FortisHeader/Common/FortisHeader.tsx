@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-import { Collapse, Box, AppBar, Backdrop, Container, useMediaQuery, useTheme } from '@mui/material'
+import { Collapse, Box, AppBar, Backdrop, Container, useMediaQuery } from '@mui/material'
 import getConfig from 'next/config'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -117,8 +117,7 @@ const KiboHeader = (props: KiboHeaderProps) => {
   const { showModal, closeModal } = useModalContext()
   const { t } = useTranslation('common')
   const router = useRouter()
-  const theme = useTheme()
-  const mdScreen = useMediaQuery(theme.breakpoints.up('md'))
+  const mdScreen = useMediaQuery('(min-width:900px)')
 
   const { createCustomerB2bAccount } = useCreateCustomerB2bAccountMutation()
 
