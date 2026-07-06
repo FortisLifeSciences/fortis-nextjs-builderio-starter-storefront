@@ -12,14 +12,15 @@ import 'next-i18next.config'
 // eslint-disable-next-line import/order
 import Router from 'next/router'
 import NProgress from 'nprogress'
-import aa from 'search-insights'
 
 import GetThemeSettings from './api/getThemeSettings'
 import BuilderComponents from './builder-registry'
 import registerDesignToken from './registerDesignToken'
+import ConsentGatedScripts from '@/components/consent/ConsentGatedScripts'
 import { DefaultLayout } from '@/components/layout'
 import { RQNotificationContextProvider, useAuthContext } from '@/context'
 import { initAlgoliaInsightsClient } from '@/lib/algoliaInsights'
+import { onConsentChange } from '@/lib/consent/consent'
 import createEmotionCache from '@/lib/createEmotionCache'
 import type { NextPageWithLayout } from '@/lib/types'
 
@@ -82,6 +83,7 @@ const App = (props: KiboAppProps) => {
 
   useEffect(() => {
     initAlgoliaInsightsClient()
+    return onConsentChange(initAlgoliaInsightsClient)
   }, [])
 
   useEffect(() => {
@@ -110,9 +112,6 @@ const App = (props: KiboAppProps) => {
     }
     fetchSettings()
   }, [])
-  if (typeof window !== 'undefined' && gtmId !== undefined) {
-    window.isGtm = true // or false, depending on your state
-  }
   const recapchaScript = `https://www.google.com/recaptcha/api.js?render=${
     (googleReCaptcha as any)?.accountCreationSiteKey
   }`
@@ -240,6 +239,7 @@ const App = (props: KiboAppProps) => {
           ></script>
         )}
       </Head>
+      <ConsentGatedScripts />
       {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
       <RQNotificationContextProvider>
         {getLayout(<Component {...pageProps} />)}
