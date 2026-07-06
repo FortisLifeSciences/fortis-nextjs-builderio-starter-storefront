@@ -82,10 +82,8 @@ export const kiboHeaderStyles = {
     minHeight: '50px',
     backgroundColor: 'transparent',
     background: 'none',
-    display: {
-      xs: 'none',
-      sm: 'none',
-      md: 'block',
-    },
+    // Visibility is handled by global.css at a fixed 900px boundary
+    // (.fortis-desktop-header-slot), not the theme `md` breakpoint (=1200).
+    display: 'block',
   },
 }
