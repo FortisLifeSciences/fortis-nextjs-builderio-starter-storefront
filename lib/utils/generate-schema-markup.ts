@@ -458,10 +458,11 @@ function generateProductSchema(
       }) || []
 
   // Build offers — only for Bethyl products
+
   const isBethyl = brandSlug.toLowerCase().includes('bethyl')
   const offers: Array<Record<string, any>> = []
 
-  if (isBethyl && productVariations && productVariations.length > 0) {
+  if (isBethyl && productVariations?.length) {
     for (const variant of productVariations) {
       const variantCode = variant.variationProductCode
       if (!variantCode) continue
@@ -474,7 +475,7 @@ function generateProductSchema(
           variantLabel,
           variantCode,
           `${productUrl}?selected=${variantCode}`,
-          (variant as any).price?.price,
+          variant.price?.price ?? undefined,
           variant.inventoryInfo,
           organizationId
         )
