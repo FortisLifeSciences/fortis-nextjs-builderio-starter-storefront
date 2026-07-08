@@ -36,8 +36,11 @@ const TRANSPARENT_PAGES = [
 
 const NavigationBar = (props: any) => {
   const router = useRouter()
-  const { isCheckoutPage, onAccountIconClick } = props
-  const isTransparentPage = TRANSPARENT_PAGES.includes(router.asPath.split('?')[0])
+  const { isCheckoutPage, onAccountIconClick, isTransparentPage: isTransparentPageProp } = props
+  const isTransparentPage =
+    typeof isTransparentPageProp === 'boolean'
+      ? isTransparentPageProp
+      : TRANSPARENT_PAGES.includes(router.asPath.split('?')[0])
   const [hasScrolled, setHasScrolled] = useState(false)
 
   useEffect(() => {
@@ -156,7 +159,7 @@ const NavigationBar = (props: any) => {
                     }}
                   />
                 )}
-                <AlgoliaAutocomplete />
+                <AlgoliaAutocomplete detachedMediaQuery="none" />
               </Box>
             </Box>
 
@@ -187,14 +190,14 @@ const NavigationBar = (props: any) => {
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  px: { md: '12px', lg: '20px' },
-                  py: { md: '8px', lg: '10px' },
+                  px: { xs: '12px', md: '20px' },
+                  py: { xs: '8px', md: '10px' },
                   bgcolor: '#30299A',
                   color: '#FFFFFF',
                   borderRadius: '0px 20px 0px 20px',
                   fontFamily: 'Poppins, sans-serif',
                   fontWeight: 400,
-                  fontSize: { md: '13px', lg: '15px' },
+                  fontSize: { xs: '13px', md: '15px' },
                   lineHeight: '150%',
                   letterSpacing: '-0.005em',
                   whiteSpace: 'nowrap',

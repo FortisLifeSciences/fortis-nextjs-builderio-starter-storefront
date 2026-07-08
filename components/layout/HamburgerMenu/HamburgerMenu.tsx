@@ -1,7 +1,7 @@
 import React from 'react'
 
 import AccountCircle from '@mui/icons-material/AccountCircle'
-import { Box, SwipeableDrawer } from '@mui/material'
+import { Box, Drawer } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
@@ -79,15 +79,12 @@ const HamburgerMenu = (props: HamburgerMenuProps) => {
 
   return (
     <>
-      <SwipeableDrawer
+      <Drawer
         anchor={'right'}
         open={isDrawerOpen || false}
         onClose={() => toggleDrawer(false)}
-        onOpen={() => toggleDrawer(true)}
         data-testid="hamburger-menu"
-        disableSwipeToOpen
         disableScrollLock
-        swipeAreaWidth={0}
         PaperProps={{
           sx: {
             height: '100vh',
@@ -139,7 +136,7 @@ const HamburgerMenu = (props: HamburgerMenuProps) => {
           </List> */}
           {requestAccountIconComponent}
         </Box>
-      </SwipeableDrawer>
+      </Drawer>
     </>
   )
 }
