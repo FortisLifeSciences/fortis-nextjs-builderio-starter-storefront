@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-import { Collapse, Box, AppBar, Backdrop, Container, useMediaQuery, useTheme } from '@mui/material'
+import { Collapse, Box, AppBar, Backdrop, Container, useMediaQuery } from '@mui/material'
 import getConfig from 'next/config'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -23,7 +23,7 @@ import {
 } from '@/components/layout'
 import { useAuthContext, useHeaderContext, useModalContext } from '@/context'
 import { useCreateCustomerB2bAccountMutation } from '@/hooks'
-import { getAnalyticsConsentFromLocalStorage } from '@/lib/getAnalyticsConsent'
+import { hasAnalyticsConsent } from '@/lib/consent/consent'
 import { buildCreateCustomerB2bAccountParams } from '@/lib/helpers'
 import type { CreateCustomerB2bAccountParams, NavigationLink } from '@/lib/types'
 
@@ -33,6 +33,7 @@ interface KiboHeaderProps {
   navLinks: NavigationLink[]
   categoriesTree: Maybe<PrCategory>[]
   isSticky?: boolean
+  isTransparentPage?: boolean
 }
 
 interface HeaderActionAreaProps {
@@ -110,14 +111,13 @@ const HeaderActionArea = (props: HeaderActionAreaProps) => {
 }
 
 const KiboHeader = (props: KiboHeaderProps) => {
-  const { navLinks, isSticky = true } = props
+  const { navLinks, isSticky = true, isTransparentPage } = props
   const { headerState, toggleMobileSearchPortal, toggleHamburgerMenu } = useHeaderContext()
   const { isAuthenticated, user } = useAuthContext()
   const { showModal, closeModal } = useModalContext()
   const { t } = useTranslation('common')
   const router = useRouter()
-  const theme = useTheme()
-  const mdScreen = useMediaQuery(theme.breakpoints.up('md'))
+  const mdScreen = useMediaQuery('(min-width:900px)')
 
   const { createCustomerB2bAccount } = useCreateCustomerB2bAccountMutation()
 
@@ -127,7 +127,7 @@ const KiboHeader = (props: KiboHeaderProps) => {
   const isCheckoutPage = router.pathname.includes('checkout')
   const { publicRuntimeConfig } = getConfig()
   const isMultiShipEnabled = publicRuntimeConfig.isMultiShipEnabled
-  const hasConsent = getAnalyticsConsentFromLocalStorage()
+  const hasConsent = hasAnalyticsConsent()
   const randomToken = `anonymous-${uuidv4()}`
   const randomAuthToken = `anonymous-${uuidv4()}`
 
@@ -148,7 +148,7 @@ const KiboHeader = (props: KiboHeaderProps) => {
           }
         }
       } else {
-        if (!isAuthenticated) {
+        if (!isAuthenticated && window.aa) {
           aa('setAuthenticatedUserToken', undefined)
         }
         if (storedToken) {
@@ -164,6 +164,8 @@ const KiboHeader = (props: KiboHeaderProps) => {
         }
       }
     }
+
+    if (!window.aa) return
 
     if (isAuthenticated && user && user.userId != null && hasConsent) {
       aa('setAuthenticatedUserToken', user.userId)
@@ -214,7 +216,7 @@ const KiboHeader = (props: KiboHeaderProps) => {
 
     if (!mdScreen)
       return (
-        <MobileHeader hideIcons={isHamburgerMenuVisible}>
+        <MobileHeader hideIcons={isHamburgerMenuVisible} isTransparentPage={isTransparentPage}>
           <Collapse in={isMobileSearchPortalVisible}>
             <Box
               height={'80px'}
@@ -248,20 +250,31 @@ const KiboHeader = (props: KiboHeaderProps) => {
       >
         <Backdrop open={isBackdropOpen} data-testid="backdrop" />
 
-        <Box component={'section'} sx={{ ...kiboHeaderStyles.topBarStyles }}>
+        {/*
+          Header mobile/desktop split is controlled by global.css at a fixed
+          900px boundary (.fortis-mobile-header-slot / .fortis-desktop-header-slot),
+          NOT by the theme `md` breakpoint — the theme redefines md=1200, which
+          would push the desktop header to 1200px+ and leave 900-1199px with no
+          header. Both slots render display:block; global.css hides one.
+        */}
+        <Box
+          component={'section'}
+          className="fortis-mobile-header-slot"
+          sx={{ ...kiboHeaderStyles.topBarStyles }}
+        >
           <Box sx={{ width: '100%' }}>{getSection()}</Box>
         </Box>
 
         <Box
           component={'section'}
-          sx={{
-            ...kiboHeaderStyles.megaMenuStyles,
-          }}
+          className="fortis-desktop-header-slot"
+          sx={{ ...kiboHeaderStyles.megaMenuStyles }}
           data-testid="mega-menu-container"
         >
           <NavigationBar
             isCheckoutPage={isCheckoutPage}
             onAccountIconClick={handleAccountIconClick}
+            isTransparentPage={isTransparentPage}
           />
         </Box>
       </AppBar>

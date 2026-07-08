@@ -15,12 +15,10 @@ import {
   IconButton,
 } from '@mui/material'
 import Link from 'next/link'
-import aa from 'search-insights'
 
 import PlpHitTextAttr from './PlpHitTextAttr'
 import { KiboImage, Price } from '@/components/common'
 import { ProductCardStyles } from '@/components/product/ProductCardListView/ProductCardListView.styles'
-import { getAnalyticsConsentFromLocalStorage } from '@/lib/getAnalyticsConsent'
 import abcore from '@/public/Brand_Logo/abcore-logo.png'
 import arista from '@/public/Brand_Logo/arista-logo.png'
 import bethyl from '@/public/Brand_Logo/bethyl-logo.png'
