@@ -199,6 +199,44 @@ function generateBreadcrumbSchema(
   }
 }
 
+function toSchemaAvailability(inventoryInfo?: {
+  onlineStockAvailable?: number | null
+  outOfStockBehavior?: string | null
+}): string {
+  if (!inventoryInfo) return 'https://schema.org/InStock'
+  if ((inventoryInfo.onlineStockAvailable ?? 0) > 0) return 'https://schema.org/InStock'
+  if (inventoryInfo.outOfStockBehavior === 'AllowBackOrder') return 'https://schema.org/BackOrder'
+  return 'https://schema.org/OutOfStock'
+}
+
+function generateOfferSchema(
+  offerName: string,
+  sku: string,
+  url: string,
+  price: number | null | undefined,
+  inventoryInfo:
+    | { onlineStockAvailable?: number | null; outOfStockBehavior?: string | null }
+    | undefined,
+  organizationId: string
+): Record<string, any> {
+  const offer: Record<string, any> = {
+    '@type': 'Offer',
+    sku,
+    mpn: sku,
+    url,
+    priceCurrency: 'USD',
+    availability: toSchemaAvailability(inventoryInfo),
+    itemCondition: 'https://schema.org/NewCondition',
+    seller: { '@id': organizationId },
+    eligibleRegion: [{ '@type': 'Country', name: 'US' }],
+  }
+
+  if (offerName) offer.name = offerName
+  if (price != null) offer.price = price.toFixed(2)
+
+  return offer
+}
+
 // Attributes whose stringValue contains raw HTML — strip tags before use in schema
 const HTML_ATTRIBUTES = new Set([
   'tenant~target-sentence',
@@ -376,7 +414,7 @@ function extractAdditionalProperties(product: Product): Array<Record<string, any
 }
 
 /**
- * Generates Product schema with variants
+ * Generates Product schema with variants and offers
  */
 function generateProductSchema(
   product: Product,
@@ -425,6 +463,50 @@ function generateProductSchema(
   const additionalProps = extractAdditionalProperties(product)
   if (additionalProps.length > 0) {
     schema.additionalProperty = additionalProps
+  }
+
+  // Build offers — one per sellable SKU (primary + each variant)
+  const offers: Array<Record<string, any>> = []
+
+  const primaryOptionLabel: string =
+    (product as any)?.options?.flatMap((o: any) => o.values ?? [])?.find((v: any) => v.isSelected)
+      ?.stringValue ?? ''
+
+  offers.push(
+    generateOfferSchema(
+      primaryOptionLabel,
+      product?.productCode ?? '',
+      productUrl,
+      (product as any)?.price?.price,
+      (product as any)?.inventoryInfo,
+      organizationId
+    )
+  )
+
+  if (productVariations && productVariations.length > 0) {
+    for (const variant of productVariations) {
+      const variantCode = (variant as any).variationProductCode
+      if (!variantCode || variantCode === product?.productCode) continue
+
+      const variantLabel: string =
+        ((variant as any).option as any[])?.find((v: any) => v.isSelected !== false)?.stringValue ??
+        ''
+
+      offers.push(
+        generateOfferSchema(
+          variantLabel,
+          variantCode,
+          `${productUrl}?selected=${variantCode}`,
+          (variant as any).price?.price,
+          (variant as any).inventoryInfo,
+          organizationId
+        )
+      )
+    }
+  }
+
+  if (offers.length > 0) {
+    schema.offers = offers
   }
 
   // Add variants as isSimilarTo — only include variants that have their own canonical
