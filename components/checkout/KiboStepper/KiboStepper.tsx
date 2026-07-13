@@ -15,7 +15,7 @@ const stepperStyles = {
     width: '100%',
     zIndex: 999,
     backgroundColor: 'common.white',
-    top: '50px',
+    top: '90px',
     paddingTop: '20px',
   },
 }

@@ -62,8 +62,40 @@ export default async function getProductSearchVariations(
         option: selectedValues,
         price: product.price,
         childPriority: childPriorityProperty ? Number(childPriorityProperty.values[0].value) : null,
+        inventoryInfo: (product as any).inventoryInfo ?? null,
       }
     })
+
+    // productSearch inventory is stale — always verify with live individual queries when stock <= 0.
+    // Trust productSearch only when it explicitly shows stock > 0 (InStock is safe to use as-is).
+    const inventoryFallbacks = result
+      .filter((v) => {
+        if (!v.inventoryInfo) return true
+        const inv = v.inventoryInfo as any
+        if (inv.onlineStockAvailable == null) return true
+        return (inv.onlineStockAvailable ?? 0) <= 0
+      })
+      .map((v) =>
+        fetcher(
+          {
+            query: getProductVariationQuery,
+            variables: { productCode, variationProductCode: v.variationProductCode },
+          },
+          { headers }
+        )
+          .then((res) => ({
+            variationProductCode: v.variationProductCode,
+            inventoryInfo: res.data?.product?.inventoryInfo ?? null,
+          }))
+          .catch(() => null)
+      )
+
+    const inventoryResults = await Promise.all(inventoryFallbacks)
+    for (const inv of inventoryResults) {
+      if (!inv) continue
+      const variant = result.find((v) => v.variationProductCode === inv.variationProductCode)
+      if (variant && inv.inventoryInfo != null) variant.inventoryInfo = inv.inventoryInfo
+    }
   } else {
     console.log('Entered else statement')
     result = []
@@ -102,6 +134,7 @@ export default async function getProductSearchVariations(
           childPriority: childPriorityProperty
             ? Number(childPriorityProperty.values[0].value)
             : null,
+          inventoryInfo: (variationProduct as any).inventoryInfo ?? null,
         })
       }
     }

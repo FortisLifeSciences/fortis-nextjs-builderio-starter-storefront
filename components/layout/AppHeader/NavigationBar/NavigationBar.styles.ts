@@ -84,8 +84,9 @@ export const navInnerStyles: SxProps = {
   flexDirection: 'row',
   justifyContent: 'space-between',
   alignItems: 'center',
-  padding: { xs: '16px 16px', md: '16px 0' },
-  gap: { xs: '12px', md: '20px' },
+  // 16px horizontal padding on tablet (900-1199px), no padding on desktop (1200px+)
+  padding: { md: '16px 16px', lg: '16px 0' },
+  gap: { md: '12px', lg: '20px' },
   maxWidth: '1200px',
   width: '100%',
   margin: '0 auto',
@@ -94,7 +95,7 @@ export const navInnerStyles: SxProps = {
   transition: 'height 0.3s ease-in-out, padding 0.3s ease-in-out',
   '.scrolled &': {
     height: '66px',
-    padding: { xs: '18px 16px', md: '18px 0' },
+    padding: { md: '18px 16px', lg: '18px 0' },
   },
 }
 
@@ -114,7 +115,7 @@ export const navRightContainerStyles: SxProps = {
   flexDirection: 'row',
   alignItems: 'center',
   justifyContent: 'flex-end',
-  gap: { xs: '8px', md: '24px' },
+  gap: { md: '8px', lg: '24px' },
   flex: 1,
   minWidth: 0,
 }
@@ -128,12 +129,11 @@ export const navLinksStyles: SxProps = {
   flexShrink: 0,
 }
 
-// Search — shrinks on tablet (900-1199px), full width on desktop (1200px+).
-// theme md=1200, so tablet width is the base (xs) and desktop width is on `md`.
+// Search — shrinks on tablet (900-1199px), full width on desktop (1200px+)
 export const searchWrapperStyles: SxProps = {
-  flex: { xs: '0 1 120px', md: '0 1 250px' },
-  width: { xs: '120px', md: '250px' },
-  maxWidth: { xs: '120px', md: '250px' },
+  flex: { md: '0 1 120px', lg: '0 1 250px' },
+  width: { md: '120px', lg: '250px' },
+  maxWidth: { md: '120px', lg: '250px' },
   minWidth: 0,
   overflow: 'hidden',
   position: 'relative',
@@ -144,6 +144,6 @@ export const iconGroupStyles: SxProps = {
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'center',
-  gap: { xs: '8px', md: '24px' },
+  gap: { md: '8px', lg: '24px' },
   flexShrink: 0,
 }
