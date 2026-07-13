@@ -48,7 +48,7 @@ export const headerActionAreaStyles = {
 export const kiboHeaderStyles = {
   topBarStyles: {
     zIndex: (theme: any) => theme.zIndex.modal,
-    display: { xs: 'block', md: 'none' }, // desktop handled by NavigationBar
+    display: 'block', // WEB-1648
     width: '100%',
     backgroundColor: 'transparent',
     background: 'none',

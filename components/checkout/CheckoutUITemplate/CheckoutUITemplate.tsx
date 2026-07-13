@@ -293,7 +293,7 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
           height: 'fit-content',
           marginLeft: { lg: '1rem' },
           position: { md: 'sticky' },
-          top: '80px',
+          top: '120px',
           marginTop: '82px',
         }}
       >
