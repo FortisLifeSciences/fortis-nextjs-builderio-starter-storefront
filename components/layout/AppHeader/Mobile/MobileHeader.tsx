@@ -71,6 +71,7 @@ const MobileHeader = ({
   return (
     <>
       <Box
+        className="fortis-mobile-header-slot"
         data-testid="mobile-header"
         sx={{
           width: '100%',
