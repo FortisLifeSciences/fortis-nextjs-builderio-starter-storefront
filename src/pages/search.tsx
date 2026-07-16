@@ -36,6 +36,7 @@ import ManualSortDropdown from '@/components/product/AlgoliaFacets/SearchSortDro
 import SelectedFiltersChips from '@/components/product/AlgoliaFacets/SelectedFiltersChips'
 import { useGetSearchedProducts } from '@/hooks'
 import { productSearch } from '@/lib/api/operations'
+import { hasAnalyticsConsent } from '@/lib/consent/consent'
 import type { CategorySearchParams, MetaData, PageWithMetaData } from '@/lib/types'
 
 import type { ProductSearchResult } from '@/lib/gql/types'
@@ -50,6 +51,8 @@ const ALGOLIA_APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || publicRuntimeCo
 const ALGOLIA_SEARCH_KEY =
   process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || publicRuntimeConfig?.ALGOLIA_SEARCH_KEY
 const searchClient = algoliasearch(ALGOLIA_APP_ID, ALGOLIA_SEARCH_KEY)
+
+const HITS_PER_PAGE = 15
 type BuilderPageHit = {
   objectID: string
   data?: {
@@ -208,15 +211,16 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
             {
               indexName: 'builder-page',
               query,
+              clickAnalytics: hasAnalyticsConsent(),
             },
             {
               indexName: sortIndex,
               query,
-              hitsPerPage: 15,
+              hitsPerPage: HITS_PER_PAGE,
               page: pagination.productsPage,
               facets: ['*'],
               filters,
-              clickAnalytics: true,
+              clickAnalytics: hasAnalyticsConsent(),
             },
           ],
         })
@@ -258,6 +262,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
     window.dataLayer.push({
       event: 'Algolia Filter View',
       algoliaFilters: filterList,
+      algoliaIndex: sortIndex,
     })
 
     // Optional: Algolia insights (uncomment if needed)
@@ -317,54 +322,30 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
   useEffect(() => {
     if (!manualSearchResults) return
 
-    let builderObjectIDs: string[] = []
-    let productObjectIDs: string[] = []
+    const dataLayer = (window as any).dataLayer
+    if (!dataLayer) return
 
     manualSearchResults.forEach((result) => {
-      if (result.index === 'builder-page') {
-        const hits = result.hits as BuilderPageHit[]
-        builderObjectIDs = hits.map((hit) => hit.objectID)
-      }
+      const objectIDs = (result.hits || []).map((hit: any) => hit.objectID)
+      if (objectIDs.length === 0) return
 
-      if (result.index === 'products') {
-        const hits = result.hits || []
-        productObjectIDs = hits.map((hit) => hit.objectID)
-      }
-    })
+      const cappedObjectIDs = objectIDs.slice(0, 20)
 
-    const dataLayer = (window as any).dataLayer
-
-    if (dataLayer && productObjectIDs.length > 0) {
-      const existingEvent = window.dataLayer.find(
-        (item) =>
+      const existingEvent = dataLayer.find(
+        (item: any) =>
           item.event === 'Hits Viewed' &&
-          item.algoliaIndex === 'products' &&
-          JSON.stringify(item.algoliaObjectIds) === JSON.stringify(productObjectIDs)
+          item.algoliaIndex === result.index &&
+          JSON.stringify(item.algoliaObjectIds) === JSON.stringify(cappedObjectIDs)
       )
       if (!existingEvent) {
         dataLayer.push({
           event: 'Hits Viewed',
-          algoliaObjectIds: productObjectIDs,
-          algoliaIndex: 'products',
+          algoliaObjectIds: cappedObjectIDs,
+          algoliaIndex: result.index,
+          queryID: result.queryID,
         })
       }
-    }
-
-    if (dataLayer && builderObjectIDs.length > 0) {
-      const existingEvent = window.dataLayer.find(
-        (item) =>
-          item.event === 'Hits Viewed' &&
-          item.algoliaIndex === 'builder-page' &&
-          JSON.stringify(item.algoliaObjectIds) === JSON.stringify(builderObjectIDs)
-      )
-      if (!existingEvent) {
-        window.dataLayer.push({
-          event: 'Hits Viewed',
-          algoliaObjectIds: builderObjectIDs,
-          algoliaIndex: 'builder-page',
-        })
-      }
-    }
+    })
   }, [manualSearchResults])
 
   return (
@@ -391,6 +372,10 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
       ) : (
         manualSearchResults.map((result, index) => {
           if (result.index === 'builder-page') {
+            const storedContentQueryId = localStorage.getItem('algoliaContentQueryId')
+            if (!storedContentQueryId || storedContentQueryId !== result.queryID) {
+              localStorage.setItem('algoliaContentQueryId', result.queryID || '')
+            }
             const hits = result.hits as BuilderPageHit[]
             const resourceHits = hits
               .filter((hit) => hit.data?.contentType === 'Resource')
@@ -410,9 +395,11 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
           }
 
           //setting queryID for to use different places
-          const algoliaQueryId = localStorage.getItem('algoliaQueryId')
-          if (!algoliaQueryId || algoliaQueryId !== result.queryID) {
-            localStorage.setItem('algoliaQueryId', result.queryID || '')
+          if (hasAnalyticsConsent()) {
+            const algoliaQueryId = localStorage.getItem('algoliaQueryId')
+            if (!algoliaQueryId || algoliaQueryId !== result.queryID) {
+              localStorage.setItem('algoliaQueryId', result.queryID || '')
+            }
           }
 
           return (
@@ -614,7 +601,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
                               {isMobile ? (
                                 <ProductHitGridView
                                   hit={hit}
-                                  position={i}
+                                  position={pagination.productsPage * HITS_PER_PAGE + i + 1}
                                   algoliaIndex={result?.index}
                                   queryId={result?.queryID ?? ''}
                                   dataInsideMethod={'clickedObjectIDsAfterSearch'}
@@ -622,7 +609,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
                               ) : isListView ? (
                                 <ProductHitListView
                                   hit={hit}
-                                  position={i}
+                                  position={pagination.productsPage * HITS_PER_PAGE + i + 1}
                                   algoliaIndex={result?.index}
                                   queryId={result?.queryID ?? ''}
                                   dataInsideMethod={'clickedObjectIDsAfterSearch'}
@@ -630,7 +617,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
                               ) : (
                                 <ProductHitGridView
                                   hit={hit}
-                                  position={i}
+                                  position={pagination.productsPage * HITS_PER_PAGE + i + 1}
                                   algoliaIndex={result?.index}
                                   queryId={result?.queryID ?? ''}
                                   dataInsideMethod={'clickedObjectIDsAfterSearch'}
