@@ -35,6 +35,7 @@ import {
   searchClient,
   instantSearchClient,
 } from '@/lib/api/util/algolia'
+import { hasAnalyticsConsent, onConsentChange } from '@/lib/consent/consent'
 import { getFacetLabel } from '@/lib/helpers/facetMapping'
 import type { MetaData, PageWithMetaData } from '@/lib/types'
 
@@ -453,6 +454,13 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
   const categoryCode = (props.categoryCode as string) || (router.query.categoryCode as string)
   const facets = props.facets
   const searchableAttributes = props.searchableAttributes
+  const [analyticsConsent, setAnalyticsConsent] = useState(false)
+
+  useEffect(() => {
+    const syncConsent = () => setAnalyticsConsent(hasAnalyticsConsent())
+    syncConsent()
+    return onConsentChange(syncConsent)
+  }, [])
 
   // Server-side metadata: prefer explicit metaData prop, fall back to builder page/section data
   const metaSource = props.metaData || section?.data || {}
@@ -501,21 +509,25 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
       <InstantSearch
         searchClient={instantSearchClient}
         indexName="products"
-        insights={{
-          onEvent(event) {
-            const { widgetType, eventType, payload, hits } = event
-            const objectIDs = hits?.map((hit) => hit.objectID)
-            if (widgetType === 'ais.hits' && eventType === 'view') {
-              if ((window as any).dataLayer) {
-                window.dataLayer.push({
-                  event: 'Hits Viewed',
-                  algoliaObjectIds: objectIDs,
-                  algoliaIndex: 'products',
-                })
+        insights={
+          analyticsConsent
+            ? {
+                onEvent(event) {
+                  const { widgetType, eventType, payload, hits } = event
+                  const objectIDs = hits?.map((hit) => hit.objectID)
+                  if (widgetType === 'ais.hits' && eventType === 'view') {
+                    if ((window as any).dataLayer) {
+                      window.dataLayer.push({
+                        event: 'Hits Viewed',
+                        algoliaObjectIds: objectIDs,
+                        algoliaIndex: 'products',
+                      })
+                    }
+                  }
+                },
               }
-            }
-          },
-        }}
+            : false
+        }
       >
         <MyHitsComponent
           categoryCode={categoryCode}
