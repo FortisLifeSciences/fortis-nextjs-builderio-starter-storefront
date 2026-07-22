@@ -182,6 +182,14 @@ const MyHitsComponent = ({
   const [isListView, setIsListView] = useState<boolean>(true)
   const { t } = useTranslation('common')
 
+  const [analyticsConsent, setAnalyticsConsent] = useState(false)
+
+  useEffect(() => {
+    const syncConsent = () => setAnalyticsConsent(hasAnalyticsConsent())
+    syncConsent()
+    return onConsentChange(syncConsent)
+  }, [])
+
   const algoliaQueryId = localStorage.getItem('algoliaQueryId')
   if (algoliaQueryId || algoliaQueryId !== '') {
     localStorage.setItem('algoliaQueryId', '')
@@ -199,6 +207,7 @@ const MyHitsComponent = ({
   useConfigure({
     hitsPerPage: 15,
     filters: `category_pages:${categoryCode}`,
+    clickAnalytics: analyticsConsent,
   } as any)
 
   const toggleFacet = (attribute: string) => {
