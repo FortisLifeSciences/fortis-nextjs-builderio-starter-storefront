@@ -131,6 +131,7 @@ export async function getStaticProps(
   const builderSection = await builder
     .get(categoryTopSection, {
       userAttributes: { slug: `category-${categoryCode}`, urlPath: `/products/${categoryCode}` },
+      locale: locale || 'Default',
     })
     .promise()
   if (builderSection) setPixelProperties(builderSection, { alt: '' })
