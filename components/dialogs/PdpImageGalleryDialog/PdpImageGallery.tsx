@@ -59,7 +59,13 @@ const B2BAccountFormDialog = (props: ImageCalleryDialogProps) => {
       })
     }
   }
-  const caption = images[selectedImage.selectedIndex]?.imagecaption
+  //Making changes for WEB-1708
+  const raw = images?.[selectedImage.selectedIndex]?.imagecaption
+  const caption =
+    typeof raw === 'string' && !['null', 'undefined'].includes(raw.trim().toLowerCase()) ? raw : ''
+
+  const rawTitle = images?.[selectedImage.selectedIndex]?.imagetitle
+  const title = typeof rawTitle === 'string' ? rawTitle : ''
 
   return (
     <ImageGalleryDialog
@@ -173,17 +179,13 @@ const B2BAccountFormDialog = (props: ImageCalleryDialogProps) => {
                     variant="body2"
                     sx={{ color: 'grey.900', fontWeight: '500', paddingBottom: '20px' }}
                   >
-                    {images[selectedImage.selectedIndex]?.imagetitle}
+                    {title}
                   </Typography>
                   <Typography
                     variant="body2"
                     sx={{ color: 'grey.900', fontWeight: '300' }}
                     dangerouslySetInnerHTML={{
-                      __html:
-                        caption == null ||
-                        ['null', 'undefined'].includes(String(caption).trim().toLowerCase())
-                          ? ''
-                          : caption,
+                      __html: caption,
                     }}
                   />
                 </Box>
