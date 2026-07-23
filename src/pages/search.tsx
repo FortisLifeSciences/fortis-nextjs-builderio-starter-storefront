@@ -211,7 +211,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
             {
               indexName: 'builder-page',
               query,
-              clickAnalytics: hasAnalyticsConsent(),
+              clickAnalytics: true,
             },
             {
               indexName: sortIndex,
@@ -220,7 +220,7 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
               page: pagination.productsPage,
               facets: ['*'],
               filters,
-              clickAnalytics: hasAnalyticsConsent(),
+              clickAnalytics: true,
             },
           ],
         })
