@@ -59,6 +59,7 @@ const B2BAccountFormDialog = (props: ImageCalleryDialogProps) => {
       })
     }
   }
+  const caption = images[selectedImage.selectedIndex]?.imagecaption
 
   return (
     <ImageGalleryDialog
@@ -178,7 +179,11 @@ const B2BAccountFormDialog = (props: ImageCalleryDialogProps) => {
                     variant="body2"
                     sx={{ color: 'grey.900', fontWeight: '300' }}
                     dangerouslySetInnerHTML={{
-                      __html: images[selectedImage.selectedIndex]?.imagecaption || '',
+                      __html:
+                        caption == null ||
+                        ['null', 'undefined'].includes(String(caption).trim().toLowerCase())
+                          ? ''
+                          : caption,
                     }}
                   />
                 </Box>
