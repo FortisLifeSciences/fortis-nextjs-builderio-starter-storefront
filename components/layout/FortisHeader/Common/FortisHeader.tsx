@@ -241,11 +241,7 @@ const KiboHeader = (props: KiboHeaderProps) => {
           would push the desktop header to 1200px+ and leave 900-1199px with no
           header. Both slots render display:block; global.css hides one.
         */}
-        <Box
-          component={'section'}
-          className="fortis-mobile-header-slot"
-          sx={{ ...kiboHeaderStyles.topBarStyles }}
-        >
+        <Box component={'section'} sx={{ ...kiboHeaderStyles.topBarStyles }}>
           <Box sx={{ width: '100%' }}>{getSection()}</Box>
         </Box>
 
