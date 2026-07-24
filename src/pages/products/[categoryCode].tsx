@@ -214,6 +214,7 @@ const MyHitsComponent = ({
   useConfigure({
     hitsPerPage: 15,
     filters: `category_pages:${categoryCode}`,
+    clickAnalytics: true,
   } as any)
 
   const toggleFacet = (attribute: string) => {
