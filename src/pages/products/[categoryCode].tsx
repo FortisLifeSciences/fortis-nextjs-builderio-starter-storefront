@@ -120,7 +120,18 @@ export async function getStaticPaths() {
     return { paths: [], fallback: 'blocking' }
   }
 }
-
+function resolveLocalizedDeep(node: any, locale = 'Default'): any {
+  if (Array.isArray(node)) return node.map((n) => resolveLocalizedDeep(n, locale))
+  if (node && typeof node === 'object') {
+    if (typeof node['@type'] === 'string' && node['@type'].includes('LocalizedValue')) {
+      return node[locale] ?? node['Default'] ?? ''
+    }
+    const out: Record<string, any> = {}
+    for (const k of Object.keys(node)) out[k] = resolveLocalizedDeep(node[k], locale)
+    return out
+  }
+  return node
+}
 export async function getStaticProps(
   context: GetStaticPropsContext
 ): Promise<GetStaticPropsResult<CategoryPageType>> {
@@ -133,7 +144,11 @@ export async function getStaticProps(
       userAttributes: { slug: `category-${categoryCode}`, urlPath: `/products/${categoryCode}` },
     })
     .promise()
-  if (builderSection) setPixelProperties(builderSection, { alt: '' })
+
+  const cleanSection = builderSection
+    ? resolveLocalizedDeep(builderSection, locale || 'Default')
+    : null
+  if (cleanSection) setPixelProperties(cleanSection, { alt: '' })
   //updated for WEB-1657 - algolia version update
   //const { hits: products, facets } = await productIndex.search('', {
   //filters: `category_pages:${categoryCode}`,
@@ -156,8 +171,8 @@ export async function getStaticProps(
   return {
     props: {
       categoryCode,
-      metaData: getMetaData(builderSection?.data),
-      section: builderSection || null,
+      metaData: getMetaData(cleanSection?.data),
+      section: cleanSection || null,
       ...(await serverSideTranslations(locale as string, ['common'])),
       facets,
       searchableAttributes,
