@@ -1,25 +1,18 @@
-#robots.txt for https://www.fortislife.com/ updated 2025-02-24T09:04:29.215Z
+#robots.txt for https://www.fortislife.com/ 
 
-
-# *
 User-agent: *
-Allow: /
-Disallow: /admin*
-Disallow: /cart*
-Disallow: /checkout*
-Disallow: /search*
-Disallow: /my-account*
-Disallow: /user*
-Disallow: /util*
-Disallow: /storefront/email/render/*
-Disallow: /print-return*
-Disallow: /guest-checkout*
-Disallow: /print-order*
-Disallow: /nomore*
-Disallow: /registrations-sign-in*
-Disallow: /home-temp*
-Disallow: /test-pricelist*
-# Disallow: /*?*
+
+Disallow: /admin
+Disallow: /cart
+Disallow: /checkout
+Disallow: /search
+Disallow: /my-account
+Disallow: /user
+Disallow: /util
+Disallow: /wishlist
+Disallow: /order-status
+Disallow: /order-confirmation
+Disallow: /registerDesignToken
 
 # Sitemaps
 Sitemap: https://www.fortislife.com/sitemap.xml
