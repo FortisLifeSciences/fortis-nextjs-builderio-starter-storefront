@@ -233,6 +233,7 @@ const Page = (props: any) => {
           <Configure
             {...({
               hitsPerPage: 15,
+              clickAnalytics: true,
               filters: `category_url:"${
                 pathLength === 1
                   ? resourceCategoryCode

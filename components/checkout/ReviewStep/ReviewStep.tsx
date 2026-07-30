@@ -38,6 +38,7 @@ import {
 import type { OrderPriceProps } from '@/components/common/OrderPrice/OrderPrice'
 import { useCheckoutStepContext, useAuthContext } from '@/context'
 import { useUpdateOrder, useUpdateUserOrder } from '@/hooks'
+import { hasAnalyticsConsent } from '@/lib/consent/consent'
 import { addressGetters, checkoutGetters, orderGetters, productGetters } from '@/lib/getters'
 import { isPasswordValid } from '@/lib/helpers/validations/validations'
 
@@ -284,32 +285,38 @@ const ReviewStep = (props: ReviewStepProps) => {
     }
   }
   const algoliaObjectData = () => {
-    if (typeof window === 'undefined' || !window.aa) return
+    if (typeof window === 'undefined' || !hasAnalyticsConsent()) return
     const queryIdArr: any[] = JSON.parse(localStorage.getItem('queryIdArray') || '[]')
 
-    const products = checkout?.items
-    aa('purchasedObjectIDsAfterSearch', {
-      eventName: 'Algolia Purchase After Search',
-      index: 'products',
-      objectIDs: (products ?? [])
-        .map((p) => p?.product?.variationProductCode)
-        .filter((id): id is string => Boolean(id)),
-      objectData: (products ?? []).map((p) => {
-        const matched = queryIdArr.find(
-          (data) => data?.ProductCode === p?.product?.variationProductCode
-        )
-        const price = typeof p?.product?.price?.price === 'number' ? p?.product?.price?.price : 0
-        console.log('price:', price)
-        return {
-          ...(matched?.queryId ? { queryID: matched.queryId } : {}),
-          price,
-          // discount: ,
-          quantity: p?.quantity ?? 1,
-        }
-      }),
-      value: checkout?.total ? checkout?.total : 0,
-      currency: 'USD',
+    const products = checkout?.items ?? []
+
+    const objectIDs: string[] = []
+    const objectData: any[] = []
+    products.forEach((p) => {
+      const id = p?.product?.variationProductCode
+      if (!id) return
+      const matched = queryIdArr.find((data) => data?.ProductCode === id)
+      const price = typeof p?.product?.price?.price === 'number' ? p?.product?.price?.price : 0
+      objectIDs.push(id)
+      objectData.push({
+        ...(matched?.queryId ? { queryID: matched.queryId } : {}),
+        price,
+        // discount: ,
+        quantity: p?.quantity ?? 1,
+      })
     })
+
+    const CHUNK = 20
+    for (let i = 0; i < objectIDs.length; i += CHUNK) {
+      aa('purchasedObjectIDsAfterSearch', {
+        eventName: 'Algolia Purchase After Search',
+        index: 'products',
+        objectIDs: objectIDs.slice(i, i + CHUNK),
+        objectData: objectData.slice(i, i + CHUNK),
+        currency: 'USD',
+        ...(i === 0 ? { value: checkout?.total ? checkout?.total : 0 } : {}),
+      })
+    }
     localStorage.removeItem('queryIdArray')
   }
 
