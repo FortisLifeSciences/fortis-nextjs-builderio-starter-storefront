@@ -56,6 +56,7 @@ import {
   usePriceRangeFormatter,
   useGetProductPrice,
 } from '@/hooks'
+import { hasAnalyticsConsent } from '@/lib/consent/consent'
 import { FulfillmentOptions as FulfillmentOptionsConstant, PurchaseTypes } from '@/lib/constants'
 import { productGetters, subscriptionGetters, wishlistGetters } from '@/lib/getters'
 import { uiHelpers } from '@/lib/helpers'
@@ -271,7 +272,9 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
 
     if (queryId) {
       setAlgoliaQueryId(queryId)
-      localStorage.setItem('algoliaQueryId', queryId)
+      if (hasAnalyticsConsent()) {
+        localStorage.setItem('algoliaQueryId', queryId)
+      }
     } else {
       const storedQueryId = localStorage.getItem('algoliaQueryId')
       if (storedQueryId) {
@@ -505,6 +508,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     return []
   })
   useEffect(() => {
+    if (!hasAnalyticsConsent()) return
     localStorage.setItem('queryIdArray', JSON.stringify(productsQueryIdArr))
   }, [productsQueryIdArr])
 

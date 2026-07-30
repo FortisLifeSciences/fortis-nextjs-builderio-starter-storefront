@@ -18,6 +18,7 @@ import {
 import { data } from 'cheerio/dist/commonjs/api/attributes'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
+import { useInstantSearch } from 'react-instantsearch-hooks-web'
 
 import { ProductCardStyles } from '../ProductCard/ProductCard.styles'
 import { KiboImage, Price } from '@/components/common'
@@ -49,11 +50,14 @@ const brandImages: Record<string, string> = {
 type Resources = {
   objectID: any
   __position: any
+  __queryID?: string
   query: any
   data: any
 }
 
 const ResourceHitGridView = ({ hit }: { hit: Resources }): JSX.Element => {
+  const { results } = useInstantSearch()
+  const algoliaIndex = results?.index || 'builder-page'
   const imageHeight = 180,
     placeholderImageUrl = DefaultImage,
     title = hit?.data?.title,
@@ -72,9 +76,10 @@ const ResourceHitGridView = ({ hit }: { hit: Resources }): JSX.Element => {
           data-testid="product-card-link"
           aria-label={title ? `View details for ${title}` : 'Product details'}
           data-insights-object-id={hit.objectID}
-          data-insis-position={hit.__position}
-          data-insights-index={'builder-page'}
-          data-insights-method={'clickedObjectIDs'}
+          data-insights-position={hit.__position}
+          data-insights-query-id={hit.__queryID}
+          data-insights-index={algoliaIndex}
+          data-insights-method={hit.__queryID ? 'clickedObjectIDsAfterSearch' : 'clickedObjectIDs'}
           className="resource-card"
         >
           <Box>
