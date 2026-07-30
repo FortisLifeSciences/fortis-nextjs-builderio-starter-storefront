@@ -164,7 +164,7 @@ const ProductHitListView = ({
     formulation = hit?.formulation,
     citation = hit?.plp_citation_count,
     newProduct = hit.new_product
-  position = hit.__position
+  position = position ?? hit.__position
 
   const firstImage = hit?.product_images?.[0]
     ? `https://cdn-tp1.mozu.com/31165-m1/cms/files/${kiboImagesData[0]}`
@@ -210,7 +210,10 @@ const ProductHitListView = ({
           data-insights-position={position !== undefined ? position : '1'}
           data-insights-query-id={queryId || hit.__queryID}
           data-insights-index={algoliaIndex || 'products'}
-          data-insights-method={dataInsideMethod || 'clickedObjectIDs'}
+          data-insights-method={
+            dataInsideMethod ||
+            (queryId || hit.__queryID ? 'clickedObjectIDsAfterSearch' : 'clickedObjectIDs')
+          }
           className={
             dataInsideMethod === 'clickedObjectIDsAfterSearch'
               ? 'product-card-search'
