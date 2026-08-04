@@ -96,7 +96,7 @@ const csp = [
   `img-src 'self' data: blob: https:`,
   `media-src 'self' https://cdn.builder.io https://*.builder.io`,
   `font-src 'self' data: https://fonts.gstatic.com https://cdn.builder.io https://*.builder.io`,
-  `connect-src 'self' https://*.mozu.com https://*.kibocommerce.com https://cdn.builder.io https://*.builder.io https://www.google.com https://www.googletagmanager.com https://www.google-analytics.com https://yqaietz5f1-dsn.algolia.net/`,
+  `connect-src 'self' https://*.mozu.com https://*.kibocommerce.com https://cdn.builder.io https://*.builder.io https://www.google.com https://www.googletagmanager.com https://www.google-analytics.com https://yqaietz5f1-dsn.algolia.net/ https://go.bethyl.com`,
   `frame-src 'self' https://*.builder.io https://www.google.com https://recaptcha.google.com https://pmts.mozu.com https://go.fortislife.com`,
   `frame-ancestors 'self'`,
   `object-src 'none'`,
