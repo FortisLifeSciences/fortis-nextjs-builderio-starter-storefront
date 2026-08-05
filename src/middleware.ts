@@ -89,6 +89,30 @@ const STALE_WHILE_REVALIDATE_TIME = 60 * 1000 // 1 minute in milliseconds
 
 let cachedRedirects: { source: string; destination: string; permanent: boolean }[] | null = null
 let cachedRedirectsTimestamp: number | null = null
+const csp = [
+  `default-src 'self'`,
+  `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.builder.io https://*.builder.io https://www.google.com https://www.gstatic.com https://*.mozu.com https://www.googletagmanager.com https://www.google-analytics.com`,
+  `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.builder.io`,
+  `img-src 'self' data: blob: https:`,
+  `media-src 'self' https://cdn.builder.io https://*.builder.io`,
+  `font-src 'self' data: https://fonts.gstatic.com https://cdn.builder.io https://*.builder.io`,
+  `connect-src 'self' https://*.mozu.com https://*.kibocommerce.com https://cdn.builder.io https://*.builder.io https://www.google.com https://www.googletagmanager.com https://www.google-analytics.com  https://*.algolia.net   https://*.algolianet.com https://go.bethyl.com https://www.fortislife.com https://insights.algolia.io`,
+  `frame-src 'self' https://*.builder.io https://www.google.com https://recaptcha.google.com https://pmts.mozu.com https://go.fortislife.com`,
+  `frame-ancestors 'self'`,
+  `worker-src 'self' blob:`,
+  `object-src 'none'`,
+  `base-uri 'self'`,
+  `form-action 'self' https://*.mozu.com`,
+  `upgrade-insecure-requests`,
+].join('; ')
+function applySecurityHeaders(response: NextResponse) {
+  response.headers.set('Content-Security-Policy', csp)
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  response.headers.set('X-Frame-Options', 'SAMEORIGIN')
+
+  return response
+}
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl
   const fullUrl = new URL(request.url)
@@ -97,7 +121,7 @@ export async function middleware(request: NextRequest) {
   if ((fullUrl.hostname === 'www.fortislife.com' || pathname.startsWith('/cms/files/')) && match) {
     const relativePath = pathname.replace('/cms/files/', '')
     const redirectUrl = `https://t31165-s51694.tp1.mozu.com/cms/files/${relativePath}`
-    return NextResponse.redirect(redirectUrl, 308)
+    return applySecurityHeaders(NextResponse.redirect(redirectUrl, 308))
   }
 
   // Fetch redirects from Edge Config
@@ -133,7 +157,7 @@ export async function middleware(request: NextRequest) {
 
       if (!Array.isArray(edgeRedirects)) {
         console.error('Error: Edge Config data is not an array')
-        return NextResponse.next()
+        return applySecurityHeaders(NextResponse.next())
       }
 
       const customEdgeRedirect = edgeRedirects.find((entry) => entry.source === pathname)
@@ -142,9 +166,11 @@ export async function middleware(request: NextRequest) {
         console.log('Match found customEdgeRedirect:', customEdgeRedirect)
         const finalUrl = new URL(customEdgeRedirect.destination, request.url)
 
-        return NextResponse.redirect(finalUrl, customEdgeRedirect.permanent ? 308 : 307)
+        return applySecurityHeaders(
+          NextResponse.redirect(finalUrl, customEdgeRedirect.permanent ? 308 : 307)
+        )
       }
-      return NextResponse.next()
+      return applySecurityHeaders(NextResponse.next())
     }
   }
   if (
@@ -152,14 +178,14 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/checkout')
   ) {
     if (checkIsAuthenticated(request)) {
-      return NextResponse.next()
+      return applySecurityHeaders(NextResponse.next())
     } else if (request.nextUrl.pathname.startsWith('/checkout')) {
       const cartUrl = new URL('/cart', request.url)
-      return NextResponse.redirect(cartUrl)
+      return applySecurityHeaders(NextResponse.redirect(cartUrl))
     }
 
     const homeUrl = new URL('/', request.url)
-    return NextResponse.redirect(homeUrl)
+    return applySecurityHeaders(NextResponse.redirect(homeUrl))
   }
 
   // Custom routes requests for product page
@@ -201,7 +227,9 @@ export async function middleware(request: NextRequest) {
             if (cleanedSearch) {
               finalUrl.search = `?${cleanedSearch}`
             }
-            return NextResponse.redirect(finalUrl, customRedirect.permanent ? 308 : 307)
+            return applySecurityHeaders(
+              NextResponse.redirect(finalUrl, customRedirect.permanent ? 308 : 307)
+            )
           }
 
           if (slugUrl && request.nextUrl.pathname !== slugUrl) {
@@ -211,22 +239,22 @@ export async function middleware(request: NextRequest) {
             if (cleanedSearch) {
               slugRedirectUrl.search = `?${cleanedSearch}`
             }
-            const slugRedirect = NextResponse.redirect(slugRedirectUrl)
+            const slugRedirect = applySecurityHeaders(NextResponse.redirect(slugRedirectUrl))
             slugRedirect.headers.set('Cache-Control', 'no-store')
-            return slugRedirect
+            return applySecurityHeaders(slugRedirect)
           }
 
           // If no custom redirect and slug URL or it's the same as the current URL, continue to the product page
-          return NextResponse.next()
+          return applySecurityHeaders(NextResponse.next())
         }
       } catch (error) {
         console.error(error)
       }
     }
 
-    return NextResponse.next()
+    return applySecurityHeaders(NextResponse.next())
   }
-  return NextResponse.next()
+  return applySecurityHeaders(NextResponse.next())
 }
 
 async function handleRedirects(
@@ -237,7 +265,7 @@ async function handleRedirects(
 
   if (!Array.isArray(redirectsCached)) {
     console.error('Error: in handlredirects method: Edge Config data is not an array')
-    return NextResponse.next()
+    return applySecurityHeaders(NextResponse.next())
   }
 
   const customCachedEdgeRedirect = redirectsCached.find((entry) => entry.source === pathname)
@@ -248,10 +276,12 @@ async function handleRedirects(
       customCachedEdgeRedirect
     )
     const finalUrl = new URL(customCachedEdgeRedirect.destination, request.url)
-    return NextResponse.redirect(finalUrl, customCachedEdgeRedirect.permanent ? 308 : 307)
+    return applySecurityHeaders(
+      NextResponse.redirect(finalUrl, customCachedEdgeRedirect.permanent ? 308 : 307)
+    )
   }
 
-  return NextResponse.next()
+  return applySecurityHeaders(NextResponse.next())
 }
 
 async function fetchEdgeConfigRedirects(): Promise<
