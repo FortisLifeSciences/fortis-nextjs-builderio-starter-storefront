@@ -277,7 +277,7 @@ const AlgoliaAutocomplete = ({ detachedMediaQuery }: AlgoliaAutocompleteProps = 
       const sources: any[] = []
       const safeQuery = String(query || '').slice(0, 512)
 
-      if (safeQuery.length < 1) return sources
+      if (safeQuery.length < 2) return sources
 
       sources.push(
         // Products source
@@ -539,7 +539,7 @@ const AlgoliaAutocomplete = ({ detachedMediaQuery }: AlgoliaAutocompleteProps = 
         if (justRedirected) {
           return false
         }
-        if (!state.query) {
+        if (state.query.trim().length < 2) {
           return false
         }
         return state.collections.some((collection) => collection.items.length > 0)
