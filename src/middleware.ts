@@ -91,7 +91,7 @@ let cachedRedirects: { source: string; destination: string; permanent: boolean }
 let cachedRedirectsTimestamp: number | null = null
 const csp = [
   `default-src 'self'`,
-  `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.hs-scripts.com https://js.hsforms.net https://js.hscollectedforms.net https://js.hs-banner.com https://js.hs-analytics.net https://static.hsappstatic.net https://*.hubspotusercontent-na1.net https://cdn.builder.io https://*.builder.io https://www.google.com https://www.gstatic.com https://*.mozu.com https://www.googletagmanager.com https://www.google-analytics.com https://*.citeab.com https://www.clarity.ms https://snid.snitcher.com https://static.hotjar.com`,
+  `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.hs-scripts.com https://js.hsforms.net https://js.hscollectedforms.net https://js.hs-banner.com https://js.hs-analytics.net https://static.hsappstatic.net https://*.hubspotusercontent-na1.net https://cdn.builder.io https://*.builder.io https://www.google.com https://www.gstatic.com https://*.mozu.com https://www.googletagmanager.com https://www.google-analytics.com https://*.citeab.com https://www.clarity.ms https://snid.snitcher.com https://static.hotjar.com https://app.secureprivacy.ai https://*.secureprivacy.ai`,
   `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.builder.io`,
   `img-src 'self' data: blob: https:`,
   `media-src 'self' https://cdn.builder.io https://*.builder.io`,
