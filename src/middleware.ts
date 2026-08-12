@@ -91,13 +91,13 @@ let cachedRedirects: { source: string; destination: string; permanent: boolean }
 let cachedRedirectsTimestamp: number | null = null
 const csp = [
   `default-src 'self'`,
-  `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.hs-scripts.com https://js.hsforms.net https://js.hscollectedforms.net https://js.hs-banner.com https://js.hs-analytics.net https://static.hsappstatic.net https://*.hubspotusercontent-na1.net https://cdn.builder.io https://*.builder.io https://www.google.com https://www.gstatic.com https://*.mozu.com https://www.googletagmanager.com https://www.google-analytics.com https://*.citeab.com`,
+  `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.hs-scripts.com https://js.hsforms.net https://js.hscollectedforms.net https://js.hs-banner.com https://js.hs-analytics.net https://static.hsappstatic.net https://*.hubspotusercontent-na1.net https://cdn.builder.io https://*.builder.io https://www.google.com https://www.gstatic.com https://*.mozu.com https://www.googletagmanager.com https://www.google-analytics.com https://*.citeab.com https://www.clarity.ms https://snid.snitcher.com https://static.hotjar.com`,
   `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.builder.io`,
   `img-src 'self' data: blob: https:`,
   `media-src 'self' https://cdn.builder.io https://*.builder.io`,
   `font-src 'self' data: https://fonts.gstatic.com https://cdn.builder.io https://*.builder.io`,
-  `connect-src 'self' https://*.mozu.com https://*.kibocommerce.com https://cdn.builder.io https://*.builder.io https://www.google.com https://*.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://*.algolia.net https://*.algolianet.com https://go.bethyl.com https://www.fortislife.com https://insights.algolia.io https://api-prod.secureprivacy.ai https://*.secureprivacy.ai https://track.hubspot.com https://*.hsforms.com https://www.clarity.ms`,
-  `frame-src 'self' https://*.builder.io https://www.google.com https://recaptcha.google.com https://pmts.mozu.com https://go.fortislife.com https://*.hsforms.com https://*.mozu.com https://*.citeab.com`,
+  `connect-src 'self' https://*.mozu.com https://*.kibocommerce.com https://cdn.builder.io https://*.builder.io https://www.google.com https://*.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://*.algolia.net https://*.algolianet.com https://go.bethyl.com https://www.fortislife.com https://insights.algolia.io https://api-prod.secureprivacy.ai https://*.secureprivacy.ai https://track.hubspot.com https://*.hsforms.com https://www.clarity.ms https://snid.snitcher.com`,
+  `frame-src 'self' https://*.builder.io https://www.google.com https://recaptcha.google.com https://pmts.mozu.com https://go.fortislife.com https://*.hsforms.com https://*.mozu.com https://*.citeab.com https://js.hsforms.net`,
   `frame-ancestors 'self'`,
   `worker-src 'self' blob:`,
   `object-src 'none'`,
