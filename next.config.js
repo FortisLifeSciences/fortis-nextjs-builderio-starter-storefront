@@ -594,6 +594,10 @@ module.exports = {
         source: '/products/:productCode', // Match product URLs under categories
         destination: '/product/:productCode', // Destination for the product page
       },
+      {
+        source: '/products/:categoryCode', // Match product URLs under categories
+        destination: '/products/:categoryCode', // Destination for the product page
+      },
     ]
   },
   async redirects() {
