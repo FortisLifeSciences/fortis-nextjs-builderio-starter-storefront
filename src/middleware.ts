@@ -44,6 +44,42 @@ const cleanQueryParams = (search: string) => {
   return urlSearchParams.toString() // Return the cleaned query string
 }
 
+/* -------------------------------------------------------------------------- */
+/*  PRODUCT vs CATEGORY DETECTION                                             */
+/*                                                                            */
+/*  Three URL shapes live under /products/:                                   */
+/*                                                                            */
+/*    1 part  → /products/BETHYL-A301-744          legacy product (redirect)  */
+/*    1 part  → /products/secondary-antibodies     category      (render)     */
+/*    3 parts → /products/{cat}/{slug}/{code}       canonical prod (render)    */
+/*                                                                            */
+/*  The 1-part collision (legacy product vs category) is resolved by the     */
+/*  fact that every product code contains a digit, while category slugs are   */
+/*  pure words. The API result stays the source of truth: even if a category  */
+/*  slipped through, `urlProductCode === productCode` fails and we render.     */
+/* -------------------------------------------------------------------------- */
+
+// Everything after the leading "products" segment.
+const productsSubPath = (pathname: string) => pathname.split('/').filter(Boolean).slice(1) // drops '' and 'products'
+
+// A single-segment /products/{x} where {x} contains a digit → legacy product code.
+const isLegacyProductPath = (pathname: string) => {
+  if (!pathname.startsWith('/products/')) return false
+  const parts = productsSubPath(pathname)
+  return parts.length === 1 && /\d/.test(parts[0])
+}
+
+// The already-canonical /products/{cat}/{slug}/{code} destination → never touch.
+const isCanonicalProductPath = (pathname: string) => {
+  if (!pathname.startsWith('/products/')) return false
+  return productsSubPath(pathname).length >= 3
+}
+
+// Any path we should run product lookup on (covers old /p/, /product/, and
+// legacy /products/{code}).
+const isProductLookupPath = (pathname: string) =>
+  pathname.startsWith('/p/') || pathname.startsWith('/product/') || isLegacyProductPath(pathname)
+
 async function getCustomRedirects() {
   //custom redirects from builder/io
   const redirectsResult = await fetch(
@@ -84,31 +120,17 @@ async function getCustomRedirects() {
     return []
   }
 }
+
 const CACHE_EXPIRATION_TIME = 60 * 60 * 1000 // 1 hour in milliseconds
 const STALE_WHILE_REVALIDATE_TIME = 60 * 1000 // 1 minute in milliseconds
 
 let cachedRedirects: { source: string; destination: string; permanent: boolean }[] | null = null
 let cachedRedirectsTimestamp: number | null = null
+
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl
   const fullUrl = new URL(request.url)
   const match = pathname.match(/^\/cms\/files\/(.+)/)
-  const lowercasePath = pathname.toLowerCase()
-  // This code is being added temporarily for WEB-1669.
-  const paths = [
-    '/products/libraries/abnano-anti-nk-cell-vhh-library/AbNano-Anti-NK-Cell-VHH',
-    '/products/libraries/abnano-anti-t-cell-vhh-library/AbNano-Anti-T-Cell-VHH',
-    '/products/libraries/abnano-vhh-naive-library/AbNano-VHH-Naive',
-  ]
-
-  if (paths.some((path) => pathname.includes(path))) {
-    const lowercaseUrl = new URL(lowercasePath, request.url)
-
-    // preserve query params
-    lowercaseUrl.search = search
-
-    return NextResponse.redirect(lowercaseUrl, 301)
-  }
 
   // Handle CDN file redirects from /cms/files/* to Kibo CDN
   if ((fullUrl.hostname === 'www.fortislife.com' || pathname.startsWith('/cms/files/')) && match) {
@@ -117,14 +139,22 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl, 308)
   }
 
+  // A canonical product URL is already the destination — render it and get out
+  // BEFORE any redirect logic can create a loop.
+  if (isCanonicalProductPath(pathname)) {
+    return NextResponse.next()
+  }
+
   // Fetch redirects from Edge Config
+  // Skip the redirect lookup for account/checkout and anything we'll handle as a
+  // product lookup (old /p/, /product/, or legacy /products/{code}). Category
+  // pages (/products/{slug} with no digit) are intentionally NOT excluded, so
+  // they still get their Edge Config / Builder redirects.
   if (
     !(
       pathname.startsWith('/my-account') ||
       pathname.startsWith('/checkout') ||
-      pathname.startsWith('/p/') ||
-      pathname.startsWith('/product/') ||
-      pathname.startsWith('/products/')
+      isProductLookupPath(pathname)
     )
   ) {
     if (cachedRedirects && cachedRedirectsTimestamp) {
@@ -165,6 +195,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next()
     }
   }
+
   if (
     request.nextUrl.pathname.startsWith('/my-account') ||
     request.nextUrl.pathname.startsWith('/checkout')
@@ -180,16 +211,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(homeUrl)
   }
 
-  // Custom routes requests for product page
-  if (
-    pathname.startsWith('/p/') ||
-    pathname.startsWith('/product/') ||
-    pathname.startsWith('/products/')
-  ) {
+  // Custom routes requests for product page.
+  // Fires for old /p/, /product/, AND legacy /products/{code} (digit-bearing).
+  // Category paths like /products/secondary-antibodies are NOT product lookup
+  // paths, so they never enter here and are never hit with the product API.
+  if (isProductLookupPath(pathname)) {
     const authToken = await getApiAuthToken()
-    const urlProductCode = pathname.split('/')[2]
+    // Robust extraction: last path segment works for /p/CODE, /product/CODE,
+    // and /products/CODE alike (instead of a hardcoded index).
+    const urlProductCode = pathname.split('/').filter(Boolean).pop()
 
-    // Make an Product API call using Fetch
+    // Make a Product API call using Fetch
     if (urlProductCode && authToken) {
       try {
         const apiUrl = `https://${apiUrlStart}/api/commerce/catalog/storefront/products/${urlProductCode}`
@@ -205,6 +237,9 @@ export async function middleware(request: NextRequest) {
         const categoryCode = categories?.[0]?.categoryCode
         const productSlug = content?.seoFriendlyUrl
 
+        // API is the source of truth: only redirect when the code truly resolves
+        // to a product. A category slug that slipped through returns no match
+        // here and falls through to NextResponse.next() → renders as a category.
         if (urlProductCode === productCode) {
           const slugUrl =
             productSlug && categoryCode
@@ -248,6 +283,7 @@ export async function middleware(request: NextRequest) {
 
     return NextResponse.next()
   }
+
   return NextResponse.next()
 }
 
@@ -255,7 +291,7 @@ async function handleRedirects(
   request: NextRequest,
   redirectsCached: { source: string; destination: string; permanent: boolean }[]
 ) {
-  const { pathname, search } = request.nextUrl
+  const { pathname } = request.nextUrl
 
   if (!Array.isArray(redirectsCached)) {
     console.error('Error: in handlredirects method: Edge Config data is not an array')
