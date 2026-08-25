@@ -596,7 +596,7 @@ module.exports = {
       },
       {
         source: '/products/:categoryCode', // Match product URLs under categories
-        destination: '/products/:categoryCode', // Destination for the product page
+        destination: '/category/:categoryCode',
       },
     ]
   },
