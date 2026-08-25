@@ -123,7 +123,8 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith('/my-account') ||
       pathname.startsWith('/checkout') ||
       pathname.startsWith('/p/') ||
-      pathname.startsWith('/product/')
+      pathname.startsWith('/product/') ||
+      pathname.startsWith('/products/')
     )
   ) {
     if (cachedRedirects && cachedRedirectsTimestamp) {
@@ -180,7 +181,11 @@ export async function middleware(request: NextRequest) {
   }
 
   // Custom routes requests for product page
-  if (pathname.startsWith('/p/') || pathname.startsWith('/product/')) {
+  if (
+    pathname.startsWith('/p/') ||
+    pathname.startsWith('/product/') ||
+    pathname.startsWith('/products/')
+  ) {
     const authToken = await getApiAuthToken()
     const urlProductCode = pathname.split('/')[2]
 
