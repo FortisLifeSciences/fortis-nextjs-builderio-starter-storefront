@@ -281,7 +281,9 @@ const ResourcesHitComponent = ({ categoryCode, facets }: { categoryCode: string;
               <DesktopRefinement />
             </Box>
             <Box sx={{ ...PLPStyles.totalResults }} pb={1}>
-              {t('no-of-products', { count: results?.nbHits ?? 0 })}
+              {results?.index === 'products'
+                ? t('no-of-products', { count: results?.nbHits ?? 0 })
+                : t('no-of-resources', { count: results?.nbHits ?? 0 })}
             </Box>
           </Box>
           <Box
