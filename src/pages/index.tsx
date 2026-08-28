@@ -10,12 +10,15 @@ import { KiboHeroCarousel, ContentTile, SmallBanner } from '@/components/home'
 import { ProductRecommendations } from '@/components/product'
 import getCategoryTree from '@/lib/api/operations/get-category-tree'
 import type { CategoryTreeResponse, NextPageWithLayout } from '@/lib/types'
+import { extractBuilderSchema } from '@/lib/utils/extract-builder-schema'
+import { renderSchemaMarkup } from '@/lib/utils/generate-schema-markup'
 
 import type { GetStaticPropsContext } from 'next'
 
 interface HomePageProps {
   page: any
   themeSetting: any
+  schemaJson: string
 }
 
 const { publicRuntimeConfig } = getConfig()
@@ -37,9 +40,11 @@ export async function getStaticProps(context: GetStaticPropsContext) {
     .toPromise()
   if (page) setPixelProperties(page, { alt: '' })
   const themeSetting = await builder.get('theme-setting').promise()
+  const { schemaJson } = extractBuilderSchema(page)
   return {
     props: {
       page: page || null,
+      schemaJson: schemaJson || '',
       categoriesTree,
       themeSetting: themeSetting || null,
       ...(await serverSideTranslations(locale as string, ['common'])),
@@ -49,7 +54,7 @@ export async function getStaticProps(context: GetStaticPropsContext) {
 }
 
 const Home: NextPageWithLayout<HomePageProps> = (props) => {
-  const { page, themeSetting } = props
+  const { page, themeSetting, schemaJson } = props
 
   const metaSource = page?.data
   const metaTitle =
@@ -75,6 +80,7 @@ const Home: NextPageWithLayout<HomePageProps> = (props) => {
         {metaTitle && <meta property="og:title" content={metaTitle} />}
         {metaDescription && <meta property="og:description" content={metaDescription} />}
         {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+        {schemaJson && renderSchemaMarkup(schemaJson)}
       </Head>
       <BuilderComponent
         model={publicRuntimeConfig?.builderIO?.modelKeys?.defaultPage}

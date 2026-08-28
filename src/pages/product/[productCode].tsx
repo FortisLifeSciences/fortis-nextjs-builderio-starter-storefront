@@ -310,11 +310,9 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
   const { sliceValue } = queryParams
   const { selected } = queryParams
 
-  if (isFallback || isProductLoading) {
-    return <ProductDetailSkeleton />
-  }
   const pdpBuilderSectionKey = publicRuntimeConfig?.builderIO?.modelKeys?.productDetailSection || ''
   const breadcrumbs = product ? productGetters.getBreadcrumbs(product) : []
+  const isProductPending = isFallback || isProductLoading || !productResponseData
 
   return (
     <>
@@ -332,7 +330,9 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
         )}
         {schemaJson && renderSchemaMarkup(schemaJson)}
       </Head>
-      {productResponseData ? (
+      {isProductPending ? (
+        <ProductDetailSkeleton />
+      ) : (
         <ProductDetailTemplate
           product={{ ...product, ...productResponseData }}
           productVariations={productVariations}
@@ -345,8 +345,6 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
         >
           <BuilderComponent model={pdpBuilderSectionKey} content={props.section} />
         </ProductDetailTemplate>
-      ) : (
-        <ProductDetailSkeleton />
       )}
     </>
   )
