@@ -11,7 +11,7 @@ import getCategoryTree from '@/lib/api/operations/get-category-tree'
 import { productIndex, searchClient, instantSearchClient } from '@/lib/api/util/algolia'
 import type { CategoryTreeResponse } from '@/lib/types'
 import type { MetaData } from '@/lib/types'
-import { extractBuilderSchema } from '@/lib/utils/extract-builder-schema'
+import { combineSchemaJson, extractBuilderSchema } from '@/lib/utils/extract-builder-schema'
 import { renderSchemaMarkup } from '@/lib/utils/generate-schema-markup'
 
 import type { GetServerSidePropsContext } from 'next'
@@ -157,7 +157,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   return {
     props: {
       page: page || null,
-      schemaJson: pageSchemaJson || sectionSchemaJson || '',
+      schemaJson: combineSchemaJson(pageSchemaJson, sectionSchemaJson),
       // Ensure metaData is pulled from either the page or the section data so it's available server-side
       metaData: getMetaData(page?.data || section?.data) || null,
       categoriesTree: categoriesTree || null,

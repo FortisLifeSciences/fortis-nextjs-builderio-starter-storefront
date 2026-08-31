@@ -61,9 +61,13 @@ function collectFromBlock(block: BuilderBlock, payloads: Record<string, any>[]) 
   )
 }
 
+function escapeClosingTags(json: string): string {
+  return json.replace(/</g, '\u003c')
+}
+
 function mergePayloads(payloads: Record<string, any>[]): string {
   if (payloads.length === 0) return ''
-  if (payloads.length === 1) return JSON.stringify(payloads[0], null, 2)
+  if (payloads.length === 1) return escapeClosingTags(JSON.stringify(payloads[0], null, 2))
 
   const graph = payloads.flatMap((payload) => {
     if (Array.isArray(payload['@graph'])) return payload['@graph']
@@ -72,7 +76,9 @@ function mergePayloads(payloads: Record<string, any>[]): string {
     return [node]
   })
 
-  return JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }, null, 2)
+  return escapeClosingTags(
+    JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }, null, 2)
+  )
 }
 
 export function extractBuilderSchema<T extends BuilderContent | null | undefined>(
@@ -83,4 +89,19 @@ export function extractBuilderSchema<T extends BuilderContent | null | undefined
   content?.data?.blocks?.forEach((block) => collectFromBlock(block, payloads))
 
   return { content, schemaJson: mergePayloads(payloads) }
+}
+
+export function combineSchemaJson(...schemaJsonList: string[]): string {
+  const payloads: Record<string, any>[] = []
+
+  schemaJsonList.forEach((schemaJson) => {
+    if (!schemaJson) return
+    try {
+      payloads.push(JSON.parse(schemaJson))
+    } catch (error) {
+      console.warn('Skipping malformed JSON-LD when combining Builder schema:', error)
+    }
+  })
+
+  return mergePayloads(payloads)
 }
