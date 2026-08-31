@@ -1248,5 +1248,55 @@
     "source": "/products/antisera_igg_fractions/sheep-anti-human-lambda-free-light-chain-antibody-igg-fraction/BETHYL-A80-127S",
     "destination": "/products/antisera-igg-fractions/sheep-anti-human-lambda-free-light-chain-antibody-igg-fraction/BETHYL-A80-127S",
     "permanent": true
+  },
+  {
+    "source": "/products/BETHYL-A301-766",
+    "destination": "/products/primary-antibodies/rabbit-anti-eif4b-antibody/BETHYL-A301-767",
+    "permanent": true
+  },
+  {
+    "source": "/products/BETHYL-A300-262",
+    "destination": "/products/primary-antibodies/rabbit-anti-sah3-antibody/BETHYL-A300-261",
+    "permanent": true
+  },
+  {
+    "source": "/products/BETHYL-A303-765",
+    "destination": "/products/primary-antibodies/rabbit-anti-dis3-antibody/BETHYL-A303-764",
+    "permanent": true
+  },
+  {
+    "source": "/products/BETHYL-A300-270",
+    "destination": "/products/primary-antibodies/rabbit-anti-ccar1-antibody/BETHYL-A300-435",
+    "permanent": true
+  },
+  {
+    "source": "/products/BETHYL-A302-520",
+    "destination": "/products/primary-antibodies/rabbit-anti-recq5-antibody/BETHYL-A302-522",
+    "permanent": true
+  },
+  {
+    "source": "/products/BETHYL-A302-292",
+    "destination": "/products/primary-antibodies/rabbit-anti-ataxin-1-antibody/BETHYL-A302-291",
+    "permanent": true
+  },
+  {
+    "source": "/products/BETHYL-A303-25",
+    "destination": "/products/primary-antibodies/rabbit-anti-zbtb10-antibody/BETHYL-A303-258",
+    "permanent": true
+  },
+  {
+    "source": "/products/BETHYL-A300-594",
+    "destination": "/products/primary-antibodies/rabbit-anti-sec23ip-mstp053-antibody/BETHYL-A300-593",
+    "permanent": true
+  },
+  {
+    "source": "/products/BETHYL-laboratories-a191-106",
+    "destination": "/products/primary-antibodies/rabbit-anti-his-tag-recombinant-monoclonal-antibody-blre06m/BETHYL-A191-106",
+    "permanent": true
+  },
+  {
+    "source": "/products/a190-113p-goat-anti-6-his-tag-antibody-hrp-conjugated",
+    "destination": "/products/primary-antibodies/goat-anti-6-his-tag-antibody/BETHYL-A190-113",
+    "permanent": true
   }
 ]
