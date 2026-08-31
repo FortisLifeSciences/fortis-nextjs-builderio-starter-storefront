@@ -136,6 +136,22 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(lowercaseUrl, 301)
   }
 
+  // WEB-1735: /products/<product-code> → canonical product page
+  const segments = pathname.split('/').filter(Boolean)
+
+  if (segments[0] === 'products' && segments.length === 2) {
+    const slug = decodeURIComponent(segments[1])
+
+    if (/^(BETHYL-)?A\d{3}-\d{2,3}/i.test(slug)) {
+      let code = slug.toUpperCase().replace(/-+$/, '').replace(/A$/, '')
+      if (!code.startsWith('BETHYL-')) code = `BETHYL-${code}`
+
+      const productUrl = new URL(`/p/${code}`, request.url)
+      productUrl.search = search
+      return NextResponse.redirect(productUrl, 301)
+    }
+  }
+
   // Handle CDN file redirects from /cms/files/* to Kibo CDN
   if ((fullUrl.hostname === 'www.fortislife.com' || pathname.startsWith('/cms/files/')) && match) {
     const relativePath = pathname.replace('/cms/files/', '')
