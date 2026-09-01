@@ -119,6 +119,23 @@ export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl
   const fullUrl = new URL(request.url)
   const match = pathname.match(/^\/cms\/files\/(.+)/)
+  const lowercasePath = pathname.toLowerCase()
+  // This code is being added temporarily for WEB-1669.
+  const paths = [
+    '/products/libraries/abnano-anti-nk-cell-vhh-library/AbNano-Anti-NK-Cell-VHH',
+    '/products/libraries/abnano-anti-t-cell-vhh-library/AbNano-Anti-T-Cell-VHH',
+    '/products/libraries/abnano-vhh-naive-library/AbNano-VHH-Naive',
+  ]
+
+  if (paths.some((path) => pathname.includes(path))) {
+    const lowercaseUrl = new URL(lowercasePath, request.url)
+
+    // preserve query params
+    lowercaseUrl.search = search
+
+    return NextResponse.redirect(lowercaseUrl, 301)
+  }
+
   // Handle CDN file redirects from /cms/files/* to Kibo CDN
   if ((fullUrl.hostname === 'www.fortislife.com' || pathname.startsWith('/cms/files/')) && match) {
     const relativePath = pathname.replace('/cms/files/', '')
