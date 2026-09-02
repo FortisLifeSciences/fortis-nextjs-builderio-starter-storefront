@@ -122,7 +122,7 @@ export const FortisMegaMenu: React.FC<MegaMenuProps> = ({ scrolled }) => {
                   zIndex: 1,
                   display: 'flex',
                   boxShadow: '3px 3px 10px rgba(0,0,0,0.2)',
-                  width: '1200px',
+                  width: 'min(1200px, calc(100vw - 48px))',
                 }}
                 tabIndex={0}
                 onMouseEnter={() => handleMouseEnter(menu)}

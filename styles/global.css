@@ -35,12 +35,13 @@ a {
   text-decoration: none;
   color: inherit;
 }
-@media (min-width: 900px) {
+/* Source of truth: HEADER_DESKTOP_MIN_PX in components/layout/AppHeader/headerBreakpoints.ts */
+@media (min-width: 1150px) {
   .fortis-mobile-header-slot {
     display: none !important;
   }
 }
-@media (max-width: 899.95px) {
+@media (max-width: 1149.95px) {
   .fortis-desktop-header-slot {
     display: none !important;
   }
