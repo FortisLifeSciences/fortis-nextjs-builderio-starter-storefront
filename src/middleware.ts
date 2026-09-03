@@ -2,6 +2,7 @@ import { get } from '@vercel/edge-config'
 import { NextResponse, NextRequest } from 'next/server'
 
 const apiUrlStart = process.env.KIBO_API_HOST
+const cspType = process?.env?.Content_Security_Policy
 
 const checkIsAuthenticated = (req: NextRequest) => {
   const cookie = req.headers.get('cookie')
@@ -108,7 +109,7 @@ const csp = [
   `upgrade-insecure-requests`,
 ].join('; ')
 function applySecurityHeaders(response: NextResponse) {
-  response.headers.set('Content-Security-Policy', csp)
+  response.headers.set(cspType ? String(cspType) : 'Content-Security-Policy-Report-Only', csp)
   response.headers.set('X-Content-Type-Options', 'nosniff')
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
   response.headers.set('X-Frame-Options', 'SAMEORIGIN')
