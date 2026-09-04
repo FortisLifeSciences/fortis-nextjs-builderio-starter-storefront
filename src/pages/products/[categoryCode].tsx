@@ -38,6 +38,8 @@ import {
 import { hasAnalyticsConsent, onConsentChange } from '@/lib/consent/consent'
 import { getFacetLabel } from '@/lib/helpers/facetMapping'
 import type { MetaData, PageWithMetaData } from '@/lib/types'
+import { extractBuilderSchema } from '@/lib/utils/extract-builder-schema'
+import { renderSchemaMarkup } from '@/lib/utils/generate-schema-markup'
 
 import type { BaseHit } from 'instantsearch.js'
 import type {
@@ -51,6 +53,7 @@ interface CategoryPageType extends PageWithMetaData {
   seoFriendlyUrl?: string
   categoryCode?: string
   section?: any
+  schemaJson?: string
   facets: Record<string, any>
   searchableAttributes: any
 }
@@ -197,9 +200,12 @@ export async function getStaticProps(
 
   const searchableAttributes = getStaticSearchableFacets()
 
+  const { schemaJson } = extractBuilderSchema(cleanSection)
+
   return {
     props: {
       categoryCode,
+      schemaJson: schemaJson || '',
       metaData: getMetaData(cleanSection?.data),
       section: cleanSection || null,
       ...(await serverSideTranslations(locale as string, ['common'])),
@@ -544,6 +550,7 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
         {metaTitle && <meta property="og:title" content={metaTitle} />}
         {metaDescription && <meta property="og:description" content={metaDescription} />}
         {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+        {props.schemaJson && renderSchemaMarkup(props.schemaJson)}
       </Head>
       <BuilderComponent
         model={publicRuntimeConfig?.builderIO?.modelKeys?.categoryTopSection}
