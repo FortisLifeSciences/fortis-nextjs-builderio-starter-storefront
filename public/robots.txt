@@ -13,6 +13,8 @@ Disallow: /wishlist
 Disallow: /order-status
 Disallow: /order-confirmation
 Disallow: /registerDesignToken
+Disallow: /fortis-discovery-library-flex-agreement
+Disallow: /bethyl-custom-services-terms
 
 # Sitemaps
 Sitemap: https://www.fortislife.com/sitemap.xml
