@@ -86,6 +86,7 @@ export interface Address {
 export interface SavedBillingAddress {
   contact: CrContact
   isSameBillingShippingAddress?: boolean
+  isAddressValid?: boolean
 }
 
 export interface BillingAddress {
