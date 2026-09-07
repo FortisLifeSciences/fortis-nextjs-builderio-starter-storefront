@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 
 import EastIcon from '@mui/icons-material/East'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
 import { Box, Divider, Grid, Paper, Typography } from '@mui/material'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 
 import MegaMenuTextLink from './MegaMenuTextLink'
 import {
@@ -31,7 +30,6 @@ interface CustomDropdownProps {
   featuredContent: any[]
   typeOfMenu: string
   onClose: () => void
-  onMouseEnter: () => void
 }
 
 const MenuPopover: React.FC<CustomDropdownProps> = ({
@@ -42,56 +40,37 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
   featuredContent,
   typeOfMenu,
   onClose,
-  onMouseEnter,
 }) => {
-  const router = useRouter()
-
-  useEffect(() => {
-    router.events.on('routeChangeComplete', onClose)
-
-    return () => {
-      router.events.off('routeChangeComplete', onClose)
-    }
-  }, [router, onClose])
-
   const [activeCategory, setActiveCategory] = useState(childCategory[0])
 
-  const handleMouseEnterCategory = (category: (typeof childCategory)[0]) => {
-    setActiveCategory(category)
-  }
-
-  const handleMouseLeave = () => {
+  const handleLinkClick = () => {
     onClose()
   }
 
-  const handleMouseOver = () => {
-    onMouseEnter()
+  const focusMenuItem = (index: number) => {
+    const item = document.getElementById(`menu-item-${index}`)
+    if (!item) return
+    // Link-only categories wrap a non-focusable Box around the anchor.
+    const target = item.tabIndex >= 0 ? item : item.querySelector<HTMLElement>('a')
+    target?.focus()
   }
-
-  const handleLinkClick = () => {
-    onClose() // Close the popover when a link is clicked
-  }
-
-  // console.log('This is child category ---> ', childCategory)
 
   const handleKeyDown = (event: React.KeyboardEvent, category: any, index: number) => {
     if (event.key === 'ArrowDown') {
       event.preventDefault()
-      const nextIndex = (index + 1) % childCategory.length
-      document.getElementById(`menu-item-${nextIndex}`)?.focus()
+      focusMenuItem((index + 1) % childCategory.length)
     } else if (event.key === 'ArrowUp') {
       event.preventDefault()
-      const prevIndex = (index - 1 + childCategory.length) % childCategory.length
-      document.getElementById(`menu-item-${prevIndex}`)?.focus()
+      focusMenuItem((index - 1 + childCategory.length) % childCategory.length)
     } else if (event.key === 'Enter' || event.key === ' ') {
       setActiveCategory(category)
+    } else if (event.key === 'Escape') {
+      onClose()
     }
   }
 
   return (
     <Paper
-      onMouseOver={handleMouseOver}
-      onMouseLeave={handleMouseLeave}
       sx={{
         width: '100%',
         overflow: 'hidden',
@@ -110,11 +89,15 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
               </Typography>
               {viewAllText && (
                 <Box sx={submenuItem}>
-                  <Link href={parentLink} passHref style={{ paddingLeft: '28px' }}>
+                  <Link
+                    href={parentLink}
+                    passHref
+                    style={{ paddingLeft: '28px' }}
+                    onClick={handleLinkClick}
+                  >
                     <Typography
                       variant="body2"
                       sx={{ ...animatedUnderline, color: 'primary.main', fontStyle: 'normal' }}
-                      onClick={handleLinkClick}
                     >
                       {viewAllText}
                     </Typography>
@@ -127,7 +110,14 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
               {childCategory.map((category, index) =>
                 !category.childCategory || category.childCategory.length === 0 ? (
                   // If no child categories, render the link directly
-                  <Box key={index} sx={submenuItem}>
+                  <Box
+                    key={index}
+                    id={`menu-item-${index}`}
+                    sx={submenuItem}
+                    onKeyDown={(event: React.KeyboardEvent) =>
+                      handleKeyDown(event, category, index)
+                    }
+                  >
                     <Link
                       href={category.categoryLink}
                       passHref
@@ -139,6 +129,7 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                       }}
                       target={category.openLinkInNewWindow ? '_blank' : '_self'}
                       rel={category.openLinkInNewWindow ? 'noopener noreferrer' : undefined}
+                      onClick={handleLinkClick}
                     >
                       <Typography
                         variant="body2"
@@ -155,7 +146,6 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                           display: 'inline-block',
                           wordWrap: 'break-all',
                         }}
-                        onClick={handleLinkClick}
                       >
                         {category.categoryName.length > 36 ? (
                           <MegaMenuTextLink text={category.categoryName} />
@@ -247,6 +237,7 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                     style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}
                     target={submenu.openLinkInNewWindow ? '_blank' : '_self'}
                     rel={submenu.openLinkInNewWindow ? 'noopener noreferrer' : undefined}
+                    onClick={handleLinkClick}
                   >
                     <Typography
                       variant="body2"
@@ -263,7 +254,6 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                         display: 'inline-block',
                         wordWrap: 'break-all',
                       }}
-                      onClick={handleLinkClick}
                     >
                       {submenu.categoryName.length > 36 ? (
                         <MegaMenuTextLink text={submenu.categoryName} />
@@ -293,6 +283,7 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                   style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}
                   target={activeCategory.openLinkInNewWindow ? '_blank' : '_self'}
                   rel={activeCategory.openLinkInNewWindow ? 'noopener noreferrer' : undefined}
+                  onClick={handleLinkClick}
                 >
                   <Typography
                     variant="body2"
@@ -309,7 +300,6 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                       display: 'inline-block',
                       wordWrap: 'break-all',
                     }}
-                    onClick={handleLinkClick}
                   >
                     View All{' '}
                     {activeCategory.categoryName.length > 36 ? (
@@ -353,7 +343,7 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                     >
                       {content.title}
                     </Typography>
-                    <Link href={content.linkUrl} passHref>
+                    <Link href={content.linkUrl} passHref onClick={handleLinkClick}>
                       <Typography
                         variant="body2"
                         sx={{
@@ -362,7 +352,6 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                           whiteSpace: 'normal',
                           fontStyle: 'normal',
                         }}
-                        onClick={handleLinkClick}
                       >
                         {content.linkText.length > 36 ? (
                           <MegaMenuTextLink text={content.linkText} />
@@ -405,6 +394,7 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                     }}
                     target={category.openLinkInNewWindow ? '_blank' : '_self'}
                     rel={category.openLinkInNewWindow ? 'noopener noreferrer' : undefined}
+                    onClick={handleLinkClick}
                   >
                     <Typography
                       variant="body2"
@@ -421,7 +411,6 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                         display: 'inline-block',
                         wordWrap: 'break-all',
                       }}
-                      onClick={handleLinkClick}
                     >
                       {category.categoryName.length > 36 ? (
                         <MegaMenuTextLink text={category.categoryName} />
@@ -472,7 +461,7 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                     >
                       {content.title}
                     </Typography>
-                    <Link href={content.linkUrl} passHref>
+                    <Link href={content.linkUrl} passHref onClick={handleLinkClick}>
                       <Typography
                         variant="body2"
                         sx={{
@@ -481,7 +470,6 @@ const MenuPopover: React.FC<CustomDropdownProps> = ({
                           whiteSpace: 'normal',
                           fontStyle: 'normal',
                         }}
-                        onClick={handleLinkClick}
                       >
                         {content.linkText.length > 36 ? (
                           <MegaMenuTextLink text={content.linkText} />
