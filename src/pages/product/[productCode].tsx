@@ -63,6 +63,8 @@ function getMetaData(product: Product): MetaData {
   const categoryCode = product?.categories?.[0]?.categoryCode || ''
   const productSlug = product?.content?.seoFriendlyUrl?.replace(/^\/+/, '') || ''
   const parentProductCode = product?.productCode || ''
+  const formattedParentProductCode =
+    categoryCode === 'libraries' ? parentProductCode.toLowerCase() : parentProductCode
   return {
     title: product?.content?.metaTagTitle || null,
     description: product?.content?.metaTagDescription || null,
@@ -70,7 +72,7 @@ function getMetaData(product: Product): MetaData {
     canonicalUrl:
       `${
         publicRuntimeConfig?.baseUrl || 'https://www.fortislife.com/'
-      }products/${categoryCode}/${productSlug}/${parentProductCode}` || null,
+      }products/${categoryCode}/${productSlug}/${formattedParentProductCode}` || null,
     robots: null,
   }
 }
