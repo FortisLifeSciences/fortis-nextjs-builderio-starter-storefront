@@ -157,6 +157,18 @@ export const baseOrderFragment = /* GraphQL */ `
       }
     }
     returnStatus
+    fulfillmentStatus
+    packages {
+      carrier
+      fulfillmentDate
+      status
+      trackingNumber
+      trackingNumbers
+      trackings {
+        number
+        url
+      }
+    }
   }
   ${contactForOrdersFragment}
 `

@@ -4,9 +4,16 @@ import { styled } from '@mui/material/styles'
 
 // Define a styled OutlinedInput to incorporate KiboInput's styling
 const StyledOutlinedInput = styled(OutlinedInput)(({ theme, error }) => ({
-  padding: '4.5px 12px',
+  // Don't pad the OutlinedInput root - `.MuiSelect-select` inside it already carries its own
+  // default padding, and the two were stacking (14px root + 14px inner ≈ 28px), which is the
+  // oversized text-to-border gap. Padding belongs on `.MuiSelect-select` alone.
+  padding: 0,
+  '& .MuiSelect-select': {
+    padding: '10px 14px',
+  },
   '& .MuiOutlinedInput-notchedOutline': {
     borderWidth: '1px', // Ensure consistent border width
+    borderColor: error ? theme.palette.error.main : '#D3D7D9',
   },
   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
     borderWidth: '1px', // Keep border width consistent on focus
@@ -40,6 +47,17 @@ const MenuProps = {
     style: {
       maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
       width: 250,
+    },
+    // MenuList/MenuItem render inside this Paper, not under the Select root - so the
+    // Select's own fontFamily/fontSize sx never reaches them. fontFamily inherits fine,
+    // but MenuItem carries its own fontSize (1rem) that wins over an inherited value, so
+    // it has to be overridden on the class directly rather than set on the Paper itself.
+    sx: {
+      fontFamily: 'Poppins',
+      '& .MuiMenuItem-root': {
+        fontFamily: 'Poppins',
+        fontSize: '14px',
+      },
     },
   },
 }
@@ -76,13 +94,14 @@ const KiboSelect = (props: KiboSelectProps) => {
           sx={{
             top: -23,
             left: 0,
-            color: error ? 'error.main' : '#020027',
+            color: error ? 'error.main' : '#3B3B3B',
             ...sx,
             fontFamily: 'Poppins',
-            fontSize: '16px',
+            fontSize: '15px',
             fontStyle: 'normal',
-            fontWeight: '300',
-            lineHeight: '25px',
+            fontWeight: '400',
+            lineHeight: '150%',
+            letterSpacing: '-0.005em',
             transform: 'translate(0, -1.5px) scale(1)',
             zIndex: '0',
           }}
@@ -99,15 +118,23 @@ const KiboSelect = (props: KiboSelectProps) => {
         value={value}
         MenuProps={MenuProps}
         sx={{
-          borderColor: error ? 'error.main' : '#020027',
+          borderColor: error ? 'error.main' : '#D3D7D9',
           borderWidth: '1px',
           borderStyle: 'solid',
-          borderRadius: '5px',
-          fontSize: { xs: '14px !important', md: '16px !important' },
+          borderRadius: '8px',
+          boxShadow: '0px 1px 2px rgba(10, 13, 18, 0.05)',
+          fontFamily: 'Poppins',
+          fontSize: { xs: '14px !important', md: '14px !important' },
+          color: '#454545',
           ...sx,
-          height: '32px',
+          height: '42px',
         }}
-        inputProps={{ id:name, 'aria-hidden': false, 'aria-label': label || name, 'aria-labelledby':name }}
+        inputProps={{
+          id: name,
+          'aria-hidden': false,
+          'aria-label': label || name,
+          'aria-labelledby': name,
+        }}
         input={<StyledOutlinedInput error={error} />}
         onChange={(event) => onChange(event.target.name, event.target.value)}
         onBlur={(event) => onBlur && onBlur(event.target.name, event.target.value)}

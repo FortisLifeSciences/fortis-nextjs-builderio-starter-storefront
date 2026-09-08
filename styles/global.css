@@ -121,6 +121,7 @@ body {
   width: 100%;
   overflow-x: hidden;
   padding-right: 0 !important;
+  font-family: 'Poppins', sans-serif;
 }
 #__next {
   width: 100%;

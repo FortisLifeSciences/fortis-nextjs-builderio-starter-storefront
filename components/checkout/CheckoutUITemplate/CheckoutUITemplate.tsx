@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect } from 'react'
 
 import { yupResolver } from '@hookform/resolvers/yup'
-import { Box, Stack, Button, SxProps, Typography, Divider } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
+import { Box, Stack, SxProps, Typography, Divider } from '@mui/material'
 import { Theme } from '@mui/material/styles'
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
@@ -211,6 +212,8 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
     checkout,
   ])
 
+  const couponDiscountDescriptions = orderGetters.getCouponDiscountDescriptions(checkout)
+
   const orderSummaryArgs = {
     nameLabel: t('Order Summary'),
     subTotalLabel: `Subtotal`,
@@ -222,6 +225,8 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
     checkoutLabel: t('go-to-checkout'),
     shippingLabel: t('go-to-shipping'),
     backLabel: t('go-back'),
+    showItems: true,
+    editHref: '/cart',
     promoComponent: (
       <PromoCodeBadge
         onApplyCouponCode={handleApplyCouponCode}
@@ -232,6 +237,10 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
         discountThresholdMessages={
           checkout?.discountThresholdMessages ? checkout?.discountThresholdMessages : []
         }
+        discountDescriptions={couponDiscountDescriptions}
+        invalidCouponCodes={(checkout as any)?.invalidCoupons?.map(
+          (c: any) => c?.couponCode as string
+        )}
       />
     ),
   }
@@ -244,30 +253,35 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
     <Stack
       sx={{ paddingTop: '20px', paddingBottom: { md: '40px' } }}
       direction={{ xs: 'column', md: 'row' }}
-      gap={0}
+      justifyContent={{ md: 'space-between' }}
+      gap={{ xs: 4, md: 0 }}
     >
-      <Stack sx={{ width: '100%', maxWidth: '920' }} gap={1}>
+      <Stack sx={{ width: '100%', maxWidth: '630px', flexShrink: { md: 1, lg: 0 } }} gap={1}>
         <Typography variant="h1" sx={{ color: 'primary.main' }}>
           {t('checkout')}
         </Typography>
 
-        <KiboStepper isSticky={true}>{children}</KiboStepper>
+        {/* A single-step checkout (guest, or the logged-in PO checkout) has nothing to
+        show numbered circles for - key off the step count rather than auth state so both
+        collapse the same way. */}
+        <KiboStepper isSticky={true} hideStepIndicator={steps.length <= 1}>
+          {children}
+        </KiboStepper>
 
-        {activeStep < buttonLabels.length && (
+        {activeStep < steps.length - 1 && (
           <Stack direction="column" gap={2} justifyContent={'end'} alignItems={'flex-end'}>
             <Divider orientation="horizontal" flexItem sx={{ mt: 2 }} />
-            <Button
+            <LoadingButton
               variant="contained"
               color="primary"
               sx={{ ...buttonStyle }}
               fullWidth
+              loading={isSubmitting}
               onClick={handleSubmit}
-              disabled={
-                stepStatus !== STEP_STATUS.VALID || activeStep === steps.length - 1 || isSubmitting
-              }
+              disabled={stepStatus !== STEP_STATUS.VALID || activeStep === steps.length - 1}
             >
-              {isSubmitting ? t('loading') : t('continue') || buttonLabels[activeStep]}
-            </Button>
+              {t('continue') || buttonLabels[activeStep]}
+            </LoadingButton>
             {/* <Button
               variant="contained"
               color="secondary"
@@ -291,7 +305,7 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
             lg: '380px',
           },
           height: 'fit-content',
-          marginLeft: { lg: '1rem' },
+          flexShrink: 0,
           position: { md: 'sticky' },
           top: '120px',
           marginTop: '82px',

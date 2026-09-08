@@ -260,9 +260,9 @@ const StandardShippingStep = (props: ShippingProps) => {
   )
 
   const handleSaveShippingMethod = async (shippingMethodCode: string) => {
-    const shippingMethodName = shippingMethods.find(
-      (method) => method.shippingMethodCode === shippingMethodCode
-    )?.shippingMethodName as string
+    const shippingMethodName =
+      shippingMethods.find((method) => method.shippingMethodCode === shippingMethodCode)
+        ?.shippingMethodName ?? ''
 
     try {
       await updateOrderShippingInfo.mutateAsync({

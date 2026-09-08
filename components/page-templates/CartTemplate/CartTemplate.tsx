@@ -17,7 +17,7 @@ import {
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
-import { CartItemList } from '@/components/cart'
+import { CartItemList, EmptyCart } from '@/components/cart'
 import { PromoCodeBadge, OrderSummary, Price } from '@/components/common'
 import { ConfirmationDialog, StoreLocatorDialog } from '@/components/dialogs'
 import { LoginDialog } from '@/components/layout'
@@ -47,7 +47,6 @@ export interface CartTemplateProps {
   updatedCart: CrCart
   cartTopContentSection?: any
   cartBottomContentSection?: any
-  cartEmptyContentSection?: any
 }
 
 const CartTemplate = (props: CartTemplateProps) => {
@@ -55,7 +54,7 @@ const CartTemplate = (props: CartTemplateProps) => {
   const { data: cart } = useGetCart(props?.cart)
   const updatedCart = props?.updatedCart
   const { refetchCart } = useRefetchCart()
-  const { cartTopContentSection, cartBottomContentSection, cartEmptyContentSection } = props
+  const { cartTopContentSection, cartBottomContentSection } = props
   const { t } = useTranslation('common')
   const theme = useTheme()
   const isMobileViewport = useMediaQuery(theme.breakpoints.down('md'))
@@ -65,7 +64,7 @@ const CartTemplate = (props: CartTemplateProps) => {
   const { updateCartItemQuantity } = useUpdateCartItemQuantity()
   const { deleteCartItem } = useDeleteCartItem()
   const { showModal, closeModal } = useModalContext()
-  const { isAuthenticated, user } = useAuthContext()
+  const { user } = useAuthContext()
 
   const cartItemCount = cartGetters.getCartItemCount(cart)
   const cartItems = cartGetters.getCartItems(cart)
@@ -89,7 +88,11 @@ const CartTemplate = (props: CartTemplateProps) => {
         couponCode,
       })
       if (response?.invalidCoupons?.length) {
-        setPromoError(`<strong>${couponCode}</strong> ${t('invalidPromoError')}`)
+        setPromoError(
+          `<strong>${couponCode}</strong> ${
+            response.invalidCoupons[0]?.reason || t('invalidPromoError')
+          }`
+        )
       }
     } catch (err) {
       console.error(err)
@@ -123,17 +126,8 @@ const CartTemplate = (props: CartTemplateProps) => {
     }
   }
 
+  // Guest checkout is allowed, so unauthenticated shoppers go straight to checkout too.
   const handleForceLogin = async () => {
-    if (!isAuthenticated) {
-      showModal({
-        Component: LoginDialog,
-        props: {
-          isCartCheckout: true,
-          onLoginSuccess: proceedWithCheckout,
-        },
-      })
-      return
-    }
     await handleGotoCheckout()
   }
 
@@ -169,6 +163,8 @@ const CartTemplate = (props: CartTemplateProps) => {
     }
   }
 
+  const couponDiscountDescriptions = orderGetters.getCouponDiscountDescriptions(cart)
+
   const orderSummaryArgs = {
     nameLabel: t('cart-summary'),
     subTotalLabel: `${t('subtotal')}`,
@@ -186,6 +182,8 @@ const CartTemplate = (props: CartTemplateProps) => {
         discountThresholdMessages={
           cart?.discountThresholdMessages ? cart?.discountThresholdMessages : []
         }
+        discountDescriptions={couponDiscountDescriptions}
+        invalidCouponCodes={cart?.invalidCoupons?.map((c) => c?.couponCode as string)}
       />
     ),
   }
@@ -481,9 +479,9 @@ const CartTemplate = (props: CartTemplateProps) => {
           </Grid>
         </>
       )}
-      {!cart?.items?.length && cartEmptyContentSection && (
+      {!cart?.items?.length && (
         <Grid item xs={12}>
-          {cartEmptyContentSection}
+          <EmptyCart />
         </Grid>
       )}
       {cartBottomContentSection && (

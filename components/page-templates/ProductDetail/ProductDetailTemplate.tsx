@@ -435,7 +435,8 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
         })
 
         const result = await response.json()
-        setMinQuantity(result?.minQty)
+        // Fall back to 1 - undefined minQuantity broke the `quantity >= minQuantity` check below.
+        setMinQuantity(result?.minQty || 1)
         if (result?.minQty) setQuantity(result?.minQty)
         else setQuantity(1)
       } catch (error) {
@@ -1188,8 +1189,8 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                       >
                         <QuantitySelector
                           label="Quantity"
-                          quantity={quantity >= minQuantity ? quantity : minQuantity}
-                          minQty={minQuantity}
+                          quantity={quantity >= (minQuantity || 1) ? quantity : minQuantity || 1}
+                          minQty={minQuantity || 1}
                           {...(maxQuantity ? { maxQuantity } : {})}
                           onIncrease={() => setQuantity((prevQuantity) => Number(prevQuantity) + 1)}
                           onDecrease={() => setQuantity((prevQuantity) => Number(prevQuantity) - 1)}

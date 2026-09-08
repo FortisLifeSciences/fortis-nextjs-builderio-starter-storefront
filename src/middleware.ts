@@ -147,15 +147,11 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next()
     }
   }
-  if (
-    request.nextUrl.pathname.startsWith('/my-account') ||
-    request.nextUrl.pathname.startsWith('/checkout')
-  ) {
+  // /checkout intentionally allows guest (unauthenticated) access here - guest checkout
+  // is a supported flow. Only /my-account requires a signed-in session.
+  if (request.nextUrl.pathname.startsWith('/my-account')) {
     if (checkIsAuthenticated(request)) {
       return NextResponse.next()
-    } else if (request.nextUrl.pathname.startsWith('/checkout')) {
-      const cartUrl = new URL('/cart', request.url)
-      return NextResponse.redirect(cartUrl)
     }
 
     const homeUrl = new URL('/', request.url)
