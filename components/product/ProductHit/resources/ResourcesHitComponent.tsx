@@ -43,7 +43,7 @@ interface RefinementListItem {
   isRefined: boolean
 }
 
-const ResourcesHitComponent = ({ categoryCode, facets }: { categoryCode: string; facets: any }) => {
+const ResourcesHitComponent = ({ categoryCode }: { categoryCode: string }) => {
   const infiniteHits = useInfiniteHits<BaseHit>(),
     results = infiniteHits.results,
     isMobile = useMediaQuery('(max-width:600px)')
@@ -85,8 +85,6 @@ const ResourcesHitComponent = ({ categoryCode, facets }: { categoryCode: string;
   const [isFilterOpen, setIsFilterOpen] = useState(false)
 
   const { publicRuntimeConfig } = getConfig()
-  const algoliaFacets = facets
-  const facetKeys = Object.keys(algoliaFacets || {})
   const expandedFacetsRef = useRef<{ [key: string]: boolean }>({})
   const [, forceUpdate] = useState(0) // manual trigger
 

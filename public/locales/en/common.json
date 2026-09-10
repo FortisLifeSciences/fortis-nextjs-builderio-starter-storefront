@@ -297,6 +297,7 @@
   "select-product-option": "Select product option",
   "products-to-show": "Showing {{m}} out of {{n}} items",
   "no-of-products": "{{count}} Products",
+  "no-of-resources": "{{count}} Resources",
   "best-match": "Best Match",
   "view": "View",
   "show-more": "Show More",
