@@ -11,6 +11,8 @@ import getCategoryTree from '@/lib/api/operations/get-category-tree'
 import { productIndex, searchClient, instantSearchClient } from '@/lib/api/util/algolia'
 import type { CategoryTreeResponse } from '@/lib/types'
 import type { MetaData } from '@/lib/types'
+import { combineSchemaJson, extractBuilderSchema } from '@/lib/utils/extract-builder-schema'
+import { renderSchemaMarkup } from '@/lib/utils/generate-schema-markup'
 
 import type { GetServerSidePropsContext } from 'next'
 
@@ -149,9 +151,13 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   const metaData = getMetaData(page?.data || section?.data)
 
+  const { schemaJson: pageSchemaJson } = extractBuilderSchema(page)
+  const { schemaJson: sectionSchemaJson } = extractBuilderSchema(section)
+
   return {
     props: {
       page: page || null,
+      schemaJson: combineSchemaJson(pageSchemaJson, sectionSchemaJson),
       // Ensure metaData is pulled from either the page or the section data so it's available server-side
       metaData: getMetaData(page?.data || section?.data) || null,
       categoriesTree: categoriesTree || null,
@@ -178,6 +184,7 @@ const Page = (props: any) => {
     pathLength,
     pCategory,
     pageURL,
+    schemaJson,
   } = props
   const noIndex = page?.data?.noIndex
     ? page?.data?.noIndex
@@ -224,6 +231,7 @@ const Page = (props: any) => {
           {metaDescription && <meta property="og:description" content={metaDescription} />}
           {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
           {noIndex && <meta name="robots" content="noindex,nofollow" />}
+          {schemaJson && renderSchemaMarkup(schemaJson)}
         </Head>
         <BuilderComponent
           model={publicRuntimeConfig?.builderIO?.modelKeys?.categoryTopSection}
@@ -262,6 +270,7 @@ const Page = (props: any) => {
         {metaDescription && <meta property="og:description" content={metaDescription} />}
         {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
         {noIndex && <meta name="robots" content="noindex,nofollow" />}
+        {schemaJson && renderSchemaMarkup(schemaJson)}
       </Head>
       <BuilderComponent
         model={publicRuntimeConfig?.builderIO?.modelKeys?.defaultPage}
