@@ -182,7 +182,10 @@ const ProductHitListView = ({
 
   // Ensure Next.js <Link> gets a relative path — absolute URLs trigger a full page reload
   const productHref = (() => {
-    const url = hit?.product_url || '#'
+    const formatProductUrl = hit?.product_url.includes('libraries')
+      ? hit?.product_url.toLowerCase()
+      : hit?.product_url
+    const url = formatProductUrl || '#'
     if (!url.startsWith('http')) return url
     try {
       const u = new URL(url)

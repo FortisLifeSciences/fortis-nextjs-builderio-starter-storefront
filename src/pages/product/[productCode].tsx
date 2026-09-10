@@ -63,6 +63,8 @@ function getMetaData(product: Product): MetaData {
   const categoryCode = product?.categories?.[0]?.categoryCode || ''
   const productSlug = product?.content?.seoFriendlyUrl?.replace(/^\/+/, '') || ''
   const parentProductCode = product?.productCode || ''
+  const formattedParentProductCode =
+    categoryCode === 'libraries' ? parentProductCode.toLowerCase() : parentProductCode
   return {
     title: product?.content?.metaTagTitle || null,
     description: product?.content?.metaTagDescription || null,
@@ -70,7 +72,7 @@ function getMetaData(product: Product): MetaData {
     canonicalUrl:
       `${
         publicRuntimeConfig?.baseUrl || 'https://www.fortislife.com/'
-      }products/${categoryCode}/${productSlug}/${parentProductCode}` || null,
+      }products/${categoryCode}/${productSlug}/${formattedParentProductCode}` || null,
     robots: null,
   }
 }
@@ -310,11 +312,9 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
   const { sliceValue } = queryParams
   const { selected } = queryParams
 
-  if (isFallback || isProductLoading) {
-    return <ProductDetailSkeleton />
-  }
   const pdpBuilderSectionKey = publicRuntimeConfig?.builderIO?.modelKeys?.productDetailSection || ''
   const breadcrumbs = product ? productGetters.getBreadcrumbs(product) : []
+  const isProductPending = isFallback || isProductLoading || !productResponseData
 
   return (
     <>
@@ -332,7 +332,9 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
         )}
         {schemaJson && renderSchemaMarkup(schemaJson)}
       </Head>
-      {productResponseData ? (
+      {isProductPending ? (
+        <ProductDetailSkeleton />
+      ) : (
         <ProductDetailTemplate
           product={{ ...product, ...productResponseData }}
           productVariations={productVariations}
@@ -345,8 +347,6 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
         >
           <BuilderComponent model={pdpBuilderSectionKey} content={props.section} />
         </ProductDetailTemplate>
-      ) : (
-        <ProductDetailSkeleton />
       )}
     </>
   )
