@@ -8,7 +8,7 @@ import { InstantSearch, Configure } from 'react-instantsearch-hooks-web'
 
 import ResourcesHitComponent from '@/components/product/ProductHit/resources/ResourcesHitComponent'
 import getCategoryTree from '@/lib/api/operations/get-category-tree'
-import { productIndex, searchClient, instantSearchClient } from '@/lib/api/util/algolia'
+import { searchClient, instantSearchClient, productIndex } from '@/lib/api/util/algolia'
 import type { CategoryTreeResponse } from '@/lib/types'
 import type { MetaData } from '@/lib/types'
 
@@ -88,10 +88,11 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   let section = []
   let page
-  let products
-  let facets
-
+  // let products;
+  // let facets;
   if (resourcesPage && resourceCategoryCode) {
+    // Commented out for now as we are not using algolia search for resources page - WEB-1657
+
     /*const result = await productIndex.search('', {
       filters: `category_url:"${
         pathLength === 1
@@ -107,18 +108,18 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 */
     //updated fro algolia version update - WEB-1657
     // ✅ Fix
-    const result = await productIndex.search('', {
-      filters: `category_url:"${
-        pathLength === 1
-          ? resourceCategoryCode
-          : pCategory !== null
-          ? `${pCategory}/${resourceCategoryCode}`
-          : ''
-      }"`,
-      facets: ['*'],
-    })
-    products = result.hits
-    facets = result.facets as Record<string, Record<string, number>>
+    // const result = await productIndex.search('', {
+    //   filters: `category_url:"${
+    //     pathLength === 1
+    //       ? resourceCategoryCode
+    //       : pCategory !== null
+    //       ? `${pCategory}/${resourceCategoryCode}`
+    //       : ''
+    //   }"`,
+    //   facets: ['*'],
+    // })
+    // products = result.hits
+    // facets = result.facets as Record<string, Record<string, number>>
 
     section = await builder
       .get(categoryTopSection, {
@@ -159,7 +160,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       resourcesPage: resourcesPage,
       resourceCategoryCode: resourceCategoryCode || null,
       pCategory: pCategory || null,
-      facets: facets || null,
       pathLength,
       urlFirstPart: pathnameArr?.[0] || null,
       pageURL: pageURL || null,
@@ -169,16 +169,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 }
 
 const Page = (props: any) => {
-  const {
-    page,
-    resourcesPage,
-    section,
-    resourceCategoryCode,
-    facets,
-    pathLength,
-    pCategory,
-    pageURL,
-  } = props
+  const { page, resourcesPage, section, resourceCategoryCode, pathLength, pCategory, pageURL } =
+    props
   const noIndex = page?.data?.noIndex
     ? page?.data?.noIndex
     : section?.data?.noIndex
@@ -243,7 +235,7 @@ const Page = (props: any) => {
               }"`,
             } as any)}
           />
-          <ResourcesHitComponent categoryCode={resourceCategoryCode} facets={facets} />
+          <ResourcesHitComponent categoryCode={resourceCategoryCode} />
         </InstantSearch>
       </>
     )
