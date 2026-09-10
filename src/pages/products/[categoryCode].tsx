@@ -38,6 +38,8 @@ import {
 import { hasAnalyticsConsent, onConsentChange } from '@/lib/consent/consent'
 import { getFacetLabel } from '@/lib/helpers/facetMapping'
 import type { MetaData, PageWithMetaData } from '@/lib/types'
+import { extractBuilderSchema } from '@/lib/utils/extract-builder-schema'
+import { renderSchemaMarkup } from '@/lib/utils/generate-schema-markup'
 
 import type { BaseHit } from 'instantsearch.js'
 import type {
@@ -51,6 +53,7 @@ interface CategoryPageType extends PageWithMetaData {
   seoFriendlyUrl?: string
   categoryCode?: string
   section?: any
+  schemaJson?: string
   facets: Record<string, any>
   searchableAttributes: any
 }
@@ -121,6 +124,29 @@ export async function getStaticPaths() {
     return { paths: [], fallback: 'blocking' }
   }
 }
+// updated start for WEB-1733
+const CATEGORY_CACHE_TTL = 60 * 60 * 1000
+let validCodes: Set<string> | null = null
+let validCodesAt = 0
+
+async function isValidCategory(code: string) {
+  if (!validCodes || Date.now() - validCodesAt > CATEGORY_CACHE_TTL) {
+    const res = await productIndex.search('', {
+      hitsPerPage: 0,
+      facets: ['category_pages'],
+      maxValuesPerFacet: 1000,
+    })
+    const categoryFacets = (res?.facets as Record<string, Record<string, number>>)?.category_pages
+    if (categoryFacets && Object.keys(categoryFacets).length) {
+      validCodes = new Set(Object.keys(categoryFacets).map((c) => c.toLowerCase()))
+      validCodesAt = Date.now()
+    }
+  }
+  if (!validCodes) return true // facet fetch failed — don't 404 the whole site
+  return validCodes.has(String(code || '').toLowerCase())
+}
+// updated end for WEB-1733
+
 function resolveLocalizedDeep(node: any, locale = 'Default'): any {
   if (Array.isArray(node)) return node.map((n) => resolveLocalizedDeep(n, locale))
   if (node && typeof node === 'object') {
@@ -139,6 +165,11 @@ export async function getStaticProps(
   const { locale, params } = context
   const { publicRuntimeConfig } = getConfig()
   const { categoryCode } = params as { categoryCode: string }
+  // Updated start for WEB-1733: reject unknown slugs before any Builder.io or Algolia request
+  if (!(await isValidCategory(categoryCode))) {
+    return { notFound: true, revalidate: 3600 }
+  }
+  // Updated end for WEB-1733
   const categoryTopSection = publicRuntimeConfig?.builderIO?.modelKeys?.categoryTopSection || ''
   const builderSection = await builder
     .get(categoryTopSection, {
@@ -169,9 +200,12 @@ export async function getStaticProps(
 
   const searchableAttributes = getStaticSearchableFacets()
 
+  const { schemaJson } = extractBuilderSchema(cleanSection)
+
   return {
     props: {
       categoryCode,
+      schemaJson: schemaJson || '',
       metaData: getMetaData(cleanSection?.data),
       section: cleanSection || null,
       ...(await serverSideTranslations(locale as string, ['common'])),
@@ -516,6 +550,7 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
         {metaTitle && <meta property="og:title" content={metaTitle} />}
         {metaDescription && <meta property="og:description" content={metaDescription} />}
         {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+        {props.schemaJson && renderSchemaMarkup(props.schemaJson)}
       </Head>
       <BuilderComponent
         model={publicRuntimeConfig?.builderIO?.modelKeys?.categoryTopSection}
