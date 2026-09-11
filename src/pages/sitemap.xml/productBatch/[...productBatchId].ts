@@ -72,7 +72,10 @@ function generateSiteMap(categoryItems: any) {
       if (product?.categories?.[0]?.categoryCode && product?.content?.seoFriendlyUrl) {
         productUrl = `${baseUrl}products/${product.categories[0].categoryCode}/${product.content.seoFriendlyUrl}/${product.productCode}`
       }
-
+      // Lowercase product URL for libraries
+      if (productUrl.includes('libraries')) {
+        productUrl = productUrl.toLowerCase()
+      }
       // Apply redirect
       try {
         const productPath = new URL(productUrl).pathname
@@ -129,6 +132,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res, query }) => 
 
     const productBatch = await fetchCursorsData(cursorMark)
     const sitemap = generateSiteMap(productBatch?.response)
+    console.log('sitemap : ', sitemap)
 
     res.setHeader('Content-Type', 'text/xml')
     // we send the XML to the browser
