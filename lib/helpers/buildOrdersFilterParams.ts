@@ -14,12 +14,20 @@ export const buildOrdersFilterParams = (params: {
   pageSize?: number
   orderNumber?: string
   billingEmail?: string
-}): { filter: string; startIndex: number; pageSize: number } => {
+  status?: string
+  sortBy?: string
+}): {
+  filter: string
+  startIndex: number
+  pageSize: number
+  sortBy?: string
+} => {
   const { publicRuntimeConfig } = getConfig()
   const variables = {
     filter: '',
-    startIndex: params.startIndex || publicRuntimeConfig.orderHistory.startIndex,
+    startIndex: params.startIndex ?? publicRuntimeConfig.orderHistory.startIndex,
     pageSize: params.pageSize || publicRuntimeConfig.orderHistory.pageSize,
+    ...(params.sortBy && { sortBy: params.sortBy }),
   }
 
   // To view order history page
@@ -38,9 +46,21 @@ export const buildOrdersFilterParams = (params: {
     variables.filter = searchFilters.join(' and ')
   }
 
+  if (params.status) {
+    const statusFilter = `status eq ${params.status}`
+    variables.filter = variables.filter
+      ? variables.filter.concat(` and ${statusFilter}`)
+      : statusFilter
+  }
+
   // To view order status page
   if (params.orderNumber && params.billingEmail) {
     variables.filter = `orderNumber eq ${params.orderNumber} and email eq ${params.billingEmail}`
+  } else if (params.orderNumber) {
+    const orderNumberFilter = `orderNumber eq ${params.orderNumber}`
+    variables.filter = variables.filter
+      ? variables.filter.concat(` and ${orderNumberFilter}`)
+      : orderNumberFilter
   }
   const defaultQuery = `status ne ${OrderStatus.ABANDONED}`
   variables.filter = variables.filter

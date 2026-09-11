@@ -1,21 +1,14 @@
 import React, { useState } from 'react'
 
-import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
-import { Box, Button, Grid, Typography, useMediaQuery, useTheme } from '@mui/material'
-import { grey } from '@mui/material/colors'
-import Link from 'next/link'
+import CloseIcon from '@mui/icons-material/Close'
+import { Box, Button, Grid, IconButton, Typography } from '@mui/material'
 import { useTranslation } from 'next-i18next'
 
-import { ProductViewDialog } from '@/components/b2b'
-import { QuantitySelector, KeyValueDisplay, KiboImage, Price } from '@/components/common'
-import { ProductOptionList } from '@/components/product'
-import { useModalContext } from '@/context'
-import { cartGetters, productGetters } from '@/lib/getters'
+import { QuantitySelector } from '@/components/common'
+import { cartGetters } from '@/lib/getters'
 import { uiHelpers } from '@/lib/helpers'
-import DefaultImage from '@/public/noImage.png'
 
-import { CrOrderItem, CrProductOption, CrWishlistItem } from '@/lib/gql/types'
+import { CrOrderItem, CrWishlistItem } from '@/lib/gql/types'
 
 export interface ListItemProps {
   item: CrWishlistItem
@@ -24,189 +17,121 @@ export interface ListItemProps {
   listId?: string
 }
 
-export interface ProductViewProps {
-  item: CrWishlistItem
-}
-
-export interface ProductViewDialogProps {
-  item: CrWishlistItem
-  onClose: () => void
+const styles = {
+  row: {
+    alignItems: 'flex-start',
+    paddingTop: '1rem',
+    paddingBottom: '1rem',
+    borderTop: '1px solid',
+    borderColor: 'grey.300',
+  },
+  productName: {
+    fontSize: '0.9375rem',
+    color: 'text.primary',
+  },
+  productMeta: {
+    fontSize: '0.75rem',
+    color: 'text.secondary',
+  },
+  unitPrice: {
+    fontSize: '0.9375rem',
+    fontWeight: 700,
+    textAlign: 'right',
+  },
+  lineTotal: {
+    fontSize: '0.75rem',
+    color: 'text.secondary',
+    textAlign: 'right',
+  },
+  detailsLink: {
+    fontSize: '0.75rem',
+    fontWeight: 600,
+    color: 'primary.main',
+    padding: 0,
+    minWidth: 0,
+    marginTop: '0.25rem',
+    '&:hover': { backgroundColor: 'transparent', textDecoration: 'underline' },
+  },
 }
 
 const ListItem = (props: ListItemProps) => {
   const { item, onChangeQuantity, onDeleteItem } = props
   const { product } = item
 
-  const { showModal, closeModal } = useModalContext()
-  const theme = useTheme()
   const { t } = useTranslation('common')
-  const mdScreen = useMediaQuery<boolean>(theme.breakpoints.up('md'))
-  const [itemQuantity, setItemQuantity] = useState(item?.quantity || 1)
-
   const { getProductLink } = uiHelpers()
+  const [itemQuantity, setItemQuantity] = useState(item?.quantity || 1)
 
   const handleQuantityUpdate = (quantity: number) => {
     setItemQuantity(quantity)
     onChangeQuantity(item.id ? item.id : (product?.productCode as string), quantity)
   }
 
-  function openViewDetailsModal() {
-    showModal({
-      Component: ProductViewDialog,
-      props: {
-        onClose: closeModal,
-        item: item,
-      },
-    })
-  }
+  const optionValues = (product?.options ?? [])
+    .map((option) => option?.value)
+    .filter(Boolean)
+    .map(String)
+
+  const linePrice = cartGetters.getLineItemPrice(item as CrOrderItem)
+  const unitPrice = linePrice.special || linePrice.regular || 0
 
   return (
-    <Grid container sx={{ borderBottom: `1px solid ${grey[300]}`, padding: '10px 0' }}>
-      <Grid item xs={mdScreen ? 2 : 3}>
-        <Box
-          display={'flex'}
-          justifyContent={'center'}
-          alignItems={'center'}
-          position={'relative'}
-          minWidth={'80px'}
-          sx={{ aspectRatio: 1 }}
-        >
-          <Link href={getProductLink(product?.productCode as string) || ''} passHref>
-            <KiboImage
-              src={
-                productGetters.handleProtocolRelativeUrl(product?.imageUrl as string) ||
-                DefaultImage
-              }
-              alt={product?.name as string}
-              style={{ width: '80px', height: '80px' }}
-            />
-          </Link>
-        </Box>
+    <Grid container sx={{ ...styles.row }}>
+      <Grid item xs={3} sm={2} sx={{ paddingRight: '0.5rem' }}>
+        <QuantitySelector
+          quantity={item?.quantity}
+          onIncrease={() => handleQuantityUpdate(itemQuantity + 1)}
+          onDecrease={() => handleQuantityUpdate(itemQuantity - 1)}
+          onQuantityUpdate={(q) => handleQuantityUpdate(q)}
+        />
       </Grid>
-      <Grid item xs={mdScreen ? 8 : 7}>
-        <Typography
-          sx={{ marginBottom: mdScreen ? '10px' : '8px', marginTop: '0' }}
-          fontWeight={'bold'}
-        >
+
+      <Grid item xs={7} sm={8}>
+        <Typography component="p" sx={{ ...styles.productName }}>
           {product?.name}
         </Typography>
-        {!mdScreen && (
-          <Box>
-            {item.subtotal && (
-              <KeyValueDisplay
-                option={{
-                  name: t('total'),
-                  value: `$${item.subtotal}`,
-                }}
-                sx={{ fontSize: '14px' }}
-                variant="body1"
-              />
-            )}
-
-            <Box sx={{ marginBottom: '12px' }}>
-              <KeyValueDisplay
-                option={{
-                  name: t('list-item'),
-                  value: `$${product?.price?.price}`,
-                }}
-                sx={{ fontStyle: 'italic', display: 'inline', fontSize: '12px' }}
-                variant="body2"
-              />
-            </Box>
-          </Box>
+        <Typography component="p" sx={{ ...styles.productMeta }}>
+          {product?.variationProductCode || product?.productCode}
+        </Typography>
+        {Boolean(optionValues.length) && (
+          <Typography component="p" sx={{ ...styles.productMeta }}>
+            {optionValues.join(', ')}
+          </Typography>
         )}
-        <Box>
-          <KeyValueDisplay
-            option={{
-              name: t('qty'),
-              value: (
-                <QuantitySelector
-                  quantity={item?.quantity}
-                  onIncrease={() => handleQuantityUpdate(itemQuantity + 1)}
-                  onDecrease={() => handleQuantityUpdate(itemQuantity - 1)}
-                  onQuantityUpdate={(q) => handleQuantityUpdate(q)}
-                />
-              ),
-            }}
-            variant="subtitle1"
-          />
-        </Box>
-        <Box data-testid="productCode">
-          <KeyValueDisplay
-            option={{
-              name: t('product-code'),
-              value: product?.variationProductCode || product?.productCode,
-            }}
-            variant="subtitle2"
-          />
-        </Box>
-        <Box data-testid="options">
-          {product?.options && (
-            <ProductOptionList options={product?.options as CrProductOption[]} />
-          )}
-        </Box>
-
-        {mdScreen && (
-          <Box component="span">
-            {item.subtotal && (
-              <KeyValueDisplay
-                option={{
-                  name: t('total'),
-                  value: (
-                    <Price
-                      variant="body2"
-                      fontWeight="bold"
-                      price={t('currency', {
-                        val: cartGetters.getLineItemPrice(item as CrOrderItem).regular?.toString(),
-                      })}
-                      salePrice={
-                        cartGetters.getLineItemPrice(item as CrOrderItem).special
-                          ? t('currency', {
-                              val: cartGetters.getLineItemPrice(item as CrOrderItem).special,
-                            })
-                          : undefined
-                      }
-                    />
-                  ),
-                }}
-                sx={{ fontSize: '14px', marginRight: '10px' }}
-                variant="body1"
-              />
-            )}
-            {item?.productDiscounts?.map((discount) => (
-              <KeyValueDisplay
-                key={`${discount?.discount?.name}`}
-                color="error.main"
-                option={{
-                  name: `${discount?.discount?.name}:`,
-                  value: `-${t('currency', { val: discount?.impact })} `,
-                }}
-              />
-            ))}
-          </Box>
-        )}
-      </Grid>
-      <Grid item xs={2} flexDirection="row" alignItems={mdScreen ? 'center' : 'flex-start'}>
         <Button
-          onClick={openViewDetailsModal}
+          variant="text"
+          component="a"
+          href={getProductLink(product?.productCode as string) || ''}
+          target="_blank"
+          rel="noopener noreferrer"
           data-testid="product-modal-btn"
-          color="inherit"
-          sx={{ minWidth: '20px', padding: '0px', marginRight: mdScreen ? '10px' : 0 }}
-          disableTouchRipple
+          sx={{ ...styles.detailsLink }}
         >
-          {mdScreen ? t('view-details') : ''}
+          {t('view-details')}
         </Button>
-        <Button
-          color="inherit"
-          aria-label="delete"
-          id={item.id as string}
-          onClick={() => onDeleteItem(item.id ? item.id : (product?.productCode as string))}
-          startIcon={<DeleteIcon />}
-          sx={{ minWidth: '20px', padding: '0px' }}
-          disableTouchRipple
-        >
-          {mdScreen ? t('remove') : ''}
-        </Button>
+      </Grid>
+
+      <Grid item xs={2} sm={2}>
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end' }}>
+          <Box>
+            <Typography component="p" sx={{ ...styles.unitPrice }}>
+              {t('currency', { val: unitPrice })}
+            </Typography>
+            {item?.quantity > 1 && (
+              <Typography component="p" sx={{ ...styles.lineTotal }}>
+                {t('currency', { val: unitPrice * item.quantity })}
+              </Typography>
+            )}
+          </Box>
+          <IconButton
+            size="small"
+            aria-label={`${t('remove')} ${product?.name}`}
+            id={item.id as string}
+            onClick={() => onDeleteItem(item.id ? item.id : (product?.productCode as string))}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Box>
       </Grid>
     </Grid>
   )

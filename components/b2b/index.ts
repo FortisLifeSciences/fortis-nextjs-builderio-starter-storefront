@@ -1,4 +1,5 @@
 export { default as B2BProductSearch } from '@/components/b2b/B2BProductSearch/B2BProductSearch'
+export { default as ListProductSearch } from '@/components/b2b/Lists/ListProductSearch/ListProductSearch'
 export { default as UserTable } from './User/UserTable/UserTable'
 export { default as UserForm } from './User/UserForm/UserForm'
 export { default as ViewUserDetail } from './User/ViewUserDetail/ViewUserDetail'
