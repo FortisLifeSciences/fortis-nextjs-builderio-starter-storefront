@@ -185,6 +185,8 @@ const getOtherBillingAddress = (addresses: CustomerContact[], defaultBillingAddr
   return Array.from(new Set(addresses?.filter((each) => each?.id != defaultBillingAddressId))) || []
 }
 
+const getCompanyOrOrganization = (user: CustomerAccount) => user?.companyOrOrganization ?? ''
+
 const getCustomerAccountDetails = (user: CustomerAccount) => {
   return {
     id: getUserId(user),
@@ -192,6 +194,7 @@ const getCustomerAccountDetails = (user: CustomerAccount) => {
     lastName: getLastName(user),
     emailAddress: getEmailAddress(user),
     fullName: getFullName(user),
+    companyOrOrganization: getCompanyOrOrganization(user),
   }
 }
 
@@ -212,6 +215,7 @@ export const userGetters = {
   getLastName,
   getFullName,
   getEmailAddress,
+  getCompanyOrOrganization,
   getUserId,
   getAllShippingAddresses,
   getAllBillingAddresses,
