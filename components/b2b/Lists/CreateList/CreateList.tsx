@@ -1,22 +1,13 @@
 import React, { FormEvent, useEffect, useState } from 'react'
 
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
-import {
-  Button,
-  useMediaQuery,
-  useTheme,
-  IconButton,
-  Box,
-  Typography,
-  Stack,
-  Link,
-} from '@mui/material'
+import { Button, Grid, Box, Typography, Stack } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
-import { B2BProductSearch, ListItem } from '@/components/b2b'
-import styles from '@/components/b2b/Lists/CreateList/CreateList.style'
+import { ListItem, ListProductSearch } from '@/components/b2b'
+import { listFormStyles } from '@/components/b2b/Lists/listFormStyles'
 import { KiboTextBox } from '@/components/common'
+import { accountActionButton, accountTextButton } from '@/components/my-account/common'
 import { useAuthContext, useSnackbarContext } from '@/context'
 import {
   useAddToWishlistItem,
@@ -27,7 +18,6 @@ import {
   useGetCustomerWishlist,
 } from '@/hooks'
 import { productGetters } from '@/lib/getters'
-import { ProductCustom } from '@/lib/types'
 
 import { CrWishlistItem, Product } from '@/lib/gql/types'
 
@@ -41,10 +31,8 @@ const CreateList = (props: CreateListProps) => {
 
   const [newListState, setNewListState] = useState<any>({})
   const [listName, setListName] = useState('')
-  const { openProductQuickViewModal, handleDeleteCurrentCart } = useProductCardActions()
+  const { handleDeleteCurrentCart } = useProductCardActions()
 
-  const theme = useTheme()
-  const mdScreen = useMediaQuery<boolean>(theme.breakpoints.up('md'))
   const router = useRouter()
   const { t } = useTranslation('common')
   const { user } = useAuthContext()
@@ -98,27 +86,11 @@ const CreateList = (props: CreateListProps) => {
   }
 
   const handleAddProduct = async (product?: any) => {
-    // setting state for creation of list in backend
-    if (productGetters.isVariationProduct(product as Product)) {
-      const dialogProps = {
-        title: t('product-configuration-options'),
-        cancel: t('cancel'),
-        addItemToList: t('add-item-to-list'),
-        isB2B: true,
-        listMode: 'create',
-      }
-      openProductQuickViewModal({
-        product: product as ProductCustom,
-        dialogProps,
-        onUpdateListData,
-      })
-    } else {
-      await addToWishlist.mutateAsync({
-        product,
-        customerAccountId: user?.id as number,
-        currentWishlist: newListState,
-      })
-    }
+    await addToWishlist.mutateAsync({
+      product,
+      customerAccountId: user?.id as number,
+      currentWishlist: newListState,
+    })
   }
 
   const handleCreateListAndUpdateWishlistName = async () => {
@@ -171,71 +143,9 @@ const CreateList = (props: CreateListProps) => {
 
   return (
     <>
-      <Box>
-        {mdScreen && (
-          <Button
-            data-testid="my-account-button"
-            sx={{ paddingLeft: 0, fontSize: '14px', color: '#000' }}
-            onClick={() => {
-              router.push('/my-account')
-            }}
-            startIcon={<ArrowBackIosIcon sx={{ width: '14px' }} />}
-          >
-            {t('my-account')}
-          </Button>
-        )}
-        <Typography
-          variant="h3"
-          sx={{ ...styles.heading, margin: mdScreen ? '20px 0' : '0px 10px 0px 0px' }}
-          fontWeight={'bold'}
-        >
-          {mdScreen ? (
-            <>
-              <Box sx={{ fontSize: '28px', marginRight: 'auto', display: 'inline' }}>
-                {t('create-new-list')}
-              </Box>
-              <Box component="span" gap={2} display="inline-flex">
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  type="button"
-                  onClick={() => {
-                    onCreateFormToggle(false)
-                  }}
-                >
-                  {t('cancel')}
-                </Button>
-                <Button
-                  variant="contained"
-                  type="submit"
-                  form="wishlist-form"
-                  disabled={!newListState?.name}
-                >
-                  {t('save-and-close')}
-                </Button>
-              </Box>
-            </>
-          ) : (
-            <>
-              <IconButton
-                sx={{ paddingLeft: 0, marginLeft: 0 }}
-                data-testid="my-account-button"
-                onClick={() => {
-                  router.push('/my-account')
-                }}
-              >
-                <ArrowBackIosIcon sx={{ width: '14px', color: '#000' }} />
-              </IconButton>
-              <Box sx={{ marginLeft: 'auto', marginRight: 'auto', display: 'inline' }}>
-                {t('create-new-list')}
-              </Box>
-            </>
-          )}
-        </Typography>
-      </Box>
-      <Box>
-        <form onSubmit={handleSubmit} style={styles.nameForm} id="wishlist-form">
-          <Box sx={{ ...styles.listSection, flexDirection: 'column' }}>
+      <Box sx={{ ...listFormStyles.card }}>
+        <form onSubmit={handleSubmit} id="wishlist-form">
+          <Box sx={{ maxWidth: '26rem' }}>
             <KiboTextBox
               placeholder={t('name-this-list')}
               name="listName"
@@ -243,46 +153,69 @@ const CreateList = (props: CreateListProps) => {
               onChange={(_, value) => setListName(value)}
               onBlur={handleCreateListAndUpdateWishlistName}
               label={t('list-name')}
-              sx={{ maxWidth: '360px' }}
+              sx={{ ...listFormStyles.textBox }}
             />
           </Box>
-          {listName && (
-            <Box sx={{ maxWidth: '360px' }}>
-              <B2BProductSearch onAddProduct={handleAddProduct} />
-            </Box>
-          )}
         </form>
-        <Box>
-          <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <Typography variant="h3" fontWeight={'bold'}>
-              {t('list-items')}
-            </Typography>
-            {newListState?.items?.length > 0 && (
-              <Stack direction="row">
-                <Button
-                  onClick={handleEmptyCartAndAddListToCart}
-                  sx={{ ...styles.addAllItemsToCartButton }}
-                >
-                  <Link sx={{ ...styles.addAllItemsToCartLink }}>
-                    {t('empty-cart-add-list-to-cart')}
-                  </Link>
-                </Button>
-                <Button onClick={handleAddListToCart} sx={{ ...styles.addAllItemsToCartButton }}>
-                  <Link sx={{ ...styles.addAllItemsToCartLink }}>{t('add-all-items-to-cart')}</Link>
-                </Button>
-              </Stack>
-            )}
-          </Stack>
-        </Box>
+
+        {listName && (
+          <Box sx={{ maxWidth: '26rem', marginTop: '1.25rem' }}>
+            <ListProductSearch onAddProduct={handleAddProduct} />
+          </Box>
+        )}
+
         {!newListState?.name && (
-          <Typography variant="body2" color="GrayText" marginTop="20px">
+          <Typography sx={{ ...listFormStyles.hint }}>
             {t('add-list-name-to-search-products')}
           </Typography>
         )}
-        {newListState?.items?.length === 0 ? (
-          <Typography variant="body2" color="GrayText" marginTop="20px">
-            {t('no-item-in-list-text')}
+      </Box>
+
+      <Box sx={{ ...listFormStyles.card }}>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          sx={{ ...listFormStyles.itemsHeader }}
+          gap={1}
+        >
+          <Typography component="h2" sx={{ ...listFormStyles.sectionTitle, marginBottom: 0 }}>
+            {t('list-items')}
           </Typography>
+          {newListState?.items?.length > 0 && (
+            <Stack direction="row" gap={1}>
+              <Button
+                variant="text"
+                sx={{ ...listFormStyles.inlineLink }}
+                onClick={handleEmptyCartAndAddListToCart}
+              >
+                {t('empty-cart-add-list-to-cart')}
+              </Button>
+              <Button
+                variant="text"
+                sx={{ ...listFormStyles.inlineLink }}
+                onClick={handleAddListToCart}
+              >
+                {t('add-all-items-to-cart')}
+              </Button>
+            </Stack>
+          )}
+        </Stack>
+
+        {Boolean(newListState?.items?.length) && (
+          <Grid container sx={{ ...listFormStyles.itemsHeaderRow }}>
+            <Grid item xs={3} sm={2}>
+              {t('qty')}
+            </Grid>
+            <Grid item xs={7} sm={8}>
+              {t('product')}
+            </Grid>
+            <Grid item xs={2} sm={2} sx={{ textAlign: 'right' }}>
+              {t('unit-price')}
+            </Grid>
+          </Grid>
+        )}
+
+        {!newListState?.items?.length ? (
+          <Typography sx={{ ...listFormStyles.hint }}>{t('no-item-in-list-text')}</Typography>
         ) : (
           newListState?.items?.map((item: CrWishlistItem, index: any) => (
             <ListItem
@@ -293,31 +226,30 @@ const CreateList = (props: CreateListProps) => {
             />
           ))
         )}
-        {!mdScreen && (
-          <Box display={'flex'} flexDirection={'column'} gap={2} marginTop={'20px'}>
-            <Button
-              variant="contained"
-              color="secondary"
-              type="button"
-              onClick={() => {
-                onCreateFormToggle(false)
-              }}
-              sx={{ width: '100%' }}
-            >
-              {t('cancel')}
-            </Button>
-            <Button
-              variant="contained"
-              type="submit"
-              form="wishlist-form"
-              sx={{ width: '100%' }}
-              disabled={!newListState?.name}
-            >
-              {t('save-and-close')}
-            </Button>
-          </Box>
-        )}
       </Box>
+
+      <Stack direction="row" alignItems="center" gap={2}>
+        <Button
+          variant="contained"
+          type="submit"
+          form="wishlist-form"
+          disableElevation
+          sx={{ ...accountActionButton }}
+          disabled={!newListState?.name}
+        >
+          {t('save-and-close')}
+        </Button>
+        <Button
+          variant="text"
+          type="button"
+          sx={{ ...accountTextButton }}
+          onClick={() => {
+            onCreateFormToggle(false)
+          }}
+        >
+          {t('cancel')}
+        </Button>
+      </Stack>
     </>
   )
 }

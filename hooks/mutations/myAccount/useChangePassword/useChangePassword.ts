@@ -9,14 +9,15 @@ import { updatePassword } from '@/lib/gql/mutations/user/updatePassword'
 import type { PasswordInfoInput } from '@/lib/gql/types'
 interface ChangePasswordProps {
   accountId: number
+  userId?: string
   passwordInfoInput: PasswordInfoInput
 }
 
 const changePassword = async (props: ChangePasswordProps) => {
   const client = makeGraphQLClient()
-  const { accountId, passwordInfoInput } = props
+  const { accountId, userId, passwordInfoInput } = props
 
-  const variables = { accountId, passwordInfoInput }
+  const variables = { accountId, passwordInfoInput, ...(userId && { userId }) }
 
   const response = await client.request({
     document: updatePassword,
