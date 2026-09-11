@@ -14,7 +14,7 @@ interface UseProductDetailTemplateProps {
   purchaseLocation: Location
 }
 
-interface SelectedFulfillmentOption<T extends Location | LocationCustom> {
+export interface SelectedFulfillmentOption<T extends Location | LocationCustom> {
   method: string
   location?: T
 }

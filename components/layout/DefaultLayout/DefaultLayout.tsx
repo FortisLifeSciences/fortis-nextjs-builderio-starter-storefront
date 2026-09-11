@@ -37,6 +37,8 @@ const TRANSPARENT_PAGES = [
   '/data-in-focus',
 ]
 
+const FULL_WIDTH_PAGES = ['/product/[productCode]']
+
 const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: ReactElement }) => {
   const router = useRouter()
   const headerRef = useRef<HTMLDivElement>(null)
@@ -46,6 +48,7 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
     typeof builderTransparent === 'boolean'
       ? builderTransparent
       : TRANSPARENT_PAGES.includes(router.asPath.split('?')[0])
+  const isFullWidthPage = FULL_WIDTH_PAGES.includes(router.pathname)
 
   useEffect(() => {
     const el = headerRef.current
@@ -161,7 +164,7 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
                     pt: isTransparentPage ? 0 : `${headerHeight}px`,
                   }}
                 >
-                  {isTransparentPage ? (
+                  {isTransparentPage || isFullWidthPage ? (
                     children
                   ) : (
                     <Container

@@ -1,23 +1,28 @@
 import { BuilderComponent, builder, Builder } from '@builder.io/react'
 import { setPixelProperties } from '@builder.io/utils'
+import { dehydrate } from '@tanstack/react-query'
 import getConfig from 'next/config'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
-import { ProductDetailTemplate, ProductDetailSkeleton } from '@/components/page-templates'
+import { PdpTemplate, ProductDetailSkeleton } from '@/components/page-templates'
 import { ProductRecommendations } from '@/components/product'
-import { useGetProduct } from '@/hooks/queries/product/useGetProduct/useGetProduct'
 import {
   getProduct,
   getCategoryTree,
   productSearch,
   getProductSearchVariations,
   configureProduct,
+  getDocumentListDocuments,
+  getProductPrice,
 } from '@/lib/api/operations'
+import { DIGITAL_ASSETS_LIST } from '@/lib/constants'
 import { productGetters } from '@/lib/getters'
 import { buildProductPath } from '@/lib/helpers'
-import type { CategorySearchParams, MetaData, PageWithMetaData } from '@/lib/types'
+import { generateQueryClient } from '@/lib/react-query/queryClient'
+import { productKeys } from '@/lib/react-query/queryKeys'
+import type { CategorySearchParams, MetaData, PageWithMetaData, ProductCustom } from '@/lib/types'
 import { generateSchemaMarkups, renderSchemaMarkup } from '@/lib/utils/generate-schema-markup'
 
 import { FilteredProduct, PrCategory, Product } from '@/lib/gql/types'
@@ -39,6 +44,7 @@ interface ProductPageType extends PageWithMetaData {
   PDPCustomAndBulkDisplayContentSection?: any
   PDPCustomAndBulkDisplaySectionKey?: string
   schemaJson?: string
+  digitalAssets?: any[]
 }
 
 const { publicRuntimeConfig } = getConfig()
@@ -259,6 +265,30 @@ export async function getStaticProps(
       })
     : ''
 
+  const digitalAssetCodes = [
+    productCode,
+    ...(variantCodes || []).map((variant: any) => variant?.productCode).filter(Boolean),
+  ]
+  const digitalAssetFilter = digitalAssetCodes.map((code) => `name eq ${code}`).join(' or ')
+
+  let digitalAssets: any[] = []
+  try {
+    digitalAssets = await getDocumentListDocuments(DIGITAL_ASSETS_LIST, digitalAssetFilter)
+  } catch (error) {
+    console.error(`Failed to fetch digital assets for: ${productCode}`, error)
+    digitalAssets = []
+  }
+
+  const queryClient = generateQueryClient()
+  try {
+    await queryClient.prefetchQuery({
+      queryKey: productKeys.productParams(productCode, false),
+      queryFn: () => getProductPrice(productCode, false),
+    })
+  } catch (error) {
+    console.error(`Failed to prefetch price for: ${productCode}`, error)
+  }
+
   return {
     props: {
       product,
@@ -270,6 +300,8 @@ export async function getStaticProps(
       PDPCustomAndBulkDisplaySectionKey: PDPCustomAndBulkDisplaySectionKey || '',
       relatedProducts,
       schemaJson: schemaJson || '',
+      digitalAssets,
+      dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
       ...(await serverSideTranslations(locale as string, ['common'])),
     },
     revalidate: parseInt(serverRuntimeConfig.revalidate),
@@ -295,6 +327,7 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
     PDPCustomAndBulkDisplayContentSection,
     PDPCustomAndBulkDisplaySectionKey,
     schemaJson,
+    digitalAssets,
   } = props
 
   // const metaSource = (props.metaData || product || {}) as Record<string, unknown>
@@ -303,18 +336,12 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
   const router = useRouter()
   const { isFallback, query } = router
 
-  const {
-    data: productResponseData,
-    isLoading: isProductLoading,
-    queryParams: queryParams,
-  } = useGetProduct(query)
-
-  const { sliceValue } = queryParams
-  const { selected } = queryParams
+  const sliceValue = query?.sliceValue as string | undefined
+  const selected = query?.selected as string | undefined
 
   const pdpBuilderSectionKey = publicRuntimeConfig?.builderIO?.modelKeys?.productDetailSection || ''
   const breadcrumbs = product ? productGetters.getBreadcrumbs(product) : []
-  const isProductPending = isFallback || isProductLoading || !productResponseData
+  const isProductPending = isFallback || !product
 
   return (
     <>
@@ -335,18 +362,19 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
       {isProductPending ? (
         <ProductDetailSkeleton />
       ) : (
-        <ProductDetailTemplate
-          product={{ ...product, ...productResponseData }}
+        <PdpTemplate
+          product={product as ProductCustom}
           productVariations={productVariations}
           relatedProducts={relatedProducts}
           breadcrumbs={breadcrumbs}
           sliceValue={sliceValue}
           selectedUrlVariant={selected}
+          digitalAssets={digitalAssets}
           PDPCustomAndBulkDisplayContentSection={PDPCustomAndBulkDisplayContentSection}
           PDPCustomAndBulkDisplaySectionKey={PDPCustomAndBulkDisplaySectionKey}
         >
           <BuilderComponent model={pdpBuilderSectionKey} content={props.section} />
-        </ProductDetailTemplate>
+        </PdpTemplate>
       )}
     </>
   )

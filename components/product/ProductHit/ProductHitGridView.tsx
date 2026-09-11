@@ -28,15 +28,10 @@ import { KiboImage, Price } from '@/components/common'
 import { PLPStyles } from '@/components/page-templates/ProductListingTemplate/ProductListingTemplate.styles'
 import { ProductCardStyles } from '@/components/product/ProductCard/ProductCard.styles'
 import { useAuthContext } from '@/context/AuthContext'
+import { brandImages } from '@/lib/constants/brandLogos'
 import { plpClick } from '@/lib/utils/google-tag-manager'
-import abcore from '@/public/Brand_Logo/abcore-logo.png'
-import arista from '@/public/Brand_Logo/arista-logo.png'
-import bethyl from '@/public/Brand_Logo/bethyl-logo.png'
-import empirical from '@/public/Brand_Logo/empirical-logo.png'
 import fortis from '@/public/Brand_Logo/fortis-logo.png'
 import ipoc from '@/public/Brand_Logo/ipoc-logo.png'
-import nanocomposix from '@/public/Brand_Logo/nanocomposix-logo.png'
-import vector from '@/public/Brand_Logo/vector-logo.png'
 import abcoreLogo from '@/public/BrandLogos/abcore_logo.png'
 import aristaLogo from '@/public/BrandLogos/arista_logo.png'
 import bethylLogo from '@/public/BrandLogos/bethyl_logo.png'
@@ -68,17 +63,6 @@ type Product = {
   objectID: string
   product_name: string
   sku: string
-}
-
-const brandImages: Record<string, string> = {
-  arista: arista.src,
-  bethyl: bethyl.src,
-  abcore: abcore.src,
-  empirical: empirical.src,
-  nanocomposix: nanocomposix.src,
-  vector: vector.src,
-  ipoc: ipoc.src,
-  fortis: fortis.src,
 }
 
 const pdpBrandLogos: Record<string, string> = {
