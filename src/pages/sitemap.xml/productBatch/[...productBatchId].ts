@@ -132,7 +132,6 @@ export const getServerSideProps: GetServerSideProps = async ({ res, query }) => 
 
     const productBatch = await fetchCursorsData(cursorMark)
     const sitemap = generateSiteMap(productBatch?.response)
-    console.log('sitemap : ', sitemap)
 
     res.setHeader('Content-Type', 'text/xml')
     // we send the XML to the browser
