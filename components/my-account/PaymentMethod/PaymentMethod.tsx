@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
+import AddIcon from '@mui/icons-material/Add'
 import Delete from '@mui/icons-material/Delete'
 import { Box, Button, Checkbox, FormControlLabel, NoSsr, Stack, Typography } from '@mui/material'
 import getConfig from 'next/config'
@@ -10,6 +10,7 @@ import { CardDetailsForm } from '@/components/checkout'
 import { AddressForm, KiboPagination, AddressCard, KiboRadio } from '@/components/common'
 import PaymentBillingCard from '@/components/common/PaymentBillingCard/PaymentBillingCard'
 import { ConfirmationDialog } from '@/components/dialogs'
+import { accountActionButton, accountTextButton } from '@/components/my-account/common'
 import { useModalContext } from '@/context'
 import { useDeleteCustomerCard, useDeleteCustomerAddress } from '@/hooks'
 import { DisplayMode, AddressType } from '@/lib/constants'
@@ -75,26 +76,7 @@ const initialBillingAddressData: Address = {
 }
 
 const styles = {
-  addPaymentMethodButtonStyle: {
-    width: 'auto',
-    maxWidth: '300px',
-    backgroundColor: 'primary.main',
-    color: 'secondary.light',
-    textAlign: 'center',
-    fontFamily: 'Poppins',
-    fontSize: '16px',
-    fontStyle: 'normal',
-    fontWeight: '500',
-    lineHeight: '24px',
-    borderRadius: '0px 26px',
-    border: '1px solid primary.main',
-    padding: '12px 30px',
-    '&:hover': {
-      backgroundColor: 'primary.light',
-      border: '1px solid primary.light',
-    },
-    marginLeft: '20px',
-  },
+  addPaymentMethodButtonStyle: accountActionButton,
 }
 const PaymentMethod = (props: PaymentMethodProps) => {
   const {
@@ -404,7 +386,7 @@ const PaymentMethod = (props: PaymentMethodProps) => {
                 color="inherit"
                 sx={{ ...styles.addPaymentMethodButtonStyle }}
                 onClick={() => handleAddNewPaymentMethod()}
-                startIcon={<AddCircleOutlineIcon />}
+                startIcon={<AddIcon />}
               >
                 {t('add-payment-method')}
               </Button>
@@ -506,10 +488,15 @@ const PaymentMethod = (props: PaymentMethodProps) => {
             <NoSsr>
               {hasPermission(actions.CREATE_CONTACTS) && !showBillingFormAddress && (
                 <Button
-                  variant="contained"
-                  color="secondary"
+                  variant={isAddressFormInDialog ? 'contained' : 'outlined'}
+                  color={isAddressFormInDialog ? 'secondary' : 'primary'}
                   onClick={handleAddNewBillingAddress}
-                  sx={{ maxWidth: '26rem' }}
+                  startIcon={isAddressFormInDialog ? undefined : <AddIcon />}
+                  sx={
+                    isAddressFormInDialog
+                      ? { maxWidth: '26rem' }
+                      : { ...accountActionButton, alignSelf: 'flex-start' }
+                  }
                 >
                   {t('add-new-address')}
                 </Button>
@@ -517,20 +504,43 @@ const PaymentMethod = (props: PaymentMethodProps) => {
             </NoSsr>
           </Stack>
 
-          <Stack pl={1} paddingY={2} gap={2} sx={{ maxWidth: '26.313rem' }}>
-            <Button variant="contained" color="secondary" onClick={cancelAddingNewPaymentMethod}>
-              {t('cancel')}
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              disableElevation
-              {...(isAddPaymentMethodButtonDisabled() && { disabled: true })}
-              onClick={handleSaveNewPaymentMethod}
-            >
-              {t('save-payment-method')}
-            </Button>
-          </Stack>
+          {isAddressFormInDialog ? (
+            <Stack pl={1} paddingY={2} gap={2} sx={{ maxWidth: '26.313rem' }}>
+              <Button variant="contained" color="secondary" onClick={cancelAddingNewPaymentMethod}>
+                {t('cancel')}
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                disableElevation
+                {...(isAddPaymentMethodButtonDisabled() && { disabled: true })}
+                onClick={handleSaveNewPaymentMethod}
+              >
+                {t('save-payment-method')}
+              </Button>
+            </Stack>
+          ) : (
+            <Stack direction="row" alignItems="center" gap={2} paddingY={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                disableElevation
+                startIcon={<AddIcon />}
+                sx={{ ...accountActionButton }}
+                {...(isAddPaymentMethodButtonDisabled() && { disabled: true })}
+                onClick={handleSaveNewPaymentMethod}
+              >
+                {t('save-changes')}
+              </Button>
+              <Button
+                variant="text"
+                sx={{ ...accountTextButton }}
+                onClick={cancelAddingNewPaymentMethod}
+              >
+                {t('cancel')}
+              </Button>
+            </Stack>
+          )}
         </Stack>
       )}
     </Box>
