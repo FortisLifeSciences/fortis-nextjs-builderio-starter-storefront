@@ -10,25 +10,34 @@ export const generateSiteMap = (categoryItems: Array<PrCategory>): string => {
 
   // Recursive function to generate category URLs
   const generateCategoryUrls = (categories: Maybe<PrCategory>[] = []): string => {
-    return categories
-      .filter((category): category is PrCategory => category !== null) // Remove null values
-      .filter((category) => category.isDisplayed) // Exclude hidden categories
-      .map((category) => {
-        const categoryUrl = `${baseUrl}products/${category.categoryCode}/`
-        const lastmod = category?.updateDate
-          ? new Date(category?.updateDate).toISOString().split('T')[0]
-          : new Date().toISOString().split('T')[0]
-        return `
+    return (
+      categories
+        .filter((category): category is PrCategory => category !== null) // Remove null values
+        .filter((category) => category.isDisplayed) // Exclude hidden categories
+        //updated for WEB-1722
+        .map((category) => {
+          const children = generateCategoryUrls(
+            category.childrenCategories?.filter((c): c is PrCategory => c !== null) ?? []
+          )
+          if (category.categoryCode === 'products') {
+            return children
+          }
+
+          const categoryUrl = `${baseUrl}products/${category.categoryCode}/`
+          const lastmod = category?.updateDate
+            ? new Date(category?.updateDate).toISOString().split('T')[0]
+            : new Date().toISOString().split('T')[0]
+
+          return `
             <url>
               <loc>${categoryUrl}</loc>
               <lastmod>${lastmod}</lastmod>
             </url>
-            ${generateCategoryUrls(
-              category.childrenCategories?.filter((c): c is PrCategory => c !== null) ?? []
-            )}
+            ${children}
           `
-      })
-      .join('')
+        })
+        .join('')
+    )
   }
 
   return `<?xml version="1.0" encoding="UTF-8"?>

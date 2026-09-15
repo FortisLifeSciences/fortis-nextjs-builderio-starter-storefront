@@ -201,6 +201,7 @@ const PaymentStep = (props: PaymentStepProps) => {
   const [isAddressSavedToAccount, setIsAddressSavedToAccount] = useState<boolean>(true)
   const [isNewAddressAdded, setIsNewAddressAdded] = useState<boolean>(false)
   const [isSaving, setIsSaving] = useState<boolean>(false)
+  const [isSavePurchaseAddress, setIsSavePurchaseAddress] = useState<boolean>(false)
 
   const userAccountId = useMemo(() => user?.id ?? 0, [user?.id])
 
@@ -569,6 +570,7 @@ const PaymentStep = (props: PaymentStepProps) => {
   const handleSaveNewPaymentMethod = async () => {
     setValidateForm(true)
     setIsSaving(true)
+    setIsSavePurchaseAddress(true)
   }
 
   const handleInitialCardDetailsLoad = () => {
@@ -1042,6 +1044,8 @@ const PaymentStep = (props: PaymentStepProps) => {
         isDataUpdated: true,
       })
     }
+    setIsSavePurchaseAddress(false)
+    setIsSaving(false)
   }
 
   const handleAddNewBillingAddress = () => {
@@ -1055,6 +1059,7 @@ const PaymentStep = (props: PaymentStepProps) => {
       isSameBillingShippingAddress: false,
       isAddressValid: false,
     })
+    setIsSaving(false)
   }
 
   useEffect(() => {
@@ -1089,8 +1094,7 @@ const PaymentStep = (props: PaymentStepProps) => {
       if (isAddingNewPayment || (!isCVVAddedForNewPayment && !isCvvValid)) setStepStatusIncomplete()
       else setStepStatusValid()
     } else if (selectedPaymentTypeRadio === PaymentType.PURCHASEORDER) {
-      if (isAddingNewPayment || !savedPaymentBillingDetailsForPurchaseOrder)
-        setStepStatusIncomplete()
+      if (isAddingNewPayment || !isSavePurchaseAddress) setStepStatusIncomplete()
       else setStepStatusValid()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1099,6 +1103,7 @@ const PaymentStep = (props: PaymentStepProps) => {
     isAddingNewPayment,
     savedPaymentBillingDetailsForPurchaseOrder,
     selectedPaymentTypeRadio,
+    isSavePurchaseAddress,
   ])
 
   useEffect(() => {

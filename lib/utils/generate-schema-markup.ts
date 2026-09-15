@@ -620,6 +620,6 @@ export function renderSchemaMarkup(schemaJson: string): JSX.Element {
   return React.createElement('script', {
     type: 'application/ld+json',
     dangerouslySetInnerHTML: { __html: schemaJson },
-    key: 'product-schema',
+    key: 'page-schema',
   })
 }

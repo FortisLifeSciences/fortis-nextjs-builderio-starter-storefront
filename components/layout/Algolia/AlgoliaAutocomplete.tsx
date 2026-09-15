@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import { autocomplete, getAlgoliaResults } from '@algolia/autocomplete-js'
 import { createQuerySuggestionsPlugin } from '@algolia/autocomplete-plugin-query-suggestions'
@@ -11,6 +11,7 @@ import { useRouter } from 'next/router'
 
 import fortisLogo from '@/assets/fortisLogo.png'
 import resourceTypeArr from '@/components/common/ResourceTypeArr'
+import { hasAnalyticsConsent, onConsentChange } from '@/lib/consent/consent'
 import abcoreLogo from '@/public/BrandLogos/abcore_logo.png'
 import aristaLogo from '@/public/BrandLogos/arista_logo.png'
 import bethylLogo from '@/public/BrandLogos/bethyl_logo.png'
@@ -63,6 +64,13 @@ interface AlgoliaAutocompleteProps {
 
 const AlgoliaAutocomplete = ({ detachedMediaQuery }: AlgoliaAutocompleteProps = {}) => {
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const [analyticsConsent, setAnalyticsConsent] = useState(false)
+
+  useEffect(() => {
+    const syncConsent = () => setAnalyticsConsent(hasAnalyticsConsent())
+    syncConsent()
+    return onConsentChange(syncConsent)
+  }, [])
 
   //redirect to search page
   const router = useRouter()
@@ -269,7 +277,7 @@ const AlgoliaAutocomplete = ({ detachedMediaQuery }: AlgoliaAutocompleteProps = 
       const sources: any[] = []
       const safeQuery = String(query || '').slice(0, 512)
 
-      if (safeQuery.length < 1) return sources
+      if (safeQuery.length < 2) return sources
 
       sources.push(
         // Products source
@@ -512,7 +520,7 @@ const AlgoliaAutocomplete = ({ detachedMediaQuery }: AlgoliaAutocompleteProps = 
       container: containerRef.current,
       placeholder: 'Search',
       openOnFocus: true,
-      insights: true,
+      insights: analyticsConsent,
       // only pass when provided so Algolia's default stays in effect otherwise
       ...(detachedMediaQuery !== undefined && { detachedMediaQuery }),
       navigator: {
@@ -531,7 +539,7 @@ const AlgoliaAutocomplete = ({ detachedMediaQuery }: AlgoliaAutocompleteProps = 
         if (justRedirected) {
           return false
         }
-        if (!state.query) {
+        if (state.query.trim().length < 2) {
           return false
         }
         return state.collections.some((collection) => collection.items.length > 0)
@@ -558,7 +566,7 @@ const AlgoliaAutocomplete = ({ detachedMediaQuery }: AlgoliaAutocompleteProps = 
         }),
     })
     return () => search.destroy()
-  }, [])
+  }, [analyticsConsent])
 
   return <div ref={containerRef} id="autocomplete" />
 }

@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 import aa from 'search-insights'
-import { v4 as uuidv4 } from 'uuid'
 
 import { headerActionAreaStyles, kiboHeaderStyles, topHeaderStyles } from './FortisHeader.styles'
 import { AccountHierarchyFormDialog } from '@/components/dialogs'
@@ -128,46 +127,31 @@ const KiboHeader = (props: KiboHeaderProps) => {
   const { publicRuntimeConfig } = getConfig()
   const isMultiShipEnabled = publicRuntimeConfig.isMultiShipEnabled
   const hasConsent = hasAnalyticsConsent()
-  const randomToken = `anonymous-${uuidv4()}`
-  const randomAuthToken = `anonymous-${uuidv4()}`
 
   React.useEffect(() => {
+    if (!hasConsent) {
+      if (window.localStorage.getItem('algoliaUserToken')) {
+        window.localStorage.removeItem('algoliaUserToken')
+      }
+      return
+    }
+
     const setToken = (token: string) => {
-      // Store the token in localStorage and dataLayer if it has changed
       const storedToken = window.localStorage.getItem('algoliaUserToken')
-      if (hasConsent) {
-        if (storedToken !== token) {
-          window.localStorage.setItem('algoliaUserToken', token)
-        }
-        if ((window as any).dataLayer) {
-          window.dataLayer.push({ algoliaUserToken: token })
-          if (isAuthenticated) {
-            window.dataLayer.push({ algoliaAuthenticatedUserToken: token })
-          } else {
-            window.dataLayer.push({ algoliaAuthenticatedUserToken: undefined })
-          }
-        }
-      } else {
-        if (!isAuthenticated && window.aa) {
-          aa('setAuthenticatedUserToken', undefined)
-        }
-        if (storedToken) {
-          window.localStorage.removeItem('algoliaUserToken')
-        }
-        if ((window as any).dataLayer) {
-          window.dataLayer.push({ algoliaUserToken: randomToken })
-          if (isAuthenticated) {
-            window.dataLayer.push({ algoliaAuthenticatedUserToken: randomAuthToken })
-          } else {
-            window.dataLayer.push({ algoliaAuthenticatedUserToken: undefined })
-          }
+      if (storedToken !== token) {
+        window.localStorage.setItem('algoliaUserToken', token)
+      }
+      if ((window as any).dataLayer) {
+        window.dataLayer.push({ algoliaUserToken: token })
+        if (isAuthenticated) {
+          window.dataLayer.push({ algoliaAuthenticatedUserToken: token })
+        } else {
+          window.dataLayer.push({ algoliaAuthenticatedUserToken: undefined })
         }
       }
     }
 
-    if (!window.aa) return
-
-    if (isAuthenticated && user && user.userId != null && hasConsent) {
+    if (isAuthenticated && user && user.userId != null) {
       aa('setAuthenticatedUserToken', user.userId)
       setToken(user.userId)
     } else {
@@ -180,7 +164,7 @@ const KiboHeader = (props: KiboHeaderProps) => {
         setToken(token)
       })
     }
-  }, [isAuthenticated, user?.userId, hasConsent, randomToken])
+  }, [isAuthenticated, user?.userId, hasConsent])
 
   const handleAccountIconClick = () => {
     isHamburgerMenuVisible && toggleHamburgerMenu()

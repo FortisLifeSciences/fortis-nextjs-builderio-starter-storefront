@@ -164,7 +164,7 @@ const ProductHitListView = ({
     formulation = hit?.formulation,
     citation = hit?.plp_citation_count,
     newProduct = hit.new_product
-  position = hit.__position
+  position = position ?? hit.__position
 
   const firstImage = hit?.product_images?.[0]
     ? `https://cdn-tp1.mozu.com/31165-m1/cms/files/${kiboImagesData[0]}`
@@ -182,7 +182,10 @@ const ProductHitListView = ({
 
   // Ensure Next.js <Link> gets a relative path — absolute URLs trigger a full page reload
   const productHref = (() => {
-    const url = hit?.product_url || '#'
+    const formatProductUrl = hit?.product_url.includes('libraries')
+      ? hit?.product_url.toLowerCase()
+      : hit?.product_url
+    const url = formatProductUrl || '#'
     if (!url.startsWith('http')) return url
     try {
       const u = new URL(url)
@@ -210,7 +213,10 @@ const ProductHitListView = ({
           data-insights-position={position !== undefined ? position : '1'}
           data-insights-query-id={queryId || hit.__queryID}
           data-insights-index={algoliaIndex || 'products'}
-          data-insights-method={dataInsideMethod || 'clickedObjectIDs'}
+          data-insights-method={
+            dataInsideMethod ||
+            (queryId || hit.__queryID ? 'clickedObjectIDsAfterSearch' : 'clickedObjectIDs')
+          }
           className={
             dataInsideMethod === 'clickedObjectIDsAfterSearch'
               ? 'product-card-search'

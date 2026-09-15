@@ -117,15 +117,22 @@ const RelatedProductsCarousel = (props: any) => {
               )
               const plpCatalogNumber = data?.plpCatalogNumber || ''
               const altText = productName
+              const formattedCategoryCode =
+                categoryCode === 'antisera_igg_fractions'
+                  ? categoryCode.replace(/_/g, '-')
+                  : categoryCode
               const productUrl =
                 categoryCode !== undefined && seoFriendlyUrl
-                  ? `/products/${categoryCode}/${seoFriendlyUrl}/${productCode}`
+                  ? `/products/${formattedCategoryCode}/${seoFriendlyUrl}/${productCode}`
                   : `/product/${productCode}`
+              const formatProductUrl = productUrl.includes('libraries')
+                ? productUrl.toLowerCase()
+                : productUrl
 
               return (
                 <SwiperSlide key={index} style={{ width: '260px' }}>
                   <Link
-                    href={productUrl}
+                    href={formatProductUrl}
                     passHref
                     data-testid="product-card-link"
                     style={{

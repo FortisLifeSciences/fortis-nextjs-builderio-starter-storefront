@@ -96,7 +96,7 @@ const ResourceSearchSliders: React.FC<Props> = ({
     setNonResourceEndState(swiper.isEnd)
   }
 
-  const algoliaQueryId = localStorage.getItem('algoliaQueryId')
+  const algoliaQueryId = localStorage.getItem('algoliaContentQueryId')
 
   return (
     <div key={index} className={styles.container}>

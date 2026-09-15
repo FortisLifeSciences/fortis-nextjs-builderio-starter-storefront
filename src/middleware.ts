@@ -93,6 +93,39 @@ export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl
   const fullUrl = new URL(request.url)
   const match = pathname.match(/^\/cms\/files\/(.+)/)
+  const lowercasePath = pathname.toLowerCase()
+  // This code is being added temporarily for WEB-1669.
+  const paths = [
+    '/products/libraries/abnano-anti-nk-cell-vhh-library/AbNano-Anti-NK-Cell-VHH',
+    '/products/libraries/abnano-anti-t-cell-vhh-library/AbNano-Anti-T-Cell-VHH',
+    '/products/libraries/abnano-vhh-naive-library/AbNano-VHH-Naive',
+  ]
+
+  if (paths.some((path) => pathname.includes(path))) {
+    const lowercaseUrl = new URL(lowercasePath, request.url)
+
+    // preserve query params
+    lowercaseUrl.search = search
+
+    return NextResponse.redirect(lowercaseUrl, 301)
+  }
+
+  // WEB-1735: /products/<product-code> → canonical product page
+  const segments = pathname.split('/').filter(Boolean)
+
+  if (segments[0] === 'products' && segments.length === 2) {
+    const slug = decodeURIComponent(segments[1])
+
+    if (/^(BETHYL-)?A\d{3}-\d{2,3}/i.test(slug)) {
+      let code = slug.toUpperCase().replace(/-+$/, '').replace(/A$/, '')
+      if (!code.startsWith('BETHYL-')) code = `BETHYL-${code}`
+
+      const productUrl = new URL(`/p/${code}`, request.url)
+      productUrl.search = search
+      return NextResponse.redirect(productUrl, 301)
+    }
+  }
+
   // Handle CDN file redirects from /cms/files/* to Kibo CDN
   if ((fullUrl.hostname === 'www.fortislife.com' || pathname.startsWith('/cms/files/')) && match) {
     const relativePath = pathname.replace('/cms/files/', '')
