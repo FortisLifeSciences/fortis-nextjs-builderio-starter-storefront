@@ -251,7 +251,7 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
 
   const commonElements = showCheckoutSteps ? (
     <Stack
-      sx={{ paddingTop: '20px', paddingBottom: { md: '40px' } }}
+      sx={{ paddingTop: '20px', paddingBottom: { xs: '40px', md: '40px' } }}
       direction={{ xs: 'column', md: 'row' }}
       justifyContent={{ md: 'space-between' }}
       gap={{ xs: 4, md: 0 }}
