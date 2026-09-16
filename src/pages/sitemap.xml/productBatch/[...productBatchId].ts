@@ -73,7 +73,15 @@ function generateSiteMap(categoryItems: any) {
         productUrl = `${baseUrl}products/${product.categories[0].categoryCode}/${product.content.seoFriendlyUrl}/${product.productCode}`
       }
       // Lowercase product URL for libraries
-      if (productUrl.includes('libraries')) {
+      const lowercaseProductCodes = [
+        'abnano-anti-nk-cell-vhh',
+        'abnano-anti-t-cell-vhh',
+        'abnano-vhh-naive',
+      ]
+
+      const productCodeFromUrl: any = productUrl.split('/').pop()?.toLowerCase()
+
+      if (lowercaseProductCodes.includes(productCodeFromUrl)) {
         productUrl = productUrl.toLowerCase()
       }
       // Apply redirect
