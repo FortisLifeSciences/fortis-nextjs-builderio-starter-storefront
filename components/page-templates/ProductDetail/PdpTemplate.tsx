@@ -21,11 +21,10 @@ import { brandImages, brandImagesWhite } from '@/lib/constants/brandLogos'
 import { productGetters } from '@/lib/getters'
 import type { ProductCustom, BreadCrumb } from '@/lib/types'
 import { addToCartGTMPDP } from '@/lib/utils/google-tag-manager'
-import GetThemeSettings from '@/src/pages/api/getThemeSettings'
 
 import type { SpecRowConfig } from './pdpSpecGroups'
 import type { PdpVariantOption } from './PdpVariantPicker'
-import type { ProductImage, Product, FilteredProduct } from '@/lib/gql/types'
+import type { ProductImage, Product, FilteredProduct, ConfiguredProduct } from '@/lib/gql/types'
 
 type queryIdArr = {
   ProductCode: string | undefined
@@ -69,6 +68,9 @@ interface PdpTemplateProps {
   PDPCustomAndBulkDisplayContentSection?: any
   PDPCustomAndBulkDisplaySectionKey?: string
   digitalAssets?: any[]
+  configuredVariant?: ConfiguredProduct | null
+  themeCodeMapping?: any[]
+  citationApiKey?: string | null
 }
 
 const scrollToSection = (id: string) => {
@@ -92,6 +94,9 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     PDPCustomAndBulkDisplayContentSection,
     PDPCustomAndBulkDisplaySectionKey,
     digitalAssets,
+    configuredVariant,
+    themeCodeMapping = [],
+    citationApiKey = null,
     getCurrentProduct,
   } = props
 
@@ -105,7 +110,7 @@ const PdpTemplate = (props: PdpTemplateProps) => {
   const [showAllDocs, setShowAllDocs] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [validationOpen, setValidationOpen] = useState(false)
-  const [themeCodeMapping, setThemeCodeMapping] = useState<any[]>([])
+  const [isMounted, setIsMounted] = useState(false)
 
   const {
     updatedProduct,
@@ -138,7 +143,6 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     ousShowPrices,
     citationCountVariant,
     citeabProductCode,
-    citationApiKey,
     digitalDocumentData,
     addToCartPayload,
     addToCart,
@@ -146,7 +150,6 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     algoliaQueryId,
     algoliaObjectData,
     addtocartvalue,
-    keyVal,
     variationCodeDynamic,
     currentlocationInventory,
     brandKey,
@@ -160,20 +163,14 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     productVariations,
     isB2B,
     digitalAssets,
+    configuredVariant,
+    citationApiKey,
     PDPCustomAndBulkDisplayContentSection,
     getCurrentProduct,
   })
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const settings = await GetThemeSettings()
-        setThemeCodeMapping(settings?.data?.themeCodeMapping || [])
-      } catch (error) {
-        console.error('Error fetching theme settings:', error)
-      }
-    }
-    fetchSettings()
+    setIsMounted(true)
   }, [])
 
   const handleAddToCart = async () => {
@@ -235,6 +232,7 @@ const PdpTemplate = (props: PdpTemplateProps) => {
   const shownQty = Number(quantity) > 0 ? Number(quantity) : minQty
 
   const isUsVisitor =
+    !isMounted ||
     (countryCode && countryCode === 'US') ||
     !countryCode ||
     (typeof countryCode === 'string' && countryCode.trim() === '')
@@ -624,7 +622,11 @@ const PdpTemplate = (props: PdpTemplateProps) => {
 
   const brandCard = brandContent.brandCard ? (
     <div className={styles.brandCard}>
-      {brandContent.brandCard.stars ? <p className={styles.stars}>★★★★★</p> : null}
+      {brandContent.brandCard.stars ? (
+        <p className={styles.stars} aria-hidden="true">
+          ★★★★★
+        </p>
+      ) : null}
       {brandLogoSrc && brandConfig.brandCardLogoVariant === 'fortisPlusBrand' ? (
         <div className={styles.brandLogosRow}>
           <img className={styles.brandLogoFortis} src={brandImagesWhite.fortis} alt="Fortis" />
@@ -883,7 +885,11 @@ const PdpTemplate = (props: PdpTemplateProps) => {
         </div>
 
         {citationCountVariant && product?.productType === 'Antibody-Configurable' ? (
-          <section className={styles.citations} id="citation-document-section" key={keyVal}>
+          <section
+            className={styles.citations}
+            id="citation-document-section"
+            key={citeabProductCode ?? 'citations'}
+          >
             <h2 className={styles.heading}>Citations / Publications</h2>
             <div className={styles.citationTrack}>
               <CitationWidget

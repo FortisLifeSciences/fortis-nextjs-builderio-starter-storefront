@@ -7,6 +7,7 @@ import { useRouter } from 'next/router'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
 import { PdpTemplate, ProductDetailSkeleton } from '@/components/page-templates'
+import { resolveDefaultOptionValue } from '@/components/page-templates/ProductDetail/resolveDefaultVariant'
 import { ProductRecommendations } from '@/components/product'
 import {
   getProduct,
@@ -24,8 +25,9 @@ import { generateQueryClient } from '@/lib/react-query/queryClient'
 import { productKeys } from '@/lib/react-query/queryKeys'
 import type { CategorySearchParams, MetaData, PageWithMetaData, ProductCustom } from '@/lib/types'
 import { generateSchemaMarkups, renderSchemaMarkup } from '@/lib/utils/generate-schema-markup'
+import GetThemeSettings from '@/src/pages/api/getThemeSettings'
 
-import { FilteredProduct, PrCategory, Product } from '@/lib/gql/types'
+import { ConfiguredProduct, FilteredProduct, PrCategory, Product } from '@/lib/gql/types'
 import type {
   GetStaticPathsResult,
   GetStaticPropsContext,
@@ -45,6 +47,9 @@ interface ProductPageType extends PageWithMetaData {
   PDPCustomAndBulkDisplaySectionKey?: string
   schemaJson?: string
   digitalAssets?: any[]
+  configuredVariant?: ConfiguredProduct | null
+  themeCodeMapping?: any[]
+  citationApiKey?: string | null
 }
 
 const { publicRuntimeConfig } = getConfig()
@@ -95,30 +100,6 @@ export async function getStaticProps(
   } catch (error) {
     console.error(`Failed to fetch product: ${productCode}`, error)
   }
-  // If the parent product has no images, configure the first variation to get its images
-  if (product && !product.content?.productImages?.length && product.options?.length) {
-    const defaultOptions = product.options
-      .map((opt: any) => ({
-        attributeFQN: opt.attributeFQN,
-        value: opt.values?.find((v: any) => v.isEnabled)?.value ?? opt.values?.[0]?.value,
-      }))
-      .filter((opt: any) => opt.value != null)
-
-    if (defaultOptions.length > 0) {
-      try {
-        const configured = await configureProduct(productCode, defaultOptions)
-        if (configured?.productImages?.length) {
-          product = {
-            ...product,
-            content: { ...product.content, productImages: configured.productImages },
-          }
-        }
-      } catch (e) {
-        console.error(`Failed to configure product for schema images: ${productCode}`, e)
-      }
-    }
-  }
-
   const variantCodes = product?.variations
   const relatedProducts = []
   const relatedProductData =
@@ -168,6 +149,39 @@ export async function getStaticProps(
   }
   if (!productVariations) {
     return { notFound: true }
+  }
+
+  let configuredVariant = null
+  if (product.options?.length) {
+    const defaultSelection = resolveDefaultOptionValue({
+      product: product as ProductCustom,
+      productVariations,
+      sliceValue: product.sliceValue,
+    })
+
+    const defaultOptions = defaultSelection
+      ? [{ attributeFQN: defaultSelection.attributeFQN, value: defaultSelection.value }]
+      : product.options
+          .map((opt: any) => ({
+            attributeFQN: opt.attributeFQN,
+            value: opt.values?.find((v: any) => v.isEnabled)?.value ?? opt.values?.[0]?.value,
+          }))
+          .filter((opt: any) => opt.value != null)
+
+    if (defaultOptions.length > 0) {
+      try {
+        configuredVariant = await configureProduct(productCode, defaultOptions)
+      } catch (e) {
+        console.error(`Failed to configure default variant: ${productCode}`, e)
+      }
+    }
+  }
+
+  if (!product.content?.productImages?.length && configuredVariant?.productImages?.length) {
+    product = {
+      ...product,
+      content: { ...product.content, productImages: configuredVariant.productImages },
+    }
   }
 
   //This is to use custom targeting with section model Ref: WEB-981
@@ -289,6 +303,16 @@ export async function getStaticProps(
     console.error(`Failed to prefetch price for: ${productCode}`, error)
   }
 
+  let themeCodeMapping = []
+  let citationApiKey = null
+  try {
+    const themeSettings = await GetThemeSettings()
+    themeCodeMapping = themeSettings?.data?.themeCodeMapping || []
+    citationApiKey = themeSettings?.data?.citationsApiKey || null
+  } catch (error) {
+    console.error(`Failed to fetch theme settings for: ${productCode}`, error)
+  }
+
   return {
     props: {
       product,
@@ -301,6 +325,9 @@ export async function getStaticProps(
       relatedProducts,
       schemaJson: schemaJson || '',
       digitalAssets,
+      configuredVariant: configuredVariant ? JSON.parse(JSON.stringify(configuredVariant)) : null,
+      themeCodeMapping,
+      citationApiKey,
       dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
       ...(await serverSideTranslations(locale as string, ['common'])),
     },
@@ -328,6 +355,9 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
     PDPCustomAndBulkDisplaySectionKey,
     schemaJson,
     digitalAssets,
+    configuredVariant,
+    themeCodeMapping,
+    citationApiKey,
   } = props
 
   // const metaSource = (props.metaData || product || {}) as Record<string, unknown>
@@ -370,6 +400,9 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
           sliceValue={sliceValue}
           selectedUrlVariant={selected}
           digitalAssets={digitalAssets}
+          configuredVariant={configuredVariant}
+          themeCodeMapping={themeCodeMapping}
+          citationApiKey={citationApiKey}
           PDPCustomAndBulkDisplayContentSection={PDPCustomAndBulkDisplayContentSection}
           PDPCustomAndBulkDisplaySectionKey={PDPCustomAndBulkDisplaySectionKey}
         >

@@ -1,7 +1,7 @@
 /**
  * @module useProductDetailTemplate
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { useConfigureProduct } from '@/hooks'
 import { productGetters } from '@/lib/getters'
@@ -12,7 +12,43 @@ import type { ConfiguredProduct, Location, ProductOptionSelectionInput } from '@
 interface UseProductDetailTemplateProps {
   product: ProductCustom
   purchaseLocation: Location
+  configuredVariant?: ConfiguredProduct | null
 }
+
+const mergeConfiguredVariant = (
+  product: ProductCustom,
+  configuredVariant?: ConfiguredProduct | null
+): ProductCustom => {
+  if (!configuredVariant) return product
+
+  return {
+    ...product,
+    priceRange: configuredVariant.priceRange ?? product.priceRange,
+    price: configuredVariant.price ?? product.price,
+    properties: configuredVariant.properties ?? product.properties,
+    variationProductCode: configuredVariant.variationProductCode,
+    options: configuredVariant.options ?? product.options,
+    purchasableState: configuredVariant.purchasableState ?? product.purchasableState,
+    content: {
+      ...product.content,
+      productImages: configuredVariant.productImages ?? product.content?.productImages,
+    },
+  } as ProductCustom
+}
+
+const deriveSelectedOptions = (
+  configuredVariant?: ConfiguredProduct | null
+): ProductOptionSelectionInput[] =>
+  (configuredVariant?.options
+    ?.filter((option) => option?.values?.some((val) => val?.isSelected))
+    .map((option) => {
+      const selected = option?.values?.find((optionVal) => optionVal?.isSelected)
+      return {
+        attributeFQN: option?.attributeFQN,
+        value: selected?.value,
+        shopperEnteredValue: selected?.shopperEnteredValue,
+      }
+    }) ?? []) as ProductOptionSelectionInput[]
 
 export interface SelectedFulfillmentOption<T extends Location | LocationCustom> {
   method: string
@@ -32,11 +68,13 @@ export interface SelectedFulfillmentOption<T extends Location | LocationCustom> 
  */
 
 export const useProductDetailTemplate = (props: UseProductDetailTemplateProps) => {
-  const { product, purchaseLocation } = props
-  const [currentProduct, setCurrentProduct] = useState<ProductCustom>(product)
+  const { product, purchaseLocation, configuredVariant } = props
+  const [currentProduct, setCurrentProduct] = useState<ProductCustom>(() =>
+    mergeConfiguredVariant(product, configuredVariant)
+  )
   const [updatedShopperEnteredValues, setUpdatedShopperEnteredValues] = useState<
     ProductOptionSelectionInput[]
-  >([])
+  >(() => deriveSelectedOptions(configuredVariant))
   const [quantity, setQuantity] = useState<number>(1)
   const [selectedFulfillmentOption, setSelectedFulfillmentOption] = useState<
     SelectedFulfillmentOption<Location>
@@ -45,7 +83,11 @@ export const useProductDetailTemplate = (props: UseProductDetailTemplateProps) =
     location: { code: 'Bethyl', name: 'Bethyl' }, // Default location to 'Bethyl'
   })
 
+  const lastProductCode = useRef(product?.productCode)
+
   useEffect(() => {
+    if (lastProductCode.current === product?.productCode) return
+    lastProductCode.current = product?.productCode
     setCurrentProduct(product)
   }, [product?.productCode])
 

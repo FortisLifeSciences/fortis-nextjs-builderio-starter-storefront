@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import * as cookieNext from 'cookies-next'
 import router from 'next/router'
@@ -10,6 +10,7 @@ import {
   MAX_HERO_FACTS,
 } from './pdpBrandConfig'
 import { buildFacts } from './pdpProperties'
+import { applyVariationData, resolveDefaultOptionValue } from './resolveDefaultVariant'
 import {
   useProductDetailTemplate,
   useGetPurchaseLocation,
@@ -27,9 +28,8 @@ import {
 import { productGetters, subscriptionGetters, wishlistGetters } from '@/lib/getters'
 import type { ProductCustom } from '@/lib/types'
 import { viewItemGTM } from '@/lib/utils/google-tag-manager'
-import GetThemeSettings from '@/src/pages/api/getThemeSettings'
 
-import type { Product, ProductPrice, FilteredProduct } from '@/lib/gql/types'
+import type { Product, ProductPrice, FilteredProduct, ConfiguredProduct } from '@/lib/gql/types'
 
 const getDocumentListDocuments = async (documentListName: string, filter: string) => {
   const response = await fetch('/api/custom-schema/get-documentlist-documents', {
@@ -83,6 +83,8 @@ export interface UsePdpViewModelParams {
   productVariations?: Product[] | FilteredProduct[]
   isB2B?: boolean
   digitalAssets?: any[]
+  configuredVariant?: ConfiguredProduct | null
+  citationApiKey?: string | null
   PDPCustomAndBulkDisplayContentSection?: any
   getCurrentProduct?: (
     addToCartPayload: any,
@@ -100,11 +102,12 @@ export const usePdpViewModel = (params: UsePdpViewModelParams) => {
     productVariations,
     isB2B = false,
     digitalAssets,
+    configuredVariant,
+    citationApiKey = null,
     PDPCustomAndBulkDisplayContentSection,
     getCurrentProduct,
   } = params
 
-  const [updatedProduct, setUpdatedProduct] = useState(product)
   const [minQuantity, setMinQuantity] = useState(1)
   const isDigitalFulfillment = product.fulfillmentTypesSupported?.some(
     (type) => type === FulfillmentOptionsConstant.DIGITAL
@@ -114,16 +117,6 @@ export const usePdpViewModel = (params: UsePdpViewModelParams) => {
   const [purchaseType, setPurchaseType] = useState<string>(PurchaseTypes.ONETIMEPURCHASE)
   const [selectedFrequency, setSelectedFrequency] = useState<string>('')
   const [isSubscriptionPricingSelected, setIsSubscriptionPricingSelected] = useState<boolean>(false)
-  const [skuStatusText, setSkuStatusText] = useState<string | null>('')
-  const [showPrices, setShowPrices] = useState<boolean | null>()
-  const [customCTALabel, setcustomCTALabel] = useState<string | null>('')
-  const [customCTATarget, setcustomTarget] = useState<string | null>('')
-  const [stockBehaviour, setStockBehaviourArr] = useState<string | null>('')
-  const [minimumStock, setMinimumStock] = useState<number>(0)
-  const [citationCountVariant, setCitationCountVariant] = useState<number>(0)
-  const [citeabProductCode, setCiteabProductCodeAttr] = useState<string | null>('')
-  const [keyVal, setKey] = useState(0)
-  const [citationApiKey, setCitationApiKey] = useState<string | null>('')
 
   const isSubscriptionModeAvailable = subscriptionGetters.isSubscriptionModeAvailable(product)
   const isSubscriptionOnly = subscriptionGetters.isSubscriptionOnly(product)
@@ -170,6 +163,7 @@ export const usePdpViewModel = (params: UsePdpViewModelParams) => {
   } = useProductDetailTemplate({
     product,
     purchaseLocation,
+    configuredVariant,
   })
 
   const {
@@ -198,8 +192,6 @@ export const usePdpViewModel = (params: UsePdpViewModelParams) => {
     productPriceResponse?.price as ProductPrice
   )
   const [variationCodeDynamic, setVariationCodeDynamic] = useState<string>()
-  const [variantProductTitle, setVariantProductTitle] = useState<string>('')
-  const [isLoading, setIsLoading] = useState<boolean>(true)
   const newProductData = product?.properties?.find(
     (data: any) => data?.attributeFQN === 'tenant~new-product'
   )
@@ -220,61 +212,24 @@ export const usePdpViewModel = (params: UsePdpViewModelParams) => {
     selectedFulfillmentOption?.location?.code as string
   )
 
-  const getModifiedOptionData = (options: any) => {
-    const variationMap = new Map()
-    productVariations?.forEach((variation) => {
-      if (variation?.option && variation.option.length > 0) {
-        const variationValue = variation.option[0]?.value
-        variationMap.set(variationValue, {
-          childPriority: variation.childPriority,
-          price: variation.price,
-          variationProductCode: variation.variationProductCode,
-        })
-      }
-    })
-
-    options?.selectOptions?.forEach((selectOption: { values: any[] }) => {
-      selectOption?.values?.forEach((optionValue) => {
-        if (optionValue && variationMap.has(optionValue.value)) {
-          const variationData = variationMap.get(optionValue.value)
-
-          if (variationData) {
-            optionValue.childPriority = variationData.childPriority
-            optionValue.price = { ...variationData.price }
-            optionValue.variationProductCode = variationData.variationProductCode
-          }
-        }
-      })
-
-      selectOption?.values?.sort((a, b) => {
-        if (a?.childPriority === undefined && b?.childPriority === undefined) return 0
-        if (a?.childPriority === undefined) return 1
-        if (b?.childPriority === undefined) return -1
-        return a?.childPriority - b?.childPriority
-      })
-    })
-    return options
-  }
+  const getModifiedOptionData = (options: any) => applyVariationData(options, productVariations)
 
   useEffect(() => {
     const fetchOptionData = async () => {
-      const optionData = getModifiedOptionData(productOptions)
-      let selectedValue = sliceValue
-        ? sliceValue
-        : optionData?.selectOptions?.[0]?.values?.[0]?.value
-      const selectedValueFromUrl = selectedUrlVariant
-        ? optionData?.selectOptions?.[0]?.values?.find(
-            (value: any) => value.variationProductCode === selectedUrlVariant
-          )?.value
-        : null
-      selectedValue = selectedValueFromUrl ? selectedValueFromUrl : selectedValue
+      const selection = resolveDefaultOptionValue({
+        product,
+        productVariations,
+        sliceValue,
+        selectedUrlVariant,
+      })
+
+      if (!selection) return
+
       await selectProductOption(
-        optionData?.selectOptions?.[0]?.attributeFQN as string,
-        selectedValue,
+        selection.attributeFQN,
+        selection.value,
         undefined,
-        optionData?.selectOptions?.[0]?.values?.find(
-          (value: { value: any }) => value?.value === selectedValue
-        )?.isEnabled as boolean
+        selection.isEnabled
       )
     }
 
@@ -435,63 +390,54 @@ export const usePdpViewModel = (params: UsePdpViewModelParams) => {
     fetchDocumentData()
   }, [variationProductCode, productCode])
 
-  useEffect(() => {
-    const mergeProductProperties = () => {
-      if (!product || !currentProduct) return
+  const updatedProduct = useMemo(() => {
+    if (!product || !currentProduct) return product
 
-      const currentProductMap = new Map(
-        currentProduct?.properties?.map((item: any) => [item.attributeFQN, item])
-      )
+    const currentProductMap = new Map(
+      currentProduct?.properties?.map((item: any) => [item.attributeFQN, item])
+    )
 
-      let mergedProperties = product?.properties?.filter(
-        (item: any) => !currentProductMap?.has(item.attributeFQN)
-      )
+    let mergedProperties = product?.properties?.filter(
+      (item: any) => !currentProductMap?.has(item.attributeFQN)
+    )
 
-      mergedProperties = mergedProperties
-        ?.filter((property: any) => !variantProperties.includes(property.attributeFQN))
-        ?.concat(currentProduct?.properties || [])
+    mergedProperties = mergedProperties
+      ?.filter((property: any) => !variantProperties.includes(property.attributeFQN))
+      ?.concat(currentProduct?.properties || [])
 
-      setUpdatedProduct({ ...product, properties: mergedProperties })
-    }
-    const variantTitlePropertyLength = currentProduct?.properties?.find(
-      (data: any) => data?.attributeFQN === 'tenant~variant-product-name'
-    )?.values?.length
-
-    const variantTitle =
-      currentProduct?.properties?.find(
-        (data: any) => data?.attributeFQN === 'tenant~variant-product-name'
-      )?.values?.[0]?.stringValue || null
-    if (variantTitlePropertyLength === 1) {
-      setIsLoading(false)
-      setVariantProductTitle(variantTitle as string)
-    }
-    mergeProductProperties()
-    forceRender()
+    return { ...product, properties: mergedProperties }
   }, [product, currentProduct])
 
-  useEffect(() => {
-    const citationCountVariantAttr =
-      currentProduct?.properties?.find(
-        (data: any) => data?.attributeFQN === 'tenant~citation-count-variant'
-      )?.values?.[0]?.value || null
-    setCitationCountVariant(citationCountVariantAttr ? Number(citationCountVariantAttr) : 0)
-  }, [currentProduct])
+  const variantTitleValues = currentProduct?.properties?.find(
+    (data: any) => data?.attributeFQN === 'tenant~variant-product-name'
+  )?.values
 
-  useEffect(() => {
-    const fetchSettings = async () => {
-      const settings = await GetThemeSettings()
-      setCitationApiKey(settings?.data?.citationsApiKey)
-    }
-    fetchSettings()
-  }, [])
+  const variantProductTitle =
+    variantTitleValues?.length === 1 ? (variantTitleValues?.[0]?.stringValue as string) ?? '' : ''
 
-  useEffect(() => {
+  const isLoading = variantTitleValues?.length !== 1
+
+  const citationCountVariantAttr =
+    currentProduct?.properties?.find(
+      (data: any) => data?.attributeFQN === 'tenant~citation-count-variant'
+    )?.values?.[0]?.value || null
+  const citationCountVariant = citationCountVariantAttr ? Number(citationCountVariantAttr) : 0
+
+  const {
+    skuStatusText,
+    showPrices,
+    customCTALabel,
+    customCTATarget,
+    stockBehaviour,
+    minimumStock,
+    citeabProductCode,
+  } = useMemo(() => {
     const skuStatusTextProperty = updatedProduct?.properties?.find(
-      (prop) => prop?.attributeFQN === 'tenant~sku-status-text'
+      (prop: any) => prop?.attributeFQN === 'tenant~sku-status-text'
     )
 
     const showPricesProperty = updatedProduct?.properties?.find(
-      (prop) => prop?.attributeFQN === 'tenant~show-prices'
+      (prop: any) => prop?.attributeFQN === 'tenant~show-prices'
     )
 
     const customCTALabelAttr =
@@ -518,17 +464,17 @@ export const usePdpViewModel = (params: UsePdpViewModelParams) => {
         (data: any) => data?.attributeFQN === 'tenant~citeab-product-code'
       )?.values?.[0]?.stringValue || null
 
-    setSkuStatusText(
-      skuStatusTextProperty ? String(skuStatusTextProperty?.values?.[0]?.value) : null
-    )
-
-    setShowPrices(showPricesProperty ? Boolean(showPricesProperty?.values?.[0]?.value) : null)
-    setcustomCTALabel(customCTALabelAttr ? String(customCTALabelAttr) : null)
-    setcustomTarget(customCTATargetAttr ? String(customCTATargetAttr) : null)
-    setStockBehaviourArr(stockBehaviourAttr ? String(stockBehaviourAttr) : null)
-    setMinimumStock(minimumStockArr ? Number(minimumStockArr) : 0)
-
-    setCiteabProductCodeAttr(citeabProductCodeAttr ? String(citeabProductCodeAttr) : null)
+    return {
+      skuStatusText: skuStatusTextProperty
+        ? String(skuStatusTextProperty?.values?.[0]?.value)
+        : null,
+      showPrices: showPricesProperty ? Boolean(showPricesProperty?.values?.[0]?.value) : null,
+      customCTALabel: customCTALabelAttr ? String(customCTALabelAttr) : null,
+      customCTATarget: customCTATargetAttr ? String(customCTATargetAttr) : null,
+      stockBehaviour: stockBehaviourAttr ? String(stockBehaviourAttr) : null,
+      minimumStock: minimumStockArr ? Number(minimumStockArr) : 0,
+      citeabProductCode: citeabProductCodeAttr ? String(citeabProductCodeAttr) : null,
+    }
   }, [updatedProduct])
 
   const availabilityMessageArr =
@@ -553,10 +499,6 @@ export const usePdpViewModel = (params: UsePdpViewModelParams) => {
     stockAvailable >= minimumStock
       ? stockAvailable - minimumStock
       : undefined
-
-  const forceRender = () => {
-    setKey((prevKey) => prevKey + 1)
-  }
 
   useEffect(() => {
     if (productCode !== variationProductCode) {
@@ -705,7 +647,7 @@ export const usePdpViewModel = (params: UsePdpViewModelParams) => {
     algoliaObjectData,
     addtocartvalue,
 
-    keyVal,
+    keyVal: citeabProductCode ?? 'citations',
     variationCodeDynamic,
     purchaseLocation,
     currentlocationInventory,
