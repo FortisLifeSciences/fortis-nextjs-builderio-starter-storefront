@@ -1,50 +1,3 @@
-export const topHeaderStyles = {
-  wrapper: {
-    display: {
-      xs: 'none',
-      md: 'flex',
-    },
-    backgroundColor: 'common.white',
-    justifyContent: 'flex-end',
-    zIndex: (theme: any) => theme.zIndex.modal,
-    paddingBlock: 1,
-    paddingInline: 2,
-  },
-  container: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    height: '40px',
-  },
-}
-
-export const headerActionAreaStyles = {
-  wrapper: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#e3e2ff',
-  },
-  container: {
-    display: 'flex',
-    justifyContent: 'end',
-    alignItems: 'center',
-  },
-  searchSuggestionsWrapper: {
-    width: '543px',
-    position: 'absolute',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    flex: 1,
-    display: { xs: 'none', md: 'inline-flex' },
-    alignItems: 'center',
-  },
-  logoWrapper: {
-    order: 0,
-    top: '-27px',
-  },
-}
-
 export const kiboHeaderStyles = {
   topBarStyles: {
     zIndex: (theme: any) => theme.zIndex.modal,
@@ -82,7 +35,7 @@ export const kiboHeaderStyles = {
     minHeight: '50px',
     backgroundColor: 'transparent',
     background: 'none',
-    // Visibility is handled by global.css at a fixed 900px boundary
+    // Visibility is handled by global.css at HEADER_DESKTOP_MIN_PX
     // (.fortis-desktop-header-slot), not the theme `md` breakpoint (=1200).
     display: 'block',
   },
