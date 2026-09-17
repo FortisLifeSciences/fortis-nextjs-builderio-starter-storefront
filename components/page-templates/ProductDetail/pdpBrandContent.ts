@@ -169,7 +169,6 @@ export const PDP_BRAND_CONTENT: Record<PdpBrandKey, PdpBrandContent> = {
       benefits: [
         '50+ years of proven expertise',
         'Farm-to-Bench™ production',
-        'Six-Pillar Validation',
         'Custom development, conjugation, and assay services',
       ],
       href: 'https://www.fortislife.com/bethyl-laboratories',
