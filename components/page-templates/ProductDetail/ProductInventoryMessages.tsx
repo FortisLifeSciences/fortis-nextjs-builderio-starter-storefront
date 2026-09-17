@@ -283,11 +283,10 @@ const ProductInventoryMessages = ({
             buffer
           )
           //console.log("deliverydate:"+deliveryDate);
+          // inventoryMessage = inventoryMessages?.normalAvailability
+          //   .replace('{CountDown}', countDown)
+          //   .replace('{DeliveryDate}', deliveryDate)
           inventoryMessage = availabilityMessage
-            ? availabilityMessage
-            : inventoryMessages?.normalAvailability
-                ?.replace('{CountDown}', countDown)
-                ?.replace('{DeliveryDate}', deliveryDate)
           cartDisplayStatus = true
           scenario = 1
           return { inventoryMessage, cartDisplayStatus, scenario }
