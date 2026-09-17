@@ -149,7 +149,7 @@ export const PDP_BRAND_CONTENT: Record<PdpBrandKey, PdpBrandContent> = {
     supportRows: [
       {
         id: 'bulk',
-        title: 'Bulk & Custom Quantities',
+        title: 'Bulk & Custom Option',
         subtitle: 'Bulk and custom supply options',
         href: '/bulk-custom-oem',
         icon: 'inventory_2',
