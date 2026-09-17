@@ -22,17 +22,7 @@ import logoBlue from '@/assets/fortisLogo.png'
 import AlgoliaAutocomplete from '@/components/layout/Algolia/AlgoliaAutocomplete'
 import AccountIcon from '@/components/layout/AppHeader/Icons/AccountIcon/AccountIcon'
 import CartIcon from '@/components/layout/AppHeader/Icons/CartIcon/CartIcon'
-
-const TRANSPARENT_PAGES = [
-  '/',
-  '/new-home-page',
-  '/new-about',
-  '/about',
-  '/our-company',
-  '/new-services-page',
-  '/fortis-grant-2026-abnano-vhh-discovery',
-  '/data-in-focus',
-]
+import { isTransparentPagePath } from '@/components/layout/AppHeader/transparentPages'
 
 const NavigationBar = (props: any) => {
   const router = useRouter()
@@ -40,7 +30,7 @@ const NavigationBar = (props: any) => {
   const isTransparentPage =
     typeof isTransparentPageProp === 'boolean'
       ? isTransparentPageProp
-      : TRANSPARENT_PAGES.includes(router.asPath.split('?')[0])
+      : isTransparentPagePath(router.asPath)
   const [hasScrolled, setHasScrolled] = useState(false)
 
   useEffect(() => {
@@ -75,12 +65,32 @@ const NavigationBar = (props: any) => {
   const [hasQuery, setHasQuery] = useState(false)
 
   useEffect(() => {
-    const el = document.querySelector<HTMLInputElement>('#autocomplete input')
-    if (!el) return
-    const onInput = () => setHasQuery(el.value.length > 0)
-    el.addEventListener('input', onInput)
-    return () => el.removeEventListener('input', onInput)
-  })
+    if (isCheckoutPage) return
+
+    const container = document.getElementById('autocomplete')
+    if (!container) return
+
+    let input: HTMLInputElement | null = null
+    const onInput = () => setHasQuery((input?.value.length ?? 0) > 0)
+
+    const bind = () => {
+      const next = container.querySelector<HTMLInputElement>('input')
+      if (next === input) return
+      input?.removeEventListener('input', onInput)
+      input = next
+      input?.addEventListener('input', onInput)
+      onInput()
+    }
+
+    bind()
+    const observer = new MutationObserver(bind)
+    observer.observe(container, { childList: true, subtree: true })
+
+    return () => {
+      observer.disconnect()
+      input?.removeEventListener('input', onInput)
+    }
+  }, [isCheckoutPage])
 
   const clearSearch = () => {
     const el = document.querySelector<HTMLInputElement>('#autocomplete input')
@@ -101,7 +111,6 @@ const NavigationBar = (props: any) => {
       className={showWhite ? 'scrolled' : ''}
     >
       <Box component="nav" sx={navInnerStyles}>
-        {/* Logo — 115×30px exact Figma size */}
         <Box sx={logoStyles}>
           <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
             <Image
@@ -190,14 +199,14 @@ const NavigationBar = (props: any) => {
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  px: { md: '12px', lg: '20px' },
-                  py: { md: '8px', lg: '10px' },
+                  px: '20px',
+                  py: '10px',
                   bgcolor: '#30299A',
                   color: '#FFFFFF',
                   borderRadius: '0px 20px 0px 20px',
                   fontFamily: 'Poppins, sans-serif',
                   fontWeight: 400,
-                  fontSize: { md: '13px', lg: '15px' },
+                  fontSize: '15px',
                   lineHeight: '150%',
                   letterSpacing: '-0.005em',
                   whiteSpace: 'nowrap',
