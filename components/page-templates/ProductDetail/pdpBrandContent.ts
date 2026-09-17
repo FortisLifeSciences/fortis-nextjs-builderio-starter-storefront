@@ -12,6 +12,7 @@ export interface PdpBrandCardContent {
   stars: boolean
   logos: string[]
   benefits: string[]
+  href?: string
 }
 
 export interface PdpServiceCard {
@@ -65,14 +66,14 @@ const SHARED_SUPPORT_ROWS: PdpSupportRow[] = [
     id: 'representative',
     title: 'Contact a Fortis Representative',
     subtitle: 'For Orders in the US',
-    href: '/contact-us',
+    href: 'https://www.fortislife.com/#distributors',
     icon: 'support_agent',
   },
   {
     id: 'distributor',
     title: 'Find a Distributor',
     subtitle: 'Local ordering worldwide',
-    href: '/distributors',
+    href: 'https://www.fortislife.com/distributors',
     icon: 'public',
   },
   {
@@ -171,6 +172,7 @@ export const PDP_BRAND_CONTENT: Record<PdpBrandKey, PdpBrandContent> = {
         'Six-Pillar Validation',
         'Custom development, conjugation, and assay services',
       ],
+      href: 'https://www.fortislife.com/bethyl-laboratories',
     },
     publicationCta: SHARED_PUBLICATION_CTA,
     secondaryCtas: [{ label: 'Bulk Request', href: '/bulk-custom-oem', variant: 'outline' }],

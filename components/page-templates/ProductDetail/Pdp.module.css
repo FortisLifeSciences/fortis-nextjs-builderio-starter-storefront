@@ -955,11 +955,13 @@
 /* ---------- brand card ---------- */
 
 .brandCard {
+  display: block;
   margin-top: 12px;
   background: var(--accent);
   border-radius: 18px;
   padding: 22px 20px 20px;
   color: #fff;
+  text-decoration: none;
 }
 
 .page[data-brand='arista'] .brandCard {

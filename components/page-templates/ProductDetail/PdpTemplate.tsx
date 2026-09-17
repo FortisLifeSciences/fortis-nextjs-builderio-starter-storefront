@@ -620,8 +620,8 @@ const PdpTemplate = (props: PdpTemplateProps) => {
 
   const brandLogoSrc = brand ? brandImagesWhite[brand.toLowerCase()] : undefined
 
-  const brandCard = brandContent.brandCard ? (
-    <div className={styles.brandCard}>
+  const brandCardInner = brandContent.brandCard ? (
+    <>
       {brandContent.brandCard.stars ? (
         <p className={styles.stars} aria-hidden="true">
           ★★★★★
@@ -644,7 +644,17 @@ const PdpTemplate = (props: PdpTemplateProps) => {
           <span>{benefit}</span>
         </div>
       ))}
-    </div>
+    </>
+  ) : null
+
+  const brandCard = brandCardInner ? (
+    brandContent.brandCard?.href ? (
+      <Link className={styles.brandCard} href={brandContent.brandCard.href}>
+        {brandCardInner}
+      </Link>
+    ) : (
+      <div className={styles.brandCard}>{brandCardInner}</div>
+    )
   ) : null
 
   return (
