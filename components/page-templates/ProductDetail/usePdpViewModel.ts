@@ -535,14 +535,16 @@ export const usePdpViewModel = (params: UsePdpViewModelParams) => {
     product?.properties?.find((data: any) => data?.attributeFQN === 'tenant~availability-message')
       ?.values?.[0]?.stringValue || null
 
+  const customCTAHref = `${customCTATarget}${currentProduct?.variationProductCode}`
+  const linkTargetHref = ousShowDistributorBtn ? '/distributors' : '/'
+  const ctaHref = ousShowDistributorBtn ? linkTargetHref : customCTAHref
+
   const handleCustomCTATarget = () => {
-    const targetPath = `${customCTATarget}${currentProduct?.variationProductCode}`
-    router.push(targetPath)
+    router.push(customCTAHref)
   }
 
   const handleLinkTarget = () => {
-    const targetPath = ousShowDistributorBtn ? '/distributors' : '/'
-    router.push(targetPath)
+    router.push(linkTargetHref)
   }
 
   const maxQuantity =
@@ -676,6 +678,7 @@ export const usePdpViewModel = (params: UsePdpViewModelParams) => {
 
     customCTALabel,
     customCTATarget,
+    ctaHref,
     handleCustomCTATarget,
     handleLinkTarget,
     countryCode,

@@ -525,7 +525,8 @@
   margin-top: 12px;
 }
 
-.mediaLinkRow button {
+.mediaLinkRow button,
+.mediaLinkRow a {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -537,7 +538,8 @@
   font-weight: 700;
 }
 
-.mediaLinkRow button svg {
+.mediaLinkRow button svg,
+.mediaLinkRow a svg {
   width: 18px;
   height: 18px;
   fill: none;
@@ -545,7 +547,8 @@
   stroke-width: 1.8;
 }
 
-.mediaLinkRow button:hover span {
+.mediaLinkRow button:hover span,
+.mediaLinkRow a:hover span {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -2325,6 +2328,10 @@
   font-weight: 800;
   transition: background-color 0.18s ease;
   min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .mobileBarActive .mobileCartBtn {

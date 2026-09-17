@@ -99,7 +99,7 @@ export const PDP_BRAND_CONTENT: Record<PdpBrandKey, PdpBrandContent> = {
     publicationCta: SHARED_PUBLICATION_CTA,
     secondaryCtas: [
       { label: 'Request a Sample', href: '/contact-us', variant: 'filled' },
-      { label: 'Order in Bulk', href: '/bulk-and-oem', variant: 'outline' },
+      { label: 'Order in Bulk', href: '/bulk-custom-oem', variant: 'outline' },
     ],
     services: [
       {
@@ -150,7 +150,7 @@ export const PDP_BRAND_CONTENT: Record<PdpBrandKey, PdpBrandContent> = {
         id: 'bulk',
         title: 'Bulk & Custom Quantities',
         subtitle: 'Bulk and custom supply options',
-        href: '/bulk-and-oem',
+        href: '/bulk-custom-oem',
         icon: 'inventory_2',
       },
       {
@@ -173,14 +173,14 @@ export const PDP_BRAND_CONTENT: Record<PdpBrandKey, PdpBrandContent> = {
       ],
     },
     publicationCta: SHARED_PUBLICATION_CTA,
-    secondaryCtas: [{ label: 'Bulk Request', href: '/bulk-and-oem', variant: 'outline' }],
+    secondaryCtas: [{ label: 'Bulk Request', href: '/bulk-custom-oem', variant: 'outline' }],
     services: [
       {
         id: 'antibody-conjugation',
         title: 'Antibody Conjugation',
         copy: 'Antibody and conjugate formats developed together, built to your specification.',
         ctaLabel: 'Request Customization',
-        href: '/antibody-services',
+        href: '/antibody-conjugation-services',
         art: '/pdp/services/bethyl-1.png',
       },
       {
@@ -188,7 +188,7 @@ export const PDP_BRAND_CONTENT: Record<PdpBrandKey, PdpBrandContent> = {
         title: 'Custom Monoclonal Antibody Discovery Services',
         copy: 'Full custom monoclonal development, from immunization through validation.',
         ctaLabel: 'Explore Monoclonal Development',
-        href: '/antibody-services',
+        href: '/custom-monoclonal-antibodies',
         art: '/pdp/services/bethyl-2.png',
       },
       {
@@ -196,7 +196,7 @@ export const PDP_BRAND_CONTENT: Record<PdpBrandKey, PdpBrandContent> = {
         title: 'VHH Discovery',
         copy: "Single-domain antibodies for structurally difficult targets a conventional monoclonal can't reach.",
         ctaLabel: 'Explore VHH Discovery',
-        href: '/antibody-services',
+        href: '/vhh-discovery',
         art: '/pdp/services/bethyl-3.png',
       },
     ],

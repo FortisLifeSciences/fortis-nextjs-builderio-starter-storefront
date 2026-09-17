@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 
 import { BuilderComponent } from '@builder.io/react'
 import Link from 'next/link'
-import router from 'next/router'
 import { useTranslation } from 'next-i18next'
 
 import CitationWidget from './CitationWidget'
@@ -133,8 +132,7 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     availabilityMessageArr,
     selectProductOption,
     customCTALabel,
-    handleCustomCTATarget,
-    handleLinkTarget,
+    ctaHref,
     countryCode,
     ousShowDistributorBtn,
     ousShowPrices,
@@ -385,25 +383,32 @@ const PdpTemplate = (props: PdpTemplateProps) => {
           <span />
         </div>
       ) : null}
-      {brandContent.supportRows.map((row) => (
-        <button
-          type="button"
-          className={styles.supportRow}
-          key={row.id}
-          onClick={() => row.href && router.push(row.href)}
-        >
-          <span className={styles.supportIcon}>
-            <DocIcon />
-          </span>
-          <span>
-            <span className={styles.supportTitle}>{row.title}</span>
-            <span className={styles.supportSub}>{row.subtitle}</span>
-          </span>
-          <span className={styles.supportArrow}>
-            <Arrow />
-          </span>
-        </button>
-      ))}
+      {brandContent.supportRows.map((row) => {
+        const rowContent = (
+          <>
+            <span className={styles.supportIcon}>
+              <DocIcon />
+            </span>
+            <span>
+              <span className={styles.supportTitle}>{row.title}</span>
+              <span className={styles.supportSub}>{row.subtitle}</span>
+            </span>
+            <span className={styles.supportArrow}>
+              <Arrow />
+            </span>
+          </>
+        )
+
+        return row.href ? (
+          <Link className={styles.supportRow} key={row.id} href={row.href}>
+            {rowContent}
+          </Link>
+        ) : (
+          <div className={styles.supportRow} key={row.id} style={{ cursor: 'default' }}>
+            {rowContent}
+          </div>
+        )
+      })}
     </>
   )
 
@@ -444,19 +449,18 @@ const PdpTemplate = (props: PdpTemplateProps) => {
           </div>
 
           {skuStatusText === 'CustomCTA' ? (
-            <button
-              type="button"
+            <Link
+              href={ctaHref}
               className={`${styles.buyBtn} ${
                 algoliaQueryId ? 'custom-CTA-button-search' : 'custom-CTA-button'
               }`}
               style={{ marginTop: '12px', width: '100%' }}
-              onClick={() => (ousShowDistributorBtn ? handleLinkTarget() : handleCustomCTATarget())}
               {...(algoliaQueryId && { 'data-insights-query-id': algoliaQueryId })}
               data-insights-object-id={variationProductCode}
               data-insights-index="products"
             >
               {ousShowDistributorBtn ? t('distributors') : customCTALabel}
-            </button>
+            </Link>
           ) : null}
 
           {showAddToCart ? (
@@ -509,20 +513,19 @@ const PdpTemplate = (props: PdpTemplateProps) => {
             {distributorNote}
           </p>
           {!(skuStatusText !== 'CustomCTA' && !ousShowDistributorBtn) ? (
-            <button
-              type="button"
+            <Link
+              href={ctaHref}
               className={`${styles.buyBtn} ${
                 algoliaQueryId ? 'custom-CTA-button-search' : 'custom-CTA-button'
               }`}
               style={{ marginTop: '12px', width: '100%' }}
-              onClick={() => (ousShowDistributorBtn ? handleLinkTarget() : handleCustomCTATarget())}
               data-insights-object-id={variationProductCode}
               data-insights-query-id={algoliaQueryId ? algoliaQueryId : undefined}
               data-insights-index="products"
             >
               {ousShowDistributorBtn && t('distributors')}
               {!ousShowDistributorBtn && skuStatusText === 'CustomCTA' && customCTALabel}
-            </button>
+            </Link>
           ) : null}
         </>
       )}
@@ -586,16 +589,28 @@ const PdpTemplate = (props: PdpTemplateProps) => {
         {hasDocuments || citationCountVariant > 0 ? (
           <div className={styles.mediaLinkRow}>
             {hasDocuments ? (
-              <button type="button" onClick={() => scrollToSection('document-section')}>
+              <a
+                href="#document-section"
+                onClick={(event) => {
+                  event.preventDefault()
+                  scrollToSection('document-section')
+                }}
+              >
                 <DocIcon />
                 <span>Product Documents</span>
-              </button>
+              </a>
             ) : null}
             {citationCountVariant > 0 ? (
-              <button type="button" onClick={() => scrollToSection('citation-document-section')}>
+              <a
+                href="#citation-document-section"
+                onClick={(event) => {
+                  event.preventDefault()
+                  scrollToSection('citation-document-section')
+                }}
+              >
                 <DocIcon />
                 <span>Citations ({citationCountVariant})</span>
-              </button>
+              </a>
             ) : null}
           </div>
         ) : null}
@@ -1030,13 +1045,9 @@ const PdpTemplate = (props: PdpTemplateProps) => {
               </div>
             </>
           ) : skuStatusText === 'CustomCTA' || ousShowDistributorBtn ? (
-            <button
-              type="button"
-              className={styles.mobileCartBtn}
-              onClick={() => (ousShowDistributorBtn ? handleLinkTarget() : handleCustomCTATarget())}
-            >
+            <Link href={ctaHref} className={styles.mobileCartBtn}>
               {ousShowDistributorBtn ? t('distributors') : customCTALabel}
-            </button>
+            </Link>
           ) : null}
         </div>
       </div>
