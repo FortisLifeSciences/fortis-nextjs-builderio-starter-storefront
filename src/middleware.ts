@@ -94,7 +94,7 @@ const csp = [
   `default-src 'self'`,
   `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.hs-scripts.com https://js.hsforms.net https://*.hsforms.com https://js.hscollectedforms.net https://js.hs-banner.com https://js.hs-analytics.net https://static.hsappstatic.net https://forms.hscollectedforms.net https://*.hubspotusercontent-na1.net https://cdn.builder.io https://*.builder.io https://www.google.com https://www.google.co.in https://analytics.google.com https://www.gstatic.com https://*.mozu.com https://www.googletagmanager.com https://www.google-analytics.com https://*.citeab.com https://*.clarity.ms https://*.snitcher.com https://radar.snitcher.com https://*.hotjar.com https://app.secureprivacy.ai https://*.secureprivacy.ai https://*.doubleclick.net https://googleads.g.doubleclick.net https://stats.g.doubleclick.net https://www.googleadservices.com https://pagead2.googlesyndication.com https://ad.doubleclick.net https://cmp.secureprivacy.ai https://www.redditstatic.com https://snap.licdn.com https://help.hotjar.com https://uper.pl https://support.google.com https://embed.typeform.com`,
 
-  `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.builder.io https://www.gstatic.com`,
+  `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.builder.io https://www.gstatic.com https://*.citeab.com`,
   `img-src 'self' data: blob: https:`,
   `media-src 'self' https://cdn.builder.io https://*.builder.io`,
   `font-src 'self' data: https://fonts.gstatic.com https://cdn.builder.io https://*.builder.io https://script.hotjar.com  https://*.hotjar.com`,
