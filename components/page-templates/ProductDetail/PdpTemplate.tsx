@@ -15,7 +15,11 @@ import PdpVariantPicker from './PdpVariantPicker'
 import ProductInventoryMessages from './ProductInventoryMessages'
 import { usePdpViewModel } from './usePdpViewModel'
 import { AddToCartDialog } from '@/components/dialogs'
+import ColorSelector from '@/components/product/ColorSelector/ColorSelector'
 import PDPValidationModal from '@/components/product/PDPValidationModal'
+import ProductOptionCheckbox from '@/components/product/ProductOptionCheckbox/ProductOptionCheckbox'
+import ProductOptionTextBox from '@/components/product/ProductOptionTextBox/ProductOptionTextBox'
+import ProductVariantSizeSelector from '@/components/product/ProductVariantSizeSelector/ProductVariantSizeSelector'
 import { useAuthContext, useModalContext } from '@/context'
 import { brandImages, brandImagesWhite } from '@/lib/constants/brandLogos'
 import { productGetters } from '@/lib/getters'
@@ -24,7 +28,14 @@ import { addToCartGTMPDP } from '@/lib/utils/google-tag-manager'
 
 import type { SpecRowConfig } from './pdpSpecGroups'
 import type { PdpVariantOption } from './PdpVariantPicker'
-import type { ProductImage, Product, FilteredProduct, ConfiguredProduct } from '@/lib/gql/types'
+import type {
+  ProductImage,
+  Product,
+  FilteredProduct,
+  ConfiguredProduct,
+  ProductOption,
+  ProductOptionValue,
+} from '@/lib/gql/types'
 
 type queryIdArr = {
   ProductCode: string | undefined
@@ -124,7 +135,10 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     productPrice,
     brand,
     brandName,
+    newProduct,
     variantProductName,
+    productOptions,
+    optionsVisibility,
     quantity,
     setQuantity,
     minQuantity,
@@ -289,15 +303,44 @@ const PdpTemplate = (props: PdpTemplateProps) => {
   )[0]
   if (categoryLabel) chips.push({ label: categoryLabel, variant: 'outline' })
 
+  const manufacturingChipLabel = (fqn: string, expectedValue: string) => {
+    const entry = findProperty(updatedProduct, fqn)?.values?.[0]
+    if (entry?.value !== expectedValue) return null
+    return entry?.stringValue || null
+  }
+
+  const manufacturingMarks = [
+    manufacturingChipLabel('tenant~mfgcertification', 'ISO13485'),
+    manufacturingChipLabel('tenant~mfgavailability', 'gmp_ready'),
+    manufacturingChipLabel('tenant~mfgavailability', 'lyo_ready'),
+  ]
+  manufacturingMarks.forEach((label) => {
+    if (label) chips.push({ label, variant: 'outline' })
+  })
+
+  const toVariantOptions = (option: any): PdpVariantOption[] =>
+    (option?.values ?? []).map((value: any) => ({
+      value: value?.value,
+      label: value?.stringValue || value?.value,
+      sku: value?.variationProductCode,
+      price: value?.price?.price != null ? `$${value.price.price.toFixed(2)}` : null,
+      disabled: !value?.isEnabled,
+    }))
+
+  const handleSelectOptionChange = async (option: any, value: string) => {
+    await selectProductOption(
+      option?.attributeFQN as string,
+      value,
+      undefined,
+      option?.values?.find((entry: any) => entry?.value === value)?.isEnabled as boolean
+    )
+  }
+
   const selectOption = factoredProductData?.selectOptions?.[0]
-  const variantOptions: PdpVariantOption[] = (selectOption?.values ?? []).map((value: any) => ({
-    value: value?.value,
-    label: value?.stringValue || value?.value,
-    sku: value?.variationProductCode,
-    price: value?.price?.price != null ? `$${value.price.price.toFixed(2)}` : null,
-    disabled: !value?.isEnabled,
-  }))
+  const variantOptions: PdpVariantOption[] = toVariantOptions(selectOption)
   const selectedVariant = productGetters.getOptionSelectedValue(selectOption as any)
+
+  const additionalSelectOptions = (factoredProductData?.selectOptions ?? []).slice(1)
 
   const variantDescription = getPropertyValues(
     findProperty(currentProduct, 'tenant~description-variant')
@@ -416,15 +459,56 @@ const PdpTemplate = (props: PdpTemplateProps) => {
         options={variantOptions}
         selected={selectedVariant}
         showPrices={priceVisible}
-        onChange={async (value) => {
-          await selectProductOption(
-            selectOption?.attributeFQN as string,
-            value,
-            undefined,
-            selectOption?.values?.find((v: any) => v?.value === value)?.isEnabled as boolean
-          )
-        }}
+        onChange={(value) => handleSelectOptionChange(selectOption, value)}
       />
+
+      {additionalSelectOptions.map((option: any) => (
+        <PdpVariantPicker
+          key={option?.attributeFQN}
+          options={toVariantOptions(option)}
+          selected={productGetters.getOptionSelectedValue(option)}
+          showPrices={priceVisible}
+          onChange={(value) => handleSelectOptionChange(option, value)}
+        />
+      ))}
+
+      {optionsVisibility?.color ? (
+        <ColorSelector
+          attributeFQN={productOptions?.colourOptions?.attributeFQN as string}
+          values={productOptions?.colourOptions?.values as ProductOptionValue[]}
+          onColorChange={selectProductOption}
+        />
+      ) : null}
+
+      {optionsVisibility?.size ? (
+        <ProductVariantSizeSelector
+          values={productOptions?.sizeOptions?.values as ProductOptionValue[]}
+          attributeFQN={productOptions?.sizeOptions?.attributeFQN as string}
+          onSizeChange={selectProductOption}
+        />
+      ) : null}
+
+      {optionsVisibility?.checkbox
+        ? productOptions?.yesNoOptions?.map((option: ProductOption | null) => (
+            <ProductOptionCheckbox
+              key={option?.attributeDetail?.name}
+              label={option?.attributeDetail?.name as string}
+              attributeFQN={option?.attributeFQN as string}
+              checked={Boolean(productGetters.getOptionSelectedValue(option as ProductOption))}
+              onCheckboxChange={selectProductOption}
+            />
+          ))
+        : null}
+
+      {optionsVisibility?.textbox
+        ? productOptions?.textBoxOptions?.map((option: ProductOption | null) => (
+            <ProductOptionTextBox
+              key={option?.attributeDetail?.name}
+              option={option as ProductOption}
+              onBlur={selectProductOption}
+            />
+          ))
+        : null}
 
       {variantDescription ? (
         <p
@@ -678,6 +762,7 @@ const PdpTemplate = (props: PdpTemplateProps) => {
             <div className={styles.titleLine}>
               <h1 className={styles.title}>
                 {heroTitle}
+                {newProduct ? <span className={styles.titleNew}>{t('new')}</span> : null}
                 {discountPercent ? (
                   <span className={styles.titleDiscount}>−{discountPercent}%</span>
                 ) : null}
