@@ -3,10 +3,9 @@ import React from 'react'
 import { ComponentStory, ComponentMeta } from '@storybook/react'
 
 import MobileHeader from './MobileHeader'
-import KiboHeader from '../Common/KiboHeader'
 import { DialogRoot, HeaderContextProvider, ModalContextProvider } from '@/context'
 
-// This component is used inside KiboHeader.
+// This component is used inside FortisHeader.
 export default {
   title: 'Layout/Mobile App Header',
   component: MobileHeader,
@@ -15,7 +14,7 @@ export default {
   },
 } as ComponentMeta<typeof MobileHeader>
 
-const Template: ComponentStory<typeof KiboHeader> = () => (
+const Template: ComponentStory<typeof MobileHeader> = () => (
   <ModalContextProvider>
     <HeaderContextProvider>
       <MobileHeader />

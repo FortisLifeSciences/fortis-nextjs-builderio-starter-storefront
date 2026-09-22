@@ -22,17 +22,7 @@ import logoBlue from '@/assets/fortisLogo.png'
 import AlgoliaAutocomplete from '@/components/layout/Algolia/AlgoliaAutocomplete'
 import AccountIcon from '@/components/layout/AppHeader/Icons/AccountIcon/AccountIcon'
 import CartIcon from '@/components/layout/AppHeader/Icons/CartIcon/CartIcon'
-
-const TRANSPARENT_PAGES = [
-  '/',
-  '/new-home-page',
-  '/new-about',
-  '/about',
-  '/our-company',
-  '/new-services-page',
-  '/fortis-grant-2026-abnano-vhh-discovery',
-  '/data-in-focus',
-]
+import { isTransparentPagePath } from '@/components/layout/AppHeader/transparentPages'
 
 const NavigationBar = (props: any) => {
   const router = useRouter()
@@ -40,7 +30,7 @@ const NavigationBar = (props: any) => {
   const isTransparentPage =
     typeof isTransparentPageProp === 'boolean'
       ? isTransparentPageProp
-      : TRANSPARENT_PAGES.includes(router.asPath.split('?')[0])
+      : isTransparentPagePath(router.asPath)
   const [hasScrolled, setHasScrolled] = useState(false)
 
   useEffect(() => {
@@ -75,12 +65,32 @@ const NavigationBar = (props: any) => {
   const [hasQuery, setHasQuery] = useState(false)
 
   useEffect(() => {
-    const el = document.querySelector<HTMLInputElement>('#autocomplete input')
-    if (!el) return
-    const onInput = () => setHasQuery(el.value.length > 0)
-    el.addEventListener('input', onInput)
-    return () => el.removeEventListener('input', onInput)
-  })
+    if (isCheckoutPage) return
+
+    const container = document.getElementById('autocomplete')
+    if (!container) return
+
+    let input: HTMLInputElement | null = null
+    const onInput = () => setHasQuery((input?.value.length ?? 0) > 0)
+
+    const bind = () => {
+      const next = container.querySelector<HTMLInputElement>('input')
+      if (next === input) return
+      input?.removeEventListener('input', onInput)
+      input = next
+      input?.addEventListener('input', onInput)
+      onInput()
+    }
+
+    bind()
+    const observer = new MutationObserver(bind)
+    observer.observe(container, { childList: true, subtree: true })
+
+    return () => {
+      observer.disconnect()
+      input?.removeEventListener('input', onInput)
+    }
+  }, [isCheckoutPage])
 
   const clearSearch = () => {
     const el = document.querySelector<HTMLInputElement>('#autocomplete input')
@@ -101,7 +111,6 @@ const NavigationBar = (props: any) => {
       className={showWhite ? 'scrolled' : ''}
     >
       <Box component="nav" sx={navInnerStyles}>
-        {/* Logo — 115×30px exact Figma size */}
         <Box sx={logoStyles}>
           <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
             <Image
@@ -115,101 +124,103 @@ const NavigationBar = (props: any) => {
         </Box>
 
         {/* Right group: nav links + search + icons */}
-        <Box sx={navRightContainerStyles}>
-          {/* Nav links */}
-          <Box sx={navLinksStyles}>
-            <FortisMegaMenu scrolled={showWhite} />
-          </Box>
-
-          {/* Search — pill ghost with plain icon */}
-          <Box sx={searchWrapperStyles}>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                position: 'relative',
-                width: '100%',
-                minWidth: 0,
-                overflow: 'hidden',
-                '& > #autocomplete': { width: '100%', minWidth: 0, flex: '1 1 auto' },
-              }}
-            >
-              {hasQuery ? (
-                <CloseIcon
-                  onClick={clearSearch}
-                  sx={{
-                    position: 'absolute',
-                    left: '20px',
-                    zIndex: 1,
-                    fontSize: '20px',
-                    color: iconColor,
-                    cursor: 'pointer',
-                  }}
-                />
-              ) : (
-                <SearchIcon
-                  sx={{
-                    position: 'absolute',
-                    left: '20px',
-                    zIndex: 1,
-                    fontSize: '20px',
-                    color: iconColor,
-                    pointerEvents: 'none',
-                  }}
-                />
-              )}
-              <AlgoliaAutocomplete detachedMediaQuery="none" />
+        {!isCheckoutPage && (
+          <Box sx={navRightContainerStyles}>
+            {/* Nav links */}
+            <Box sx={navLinksStyles}>
+              <FortisMegaMenu scrolled={showWhite} />
             </Box>
-          </Box>
 
-          {/* Divider + Cart + Account */}
-          <Box sx={iconGroupStyles} className="nav-right-icons">
-            <Box
-              sx={{
-                width: '1px',
-                height: '32px',
-                bgcolor: showWhite ? '#B5B5B5' : 'rgba(181,181,181,0.6)',
-              }}
-            />
-            <CartIcon size="medium" />
-            <button
-              aria-label="Login"
-              onClick={onAccountIconClick}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex' }}
-            >
-              <AccountIcon size="medium" onAccountIconClick={onAccountIconClick} />
-            </button>
-          </Box>
-
-          {/* Contact CTA button */}
-          <Link href="/contact-us" passHref legacyBehavior>
-            <Box
-              component="a"
-              sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                px: { md: '12px', lg: '20px' },
-                py: { md: '8px', lg: '10px' },
-                bgcolor: '#30299A',
-                color: '#FFFFFF',
-                borderRadius: '0px 20px 0px 20px',
-                fontFamily: 'Poppins, sans-serif',
-                fontWeight: 400,
-                fontSize: { md: '13px', lg: '15px' },
-                lineHeight: '150%',
-                letterSpacing: '-0.005em',
-                whiteSpace: 'nowrap',
-                textDecoration: 'none',
-                flexShrink: 0,
-                cursor: 'pointer !important',
-                '&:hover': { bgcolor: 'rgb(10, 17, 56)', cursor: 'pointer !important' },
-              }}
-            >
-              Contact
+            {/* Search — pill ghost with plain icon */}
+            <Box sx={searchWrapperStyles}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  position: 'relative',
+                  width: '100%',
+                  minWidth: 0,
+                  overflow: 'hidden',
+                  '& > #autocomplete': { width: '100%', minWidth: 0, flex: '1 1 auto' },
+                }}
+              >
+                {hasQuery ? (
+                  <CloseIcon
+                    onClick={clearSearch}
+                    sx={{
+                      position: 'absolute',
+                      left: '20px',
+                      zIndex: 1,
+                      fontSize: '20px',
+                      color: iconColor,
+                      cursor: 'pointer',
+                    }}
+                  />
+                ) : (
+                  <SearchIcon
+                    sx={{
+                      position: 'absolute',
+                      left: '20px',
+                      zIndex: 1,
+                      fontSize: '20px',
+                      color: iconColor,
+                      pointerEvents: 'none',
+                    }}
+                  />
+                )}
+                <AlgoliaAutocomplete detachedMediaQuery="none" />
+              </Box>
             </Box>
-          </Link>
-        </Box>
+
+            {/* Divider + Cart + Account */}
+            <Box sx={iconGroupStyles} className="nav-right-icons">
+              <Box
+                sx={{
+                  width: '1px',
+                  height: '32px',
+                  bgcolor: showWhite ? '#B5B5B5' : 'rgba(181,181,181,0.6)',
+                }}
+              />
+              <CartIcon size="medium" />
+              <button
+                aria-label="Login"
+                onClick={onAccountIconClick}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex' }}
+              >
+                <AccountIcon size="medium" onAccountIconClick={onAccountIconClick} />
+              </button>
+            </Box>
+
+            {/* Contact CTA button */}
+            <Link href="/contact-us" passHref legacyBehavior>
+              <Box
+                component="a"
+                sx={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  px: { md: '12px', lg: '20px' },
+                  py: { md: '8px', lg: '10px' },
+                  bgcolor: '#30299A',
+                  color: '#FFFFFF',
+                  borderRadius: '0px 20px 0px 20px',
+                  fontFamily: 'Poppins, sans-serif',
+                  fontWeight: 400,
+                  fontSize: { md: '13px', lg: '15px' },
+                  lineHeight: '150%',
+                  letterSpacing: '-0.005em',
+                  whiteSpace: 'nowrap',
+                  textDecoration: 'none',
+                  flexShrink: 0,
+                  cursor: 'pointer !important',
+                  '&:hover': { bgcolor: 'rgb(10, 17, 56)', cursor: 'pointer !important' },
+                }}
+              >
+                Contact
+              </Box>
+            </Link>
+          </Box>
+        )}
       </Box>
     </Box>
   )

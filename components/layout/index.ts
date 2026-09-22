@@ -1,4 +1,3 @@
-export { default as KiboHeader } from './AppHeader/Common/KiboHeader'
 export { default as MobileHeader } from './AppHeader/Mobile/MobileHeader'
 export { default as CheckoutHeader } from './AppHeader/Checkout/CheckoutHeader'
 
@@ -8,8 +7,6 @@ export { default as NavigationBar } from './AppHeader/NavigationBar/NavigationBa
 export { default as HamburgerMenu } from './HamburgerMenu/HamburgerMenu'
 export { default as CategoryNestedNavigation } from './CategoryNestedNavigation/CategoryNestedNavigation'
 export { default as LoginDialog } from './Login/LoginDialog/LoginDialog'
-export { default as MegaMenu } from './MegaMenu/MegaMenu'
-export { default as MegaMenuItem } from './MegaMenuItem/MegaMenuItem'
 export { default as FortisMegaMenu } from './AppHeader/FortisMegaMenu/FortisMegaMenu'
 export { default as MenuPopover } from './AppHeader/FortisMegaMenu/MenuPopover'
 export { default as SearchSuggestions } from './SearchSuggestions/SearchSuggestions'
