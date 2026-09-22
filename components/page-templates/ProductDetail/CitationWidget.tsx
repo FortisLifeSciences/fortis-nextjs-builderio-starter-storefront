@@ -42,7 +42,7 @@ const CitationWidget: React.FC<CitationWidgetProps> = ({
           console.error('Error loading CiteAb script:', error)
         })
     }
-  }, [citeabProductCode])
+  }, [citeabProductCode, citationApiKey])
 
   useEffect(() => {
     if (window.location.hash === '#citations') {
