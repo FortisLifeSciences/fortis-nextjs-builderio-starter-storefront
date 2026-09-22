@@ -24,6 +24,7 @@ import { useReCaptcha } from 'next-recaptcha-v3'
 import { B2BTemplateStyle } from './B2BTemplate.styles'
 import { MyAccountTemplateStyle } from '../../MyAccountTemplate/MyAccountTemplate.styles'
 import { MyProfile, PaymentMethod, AddressBook, ShippingPreferences } from '@/components/my-account'
+import { OngoingOrderBanner } from '@/components/order'
 import { useAuthContext, useSnackbarContext } from '@/context'
 import { useCardContactActions } from '@/hooks'
 import { validateGoogleReCaptcha } from '@/lib/helpers'
@@ -185,6 +186,9 @@ const B2BTemplate = (props: B2BTemplateProps) => {
             {user?.companyOrOrganization}
           </Typography>
         </Box>
+
+        <OngoingOrderBanner />
+
         <Box
           sx={{
             display: { md: 'flex', xs: 'block' },

@@ -1,21 +1,15 @@
 import '@testing-library/jest-dom'
-import { render, screen } from '@testing-library/react'
+import { render, waitFor } from '@testing-library/react'
+import mockRouter from 'next-router-mock'
 
-import { cartMock } from '@/__mocks__/stories/cartMock'
-import { createQueryClientWrapper } from '@/__test__/utils'
 import CartPage, { getServerSideProps } from '@/pages/cart'
 
-const mockCart = cartMock
+jest.mock('next/router', () => require('next-router-mock'))
 
-jest.mock('@/lib/api/util', () => ({
-  fetcher: jest.fn(() => {
-    return Promise.resolve({
-      data: mockCart,
-    })
-  }),
+const toggleCartDrawer = jest.fn()
+jest.mock('@/context', () => ({
+  useHeaderContext: () => ({ toggleCartDrawer }),
 }))
-
-jest.mock('@/lib/api/util/getUserClaimsFromRequest.ts', () => jest.fn(() => null))
 
 jest.mock('next-i18next/serverSideTranslations', () => ({
   serverSideTranslations: jest.fn(() => {
@@ -29,47 +23,16 @@ jest.mock('next-i18next/serverSideTranslations', () => ({
   }),
 }))
 
-const CartTemplate = () => <div data-testid="cart-template-mock" />
-jest.mock('@/components/page-templates/CartTemplate/CartTemplate.tsx', () => () => CartTemplate())
-
-jest.mock('next/config', () => {
-  return () => ({
-    publicRuntimeConfig: {
-      maxCookieAge: 0,
-      productListing: {
-        sortOptions: [
-          { value: 'Best Match', id: '' },
-          { value: 'Price: Low to High', id: 'price asc' },
-          { value: 'Price: High to Low', id: 'price desc' },
-          { value: 'Latest', id: 'createDate desc' },
-          { value: 'Oldest', id: 'createDate asc' },
-        ],
-        pageSize: 16,
-      },
-      isMultiShipEnabled: true,
-    },
-    serverRuntimeConfig: {
-      cacheKey: 'categoryTree',
-      cacheTimeOut: 10000,
-      isMultiShipEnabled: true,
-    },
-  })
-})
-
 describe('[page] Cart Page', () => {
-  it('should run getServerSideProps method', async () => {
-    const response = await getServerSideProps({ params: {} } as any)
+  beforeEach(() => {
+    toggleCartDrawer.mockClear()
+    mockRouter.setCurrentUrl('/cart')
+  })
+
+  it('should run getServerSideProps method and only load translations', async () => {
+    const response = await getServerSideProps({ locale: 'en' } as any)
     expect(response).toStrictEqual({
       props: {
-        isMultiShipEnabled: true,
-        cart: cartMock?.currentCart,
-        metaData: {
-          canonicalUrl: null,
-          description: null,
-          keywords: null,
-          robots: 'noindex,nofollow',
-          title: 'Cart',
-        },
         _nextI18Next: {
           initialI18nStore: { 'mock-locale': [{}], en: [{}] },
           initialLocale: 'mock-locale',
@@ -79,12 +42,12 @@ describe('[page] Cart Page', () => {
     })
   })
 
-  it('should render the cart template and order summary', () => {
-    render(<CartPage />, {
-      wrapper: createQueryClientWrapper(),
-    })
+  it('should open the cart side-drawer and redirect home instead of rendering a cart page', async () => {
+    render(<CartPage />)
 
-    const cartTemplate = screen.getByTestId('cart-template-mock')
-    expect(cartTemplate).toBeVisible()
+    await waitFor(() => {
+      expect(mockRouter.asPath).toBe('/')
+    })
+    expect(toggleCartDrawer).toHaveBeenCalledWith(true)
   })
 })

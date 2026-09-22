@@ -21,6 +21,7 @@ import type {
   CrCart,
   CrBillingInfo,
   CrPaymentCard,
+  CrPackageObj,
   CustomerContact,
   CuAddress,
   Checkout,
@@ -206,10 +207,7 @@ const getFulfillmentLocationCodes = (cartItems: (CrCartItem | CrOrderItem)[]): s
 }
 
 const getPaymentMethods = (order: CrOrder) => {
-  const payments: CrPayment[] =
-    (order?.payments?.filter(
-      (payment) => payment?.status?.toLowerCase() === 'new'
-    ) as CrPayment[]) || []
+  const payments: CrPayment[] = (order?.payments as CrPayment[]) || []
 
   if (!payments) return []
 
@@ -452,6 +450,30 @@ const getLocationCode = (order: CrOrder) => order?.locationCode
 const getAllOrderItems = (order: CrOrder | CrCart): CrOrderItem[] =>
   (order?.items as CrOrderItem[]) || []
 
+const getFulfillmentStatus = (order: CrOrder): string => order?.fulfillmentStatus || ''
+
+const getPackages = (order: CrOrder): CrPackageObj[] => (order?.packages as CrPackageObj[]) || []
+
+// First package's carrier/tracking info - orders currently ship as a single package.
+const getTrackingInfo = (order: CrOrder) => {
+  const trackingPackage = getPackages(order)?.[0]
+  return {
+    carrier: trackingPackage?.carrier || '',
+    trackingNumber: trackingPackage?.trackingNumber || trackingPackage?.trackingNumbers?.[0] || '',
+    trackingUrl: trackingPackage?.trackings?.[0]?.url || '',
+    fulfillmentDate: trackingPackage?.fulfillmentDate,
+  }
+}
+
+// Real discount name per coupon code, straight off the order/cart/checkout.
+const getCouponDiscountDescriptions = (order: any): Record<string, string> =>
+  (order?.orderDiscounts || []).reduce((descriptions: Record<string, string>, item: any) => {
+    if (item?.couponCode && item?.discount?.name) {
+      descriptions[item.couponCode] = item.discount.name
+    }
+    return descriptions
+  }, {})
+
 export const orderGetters = {
   getId,
   getCheckoutItemCount,
@@ -503,4 +525,8 @@ export const orderGetters = {
   getShippingMethodName,
   getAllOrderItems,
   getTotalDiscount,
+  getFulfillmentStatus,
+  getPackages,
+  getTrackingInfo,
+  getCouponDiscountDescriptions,
 }

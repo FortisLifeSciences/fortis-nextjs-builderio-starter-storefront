@@ -1,4 +1,4 @@
-import React, { useMemo, useReducer, useContext, createContext } from 'react'
+import React, { useEffect, useMemo, useReducer, useRef, useContext, createContext } from 'react'
 
 export type State = {
   activeStep: number
@@ -12,6 +12,7 @@ type Action = {
   type: string
   status?: string
   activeStep?: number
+  steps?: string[]
 }
 
 export const STEP_STATUS = {
@@ -45,6 +46,14 @@ const checkoutStepReducer = (state: State, action: Action): State => {
         activeStep: action.activeStep as number,
         stepStatus: STEP_STATUS.INCOMPLETE,
       }
+
+    case 'SET_STEPS':
+      return {
+        ...state,
+        steps: action.steps as string[],
+        activeStep: 0,
+        stepStatus: STEP_STATUS.INCOMPLETE,
+      }
     default:
       return state
   }
@@ -74,6 +83,22 @@ export const CheckoutStepProvider = (props: CheckoutStepProviderProps) => {
         }
       : initialState
   )
+
+  // `steps` can legitimately change after mount - e.g. a guest who logs in mid-checkout to use
+  // a login-gated payment option (Purchase Order) switches from the single-step guest layout
+  // to the full shipping/payment/review stepper without the page remounting. Sync it in rather
+  // than relying on the reducer's one-time lazy init.
+  const prevStepsRef = useRef<string[] | undefined>(stepsProp)
+  useEffect(() => {
+    if (!stepsProp) return
+    const changed =
+      stepsProp.length !== prevStepsRef.current?.length ||
+      stepsProp.some((step, index) => step !== prevStepsRef.current?.[index])
+    if (changed) {
+      prevStepsRef.current = stepsProp
+      dispatch({ type: 'SET_STEPS', steps: stepsProp })
+    }
+  }, [stepsProp])
 
   const activeStep = useMemo(() => state.activeStep, [state.activeStep])
   const stepStatus = useMemo(() => state.stepStatus, [state.stepStatus])

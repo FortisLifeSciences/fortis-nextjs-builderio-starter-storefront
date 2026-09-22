@@ -1,8 +1,9 @@
 import React from 'react'
 
 import { Box, Container, Typography } from '@mui/material'
-import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
+
+import { useHeaderContext } from '@/context'
 
 const checkoutHeaderStyles = {
   container: {
@@ -17,10 +18,10 @@ const checkoutHeaderStyles = {
 
 const CheckoutHeader = ({ isMultiShipEnabled }: { isMultiShipEnabled: boolean }) => {
   const { t } = useTranslation()
-  const router = useRouter()
+  const { toggleCartDrawer } = useHeaderContext()
 
   const gotoCart = () => {
-    router.push('/cart')
+    toggleCartDrawer(true)
   }
 
   return (

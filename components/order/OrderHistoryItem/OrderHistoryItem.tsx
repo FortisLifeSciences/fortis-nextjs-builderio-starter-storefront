@@ -11,11 +11,10 @@ import {
   Button,
   IconButton,
 } from '@mui/material'
-import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
 import { FullWidthDivider, Price } from '@/components/common'
-import { useAuthContext, useSnackbarContext } from '@/context'
+import { useAuthContext, useHeaderContext, useSnackbarContext } from '@/context'
 import { useProductCardActions } from '@/hooks'
 import { useAddItemsToCurrentCart } from '@/hooks/mutations/cart/useAddItemsToCurrentCart/useAddItemsToCurrentCart'
 import {
@@ -60,11 +59,11 @@ const OrderHistoryItem = (props: OrderHistoryItemProps) => {
 
   const theme = useTheme()
   const mdScreen = useMediaQuery(theme.breakpoints.up('md'))
-  const router = useRouter()
 
   const { addItemsToCurrentCart } = useAddItemsToCurrentCart()
   const { handleDeleteCurrentCart } = useProductCardActions()
   const { user } = useAuthContext()
+  const { toggleCartDrawer } = useHeaderContext()
 
   const handleHistoryItemClick = () => {
     onHistoryItemClick(id)
@@ -90,7 +89,7 @@ const OrderHistoryItem = (props: OrderHistoryItemProps) => {
   const handleReorder = async () => {
     await handleDeleteCurrentCart()
     await handleAddListToCart()
-    router.push('/cart')
+    toggleCartDrawer(true)
   }
 
   return orderStatus === 'Accepted' ||

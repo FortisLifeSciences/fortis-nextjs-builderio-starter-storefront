@@ -12,6 +12,7 @@ export { default as ImageGalleryDialog } from './ImageGalleryDialog/ImageGallery
 export { default as KiboImage } from './KiboImage/KiboImage'
 export { default as KiboLogo } from './KiboLogo/KiboLogo'
 export { default as KiboRadio } from './KiboRadio/KiboRadio'
+export { default as KiboPhoneInput } from './KiboPhoneInput/KiboPhoneInput'
 export { default as KiboSelect } from './KiboSelect/KiboSelect'
 export { default as KiboTextBox } from './KiboTextBox/KiboTextBox'
 export { default as OrderSummary } from './OrderSummary/OrderSummary'

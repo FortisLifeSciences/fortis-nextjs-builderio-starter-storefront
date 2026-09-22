@@ -23,6 +23,7 @@ import { useReCaptcha } from 'next-recaptcha-v3'
 
 import { MyAccountTemplateStyle } from './MyAccountTemplate.styles'
 import { MyProfile, PaymentMethod, AddressBook } from '@/components/my-account'
+import { OngoingOrderBanner } from '@/components/order'
 import { useAuthContext, useSnackbarContext } from '@/context'
 import { useCardContactActions } from '@/hooks'
 import { validateGoogleReCaptcha } from '@/lib/helpers'
@@ -124,6 +125,9 @@ const MyAccountTemplate = (props: MyAccountTemplateProps) => {
             {t('back')}
           </Link>
         )}
+
+        <OngoingOrderBanner />
+
         <Box
           sx={{
             display: { md: 'flex', xs: 'block' },
