@@ -338,7 +338,11 @@ const PdpTemplate = (props: PdpTemplateProps) => {
 
   const chips: { label: string; variant: 'primary' | 'outline'; onClick?: () => void }[] = []
   if (validationText) {
-    chips.push({ label: 'Validated', variant: 'primary', onClick: () => setValidationOpen(true) })
+    chips.push({
+      label: 'Validated: See How >',
+      variant: 'primary',
+      onClick: () => setValidationOpen(true),
+    })
   }
   const categoryLabel = getPropertyValues(
     findProperty(updatedProduct, 'tenant~web-category-list')

@@ -70,7 +70,7 @@ export const PDP_BRAND_CONFIGS: Record<PdpBrandKey, PdpBrandConfig> = {
     belowSections: DEFAULT_BELOW_SECTIONS,
     mobileBarVariant: 'sample',
     brandCardStars: true,
-    brandCardLogoVariant: 'fortisPlusBrand',
+    brandCardLogoVariant: 'brandOnly',
     heroFacts: [
       { fqns: ['tenant~target'] },
       { fqns: ['tenant~host'] },

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 
+import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch'
+
 import styles from './Pdp.module.css'
 import { productGetters } from '@/lib/getters'
 
@@ -159,7 +161,18 @@ const PdpGallery = ({ digitalAssets, kiboImages, brandImage, title }: PdpGallery
   return (
     <>
       <div className={styles.mediaMain}>
-        <img src={mainSrc} alt={hasImages ? current?.altText ?? '' : ''} />
+        {hasImages ? (
+          <TransformWrapper key={index}>
+            <TransformComponent
+              wrapperStyle={{ width: '100%', height: '100%' }}
+              contentStyle={{ width: '100%', height: '100%' }}
+            >
+              <img src={mainSrc} alt={current?.altText ?? ''} />
+            </TransformComponent>
+          </TransformWrapper>
+        ) : (
+          <img src={mainSrc} alt="" />
+        )}
         {hasImages && current?.description ? (
           <button
             type="button"

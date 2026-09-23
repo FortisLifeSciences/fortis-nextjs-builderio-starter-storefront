@@ -399,6 +399,7 @@
 
 .mediaInfoDot {
   position: absolute;
+  z-index: 1;
   right: 14px;
   top: 12px;
   width: 22px;
@@ -421,6 +422,7 @@
 
 .zoom {
   position: absolute;
+  z-index: 1;
   right: 10px;
   bottom: 10px;
   width: 32px;
@@ -2422,6 +2424,12 @@
 
 .mobileBarActive .mobileCartBtn {
   grid-column: 1;
+}
+
+.mobileBarActive .mobileCartBtn:last-child {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: calc(50% - 3.5px);
 }
 
 .mobileCartBtn:hover {
