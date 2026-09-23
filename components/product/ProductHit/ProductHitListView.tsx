@@ -17,6 +17,7 @@ import {
 import Link from 'next/link'
 
 import PlpHitTextAttr from './PlpHitTextAttr'
+import { buildProductHitLink } from './productHitLink'
 import { KiboImage, Price } from '@/components/common'
 import { ProductCardStyles } from '@/components/product/ProductCardListView/ProductCardListView.styles'
 import abcore from '@/public/Brand_Logo/abcore-logo.png'
@@ -139,7 +140,6 @@ const ProductHitListView = ({
   const placeholderImageUrl = DefaultImage,
     kiboImagesData = hit?.product_images,
     variationProductCode = hit?.sku,
-    productCode = hit?.parent_id,
     title = hit?.product_name,
     variantProductName = hit?.product_name_variant,
     sliceValue = hit?.slice_product,
@@ -181,19 +181,9 @@ const ProductHitListView = ({
   truncatedTitle = truncatedTitle + `${uniqueVal}`
 
   // Ensure Next.js <Link> gets a relative path — absolute URLs trigger a full page reload
-  const productHref = (() => {
-    const formatProductUrl = hit?.product_url.includes('libraries')
-      ? hit?.product_url.toLowerCase()
-      : hit?.product_url
-    const url = formatProductUrl || '#'
-    if (!url.startsWith('http')) return url
-    try {
-      const u = new URL(url)
-      return u.pathname + u.search + u.hash
-    } catch {
-      return url
-    }
-  })()
+  const safeProductLink = buildProductHitLink(hit)
+  const productCode = safeProductLink.isValid ? safeProductLink.href.replace('/product/', '') : null
+  const productHref = safeProductLink.isValid ? safeProductLink.as : '#'
 
   return (
     <>
@@ -203,198 +193,200 @@ const ProductHitListView = ({
         className="product-card"
         data-index={algoliaIndex || 'products'} // <-- Add index as a data attribute if needed
       >
-        <Link
-          href={`/product/${productCode}`}
-          as={productHref}
-          passHref
-          data-testid="product-card-link"
-          aria-label={title ? `View details for ${title}` : 'Product details'}
-          data-insights-object-id={hit.objectID}
-          data-insights-position={position !== undefined ? position : '1'}
-          data-insights-query-id={queryId || hit.__queryID}
-          data-insights-index={algoliaIndex || 'products'}
-          data-insights-method={
-            dataInsideMethod ||
-            (queryId || hit.__queryID ? 'clickedObjectIDsAfterSearch' : 'clickedObjectIDs')
-          }
-          className={
-            dataInsideMethod === 'clickedObjectIDsAfterSearch'
-              ? 'product-card-search'
-              : 'product-card'
-          }
-        >
-          <Box>
-            <Card sx={ProductCardStyles.cardRoot} data-testid="product-card">
-              <Box>
-                {newProduct ? (
-                  <Box
-                    sx={{
-                      width: 80,
-                      height: 41,
-                      top: '0px',
-                      position: 'absolute',
-                      left: '0px',
-                      zIndex: 2,
-                    }}
-                    style={{
-                      backgroundImage: `url('/NewTag.svg')`,
-                    }}
-                  />
-                ) : null}
-              </Box>
-              <CardMedia
-                className="product-image"
-                sx={{
-                  ...ProductCardStyles.cardMedia,
-                  height: {
-                    xs: imageHeight,
-                    // sm: 'auto',
-                  },
-                }}
-              >
-                <KiboImage
-                  src={firstImage || placeholderImageUrl}
-                  alt={truncatedTitle || 'no-image-alt'}
-                  objectFit={firstImage ? 'contain' : 'none'}
-                  data-testid="product-image"
-                />
-              </CardMedia>
-              <Box flexDirection="column" m={1} width="75%" className="product-info">
-                <Box display="flex" alignItems="start" width="100%">
-                  <Typography
-                    variant="body2"
-                    gutterBottom
-                    fontWeight={500}
-                    sx={{ ...ProductCardStyles.productTitle }}
-                    tabIndex={0}
-                  >
-                    {sliceValue ? variantProductName : title}
-                  </Typography>
-                  {typeof brand === 'string' && brandImages[brand.toLowerCase()] && (
-                    <Box sx={ProductCardStyles.brandLogoContainer}>
-                      <Box
-                        component="img"
-                        src={brandImages[brand.toLowerCase()]}
-                        alt={`${brand}-logo`}
-                        sx={ProductCardStyles.brandLogoImage}
-                        data-testid="brand-logo"
-                      />
-                    </Box>
-                  )}
-                </Box>
-                <Box sx={ProductCardStyles.brandStyle}>
-                  <Typography gutterBottom color="text.primary" sx={ProductCardStyles.brandLable}>
-                    {brandLabel}
-                  </Typography>
-                  {(sliceValue ? variationProductCode : ProductCatalogNumber) && (
-                    <Typography color="text.primary" sx={ProductCardStyles.catalogNum}>
-                      {`Catalog # ${sliceValue ? variationProductCode : ProductCatalogNumber}`}
-                    </Typography>
-                  )}
-                </Box>
+        {!safeProductLink.isValid ? null : (
+          <Link
+            href={`/product/${productCode}`}
+            as={productHref}
+            passHref
+            data-testid="product-card-link"
+            aria-label={title ? `View details for ${title}` : 'Product details'}
+            data-insights-object-id={hit.objectID}
+            data-insights-position={position !== undefined ? position : '1'}
+            data-insights-query-id={queryId || hit.__queryID}
+            data-insights-index={algoliaIndex || 'products'}
+            data-insights-method={
+              dataInsideMethod ||
+              (queryId || hit.__queryID ? 'clickedObjectIDsAfterSearch' : 'clickedObjectIDs')
+            }
+            className={
+              dataInsideMethod === 'clickedObjectIDsAfterSearch'
+                ? 'product-card-search'
+                : 'product-card'
+            }
+          >
+            <Box>
+              <Card sx={ProductCardStyles.cardRoot} data-testid="product-card">
                 <Box>
-                  <Grid container spacing={2} sx={{ marginBottom: '10px' }}>
-                    {validated ? (
-                      <Grid item md={3} sm={3} tabIndex={0}>
-                        <Box sx={plpIconStyles.flexDirectionRow}>
-                          <Box sx={plpIconStyles.plpIconCss}>
-                            <span
-                              className="material-symbols-outlined"
-                              style={{ fontSize: '16px', color: '#348345' }}
-                            >
-                              verified
-                            </span>
-                          </Box>
-                          <Box sx={{ ...plpIconStyles.plpIconText, color: '#348345' }}>
-                            Validated
-                          </Box>
-                        </Box>
-                      </Grid>
-                    ) : null}
-                    {trialSizeAvailable ? (
-                      <Grid item md={3} sm={3} tabIndex={0}>
-                        <Box sx={plpIconStyles.flexDirectionRow}>
-                          <Box sx={plpIconStyles.flexDirectionRow}>
-                            <Box sx={plpIconStyles.plpIconCss}>
-                              <span
-                                className="material-symbols-outlined"
-                                style={{ fontSize: '16px', color: '#1468C8' }}
-                              >
-                                labs
-                              </span>
-                            </Box>
-                            <Box sx={{ ...plpIconStyles.plpIconText, color: '#1468C8' }}>
-                              Trial Size Available
-                            </Box>
-                          </Box>
-                        </Box>
-                      </Grid>
-                    ) : null}
-                    {formulation ? (
-                      <Grid item md={3} sm={3} tabIndex={0}>
-                        <Box sx={plpIconStyles.flexDirectionRow}>
-                          <Box sx={plpIconStyles.flexDirectionRow}>
-                            <Box sx={plpIconStyles.plpIconCss}>
-                              <span
-                                className="material-symbols-outlined"
-                                style={{ fontSize: '16px', color: '#9E6C00' }}
-                              >
-                                block
-                              </span>
-                            </Box>
-                            <Box sx={{ ...plpIconStyles.plpIconText, color: '#9E6C00' }}>
-                              {formulation}
-                            </Box>
-                          </Box>
-                        </Box>
-                      </Grid>
-                    ) : null}
-                    {citation ? (
-                      <Grid item md={3} sm={3}>
-                        <Box sx={plpIconStyles.flexDirectionRow}>
-                          <Box sx={plpIconStyles.plpIconCss}>
-                            <span
-                              className="material-symbols-outlined"
-                              style={{ fontSize: '16px', color: 'primary.main' }}
-                            >
-                              note_stack
-                            </span>
-                          </Box>
-                          <Box sx={{ ...plpIconStyles.plpIconText, color: 'primary.main' }}>
-                            Citations ({citation})
-                          </Box>
-                        </Box>
-                      </Grid>
-                    ) : null}
-                  </Grid>
+                  {newProduct ? (
+                    <Box
+                      sx={{
+                        width: 80,
+                        height: 41,
+                        top: '0px',
+                        position: 'absolute',
+                        left: '0px',
+                        zIndex: 2,
+                      }}
+                      style={{
+                        backgroundImage: `url('/NewTag.svg')`,
+                      }}
+                    />
+                  ) : null}
                 </Box>
-                <PlpHitTextAttr
-                  reactivity={reactivity}
-                  species={species}
-                  applications={applications}
-                  platforms={platforms}
-                  conjugate={conjugate}
-                  assayRange={assayRange}
-                  sampleType={sampleType}
-                  detectionMethod={detectionMethod}
-                  host={host}
-                  format={format}
-                  epitopeTag={epitopeTag}
-                  immunogen={immunogen}
-                  purity={purity}
-                />
-              </Box>
-              <IconButton
-                component="span"
-                sx={{ ...ProductCardStyles.listIconButton }}
-                title="View product details"
-                aria-label="View product details"
-              >
-                <ArrowForwardIos sx={{ color: 'white' }} />
-              </IconButton>
-            </Card>
-          </Box>
-        </Link>
+                <CardMedia
+                  className="product-image"
+                  sx={{
+                    ...ProductCardStyles.cardMedia,
+                    height: {
+                      xs: imageHeight,
+                      // sm: 'auto',
+                    },
+                  }}
+                >
+                  <KiboImage
+                    src={firstImage || placeholderImageUrl}
+                    alt={truncatedTitle || 'no-image-alt'}
+                    objectFit={firstImage ? 'contain' : 'none'}
+                    data-testid="product-image"
+                  />
+                </CardMedia>
+                <Box flexDirection="column" m={1} width="75%" className="product-info">
+                  <Box display="flex" alignItems="start" width="100%">
+                    <Typography
+                      variant="body2"
+                      gutterBottom
+                      fontWeight={500}
+                      sx={{ ...ProductCardStyles.productTitle }}
+                      tabIndex={0}
+                    >
+                      {sliceValue ? variantProductName : title}
+                    </Typography>
+                    {typeof brand === 'string' && brandImages[brand.toLowerCase()] && (
+                      <Box sx={ProductCardStyles.brandLogoContainer}>
+                        <Box
+                          component="img"
+                          src={brandImages[brand.toLowerCase()]}
+                          alt={`${brand}-logo`}
+                          sx={ProductCardStyles.brandLogoImage}
+                          data-testid="brand-logo"
+                        />
+                      </Box>
+                    )}
+                  </Box>
+                  <Box sx={ProductCardStyles.brandStyle}>
+                    <Typography gutterBottom color="text.primary" sx={ProductCardStyles.brandLable}>
+                      {brandLabel}
+                    </Typography>
+                    {(sliceValue ? variationProductCode : ProductCatalogNumber) && (
+                      <Typography color="text.primary" sx={ProductCardStyles.catalogNum}>
+                        {`Catalog # ${sliceValue ? variationProductCode : ProductCatalogNumber}`}
+                      </Typography>
+                    )}
+                  </Box>
+                  <Box>
+                    <Grid container spacing={2} sx={{ marginBottom: '10px' }}>
+                      {validated ? (
+                        <Grid item md={3} sm={3} tabIndex={0}>
+                          <Box sx={plpIconStyles.flexDirectionRow}>
+                            <Box sx={plpIconStyles.plpIconCss}>
+                              <span
+                                className="material-symbols-outlined"
+                                style={{ fontSize: '16px', color: '#348345' }}
+                              >
+                                verified
+                              </span>
+                            </Box>
+                            <Box sx={{ ...plpIconStyles.plpIconText, color: '#348345' }}>
+                              Validated
+                            </Box>
+                          </Box>
+                        </Grid>
+                      ) : null}
+                      {trialSizeAvailable ? (
+                        <Grid item md={3} sm={3} tabIndex={0}>
+                          <Box sx={plpIconStyles.flexDirectionRow}>
+                            <Box sx={plpIconStyles.flexDirectionRow}>
+                              <Box sx={plpIconStyles.plpIconCss}>
+                                <span
+                                  className="material-symbols-outlined"
+                                  style={{ fontSize: '16px', color: '#1468C8' }}
+                                >
+                                  labs
+                                </span>
+                              </Box>
+                              <Box sx={{ ...plpIconStyles.plpIconText, color: '#1468C8' }}>
+                                Trial Size Available
+                              </Box>
+                            </Box>
+                          </Box>
+                        </Grid>
+                      ) : null}
+                      {formulation ? (
+                        <Grid item md={3} sm={3} tabIndex={0}>
+                          <Box sx={plpIconStyles.flexDirectionRow}>
+                            <Box sx={plpIconStyles.flexDirectionRow}>
+                              <Box sx={plpIconStyles.plpIconCss}>
+                                <span
+                                  className="material-symbols-outlined"
+                                  style={{ fontSize: '16px', color: '#9E6C00' }}
+                                >
+                                  block
+                                </span>
+                              </Box>
+                              <Box sx={{ ...plpIconStyles.plpIconText, color: '#9E6C00' }}>
+                                {formulation}
+                              </Box>
+                            </Box>
+                          </Box>
+                        </Grid>
+                      ) : null}
+                      {citation ? (
+                        <Grid item md={3} sm={3}>
+                          <Box sx={plpIconStyles.flexDirectionRow}>
+                            <Box sx={plpIconStyles.plpIconCss}>
+                              <span
+                                className="material-symbols-outlined"
+                                style={{ fontSize: '16px', color: 'primary.main' }}
+                              >
+                                note_stack
+                              </span>
+                            </Box>
+                            <Box sx={{ ...plpIconStyles.plpIconText, color: 'primary.main' }}>
+                              Citations ({citation})
+                            </Box>
+                          </Box>
+                        </Grid>
+                      ) : null}
+                    </Grid>
+                  </Box>
+                  <PlpHitTextAttr
+                    reactivity={reactivity}
+                    species={species}
+                    applications={applications}
+                    platforms={platforms}
+                    conjugate={conjugate}
+                    assayRange={assayRange}
+                    sampleType={sampleType}
+                    detectionMethod={detectionMethod}
+                    host={host}
+                    format={format}
+                    epitopeTag={epitopeTag}
+                    immunogen={immunogen}
+                    purity={purity}
+                  />
+                </Box>
+                <IconButton
+                  component="span"
+                  sx={{ ...ProductCardStyles.listIconButton }}
+                  title="View product details"
+                  aria-label="View product details"
+                >
+                  <ArrowForwardIos sx={{ color: 'white' }} />
+                </IconButton>
+              </Card>
+            </Box>
+          </Link>
+        )}
       </Box>
     </>
   )

@@ -24,6 +24,7 @@ import Link from 'next/link'
 import router, { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
+import { buildProductHitLink } from './productHitLink'
 import { KiboImage, Price } from '@/components/common'
 import { PLPStyles } from '@/components/page-templates/ProductListingTemplate/ProductListingTemplate.styles'
 import { ProductCardStyles } from '@/components/product/ProductCard/ProductCard.styles'
@@ -111,7 +112,6 @@ const ProductHitGridView = ({
   const placeholderImageUrl = DefaultImage,
     kiboImagesData = hit?.product_images,
     variationProductCode = hit?.sku,
-    productCode = hit?.parent_id,
     title = hit?.product_name,
     variantProductName = hit?.product_name_variant,
     sliceValue = hit?.slice_product,
@@ -120,6 +120,9 @@ const ProductHitGridView = ({
     brand = hit?.brand_code,
     newProduct = hit.new_product
   position = position ?? hit.__position
+
+  const safeProductLink = buildProductHitLink(hit)
+  const productCode = safeProductLink.isValid ? safeProductLink.href.replace('/product/', '') : null
 
   const firstImage = hit?.product_images?.[0]
     ? `https://cdn-tp1.mozu.com/31165-m1/cms/files/${kiboImagesData[0]}`
@@ -136,18 +139,7 @@ const ProductHitGridView = ({
   truncatedTitle = truncatedTitle + `${uniqueVal}`
 
   // Ensure Next.js <Link> gets a relative path — absolute URLs trigger a full page reload
-  const productHref = (() => {
-    const formatProductUrl = hit?.product_url.includes('libraries')
-      ? hit?.product_url.toLowerCase()
-      : hit?.product_url
-    const url = formatProductUrl || '#'
-    if (!url.startsWith('http')) return url
-    try {
-      return new URL(url).pathname + new URL(url).search + new URL(url).hash
-    } catch {
-      return url
-    }
-  })()
+  const productHref = safeProductLink.isValid ? safeProductLink.as : '#'
 
   return (
     <>
@@ -157,101 +149,103 @@ const ProductHitGridView = ({
         className="product-card"
         data-index={algoliaIndex || 'products'}
       >
-        <Link
-          href={`/product/${productCode}`}
-          as={productHref}
-          passHref
-          data-testid="product-card-link"
-          aria-label={title ? `View details for ${title}` : 'Product details'}
-          data-insights-object-id={hit.objectID}
-          data-insights-position={position !== undefined ? position : '1'}
-          data-insights-query-id={queryId || hit.__queryID}
-          data-insights-index={algoliaIndex || 'products'}
-          data-insights-method={
-            dataInsideMethod ||
-            (queryId || hit.__queryID ? 'clickedObjectIDsAfterSearch' : 'clickedObjectIDs')
-          }
-          className={
-            dataInsideMethod === 'clickedObjectIDsAfterSearch'
-              ? 'product-card-search'
-              : 'product-card'
-          }
-        >
-          <Box>
-            <Card sx={ProductCardStyles.cardRoot} data-testid="product-card">
-              <Box>
-                {newProduct ? (
-                  <Box
-                    sx={{
-                      width: 80,
-                      height: 41,
-                      top: '0px',
-                      position: 'absolute',
-                      left: '0px',
-                      zIndex: 2,
-                    }}
-                    style={{
-                      backgroundImage: `url('/NewTag.svg')`,
-                    }}
+        {!safeProductLink.isValid ? null : (
+          <Link
+            href={`/product/${productCode}`}
+            as={productHref}
+            passHref
+            data-testid="product-card-link"
+            aria-label={title ? `View details for ${title}` : 'Product details'}
+            data-insights-object-id={hit.objectID}
+            data-insights-position={position !== undefined ? position : '1'}
+            data-insights-query-id={queryId || hit.__queryID}
+            data-insights-index={algoliaIndex || 'products'}
+            data-insights-method={
+              dataInsideMethod ||
+              (queryId || hit.__queryID ? 'clickedObjectIDsAfterSearch' : 'clickedObjectIDs')
+            }
+            className={
+              dataInsideMethod === 'clickedObjectIDsAfterSearch'
+                ? 'product-card-search'
+                : 'product-card'
+            }
+          >
+            <Box>
+              <Card sx={ProductCardStyles.cardRoot} data-testid="product-card">
+                <Box>
+                  {newProduct ? (
+                    <Box
+                      sx={{
+                        width: 80,
+                        height: 41,
+                        top: '0px',
+                        position: 'absolute',
+                        left: '0px',
+                        zIndex: 2,
+                      }}
+                      style={{
+                        backgroundImage: `url('/NewTag.svg')`,
+                      }}
+                    />
+                  ) : null}
+                </Box>
+                <CardMedia
+                  className="product-image"
+                  sx={{
+                    ...ProductCardStyles.cardMedia,
+                    height: {
+                      xs: imageHeight,
+                      // sm: 'auto',
+                    },
+                  }}
+                >
+                  <KiboImage
+                    src={firstImage || placeholderImageUrl}
+                    alt={truncatedTitle || 'no-image-alt'}
+                    objectFit={firstImage ? 'contain' : 'none'}
+                    data-testid="product-image"
                   />
-                ) : null}
-              </Box>
-              <CardMedia
-                className="product-image"
-                sx={{
-                  ...ProductCardStyles.cardMedia,
-                  height: {
-                    xs: imageHeight,
-                    // sm: 'auto',
-                  },
-                }}
-              >
-                <KiboImage
-                  src={firstImage || placeholderImageUrl}
-                  alt={truncatedTitle || 'no-image-alt'}
-                  objectFit={firstImage ? 'contain' : 'none'}
-                  data-testid="product-image"
-                />
-              </CardMedia>
-              <Box flexDirection="column" m={1} className="product-info">
-                <Typography
-                  variant="body1"
-                  gutterBottom
-                  color="text.primary"
-                  sx={ProductCardStyles.brandLabel}
+                </CardMedia>
+                <Box flexDirection="column" m={1} className="product-info">
+                  <Typography
+                    variant="body1"
+                    gutterBottom
+                    color="text.primary"
+                    sx={ProductCardStyles.brandLabel}
+                  >
+                    {brandLabel}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    gutterBottom
+                    fontWeight={500}
+                    className="productNameStyle"
+                    sx={{ ...ProductCardStyles.productNameStyle, marginBottom: '25px' }}
+                    tabIndex={0}
+                  >
+                    {sliceValue ? variantProductName : title}
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    gutterBottom
+                    color="text.primary"
+                    sx={ProductCardStyles.brandLabel}
+                  >
+                    {uniqueVal}
+                  </Typography>
+                </Box>
+                <IconButton
+                  component="span"
+                  sx={{ ...ProductCardStyles.iconButton }}
+                  title="View product details"
+                  aria-label="View product details"
                 >
-                  {brandLabel}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  gutterBottom
-                  fontWeight={500}
-                  className="productNameStyle"
-                  sx={{ ...ProductCardStyles.productNameStyle, marginBottom: '25px' }}
-                  tabIndex={0}
-                >
-                  {sliceValue ? variantProductName : title}
-                </Typography>
-                <Typography
-                  variant="body1"
-                  gutterBottom
-                  color="text.primary"
-                  sx={ProductCardStyles.brandLabel}
-                >
-                  {uniqueVal}
-                </Typography>
-              </Box>
-              <IconButton
-                component="span"
-                sx={{ ...ProductCardStyles.iconButton }}
-                title="View product details"
-                aria-label="View product details"
-              >
-                <ArrowForwardIos sx={{ color: 'white' }} />
-              </IconButton>
-            </Card>
-          </Box>
-        </Link>
+                  <ArrowForwardIos sx={{ color: 'white' }} />
+                </IconButton>
+              </Card>
+            </Box>
+          </Link>
+        )}
       </Box>
     </>
   )
