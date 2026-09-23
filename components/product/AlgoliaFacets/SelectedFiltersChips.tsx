@@ -3,15 +3,22 @@ import { Box, Chip, Link } from '@mui/material'
 import { styled } from '@mui/material/styles'
 
 const StyledChip = styled(Chip)(({ theme }) => ({
-  backgroundColor: '#fff',
-  color: '#2B2B2B',
-  fontWeight: 400,
-  border: '1px solid #020027',
-  fontSize: '14px',
+  backgroundColor: '#30299A',
+  color: '#FFFFFF',
+  fontWeight: 600,
+  fontFamily: 'Poppins',
+  border: 'none',
+  fontSize: '12px',
+  borderRadius: '20px',
   textTransform: 'capitalize',
   '.MuiChip-deleteIcon': {
-    color: '#2B2B2B',
+    color: '#FFFFFF',
+    opacity: 0.85,
     borderRadius: '16px',
+    '&:hover': {
+      opacity: 1,
+      color: '#FFFFFF',
+    },
   },
 }))
 
@@ -50,18 +57,18 @@ const SelectedFiltersChips = ({
         onClick={onClearAll}
         underline="hover"
         sx={{
-          color: '#020027',
-          fontSize: '14px',
-          fontWeight: 400,
+          color: '#30299A',
+          fontSize: '12px',
+          fontWeight: 700,
           textTransform: 'none',
           marginLeft: 2,
           cursor: 'pointer',
           textDecoration: 'underline',
           fontFamily: 'Poppins',
-          lineHeight: '20px',
+          lineHeight: '19px',
         }}
       >
-        Clear All Filters
+        Clear all
       </Link>
     </Box>
   )
