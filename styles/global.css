@@ -968,40 +968,75 @@ section[data-autocomplete-source-id='builder-page'] {
 
 .AlgoliaPagination .ais-Pagination-list {
   font-family: 'Poppins';
-  font-size: 18px;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.AlgoliaPagination .ais-Pagination-link {
-  color: #30299a;
-  font-family: 'Poppins';
-  font-size: 18px;
-  border: none;
-  background: none;
-  padding: 3px;
-  cursor: pointer;
-  font-weight: 300;
+.AlgoliaPagination .ais-Pagination-item {
+  display: flex;
 }
 
-.AlgoliaPagination .ais-Pagination-link :hover {
-  text-decoration: underline;
-  color: #30299a;
+.AlgoliaPagination .ais-Pagination-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  background: none;
+  color: #5c5a70;
+  font-family: 'Poppins';
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out,
+    color 0.15s ease-in-out;
 }
-.AlgoliaPagination .ais-Pagination-item--page {
-  font-size: 18px;
-  color: #4c47c4;
+
+.AlgoliaPagination .ais-Pagination-link:hover {
+  background-color: #f6f6fa;
+  border-color: #eaeaf1;
+  color: #1b1a24;
+  text-decoration: none;
 }
-.AlgoliaPagination .ais-Pagination-item--selected,
+
+.AlgoliaPagination .ais-Pagination-item--firstPage .ais-Pagination-link,
+.AlgoliaPagination .ais-Pagination-item--previousPage .ais-Pagination-link,
+.AlgoliaPagination .ais-Pagination-item--nextPage .ais-Pagination-link,
+.AlgoliaPagination .ais-Pagination-item--lastPage .ais-Pagination-link {
+  color: #8b8aa0;
+  font-weight: 700;
+}
+
 .AlgoliaPagination .ais-Pagination-item--selected .ais-Pagination-link {
-  padding: 3px;
-  font-weight: 500;
-  color: #30299a;
+  background-color: #30299a;
+  border-color: #30299a;
+  color: #ffffff;
+}
+
+.AlgoliaPagination .ais-Pagination-item--selected .ais-Pagination-link:hover {
+  background-color: #30299a;
+  border-color: #30299a;
+  color: #ffffff;
+}
+
+.AlgoliaPagination .ais-Pagination-item--disabled .ais-Pagination-link {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.AlgoliaPagination .ais-Pagination-item--disabled .ais-Pagination-link:hover {
+  background: none;
+  border-color: transparent;
+  color: #8b8aa0;
 }
 /** search page css **/
 .rightSearchContainer .AvailableProducts {
