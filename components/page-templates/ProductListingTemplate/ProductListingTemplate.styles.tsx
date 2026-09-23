@@ -44,12 +44,12 @@ export const PLPStyles = {
   navBarLabel: {
     whiteSpace: 'noWrap',
     marginRight: '10px',
-    color: '#020027',
+    color: '#1B1A24',
     fontFamily: 'Poppins',
-    fontSize: '16px',
+    fontSize: '13px',
     fontStyle: 'normal',
     fontWeight: '400',
-    lineHeight: '24px',
+    lineHeight: '19px',
     display: { md: 'block', xs: 'none' },
   } as SxProps<Theme> | undefined,
   navBarView: {
@@ -85,8 +85,8 @@ export const PLPStyles = {
   },
   filterByButton: {
     textTransform: 'capitalize',
-    border: '1px solid #2b2b2b',
-    color: '#2b2b2b',
+    border: '1px solid #30299A',
+    color: '#30299A',
     justifyContent: 'space-between',
     width: '100%',
     height: '2.188rem',
@@ -160,12 +160,12 @@ export const PLPStyles = {
     marginRight: { md: 0, xs: '1rem' },
     typography: 'body2',
     whiteSpace: 'nowrap',
-    color: '#020027',
+    color: '#1B1A24',
     fontFamily: 'Poppins',
-    fontSize: '14px',
+    fontSize: '13.5px',
     fontStyle: 'normal',
-    fontWeight: '400',
-    lineHeight: '20px',
+    fontWeight: '700',
+    lineHeight: '22px',
   },
   plpGrid: {
     width: {

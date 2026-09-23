@@ -927,68 +927,42 @@ section[data-autocomplete-source-id='builder-page'] {
 }
 
 .product-list-view .ais-Hits-list {
-  list-style: none;
-}
-
-@media (max-width: 640px) {
-  .product-list-view .ais-Hits-list {
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-  }
-
-  .product-grid-view .ais-Hits-list {
-    justify-content: center;
-    justify-items: center;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  }
-}
-
-.product-list-view .ais-Hits-list .ais-Hits-item {
-  margin-bottom: 20px;
-}
-
-@media (min-width: 640px) {
-  .product-grid-view {
-    margin-left: 20px;
-  }
-}
-.product-grid-view .ais-Hits-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1rem;
+  grid-template-columns: 332px;
+  gap: 16px;
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-@media (max-width: 1040px) and (min-width: 641px) {
+.product-grid-view .ais-Hits-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+@media (min-width: 600px) {
+  .product-grid-view {
+    margin-left: 20px;
+  }
+}
+
+@media (max-width: 1040px) and (min-width: 600px) {
   .product-grid-view .ais-Hits-list {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-/* Mobile View: max-width 680px */
-@media (max-width: 680px) {
-  .product-grid-view .ais-Hits-list .ais-Hits-item:nth-child(3n + 1),
-  .product-grid-view .ais-Hits-list .ais-Hits-item:nth-child(3n + 2),
-  .product-grid-view .ais-Hits-list .ais-Hits-item:nth-child(3n + 3) {
-    justify-self: center;
-  }
-}
-
-/* Desktop View: min-width 1028px */
-@media (min-width: 1028px) {
-  .product-grid-view .ais-Hits-list .ais-Hits-item:nth-child(3n + 1) {
-    justify-self: start;
+@media (max-width: 599.95px) {
+  .product-list-view .ais-Hits-list {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .product-grid-view .ais-Hits-list .ais-Hits-item:nth-child(3n + 2) {
-    justify-self: center;
-  }
-
-  .product-grid-view .ais-Hits-list .ais-Hits-item:nth-child(3n + 3) {
-    justify-self: end;
+  .product-grid-view .ais-Hits-list {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
