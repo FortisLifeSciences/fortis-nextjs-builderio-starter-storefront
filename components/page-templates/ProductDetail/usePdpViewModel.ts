@@ -3,12 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import * as cookieNext from 'cookies-next'
 import router from 'next/router'
 
-import {
-  getPdpBrandConfig,
-  resolveBrandKey,
-  HERO_FACT_FQNS,
-  MAX_HERO_FACTS,
-} from './pdpBrandConfig'
+import { getPdpBrandConfig, resolveBrandKey, MAX_HERO_FACTS } from './pdpBrandConfig'
 import { buildFacts } from './pdpProperties'
 import { applyVariationData, resolveDefaultOptionValue } from './resolveDefaultVariant'
 import {
@@ -554,7 +549,7 @@ export const usePdpViewModel = (params: UsePdpViewModelParams) => {
   const brandConfig = getPdpBrandConfig(brand)
   const catalogNumber = variationProductCode || productCode
   const heroTitle = variantProductTitle || productName || catalogNumber || ''
-  const heroFacts = buildFacts(updatedProduct, HERO_FACT_FQNS, MAX_HERO_FACTS - 1)
+  const heroFacts = buildFacts(updatedProduct, brandConfig.heroFacts, MAX_HERO_FACTS - 1)
 
   return {
     brandKey,

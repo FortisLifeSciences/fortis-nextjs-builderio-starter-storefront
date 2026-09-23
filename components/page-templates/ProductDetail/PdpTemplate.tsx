@@ -9,8 +9,8 @@ import styles from './Pdp.module.css'
 import { getPdpBrandConfig } from './pdpBrandConfig'
 import { getPdpBrandContent } from './pdpBrandContent'
 import PdpGallery from './PdpGallery'
-import { findProperty, getPropertyText, getPropertyValues } from './pdpProperties'
-import { DEFAULT_SPEC_GROUPS } from './pdpSpecGroups'
+import { findProperty, getPropertyValues } from './pdpProperties'
+import { getSpecGroups } from './pdpSpecGroups'
 import PdpVariantPicker from './PdpVariantPicker'
 import ProductInventoryMessages from './ProductInventoryMessages'
 import { usePdpViewModel } from './usePdpViewModel'
@@ -26,6 +26,8 @@ import { productGetters } from '@/lib/getters'
 import type { ProductCustom, BreadCrumb } from '@/lib/types'
 import { addToCartGTMPDP } from '@/lib/utils/google-tag-manager'
 
+import type { PdpSectionId } from './pdpBrandConfig'
+import type { PdpSupportIcon } from './pdpBrandContent'
 import type { SpecRowConfig } from './pdpSpecGroups'
 import type { PdpVariantOption } from './PdpVariantPicker'
 import type {
@@ -61,6 +63,47 @@ const DocIcon = () => (
   </svg>
 )
 
+const TruckIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M3 6h11v9H3z" />
+    <path d="M14 9h4l3 3v3h-7z" />
+    <circle cx="7" cy="17.5" r="1.8" />
+    <circle cx="17" cy="17.5" r="1.8" />
+  </svg>
+)
+
+const ChatIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M5 4h14a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H10l-4 4v-4H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" />
+    <path d="M9 9h.01M12 9h.01M15 9h.01" />
+  </svg>
+)
+
+const GlobeIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M3 12h18M12 3c2.5 2.7 3.5 5.7 3.5 9s-1 6.3-3.5 9c-2.5-2.7-3.5-5.7-3.5-9s1-6.3 3.5-9z" />
+  </svg>
+)
+
+const SUPPORT_ICONS: Record<PdpSupportIcon, () => JSX.Element> = {
+  truck: TruckIcon,
+  chat: ChatIcon,
+  globe: GlobeIcon,
+}
+
+const productHref = (data: any) => {
+  const formattedCategoryCode =
+    data?.categoryCode === 'antisera_igg_fractions'
+      ? data.categoryCode.replace(/_/g, '-')
+      : data?.categoryCode
+  const url =
+    data?.categoryCode !== undefined && data?.seoFriendlyUrl
+      ? `/products/${formattedCategoryCode}/${data.seoFriendlyUrl}/${data.productCode}`
+      : `/product/${data?.productCode}`
+  return url.includes('libraries') ? url.toLowerCase() : url
+}
+
 interface PdpTemplateProps {
   product: ProductCustom
   sliceValue?: string
@@ -70,6 +113,7 @@ interface PdpTemplateProps {
   children?: any
   isB2B?: boolean
   relatedProducts?: []
+  pairingProducts?: any[]
   getCurrentProduct?: (
     addToCartPayload: any,
     currentProduct: ProductCustom,
@@ -102,6 +146,7 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     children,
     isB2B = false,
     relatedProducts,
+    pairingProducts = [],
     PDPCustomAndBulkDisplayContentSection,
     PDPCustomAndBulkDisplaySectionKey,
     digitalAssets,
@@ -270,9 +315,6 @@ const PdpTemplate = (props: PdpTemplateProps) => {
 
   const brandContent = getPdpBrandContent(brandKey)
   const brandConfig = getPdpBrandConfig(brandKey)
-  const validatedApplications =
-    getPropertyText(updatedProduct, 'tenant~applications-variant', ' · ') ||
-    getPropertyText(updatedProduct, 'tenant~applications', ' · ')
 
   const validationText = getPropertyValues(
     findProperty(updatedProduct, 'tenant~validation-text')
@@ -342,9 +384,10 @@ const PdpTemplate = (props: PdpTemplateProps) => {
 
   const additionalSelectOptions = (factoredProductData?.selectOptions ?? []).slice(1)
 
-  const variantDescription = getPropertyValues(
-    findProperty(currentProduct, 'tenant~description-variant')
-  )[0]
+  const descriptionHtml =
+    shortDescription ||
+    getPropertyValues(findProperty(currentProduct, 'tenant~description-variant'))[0] ||
+    getPropertyValues(findProperty(updatedProduct, 'tenant~target-sentence'))[0]
 
   const handleCopy = async () => {
     if (!catalogNumber) return
@@ -360,17 +403,37 @@ const PdpTemplate = (props: PdpTemplateProps) => {
   const hasContentsVariant =
     getPropertyValues(findProperty(updatedProduct, 'tenant~contents-variant')).length > 0
   const seenSpecLabels = new Set<string>()
-  const specGroups = DEFAULT_SPEC_GROUPS.map((group) => {
-    const rows: { key: string; label: string; value: string; config: SpecRowConfig }[] = []
+  const specGroups = getSpecGroups(brandKey).map((group) => {
+    const rows: {
+      key: string
+      label: string
+      value: string
+      items: string[]
+      config: SpecRowConfig
+    }[] = []
     for (const config of group.rows) {
       if (config.fqn === 'tenant~contents' && hasContentsVariant) continue
       const property = findProperty(updatedProduct, config.fqn)
-      const value = getPropertyValues(property).join(', ')
+      const values = getPropertyValues(property)
+      const value = values.join(', ')
       if (!value) continue
-      const label = config.labelOverride || property?.attributeDetail?.name || ''
+      const label =
+        config.labelOverride ||
+        brandConfig.specLabelOverrides[config.fqn] ||
+        property?.attributeDetail?.name ||
+        ''
       if (!label || seenSpecLabels.has(label)) continue
       seenSpecLabels.add(label)
-      rows.push({ key: config.fqn, label, value, config })
+      const items = config.separator
+        ? values.flatMap((entry) => entry.split(config.separator as string))
+        : values
+      rows.push({
+        key: config.fqn,
+        label,
+        value,
+        items: items.map((item) => item.trim()).filter(Boolean),
+        config,
+      })
     }
     return { ...group, resolvedRows: rows }
   })
@@ -402,9 +465,11 @@ const PdpTemplate = (props: PdpTemplateProps) => {
   const hasApplications =
     Boolean(applicationText) || Boolean(applicationTextVariant) || dilutionRows.length > 0
 
-  const productionText = getPropertyValues(
-    findProperty(updatedProduct, 'tenant~production-epitope')
-  )[0]
+  const productionText =
+    getPropertyValues(findProperty(updatedProduct, 'tenant~production-epitope'))[0] ||
+    getPropertyValues(findProperty(updatedProduct, 'tenant~prodprocedures-1'))[0]
+
+  const hasCitations = citationCountVariant > 0 && product?.productType === 'Antibody-Configurable'
 
   const distributorNote = ousShowDistributorBtn
     ? t('distributorMessage')
@@ -412,23 +477,12 @@ const PdpTemplate = (props: PdpTemplateProps) => {
 
   const supportRows = (
     <>
-      {validatedApplications ? (
-        <div className={styles.supportRow} style={{ cursor: 'default' }}>
-          <span className={styles.supportIcon}>
-            <CheckIcon />
-          </span>
-          <span>
-            <span className={styles.supportTitle}>Validated applications</span>
-            <span className={styles.supportSub}>{validatedApplications}</span>
-          </span>
-          <span />
-        </div>
-      ) : null}
       {brandContent.supportRows.map((row) => {
+        const RowIcon = SUPPORT_ICONS[row.icon]
         const rowContent = (
           <>
             <span className={styles.supportIcon}>
-              <DocIcon />
+              <RowIcon />
             </span>
             <span>
               <span className={styles.supportTitle}>{row.title}</span>
@@ -509,14 +563,6 @@ const PdpTemplate = (props: PdpTemplateProps) => {
             />
           ))
         : null}
-
-      {variantDescription ? (
-        <p
-          className={styles.buyNote}
-          style={{ marginTop: '12px' }}
-          dangerouslySetInnerHTML={{ __html: variantDescription }}
-        />
-      ) : null}
 
       {isUsVisitor ? (
         <>
@@ -668,7 +714,7 @@ const PdpTemplate = (props: PdpTemplateProps) => {
           </div>
         ) : null}
 
-        {hasDocuments || citationCountVariant > 0 ? (
+        {hasDocuments || hasCitations ? (
           <div className={styles.mediaLinkRow}>
             {hasDocuments ? (
               <a
@@ -679,10 +725,14 @@ const PdpTemplate = (props: PdpTemplateProps) => {
                 }}
               >
                 <DocIcon />
-                <span>Product Documents</span>
+                <span>
+                  {brandConfig.documentsLinkWithCode && catalogNumber
+                    ? `Documents (${catalogNumber})`
+                    : 'Product Documents'}
+                </span>
               </a>
             ) : null}
-            {citationCountVariant > 0 ? (
+            {hasCitations ? (
               <a
                 href="#citation-document-section"
                 onClick={(event) => {
@@ -740,6 +790,272 @@ const PdpTemplate = (props: PdpTemplateProps) => {
       <div className={styles.brandCard}>{brandCardInner}</div>
     )
   ) : null
+
+  const sectionNodes: Record<PdpSectionId, React.ReactNode> = {
+    description: (
+      <>
+        {descriptionHtml ? (
+          <section className={styles.description}>
+            <h2 className={styles.heading}>Product Description</h2>
+            <div
+              className={`${styles.clamp} ${descExpanded ? styles.clampExpanded : ''}`}
+              dangerouslySetInnerHTML={{ __html: descriptionHtml }}
+            />
+            <button
+              type="button"
+              className={`${styles.seeMore} ${descExpanded ? styles.seeMoreExpanded : ''}`}
+              onClick={() => setDescExpanded(!descExpanded)}
+            >
+              <span>{descExpanded ? 'See less' : 'See more'}</span>
+              <Arrow />
+            </button>
+          </section>
+        ) : null}
+
+        {description ? (
+          <section className={styles.section}>
+            <h2 className={styles.heading}>{t('product-details')}</h2>
+            <div className={styles.copy} dangerouslySetInnerHTML={{ __html: description }} />
+          </section>
+        ) : null}
+
+        {children}
+      </>
+    ),
+    pairing:
+      pairingProducts.length > 0 ? (
+        <section className={styles.section}>
+          <h2 className={styles.heading}>Pairing</h2>
+          <div className={styles.pairingTrack}>
+            {pairingProducts.map((data: any) => (
+              <Link className={styles.pairingCard} href={productHref(data)} key={data?.productCode}>
+                <span>
+                  <strong>{data?.plpCatalogNumber || data?.productCode}</strong> {data?.title}
+                </span>
+                <Arrow />
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null,
+    specs: hasSpecs ? (
+      <section className={styles.section}>
+        <h2 className={styles.heading}>Specifications</h2>
+        <div className={styles.specTable}>
+          {specGroups.map((group) =>
+            group.resolvedRows.length === 0 ? null : (
+              <div key={group.id}>
+                {group.label ? <div className={styles.specGroup}>{group.label}</div> : null}
+                {group.resolvedRows.map((row) => (
+                  <div className={styles.specRow} key={row.key}>
+                    <span className={styles.specLabel}>{row.label}</span>
+                    {row.config.render === 'link' && row.config.href ? (
+                      <a
+                        className={styles.specLink}
+                        href={row.config.href(row.value)}
+                        {...(row.config.external && { target: '_blank', rel: 'noreferrer' })}
+                      >
+                        <span>{row.value}</span>
+                        <Arrow />
+                      </a>
+                    ) : row.config.render === 'list' ? (
+                      <div className={`${styles.specValue} ${styles.specRowAlt}`}>
+                        <ul className={styles.specList}>
+                          {row.items.map((item) => (
+                            <li key={item}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : row.config.render === 'html' ? (
+                      <div
+                        className={`${styles.specValue} ${styles.specRowAlt}`}
+                        dangerouslySetInnerHTML={{ __html: row.value }}
+                      />
+                    ) : (
+                      <div className={styles.specValue}>{row.value}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )
+          )}
+        </div>
+      </section>
+    ) : null,
+    production: productionText ? (
+      <section className={styles.section}>
+        <h2 className={styles.heading}>{brandConfig.productionHeading}</h2>
+        <p className={styles.copy} dangerouslySetInnerHTML={{ __html: productionText }} />
+      </section>
+    ) : null,
+    applications: hasApplications ? (
+      <section className={styles.section}>
+        <h2 className={styles.heading}>Applications</h2>
+        {applicationText ? (
+          <p className={styles.copy} dangerouslySetInnerHTML={{ __html: applicationText }} />
+        ) : null}
+        {applicationTextVariant ? (
+          <p className={styles.copy} dangerouslySetInnerHTML={{ __html: applicationTextVariant }} />
+        ) : null}
+        {dilutionRows.length > 0 ? (
+          <div className={styles.applicationTable}>
+            {dilutionRows.map((row) => (
+              <div className={styles.applicationRow} key={row.Application}>
+                <span className={styles.applicationLabel}>{row.Application}</span>
+                <span className={styles.applicationValue}>{row.ApplicationDilutionRange}</span>
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </section>
+    ) : null,
+    documents: hasDocuments ? (
+      <section className={styles.documents} id="document-section">
+        <h2 className={styles.heading}>Documents</h2>
+        {documents.map((doc: any) => {
+          const lot = doc?.properties?.assetlotnumber
+          const lotLabel = lot ? `${lot}${lot === currentLot ? ' (current lot)' : ''}` : null
+          return (
+            <a
+              className={styles.documentLink}
+              key={doc.id}
+              href={`/cms/files/${doc.properties.salsifyname}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <div className={styles.documentRow}>
+                <span className={styles.docIcon}>
+                  <DocIcon />
+                </span>
+                <span>
+                  <span className={styles.docTitle}>
+                    {doc?.properties?.assettype === 'Datasheet'
+                      ? 'Product Datasheet'
+                      : 'Safety Data Sheet'}
+                  </span>
+                  <span className={styles.docSub}>
+                    PDF{catalogNumber ? ` · ${catalogNumber}` : ''}
+                    {lotLabel ? ` · Lot ${lotLabel}` : ''}
+                  </span>
+                </span>
+                <span className={styles.docAction}>
+                  <span>Open</span>
+                  <Arrow />
+                </span>
+              </div>
+            </a>
+          )
+        })}
+        {hasHiddenDocs ? (
+          <button
+            type="button"
+            className={styles.seeMore}
+            onClick={() => setShowAllDocs(!showAllDocs)}
+          >
+            <span>{showAllDocs ? 'Show fewer documents' : 'Show all documents'}</span>
+            <Arrow />
+          </button>
+        ) : null}
+      </section>
+    ) : null,
+    citations: hasCitations ? (
+      <section
+        className={styles.citations}
+        id="citation-document-section"
+        key={citeabProductCode ?? 'citations'}
+      >
+        <h2 className={styles.heading}>Citations / Publications</h2>
+        <div className={styles.citationTrack}>
+          <CitationWidget
+            citeabProductCode={citeabProductCode}
+            variantProductName={variantProductName}
+            citationApiKey={citationApiKey}
+          />
+        </div>
+      </section>
+    ) : null,
+    publicationCta: brandContent.publicationCta ? (
+      <section className={styles.publicationCta}>
+        <span className={styles.ctaCopy}>
+          <strong>{brandContent.publicationCta.title}</strong>
+          <span>{brandContent.publicationCta.copy}</span>
+        </span>
+        <Link className={styles.ctaLink} href={brandContent.publicationCta.href}>
+          <span>{brandContent.publicationCta.ctaLabel}</span>
+          <Arrow />
+        </Link>
+      </section>
+    ) : null,
+    related:
+      relatedProducts && relatedProducts.length > 0 ? (
+        <section className={styles.section}>
+          <h2 className={styles.heading}>Related Products</h2>
+          <div className={styles.relatedGrid}>
+            {relatedProducts.map((data: any, index: number) => {
+              return (
+                <article className={styles.relatedCard} key={data?.productCode ?? index}>
+                  <div>
+                    {brandConfig.relatedCardVariant === 'branded' && data?.brand?.stringValue ? (
+                      <div className={styles.relatedBrand}>{data.brand.stringValue}</div>
+                    ) : null}
+                    <h3>{data?.title}</h3>
+                    <div className={styles.relatedSku}>
+                      {data?.plpCatalogNumber ||
+                        String(data?.productCode ?? '').replace(/^[A-Z]+-/, '')}
+                    </div>
+                  </div>
+                  <Link href={productHref(data)} data-testid="product-card-link">
+                    <span>{brandContent.relatedCtaLabel}</span>
+                    <Arrow />
+                  </Link>
+                </article>
+              )
+            })}
+          </div>
+        </section>
+      ) : null,
+    services:
+      brandContent.services.length > 0 ? (
+        <section className={styles.section}>
+          <h2 className={styles.heading}>Services</h2>
+          <div className={styles.servicesGrid}>
+            {brandContent.services.map((service) => (
+              <Link className={styles.serviceCard} href={service.href} key={service.id}>
+                <div className={styles.formatTitle}>{service.title}</div>
+                <p>{service.copy}</p>
+                <span className={styles.formatLink}>
+                  <span>{service.ctaLabel}</span>
+                  <Arrow />
+                </span>
+                {service.art ? (
+                  <span className={styles.antibodyArt} aria-hidden="true">
+                    <img src={service.art} alt="" />
+                  </span>
+                ) : null}
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null,
+    resources:
+      brandContent.resources.length > 0 ? (
+        <section className={styles.section}>
+          <h2 className={styles.heading}>Resources</h2>
+          <div className={styles.resourcesGrid}>
+            {brandContent.resources.map((resource) => (
+              <article className={styles.resourceCard} key={resource.id}>
+                <img className={styles.resourceIcon} src={resource.icon} alt="" />
+                <h3>{resource.title}</h3>
+                <Link href={resource.href}>
+                  <span>{resource.ctaLabel}</span>
+                  <Arrow />
+                </Link>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null,
+  }
 
   return (
     <div className={styles.page} data-brand={brandKey}>
@@ -818,159 +1134,9 @@ const PdpTemplate = (props: PdpTemplateProps) => {
               <div className={styles.mediaCard}>{mediaCardInner}</div>
             </div>
 
-            {shortDescription ? (
-              <section className={styles.description}>
-                <h2 className={styles.heading}>Product Description</h2>
-                <div
-                  className={`${styles.clamp} ${descExpanded ? styles.clampExpanded : ''}`}
-                  dangerouslySetInnerHTML={{ __html: shortDescription }}
-                />
-                <button
-                  type="button"
-                  className={`${styles.seeMore} ${descExpanded ? styles.seeMoreExpanded : ''}`}
-                  onClick={() => setDescExpanded(!descExpanded)}
-                >
-                  <span>{descExpanded ? 'See less' : 'See more'}</span>
-                  <Arrow />
-                </button>
-              </section>
-            ) : null}
-
-            {description ? (
-              <section className={styles.section}>
-                <h2 className={styles.heading}>{t('product-details')}</h2>
-                <div className={styles.copy} dangerouslySetInnerHTML={{ __html: description }} />
-              </section>
-            ) : null}
-
-            {children}
-
-            {hasSpecs ? (
-              <section className={styles.section}>
-                <h2 className={styles.heading}>Specifications</h2>
-                <div className={styles.specTable}>
-                  {specGroups.map((group) =>
-                    group.resolvedRows.length === 0 ? null : (
-                      <div key={group.id}>
-                        {group.label ? <div className={styles.specGroup}>{group.label}</div> : null}
-                        {group.resolvedRows.map((row) => (
-                          <div className={styles.specRow} key={row.key}>
-                            <span className={styles.specLabel}>{row.label}</span>
-                            {row.config.render === 'link' && row.config.href ? (
-                              <a
-                                className={styles.specLink}
-                                href={row.config.href(row.value)}
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                <span>{row.value}</span>
-                                <Arrow />
-                              </a>
-                            ) : row.config.render === 'html' ? (
-                              <div
-                                className={`${styles.specValue} ${styles.specRowAlt}`}
-                                dangerouslySetInnerHTML={{ __html: row.value }}
-                              />
-                            ) : (
-                              <div className={styles.specValue}>{row.value}</div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )
-                  )}
-                </div>
-              </section>
-            ) : null}
-
-            {productionText ? (
-              <section className={styles.section}>
-                <h2 className={styles.heading}>Production &amp; Epitope</h2>
-                <p className={styles.copy} dangerouslySetInnerHTML={{ __html: productionText }} />
-              </section>
-            ) : null}
-
-            {hasApplications ? (
-              <section className={styles.section}>
-                <h2 className={styles.heading}>Applications</h2>
-                {applicationText ? (
-                  <p
-                    className={styles.copy}
-                    dangerouslySetInnerHTML={{ __html: applicationText }}
-                  />
-                ) : null}
-                {applicationTextVariant ? (
-                  <p
-                    className={styles.copy}
-                    dangerouslySetInnerHTML={{ __html: applicationTextVariant }}
-                  />
-                ) : null}
-                {dilutionRows.length > 0 ? (
-                  <div className={styles.applicationTable}>
-                    {dilutionRows.map((row) => (
-                      <div className={styles.applicationRow} key={row.Application}>
-                        <span className={styles.applicationLabel}>{row.Application}</span>
-                        <span className={styles.applicationValue}>
-                          {row.ApplicationDilutionRange}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
-              </section>
-            ) : null}
-
-            {hasDocuments ? (
-              <section className={styles.documents} id="document-section">
-                <h2 className={styles.heading}>Documents</h2>
-                {documents.map((doc: any) => {
-                  const lot = doc?.properties?.assetlotnumber
-                  const lotLabel = lot
-                    ? `${lot}${lot === currentLot ? ' (current lot)' : ''}`
-                    : null
-                  return (
-                    <a
-                      className={styles.documentLink}
-                      key={doc.id}
-                      href={`/cms/files/${doc.properties.salsifyname}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <div className={styles.documentRow}>
-                        <span className={styles.docIcon}>
-                          <DocIcon />
-                        </span>
-                        <span>
-                          <span className={styles.docTitle}>
-                            {doc?.properties?.assettype === 'Datasheet'
-                              ? 'Product Datasheet'
-                              : 'Safety Data Sheet'}
-                          </span>
-                          <span className={styles.docSub}>
-                            PDF{catalogNumber ? ` · ${catalogNumber}` : ''}
-                            {lotLabel ? ` · Lot ${lotLabel}` : ''}
-                          </span>
-                        </span>
-                        <span className={styles.docAction}>
-                          <span>Open</span>
-                          <Arrow />
-                        </span>
-                      </div>
-                    </a>
-                  )
-                })}
-                {hasHiddenDocs ? (
-                  <button
-                    type="button"
-                    className={styles.seeMore}
-                    onClick={() => setShowAllDocs(!showAllDocs)}
-                  >
-                    <span>{showAllDocs ? 'Show fewer documents' : 'Show all documents'}</span>
-                    <Arrow />
-                  </button>
-                ) : null}
-              </section>
-            ) : null}
+            {brandConfig.leftSections.map((id) => (
+              <React.Fragment key={id}>{sectionNodes[id]}</React.Fragment>
+            ))}
           </div>
 
           <aside className={styles.rail}>
@@ -979,114 +1145,9 @@ const PdpTemplate = (props: PdpTemplateProps) => {
           </aside>
         </div>
 
-        {citationCountVariant && product?.productType === 'Antibody-Configurable' ? (
-          <section
-            className={styles.citations}
-            id="citation-document-section"
-            key={citeabProductCode ?? 'citations'}
-          >
-            <h2 className={styles.heading}>Citations / Publications</h2>
-            <div className={styles.citationTrack}>
-              <CitationWidget
-                citeabProductCode={citeabProductCode}
-                variantProductName={variantProductName}
-                citationApiKey={citationApiKey}
-              />
-            </div>
-          </section>
-        ) : null}
-
-        {brandContent.publicationCta ? (
-          <section className={styles.publicationCta}>
-            <span className={styles.ctaCopy}>
-              <strong>{brandContent.publicationCta.title}</strong>
-              <span>{brandContent.publicationCta.copy}</span>
-            </span>
-            <Link className={styles.ctaLink} href={brandContent.publicationCta.href}>
-              <span>{brandContent.publicationCta.ctaLabel}</span>
-              <Arrow />
-            </Link>
-          </section>
-        ) : null}
-
-        {relatedProducts && relatedProducts.length > 0 ? (
-          <section className={styles.section}>
-            <h2 className={styles.heading}>Related Products</h2>
-            <div className={styles.relatedGrid}>
-              {relatedProducts.map((data: any, index: number) => {
-                const formattedCategoryCode =
-                  data?.categoryCode === 'antisera_igg_fractions'
-                    ? data.categoryCode.replace(/_/g, '-')
-                    : data?.categoryCode
-                const url =
-                  data?.categoryCode !== undefined && data?.seoFriendlyUrl
-                    ? `/products/${formattedCategoryCode}/${data.seoFriendlyUrl}/${data.productCode}`
-                    : `/product/${data?.productCode}`
-                const href = url.includes('libraries') ? url.toLowerCase() : url
-
-                return (
-                  <article className={styles.relatedCard} key={data?.productCode ?? index}>
-                    <div>
-                      {data?.brand?.stringValue ? (
-                        <div className={styles.relatedBrand}>{data.brand.stringValue}</div>
-                      ) : null}
-                      <h3>{data?.title}</h3>
-                      <div className={styles.relatedSku}>
-                        {data?.plpCatalogNumber ||
-                          String(data?.productCode ?? '').replace(/^[A-Z]+-/, '')}
-                      </div>
-                    </div>
-                    <Link href={href} data-testid="product-card-link">
-                      <span>See Product Details</span>
-                      <Arrow />
-                    </Link>
-                  </article>
-                )
-              })}
-            </div>
-          </section>
-        ) : null}
-
-        {brandContent.services.length > 0 ? (
-          <section className={styles.section}>
-            <h2 className={styles.heading}>Services</h2>
-            <div className={styles.servicesGrid}>
-              {brandContent.services.map((service) => (
-                <Link className={styles.serviceCard} href={service.href} key={service.id}>
-                  <div className={styles.formatTitle}>{service.title}</div>
-                  <p>{service.copy}</p>
-                  <span className={styles.formatLink}>
-                    <span>{service.ctaLabel}</span>
-                    <Arrow />
-                  </span>
-                  {service.art ? (
-                    <span className={styles.antibodyArt} aria-hidden="true">
-                      <img src={service.art} alt="" />
-                    </span>
-                  ) : null}
-                </Link>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        {brandContent.resources.length > 0 ? (
-          <section className={styles.section}>
-            <h2 className={styles.heading}>Resources</h2>
-            <div className={styles.resourcesGrid}>
-              {brandContent.resources.map((resource) => (
-                <article className={styles.resourceCard} key={resource.id}>
-                  <img className={styles.resourceIcon} src={resource.icon} alt="" />
-                  <h3>{resource.title}</h3>
-                  <Link href={resource.href}>
-                    <span>{resource.ctaLabel}</span>
-                    <Arrow />
-                  </Link>
-                </article>
-              ))}
-            </div>
-          </section>
-        ) : null}
+        {brandConfig.belowSections.map((id) => (
+          <React.Fragment key={id}>{sectionNodes[id]}</React.Fragment>
+        ))}
       </div>
 
       <div className={`${styles.mobilePurchase} ${drawerOpen ? styles.mobileOpen : ''}`}>

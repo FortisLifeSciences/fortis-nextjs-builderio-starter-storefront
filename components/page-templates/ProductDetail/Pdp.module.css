@@ -1125,7 +1125,72 @@
 
 .specValue :global(a) {
   color: var(--accent);
+  text-decoration: none;
+}
+
+.specValue :global(a):hover {
   text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.specList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.specList li + li::before {
+  content: '•';
+  margin: 0 8px;
+  color: var(--slate);
+}
+
+.pairingTrack {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(240px, calc((100% - 20px) / 3));
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 4px;
+}
+
+.pairingCard {
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 84px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  color: #0c0b14;
+  font-size: 14px;
+  line-height: 1.4;
+  text-decoration: none;
+  transition: border-color 0.16s ease;
+}
+
+.pairingCard strong {
+  font-weight: 700;
+}
+
+.pairingCard:hover {
+  border-color: var(--accent);
+}
+
+.pairingCard svg {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.2;
 }
 
 .specRowAlt {

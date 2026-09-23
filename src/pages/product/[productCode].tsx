@@ -41,6 +41,7 @@ interface ProductPageType extends PageWithMetaData {
   categoriesTree?: PrCategory[]
   product?: Product
   relatedProducts: any
+  pairingProducts?: any[]
   productVariations?: FilteredProduct[]
   section?: any
   PDPCustomAndBulkDisplayContentSection?: any
@@ -131,6 +132,30 @@ export async function getStaticProps(
       } else {
         console.warn(`No product found for code: ${data}`)
       }
+    }
+  }
+
+  const pairingProducts = []
+  const pairingProductData =
+    product?.properties?.find((item: any) => item?.attributeFQN === 'tenant~pairing-products')
+      ?.values?.[0]?.stringValue || null
+  if (pairingProductData) {
+    for (const code of pairingProductData.split('|')) {
+      const pairedProduct = await getProduct(code.trim())
+      if (!pairedProduct) {
+        console.warn(`No pairing product found for code: ${code}`)
+        continue
+      }
+      pairingProducts.push({
+        productCode: pairedProduct?.productCode,
+        categoryCode: pairedProduct?.categories?.[0]?.categoryCode,
+        seoFriendlyUrl: pairedProduct?.content?.seoFriendlyUrl,
+        title: pairedProduct?.content?.productName,
+        plpCatalogNumber:
+          pairedProduct?.properties?.find(
+            (item: any) => item?.attributeFQN?.toLowerCase() === 'tenant~plp-catalog-number'
+          )?.values?.[0]?.stringValue || '',
+      })
     }
   }
 
@@ -323,6 +348,7 @@ export async function getStaticProps(
       PDPCustomAndBulkDisplayContentSection: PDPCustomAndBulkDisplayContentSection || null,
       PDPCustomAndBulkDisplaySectionKey: PDPCustomAndBulkDisplaySectionKey || '',
       relatedProducts,
+      pairingProducts,
       schemaJson: schemaJson || '',
       digitalAssets,
       configuredVariant: configuredVariant ? JSON.parse(JSON.stringify(configuredVariant)) : null,
@@ -351,6 +377,7 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
     product,
     productVariations,
     relatedProducts,
+    pairingProducts,
     PDPCustomAndBulkDisplayContentSection,
     PDPCustomAndBulkDisplaySectionKey,
     schemaJson,
@@ -396,6 +423,7 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
           product={product as ProductCustom}
           productVariations={productVariations}
           relatedProducts={relatedProducts}
+          pairingProducts={pairingProducts}
           breadcrumbs={breadcrumbs}
           sliceValue={sliceValue}
           selectedUrlVariant={selected}

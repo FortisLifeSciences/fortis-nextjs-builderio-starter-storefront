@@ -47,26 +47,34 @@ export interface PdpFact {
   value: string
 }
 
+export interface PdpFactConfig {
+  fqns: string[]
+  label?: string
+}
+
 export const buildFacts = (
   product: WithProperties | null | undefined,
-  fqns: string[],
+  configs: PdpFactConfig[],
   limit?: number
 ): PdpFact[] => {
   const facts: PdpFact[] = []
   const seenLabels = new Set<string>()
 
-  for (const fqn of fqns) {
+  for (const config of configs) {
     if (limit !== undefined && facts.length >= limit) break
 
-    const property = findProperty(product, fqn)
-    const value = getPropertyValues(property).join(', ')
-    if (!value) continue
+    for (const fqn of config.fqns) {
+      const property = findProperty(product, fqn)
+      const value = getPropertyValues(property).join(', ')
+      if (!value) continue
 
-    const label = getPropertyLabel(property)
-    if (!label || seenLabels.has(label)) continue
+      const label = config.label || getPropertyLabel(property)
+      if (!label || seenLabels.has(label)) break
 
-    seenLabels.add(label)
-    facts.push({ fqn, label, value })
+      seenLabels.add(label)
+      facts.push({ fqn, label, value })
+      break
+    }
   }
 
   return facts
