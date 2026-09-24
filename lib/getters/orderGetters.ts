@@ -345,6 +345,10 @@ const getProductNames = (order: CrOrder) => {
 
 const getOrderStatus = (order: CrOrder) => order?.status || ''
 
+const getOrderPaymentStatus = (order: CrOrder) => order?.paymentStatus || ''
+
+const getOrderFulfillmentStatus = (order: CrOrder) => order?.fulfillmentStatus || ''
+
 const getOrderPaymentCardDetails = (card: CrPaymentCard) => {
   return {
     paymentServiceCardId: cardGetters.getPaymentServiceCardId(card),
@@ -512,6 +516,9 @@ export const orderGetters = {
   getLocationCode,
   getPaymentMethods,
   getOrderStatus,
+  getOrderTotal,
+  getOrderPaymentStatus,
+  getOrderFulfillmentStatus,
   getFinalOrderPayment,
   getOrderPurchaseOrderDetails,
   getHandlingTotal,
