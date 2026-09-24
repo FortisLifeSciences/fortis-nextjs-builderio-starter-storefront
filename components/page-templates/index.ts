@@ -8,6 +8,7 @@ export { default as StandardShipCheckoutTemplate } from './StandardShipCheckoutT
 export { default as MultiShipCheckoutTemplate } from './MultiShipCheckoutTemplate/MultiShipCheckoutTemplate'
 export { default as CheckoutUITemplate } from '../checkout/CheckoutUITemplate/CheckoutUITemplate'
 export { default as ResetPasswordConfirmationTemplate } from './ResetPasswordConfirmationTemplate/ResetPasswordConfirmationTemplate'
+export { default as CreateAccountTemplate } from './CreateAccountTemplate/CreateAccountTemplate'
 
 export { default as AccountInformationTemplate } from './MyAccount/AccountInformationTemplate/AccountInformationTemplate'
 export { default as ShippingAddressTemplate } from './MyAccount/ShippingAddressTemplate/ShippingAddressTemplate'

@@ -1,21 +1,32 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import { screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import userEvent from '@testing-library/user-event'
-import mockRouter from 'next-router-mock'
 
 import CartIcon from './CartIcon'
 import { renderWithQueryClient } from '@/__test__/utils'
-import { ModalContextProvider, DialogRoot } from '@/context'
+import {
+  ModalContextProvider,
+  DialogRoot,
+  HeaderContextProvider,
+  useHeaderContext,
+} from '@/context'
+
+const DrawerStateProbe = () => {
+  const { headerState } = useHeaderContext()
+  return <div data-testid="drawer-state">{String(!!headerState.isCartDrawerVisible)}</div>
+}
 
 const setup = () => {
   const user = userEvent.setup()
 
   renderWithQueryClient(
-    <ModalContextProvider>
-      <DialogRoot />
-      <CartIcon size="large" isElementVisible={true} />
-    </ModalContextProvider>
+    <HeaderContextProvider>
+      <ModalContextProvider>
+        <DialogRoot />
+        <CartIcon size="large" isElementVisible={true} />
+        <DrawerStateProbe />
+      </ModalContextProvider>
+    </HeaderContextProvider>
   )
   return {
     user,
@@ -29,17 +40,15 @@ describe('[component] CartIcon component', () => {
     expect(screen.getByText(/cart/)).toBeVisible()
   })
 
-  it('should change route on click of icon', async () => {
+  it('should open the cart side-drawer on click instead of navigating to a cart page', async () => {
     const { user } = setup()
+
+    expect(screen.getByTestId('drawer-state')).toHaveTextContent('false')
 
     user.click(screen.getByText(/cart/))
 
     await waitFor(() => {
-      expect(mockRouter).toMatchObject({
-        asPath: '/cart',
-        pathname: '/cart',
-        query: {},
-      })
+      expect(screen.getByTestId('drawer-state')).toHaveTextContent('true')
     })
   })
 })

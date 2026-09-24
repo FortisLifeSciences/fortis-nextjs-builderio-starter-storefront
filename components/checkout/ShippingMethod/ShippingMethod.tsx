@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 
 import { yupResolver } from '@hookform/resolvers/yup'
-import { Typography, Box, MenuItem, Divider } from '@mui/material'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
+import { Typography, Box, MenuItem, Divider, Tooltip } from '@mui/material'
 import { filter, find } from 'lodash'
 import { useTranslation } from 'next-i18next'
 import { Controller, useForm } from 'react-hook-form'
@@ -50,6 +51,39 @@ const styles = {
     fontWeight: '600',
     color: 'text.primary',
   },
+}
+
+// Card treatment for each shipping-method row: bordered/rounded, matching the checkout design.
+const shippingMethodCardSx = {
+  width: '100%',
+  p: '16px',
+  border: '1px solid #C9C9C9',
+  borderRadius: '12px',
+  backgroundColor: '#FFFFFF !important',
+  transition: 'border-color 0.2s',
+  '&:hover': { borderColor: 'primary.main' },
+  '& .MuiFormControlLabel-root': { width: '100%', margin: 0 },
+  '& .MuiFormControlLabel-label': { width: '100%' },
+}
+
+// Row label for the FedEx/UPS account options - text on the left, info icon pinned right.
+const accountOptionLabelSx = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  width: '100%',
+}
+
+// "Where to find your account number" callout shown once a customer-account option is selected.
+const accountNumberHintSx = {
+  border: '1px solid #30299A',
+  backgroundColor: '#EEF1FF',
+  borderRadius: '8px',
+  padding: '12px 16px',
+  fontSize: '13px',
+  lineHeight: '150%',
+  color: '#30299A',
+  '& strong': { fontWeight: 700 },
 }
 
 export const useFedExSchema = () => {
@@ -700,15 +734,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   return (
     <Box data-testid="ship-items">
       <Box mt={2}>
-        <Box
-          m={0}
-          sx={{
-            display: 'grid',
-            borderRadius: '5px',
-            marginBottom: '10px',
-            '&:hover': { borderRadius: '5px', backgroundColor: '#E3E2FF' },
-          }}
-        >
+        <Box m={0} sx={{ display: 'grid', gap: '12px', marginBottom: '12px' }}>
           {/* Normal Shipping method */}
           <KiboRadio
             radioOptions={
@@ -719,11 +745,13 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                   <MenuItem
                     key={item?.shippingMethodCode}
                     value={`${item?.shippingMethodCode}`}
-                    sx={{ mt: 0.25, background: 'none', '&:hover': { background: 'none' } }}
+                    sx={{ mt: 0.25, background: 'none', '&:hover': { background: 'none' }, p: 0 }}
                   >
                     <Price
                       variant="body2"
-                      fontWeight="normal"
+                      fontWeight="600"
+                      color="rgba(0, 0, 0, 0.8)"
+                      sx={{ fontFamily: 'Poppins', fontSize: '15px', letterSpacing: '-0.005em' }}
                       price={`${t('fortis-shipping')} (${item?.shippingMethodName})`}
                     />
                   </MenuItem>
@@ -733,32 +761,20 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
             selected={
               isOtherShippingMethod && selectedShippingMethodCode ? selectedShippingMethodCode : ''
             }
-            align="flex-start"
+            align="center"
+            boxSx={shippingMethodCardSx}
             onChange={(value) => {
               selectShippingMethod('fortis')
               handleShippingMethodChange(value)
             }}
             sx={{
-              borderRadius: 1,
-              my: 1,
-              ml: 0,
-              pl: 1.5,
               width: '100%',
             }}
           />
         </Box>
         {/* Only show Customer FedEx Shipping method if there are FedEx shipping methods available */}
         {getFedExShippingMethods()?.length > 0 && (
-          <Box
-            m={0}
-            py={0.5}
-            sx={{
-              display: 'grid',
-              backgroundColor: isFedExMethodSelected ? '#E3E2FF' : 'initial',
-              '&:hover': { backgroundColor: '#E3E2FF', borderRadius: '5px' },
-              borderRadius: '5px',
-            }}
-          >
+          <Box m={0} mt={1.5} sx={{ ...shippingMethodCardSx, display: 'grid' }}>
             {/* Customer FedEx Shipping method */}
             <KiboRadio
               radioOptions={[
@@ -772,27 +788,46 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                       sx={{
                         mt: 0.25,
                         width: '100%',
+                        minHeight: 'auto',
                         backgroundColor: 'none',
+                        p: 0,
                         '&:hover': { background: 'none' },
                       }}
                     >
-                      <Price variant="body2" fontWeight="normal" price={'Customer FedEx Account'} />
+                      <Box sx={accountOptionLabelSx}>
+                        <Price
+                          variant="body2"
+                          fontWeight="600"
+                          color="rgba(0, 0, 0, 0.8)"
+                          sx={{
+                            fontFamily: 'Poppins',
+                            fontSize: '15px',
+                            letterSpacing: '-0.005em',
+                          }}
+                          price={t('use-customer-fedex-account')}
+                        />
+                        <Tooltip title={t('fedex-account-number-hint').replace(/<\/?strong>/g, '')}>
+                          <InfoOutlinedIcon
+                            sx={{ color: '#30299A', fontSize: '20px' }}
+                            aria-label={t('fedex-account-number-hint').replace(/<\/?strong>/g, '')}
+                          />
+                        </Tooltip>
+                      </Box>
                     </MenuItem>
                   ),
                 },
               ]}
               selected={isFedExMethodSelected ? 'fedExAccount' : ''}
-              align="flex-start"
+              align="center"
+              boxSx={{ border: 'none', borderRadius: 0, p: 0, backgroundColor: 'transparent' }}
               onChange={() => selectShippingMethod('fedex')}
-              sx={{ ml: 1.5 }}
             />
             {isFedExMethodSelected && (
-              <Box
-                ml={8.5}
-                mr={4}
-                mb={2}
-                sx={{ backgroundColor: isFedExMethodSelected ? '#E3E2FF' : 'initial' }}
-              >
+              <Box mt={1.5} mb={0}>
+                <Box
+                  sx={{ ...accountNumberHintSx, mb: 1.5 }}
+                  dangerouslySetInnerHTML={{ __html: t('fedex-account-number-hint') }}
+                />
                 <Controller
                   name="fedExAccountNumber"
                   control={control}
@@ -816,7 +851,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                           sanitizedValue.length === 0 ||
                           sanitizedValue.length < 9
                         ) {
-                          setLocalError(t('this-field-is-min-max-length')) // error message
+                          setLocalError(t('fedex-account-number-invalid')) // error message
                           if (isFedexAccountMethodUpdated) {
                             handleShippingMethodSelectChange('', '')
                           }
@@ -843,17 +878,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
 
         {/* Only show Customer UPS Shipping method if there are UPS shipping methods available */}
         {getUPSShippingMethods()?.length > 0 && (
-          <Box
-            m={0}
-            py={0.5}
-            sx={{
-              display: 'grid',
-              backgroundColor: isUpsMethodSelected ? '#E3E2FF' : 'initial',
-              '&:hover': { backgroundColor: '#E3E2FF', borderRadius: '5px' },
-              borderRadius: '5px',
-              marginTop: '10px',
-            }}
-          >
+          <Box m={0} mt={1.5} sx={{ ...shippingMethodCardSx, display: 'grid' }}>
             {/* Customer UPS Shipping method */}
             <KiboRadio
               radioOptions={[
@@ -867,27 +892,46 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                       sx={{
                         mt: 0.25,
                         width: '100%',
+                        minHeight: 'auto',
                         backgroundColor: 'none',
+                        p: 0,
                         '&:hover': { background: 'none' },
                       }}
                     >
-                      <Price variant="body2" fontWeight="normal" price={'Customer UPS Account'} />
+                      <Box sx={accountOptionLabelSx}>
+                        <Price
+                          variant="body2"
+                          fontWeight="600"
+                          color="rgba(0, 0, 0, 0.8)"
+                          sx={{
+                            fontFamily: 'Poppins',
+                            fontSize: '15px',
+                            letterSpacing: '-0.005em',
+                          }}
+                          price={t('use-customer-ups-account')}
+                        />
+                        <Tooltip title={t('ups-account-number-hint').replace(/<\/?strong>/g, '')}>
+                          <InfoOutlinedIcon
+                            sx={{ color: '#30299A', fontSize: '20px' }}
+                            aria-label={t('ups-account-number-hint').replace(/<\/?strong>/g, '')}
+                          />
+                        </Tooltip>
+                      </Box>
                     </MenuItem>
                   ),
                 },
               ]}
               selected={isUpsMethodSelected ? 'upsAccount' : ''}
-              align="flex-start"
+              align="center"
+              boxSx={{ border: 'none', borderRadius: 0, p: 0, backgroundColor: 'transparent' }}
               onChange={() => selectShippingMethod('ups')}
-              sx={{ ml: 1.5 }}
             />
             {isUpsMethodSelected && (
-              <Box
-                ml={8.5}
-                mr={4}
-                mb={2}
-                sx={{ backgroundColor: isUpsMethodSelected ? '#E3E2FF' : 'initial' }}
-              >
+              <Box mt={1.5} mb={0}>
+                <Box
+                  sx={{ ...accountNumberHintSx, mb: 1.5 }}
+                  dangerouslySetInnerHTML={{ __html: t('ups-account-number-hint') }}
+                />
                 <Controller
                   name="upsAccountNumber"
                   control={upsControl}
@@ -907,7 +951,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                         setUpsAccountNumber(sanitizedValue)
                         localStorage.setItem('upsAccountNumber', sanitizedValue ?? '')
                         if (!sanitizedValue || sanitizedValue.length < 6) {
-                          setLocalUpsError(t('this-field-is-min-max-length-6'))
+                          setLocalUpsError(t('ups-account-number-invalid'))
                           // If the previous value was valid and now it's not, clear the shipping method
                           if (previousUpsAccountNumber.current.length === 6) {
                             handleShippingMethodSelectChange('', '')

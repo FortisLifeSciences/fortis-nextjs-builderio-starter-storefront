@@ -21,6 +21,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
+import { useHeaderContext } from '@/context'
+
 import type { Maybe, MenuItem, PrCategory } from '@/lib/gql/types'
 
 interface CategoryNestedNavigationProps {
@@ -62,6 +64,7 @@ const CategoryNestedNavigation = (props: CategoryNestedNavigationProps) => {
   const { t } = useTranslation('common')
 
   const router = useRouter()
+  const { toggleCartDrawer } = useHeaderContext()
 
   const initialSubHeader: {
     backLink: string | null
@@ -92,7 +95,7 @@ const CategoryNestedNavigation = (props: CategoryNestedNavigationProps) => {
   const [categoryStack, setCategoryStack] = useState<MenuItem[]>([])
 
   const gotoCart = () => {
-    router.push('/cart')
+    toggleCartDrawer(true)
     setParentCategory(null)
     onCloseMenu(true)
   }
