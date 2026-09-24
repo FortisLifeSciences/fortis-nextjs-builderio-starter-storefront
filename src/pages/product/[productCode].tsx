@@ -1,4 +1,4 @@
-import { BuilderComponent, builder, Builder } from '@builder.io/react'
+import { builder, Builder } from '@builder.io/react'
 import { setPixelProperties } from '@builder.io/utils'
 import { dehydrate } from '@tanstack/react-query'
 import getConfig from 'next/config'
@@ -43,7 +43,6 @@ interface ProductPageType extends PageWithMetaData {
   relatedProducts: any
   pairingProducts?: any[]
   productVariations?: FilteredProduct[]
-  section?: any
   PDPCustomAndBulkDisplayContentSection?: any
   PDPCustomAndBulkDisplaySectionKey?: string
   schemaJson?: string
@@ -212,18 +211,7 @@ export async function getStaticProps(
   //This is to use custom targeting with section model Ref: WEB-981
   const targetingBrandName = productCode.split('-')[0].toLowerCase()
 
-  const pdpBuilderSectionKey = publicRuntimeConfig?.builderIO?.modelKeys?.productDetailSection || ''
-  let section = null
   let PDPCustomAndBulkDisplayContentSection = null
-  try {
-    section = await builder
-      .get(pdpBuilderSectionKey, { userAttributes: { slug: `product-${productCode}` } })
-      .promise()
-    if (section) setPixelProperties(section, { alt: '' })
-  } catch (error) {
-    console.error(`Failed to fetch Builder section for ${productCode}:`, error)
-    section = null
-  }
 
   const PDPCustomAndBulkDisplaySectionKey =
     publicRuntimeConfig?.builderIO?.modelKeys?.PDPCustomAndBulkDisplaySection || ''
@@ -344,7 +332,6 @@ export async function getStaticProps(
       productVariations,
       metaData: getMetaData(product),
       categoriesTree,
-      section: section || null,
       PDPCustomAndBulkDisplayContentSection: PDPCustomAndBulkDisplayContentSection || null,
       PDPCustomAndBulkDisplaySectionKey: PDPCustomAndBulkDisplaySectionKey || '',
       relatedProducts,
@@ -396,7 +383,6 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
   const sliceValue = query?.sliceValue as string | undefined
   const selected = query?.selected as string | undefined
 
-  const pdpBuilderSectionKey = publicRuntimeConfig?.builderIO?.modelKeys?.productDetailSection || ''
   const breadcrumbs = product ? productGetters.getBreadcrumbs(product) : []
   const isProductPending = isFallback || !product
 
@@ -433,9 +419,7 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
           citationApiKey={citationApiKey}
           PDPCustomAndBulkDisplayContentSection={PDPCustomAndBulkDisplayContentSection}
           PDPCustomAndBulkDisplaySectionKey={PDPCustomAndBulkDisplaySectionKey}
-        >
-          <BuilderComponent model={pdpBuilderSectionKey} content={props.section} />
-        </PdpTemplate>
+        />
       )}
     </>
   )

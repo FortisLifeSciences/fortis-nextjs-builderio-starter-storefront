@@ -109,7 +109,6 @@ interface PdpTemplateProps {
   selectedUrlVariant?: string
   productVariations?: Product[] | FilteredProduct[]
   breadcrumbs?: BreadCrumb[]
-  children?: any
   isB2B?: boolean
   relatedProducts?: []
   pairingProducts?: any[]
@@ -142,7 +141,6 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     selectedUrlVariant,
     productVariations,
     breadcrumbs = [],
-    children,
     isB2B = false,
     relatedProducts,
     pairingProducts = [],
@@ -823,8 +821,6 @@ const PdpTemplate = (props: PdpTemplateProps) => {
             <div className={styles.copy} dangerouslySetInnerHTML={{ __html: description }} />
           </section>
         ) : null}
-
-        {children}
       </>
     ),
     pairing:
