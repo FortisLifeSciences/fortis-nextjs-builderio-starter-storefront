@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 
-import { BuilderComponent } from '@builder.io/react'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 
@@ -148,7 +147,6 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     relatedProducts,
     pairingProducts = [],
     PDPCustomAndBulkDisplayContentSection,
-    PDPCustomAndBulkDisplaySectionKey,
     digitalAssets,
     configuredVariant,
     themeCodeMapping = [],
@@ -159,7 +157,6 @@ const PdpTemplate = (props: PdpTemplateProps) => {
   const { t } = useTranslation('common')
   const { showModal } = useModalContext()
   const { user } = useAuthContext()
-  const siteUrl = process.env.NEXT_PUBLIC_URL
 
   const [descExpanded, setDescExpanded] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -314,6 +311,13 @@ const PdpTemplate = (props: PdpTemplateProps) => {
       : null
 
   const brandContent = getPdpBrandContent(brandKey)
+  const bulkQuoteCode = variationCodeDynamic || variationProductCode
+  const bulkQuoteHref =
+    !brandContent.secondaryCtas.length && sectionTargetUrl && bulkQuoteCode
+      ? `/${String(sectionTargetUrl).replace(/^\//, '')}?Catalog_Num=${encodeURIComponent(
+          bulkQuoteCode
+        )}`
+      : null
   const brandConfig = getPdpBrandConfig(brandKey)
 
   const validationText = getPropertyValues(
@@ -662,40 +666,29 @@ const PdpTemplate = (props: PdpTemplateProps) => {
         </>
       )}
 
-      {!PDPCustomAndBulkDisplayContentSection &&
-        brandContent.secondaryCtas.map((cta) => (
-          <Link
-            key={cta.label}
-            href={cta.href}
-            className={cta.variant === 'filled' ? styles.sampleBtn : styles.bulkBtn}
-          >
-            {cta.label}
-          </Link>
-        ))}
+      {brandContent.secondaryCtas.map((cta) => (
+        <Link
+          key={cta.label}
+          href={cta.href}
+          className={cta.variant === 'filled' ? styles.sampleBtn : styles.bulkBtn}
+        >
+          {cta.label}
+        </Link>
+      ))}
 
-      {PDPCustomAndBulkDisplayContentSection &&
-        PDPCustomAndBulkDisplaySectionKey &&
-        variationCodeDynamic && (
-          <div className={styles.builderSlot}>
-            <BuilderComponent
-              key={variationCodeDynamic}
-              model={PDPCustomAndBulkDisplaySectionKey}
-              content={PDPCustomAndBulkDisplayContentSection}
-              data={{
-                objectId: variationProductCode,
-                queryId: algoliaQueryId || undefined,
-              }}
-              context={{
-                className: algoliaQueryId
-                  ? 'bulk-and-custom-button-search'
-                  : 'bulk-and-custom-button',
-                bulkRedirect: () => {
-                  window.location.href = `${siteUrl}${sectionTargetUrl}?Catalog_Num=${variationCodeDynamic}`
-                },
-              }}
-            />
-          </div>
-        )}
+      {bulkQuoteHref ? (
+        <Link
+          href={bulkQuoteHref}
+          className={`${styles.bulkBtn} ${
+            algoliaQueryId ? 'bulk-and-custom-button-search' : 'bulk-and-custom-button'
+          }`}
+          data-insights-object-id={variationProductCode}
+          data-insights-query-id={algoliaQueryId ? algoliaQueryId : undefined}
+          data-insights-index="products"
+        >
+          Custom &amp; Bulk Quote
+        </Link>
+      ) : null}
     </div>
   )
 
