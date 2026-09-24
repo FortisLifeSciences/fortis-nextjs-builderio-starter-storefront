@@ -420,7 +420,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
               <Box
                 component="img"
                 src={brandImages[brand.toLowerCase()]}
-                alt={`${brand}-logo`}
+                alt={`${brand} logo`}
                 sx={{
                   width: '100%',
                   maxWidth: { sm: '150px', md: '200px' },

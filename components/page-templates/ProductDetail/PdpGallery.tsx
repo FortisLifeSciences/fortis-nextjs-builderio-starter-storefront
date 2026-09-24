@@ -37,6 +37,11 @@ export const mergeGalleryImages = (
     .sort((a: any, b: any) => a.sortorder - b.sortorder)
 }
 
+export const imageAlt = (image: PdpImage | undefined, index: number, title?: string | null) =>
+  image?.altText?.trim() ||
+  image?.title?.trim() ||
+  (title ? `${title}, image ${index + 1}` : `Product image ${index + 1}`)
+
 const ArrowIcon = ({ flip }: { flip?: boolean }) => (
   <svg viewBox="0 0 16 16" aria-hidden="true">
     <path d={flip ? 'M10 3.5 5.5 8 10 12.5' : 'M6 3.5 10.5 8 6 12.5'} />
@@ -89,7 +94,7 @@ const PdpLightbox = ({ images, index, title, onClose, onIndexChange }: PdpLightb
           ) : null}
           <img
             src={productGetters.handleProtocolRelativeUrl(current?.imageUrl as string)}
-            alt={current?.altText ?? ''}
+            alt={imageAlt(current, index, title)}
           />
           {images.length > 1 ? (
             <button
@@ -127,7 +132,7 @@ const PdpLightbox = ({ images, index, title, onClose, onIndexChange }: PdpLightb
                 >
                   <img
                     src={productGetters.handleProtocolRelativeUrl(image?.imageUrl as string)}
-                    alt={image?.altText ?? ''}
+                    alt={imageAlt(image, i, title)}
                   />
                 </button>
               ))}
@@ -167,11 +172,11 @@ const PdpGallery = ({ digitalAssets, kiboImages, brandImage, title }: PdpGallery
               wrapperStyle={{ width: '100%', height: '100%' }}
               contentStyle={{ width: '100%', height: '100%' }}
             >
-              <img src={mainSrc} alt={current?.altText ?? ''} />
+              <img src={mainSrc} alt={imageAlt(current, index, title)} />
             </TransformComponent>
           </TransformWrapper>
         ) : (
-          <img src={mainSrc} alt="" />
+          <img src={mainSrc} alt={title ? `${title}, no image available` : 'No image available'} />
         )}
         {hasImages && current?.description ? (
           <button
@@ -210,7 +215,7 @@ const PdpGallery = ({ digitalAssets, kiboImages, brandImage, title }: PdpGallery
             >
               <img
                 src={productGetters.handleProtocolRelativeUrl(image?.imageUrl as string)}
-                alt={image?.altText ?? ''}
+                alt={imageAlt(image, i, title)}
               />
             </button>
           ))}

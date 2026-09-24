@@ -768,11 +768,19 @@ const PdpTemplate = (props: PdpTemplateProps) => {
       {brandLogoSrc && brandConfig.brandCardLogoVariant === 'fortisPlusBrand' ? (
         <div className={styles.brandLogosRow}>
           <img className={styles.brandLogoFortis} src={brandImagesWhite.fortis} alt="Fortis" />
-          <img className={styles.brandLogoBrand} src={brandLogoSrc} alt={brandName ?? ''} />
+          <img
+            className={styles.brandLogoBrand}
+            src={brandLogoSrc}
+            alt={brandName || `${brand} logo`}
+          />
         </div>
       ) : null}
       {brandLogoSrc && brandConfig.brandCardLogoVariant === 'brandOnly' ? (
-        <img className={styles.brandLogoSolo} src={brandLogoSrc} alt={brandName ?? ''} />
+        <img
+          className={styles.brandLogoSolo}
+          src={brandLogoSrc}
+          alt={brandName || `${brand} logo`}
+        />
       ) : null}
       {brandContent.brandCard.benefits.map((benefit) => (
         <div className={styles.benefit} key={benefit}>
