@@ -144,6 +144,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     currentProduct,
     isDigitalFulfillment,
     sectionTargetUrl,
+    newVariantProductAttribute,
     productCode,
     variationProductCode,
     description,
@@ -521,6 +522,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                     <FortisRadio
                       name={option?.attributeDetail?.name || ''}
                       title={option?.attributeDetail?.name}
+                      newVariantProductAttribute={newVariantProductAttribute}
                       selected={productGetters.getOptionSelectedValue(option as ProductOption)}
                       radioOptions={radioOptions}
                       skuStatusText={skuStatusText}
@@ -952,7 +954,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
           width={'100%'}
           display={'flex'}
           flexDirection={'row'}
-          key={keyVal}
+          key={citeabProductCode ?? 'no-citation'}
           sx={{
             marginTop: '35px',
           }}

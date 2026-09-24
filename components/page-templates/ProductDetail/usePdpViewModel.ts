@@ -46,6 +46,7 @@ const getDocumentListDocuments = async (documentListName: string, filter: string
 
 const variantProperties = [
   'tenant~applications-variant',
+  'tenant~new-product-variant',
   'tenant~conjugate-type-variant',
   'tenant~purity-variant',
   'tenant~stock-concentration',
@@ -163,6 +164,7 @@ export const usePdpViewModel = (params: UsePdpViewModelParams) => {
 
   const {
     productName,
+    newVariantProductAttribute,
     productCode,
     variationProductCode,
     fulfillmentMethod,
@@ -563,6 +565,7 @@ export const usePdpViewModel = (params: UsePdpViewModelParams) => {
     sectionTargetUrl,
 
     productName,
+    newVariantProductAttribute,
     productCode,
     variationProductCode,
     fulfillmentMethod,
