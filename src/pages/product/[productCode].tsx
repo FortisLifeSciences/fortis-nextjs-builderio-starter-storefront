@@ -1,26 +1,33 @@
-import { BuilderComponent, builder, Builder } from '@builder.io/react'
+import { builder, Builder } from '@builder.io/react'
 import { setPixelProperties } from '@builder.io/utils'
+import { dehydrate } from '@tanstack/react-query'
 import getConfig from 'next/config'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
-import { ProductDetailTemplate, ProductDetailSkeleton } from '@/components/page-templates'
+import { PdpTemplate, ProductDetailSkeleton } from '@/components/page-templates'
+import { resolveDefaultOptionValue } from '@/components/page-templates/ProductDetail/resolveDefaultVariant'
 import { ProductRecommendations } from '@/components/product'
-import { useGetProduct } from '@/hooks/queries/product/useGetProduct/useGetProduct'
 import {
   getProduct,
   getCategoryTree,
   productSearch,
   getProductSearchVariations,
   configureProduct,
+  getDocumentListDocuments,
+  getProductPrice,
 } from '@/lib/api/operations'
+import { DIGITAL_ASSETS_LIST } from '@/lib/constants'
 import { productGetters } from '@/lib/getters'
 import { buildProductPath } from '@/lib/helpers'
-import type { CategorySearchParams, MetaData, PageWithMetaData } from '@/lib/types'
+import { generateQueryClient } from '@/lib/react-query/queryClient'
+import { productKeys } from '@/lib/react-query/queryKeys'
+import type { CategorySearchParams, MetaData, PageWithMetaData, ProductCustom } from '@/lib/types'
 import { generateSchemaMarkups, renderSchemaMarkup } from '@/lib/utils/generate-schema-markup'
+import GetThemeSettings from '@/src/pages/api/getThemeSettings'
 
-import { FilteredProduct, PrCategory, Product } from '@/lib/gql/types'
+import { ConfiguredProduct, FilteredProduct, PrCategory, Product } from '@/lib/gql/types'
 import type {
   GetStaticPathsResult,
   GetStaticPropsContext,
@@ -34,11 +41,15 @@ interface ProductPageType extends PageWithMetaData {
   categoriesTree?: PrCategory[]
   product?: Product
   relatedProducts: any
+  pairingProducts?: any[]
   productVariations?: FilteredProduct[]
-  section?: any
   PDPCustomAndBulkDisplayContentSection?: any
   PDPCustomAndBulkDisplaySectionKey?: string
   schemaJson?: string
+  digitalAssets?: any[]
+  configuredVariant?: ConfiguredProduct | null
+  themeCodeMapping?: any[]
+  citationApiKey?: string | null
 }
 
 const { publicRuntimeConfig } = getConfig()
@@ -89,30 +100,6 @@ export async function getStaticProps(
   } catch (error) {
     console.error(`Failed to fetch product: ${productCode}`, error)
   }
-  // If the parent product has no images, configure the first variation to get its images
-  if (product && !product.content?.productImages?.length && product.options?.length) {
-    const defaultOptions = product.options
-      .map((opt: any) => ({
-        attributeFQN: opt.attributeFQN,
-        value: opt.values?.find((v: any) => v.isEnabled)?.value ?? opt.values?.[0]?.value,
-      }))
-      .filter((opt: any) => opt.value != null)
-
-    if (defaultOptions.length > 0) {
-      try {
-        const configured = await configureProduct(productCode, defaultOptions)
-        if (configured?.productImages?.length) {
-          product = {
-            ...product,
-            content: { ...product.content, productImages: configured.productImages },
-          }
-        }
-      } catch (e) {
-        console.error(`Failed to configure product for schema images: ${productCode}`, e)
-      }
-    }
-  }
-
   const variantCodes = product?.variations
   const relatedProducts = []
   const relatedProductData =
@@ -147,6 +134,30 @@ export async function getStaticProps(
     }
   }
 
+  const pairingProducts = []
+  const pairingProductData =
+    product?.properties?.find((item: any) => item?.attributeFQN === 'tenant~pairing-products')
+      ?.values?.[0]?.stringValue || null
+  if (pairingProductData) {
+    for (const code of pairingProductData.split('|')) {
+      const pairedProduct = await getProduct(code.trim())
+      if (!pairedProduct) {
+        console.warn(`No pairing product found for code: ${code}`)
+        continue
+      }
+      pairingProducts.push({
+        productCode: pairedProduct?.productCode,
+        categoryCode: pairedProduct?.categories?.[0]?.categoryCode,
+        seoFriendlyUrl: pairedProduct?.content?.seoFriendlyUrl,
+        title: pairedProduct?.content?.productName,
+        plpCatalogNumber:
+          pairedProduct?.properties?.find(
+            (item: any) => item?.attributeFQN?.toLowerCase() === 'tenant~plp-catalog-number'
+          )?.values?.[0]?.stringValue || '',
+      })
+    }
+  }
+
   let productVariations = []
   try {
     productVariations = await getProductSearchVariations(productCode, variantCodes)
@@ -164,21 +175,43 @@ export async function getStaticProps(
     return { notFound: true }
   }
 
+  let configuredVariant = null
+  if (product.options?.length) {
+    const defaultSelection = resolveDefaultOptionValue({
+      product: product as ProductCustom,
+      productVariations,
+      sliceValue: product.sliceValue,
+    })
+
+    const defaultOptions = defaultSelection
+      ? [{ attributeFQN: defaultSelection.attributeFQN, value: defaultSelection.value }]
+      : product.options
+          .map((opt: any) => ({
+            attributeFQN: opt.attributeFQN,
+            value: opt.values?.find((v: any) => v.isEnabled)?.value ?? opt.values?.[0]?.value,
+          }))
+          .filter((opt: any) => opt.value != null)
+
+    if (defaultOptions.length > 0) {
+      try {
+        configuredVariant = await configureProduct(productCode, defaultOptions)
+      } catch (e) {
+        console.error(`Failed to configure default variant: ${productCode}`, e)
+      }
+    }
+  }
+
+  if (!product.content?.productImages?.length && configuredVariant?.productImages?.length) {
+    product = {
+      ...product,
+      content: { ...product.content, productImages: configuredVariant.productImages },
+    }
+  }
+
   //This is to use custom targeting with section model Ref: WEB-981
   const targetingBrandName = productCode.split('-')[0].toLowerCase()
 
-  const pdpBuilderSectionKey = publicRuntimeConfig?.builderIO?.modelKeys?.productDetailSection || ''
-  let section = null
   let PDPCustomAndBulkDisplayContentSection = null
-  try {
-    section = await builder
-      .get(pdpBuilderSectionKey, { userAttributes: { slug: `product-${productCode}` } })
-      .promise()
-    if (section) setPixelProperties(section, { alt: '' })
-  } catch (error) {
-    console.error(`Failed to fetch Builder section for ${productCode}:`, error)
-    section = null
-  }
 
   const PDPCustomAndBulkDisplaySectionKey =
     publicRuntimeConfig?.builderIO?.modelKeys?.PDPCustomAndBulkDisplaySection || ''
@@ -259,17 +292,56 @@ export async function getStaticProps(
       })
     : ''
 
+  const digitalAssetCodes = [
+    productCode,
+    ...(variantCodes || []).map((variant: any) => variant?.productCode).filter(Boolean),
+  ]
+  const digitalAssetFilter = digitalAssetCodes.map((code) => `name eq ${code}`).join(' or ')
+
+  let digitalAssets: any[] = []
+  try {
+    digitalAssets = await getDocumentListDocuments(DIGITAL_ASSETS_LIST, digitalAssetFilter)
+  } catch (error) {
+    console.error(`Failed to fetch digital assets for: ${productCode}`, error)
+    digitalAssets = []
+  }
+
+  const queryClient = generateQueryClient()
+  try {
+    await queryClient.prefetchQuery({
+      queryKey: productKeys.productParams(productCode, false),
+      queryFn: () => getProductPrice(productCode, false),
+    })
+  } catch (error) {
+    console.error(`Failed to prefetch price for: ${productCode}`, error)
+  }
+
+  let themeCodeMapping = []
+  let citationApiKey = null
+  try {
+    const themeSettings = await GetThemeSettings()
+    themeCodeMapping = themeSettings?.data?.themeCodeMapping || []
+    citationApiKey = themeSettings?.data?.citationsApiKey || null
+  } catch (error) {
+    console.error(`Failed to fetch theme settings for: ${productCode}`, error)
+  }
+
   return {
     props: {
       product,
       productVariations,
       metaData: getMetaData(product),
       categoriesTree,
-      section: section || null,
       PDPCustomAndBulkDisplayContentSection: PDPCustomAndBulkDisplayContentSection || null,
       PDPCustomAndBulkDisplaySectionKey: PDPCustomAndBulkDisplaySectionKey || '',
       relatedProducts,
+      pairingProducts,
       schemaJson: schemaJson || '',
+      digitalAssets,
+      configuredVariant: configuredVariant ? JSON.parse(JSON.stringify(configuredVariant)) : null,
+      themeCodeMapping,
+      citationApiKey,
+      dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
       ...(await serverSideTranslations(locale as string, ['common'])),
     },
     revalidate: parseInt(serverRuntimeConfig.revalidate),
@@ -292,9 +364,14 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
     product,
     productVariations,
     relatedProducts,
+    pairingProducts,
     PDPCustomAndBulkDisplayContentSection,
     PDPCustomAndBulkDisplaySectionKey,
     schemaJson,
+    digitalAssets,
+    configuredVariant,
+    themeCodeMapping,
+    citationApiKey,
   } = props
 
   // const metaSource = (props.metaData || product || {}) as Record<string, unknown>
@@ -303,18 +380,11 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
   const router = useRouter()
   const { isFallback, query } = router
 
-  const {
-    data: productResponseData,
-    isLoading: isProductLoading,
-    queryParams: queryParams,
-  } = useGetProduct(query)
+  const sliceValue = query?.sliceValue as string | undefined
+  const selected = query?.selected as string | undefined
 
-  const { sliceValue } = queryParams
-  const { selected } = queryParams
-
-  const pdpBuilderSectionKey = publicRuntimeConfig?.builderIO?.modelKeys?.productDetailSection || ''
   const breadcrumbs = product ? productGetters.getBreadcrumbs(product) : []
-  const isProductPending = isFallback || isProductLoading || !productResponseData
+  const isProductPending = isFallback || !product
 
   return (
     <>
@@ -335,18 +405,21 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
       {isProductPending ? (
         <ProductDetailSkeleton />
       ) : (
-        <ProductDetailTemplate
-          product={{ ...product, ...productResponseData }}
+        <PdpTemplate
+          product={product as ProductCustom}
           productVariations={productVariations}
           relatedProducts={relatedProducts}
+          pairingProducts={pairingProducts}
           breadcrumbs={breadcrumbs}
           sliceValue={sliceValue}
           selectedUrlVariant={selected}
+          digitalAssets={digitalAssets}
+          configuredVariant={configuredVariant}
+          themeCodeMapping={themeCodeMapping}
+          citationApiKey={citationApiKey}
           PDPCustomAndBulkDisplayContentSection={PDPCustomAndBulkDisplayContentSection}
           PDPCustomAndBulkDisplaySectionKey={PDPCustomAndBulkDisplaySectionKey}
-        >
-          <BuilderComponent model={pdpBuilderSectionKey} content={props.section} />
-        </ProductDetailTemplate>
+        />
       )}
     </>
   )
