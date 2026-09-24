@@ -10,7 +10,7 @@ import { getPdpBrandContent } from './pdpBrandContent'
 import PdpGallery from './PdpGallery'
 import { findProperty, getPropertyValues } from './pdpProperties'
 import { getSpecGroups } from './pdpSpecGroups'
-import PdpVariantPicker from './PdpVariantPicker'
+import PdpVariantPicker, { PdpMobileSizePicker } from './PdpVariantPicker'
 import ProductInventoryMessages from './ProductInventoryMessages'
 import { usePdpViewModel } from './usePdpViewModel'
 import { AddToCartDialog } from '@/components/dialogs'
@@ -513,15 +513,15 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     </>
   )
 
-  const buyPanel = (
-    <div className={styles.buyPanel}>
-      <PdpVariantPicker
-        options={variantOptions}
-        selected={selectedVariant}
-        showPrices={priceVisible}
-        onChange={(value) => handleSelectOptionChange(selectOption, value)}
-      />
+  const hasExtraOptions =
+    additionalSelectOptions.length > 0 ||
+    Boolean(optionsVisibility?.color) ||
+    Boolean(optionsVisibility?.size) ||
+    Boolean(optionsVisibility?.checkbox && productOptions?.yesNoOptions?.length) ||
+    Boolean(optionsVisibility?.textbox && productOptions?.textBoxOptions?.length)
 
+  const extraOptionControls = (
+    <>
       {additionalSelectOptions.map((option: any) => (
         <PdpVariantPicker
           key={option?.attributeFQN}
@@ -569,6 +569,47 @@ const PdpTemplate = (props: PdpTemplateProps) => {
             />
           ))
         : null}
+    </>
+  )
+
+  const secondaryButtons = (
+    <>
+      {brandContent.secondaryCtas.map((cta) => (
+        <Link
+          key={cta.label}
+          href={cta.href}
+          className={cta.variant === 'filled' ? styles.sampleBtn : styles.bulkBtn}
+        >
+          {cta.label}
+        </Link>
+      ))}
+
+      {bulkQuoteHref ? (
+        <Link
+          href={bulkQuoteHref}
+          className={`${styles.bulkBtn} ${
+            algoliaQueryId ? 'bulk-and-custom-button-search' : 'bulk-and-custom-button'
+          }`}
+          data-insights-object-id={variationProductCode}
+          data-insights-query-id={algoliaQueryId ? algoliaQueryId : undefined}
+          data-insights-index="products"
+        >
+          Custom &amp; Bulk Quote
+        </Link>
+      ) : null}
+    </>
+  )
+
+  const buyPanel = (
+    <div className={styles.buyPanel}>
+      <PdpVariantPicker
+        options={variantOptions}
+        selected={selectedVariant}
+        showPrices={priceVisible}
+        onChange={(value) => handleSelectOptionChange(selectOption, value)}
+      />
+
+      {extraOptionControls}
 
       {isUsVisitor ? (
         <>
@@ -664,41 +705,23 @@ const PdpTemplate = (props: PdpTemplateProps) => {
         </>
       )}
 
-      {brandContent.secondaryCtas.map((cta) => (
-        <Link
-          key={cta.label}
-          href={cta.href}
-          className={cta.variant === 'filled' ? styles.sampleBtn : styles.bulkBtn}
-        >
-          {cta.label}
-        </Link>
-      ))}
-
-      {bulkQuoteHref ? (
-        <Link
-          href={bulkQuoteHref}
-          className={`${styles.bulkBtn} ${
-            algoliaQueryId ? 'bulk-and-custom-button-search' : 'bulk-and-custom-button'
-          }`}
-          data-insights-object-id={variationProductCode}
-          data-insights-query-id={algoliaQueryId ? algoliaQueryId : undefined}
-          data-insights-index="products"
-        >
-          Custom &amp; Bulk Quote
-        </Link>
-      ) : null}
+      {secondaryButtons}
     </div>
+  )
+
+  const gallery = (
+    <PdpGallery
+      digitalAssets={digitalDocumentData}
+      kiboImages={productGallery as ProductImage[]}
+      brandImage={brand && typeof brand === 'string' ? brandImages[brand.toLowerCase()] : null}
+      title={heroTitle}
+    />
   )
 
   const mediaCardInner = (
     <>
       <div className={styles.mediaTop}>
-        <PdpGallery
-          digitalAssets={digitalDocumentData}
-          kiboImages={productGallery as ProductImage[]}
-          brandImage={brand && typeof brand === 'string' ? brandImages[brand.toLowerCase()] : null}
-          title={heroTitle}
-        />
+        {gallery}
 
         {catalogNumber ? (
           <div className={styles.mediaCodeRow}>
@@ -1132,7 +1155,10 @@ const PdpTemplate = (props: PdpTemplateProps) => {
             ) : null}
 
             <div className={styles.mobileGalleryMount}>
-              <div className={styles.mediaCard}>{mediaCardInner}</div>
+              <div className={styles.mediaTop}>{gallery}</div>
+              {hasExtraOptions ? (
+                <div className={styles.mobileExtraOptions}>{extraOptionControls}</div>
+              ) : null}
             </div>
 
             {brandConfig.leftSections.map((id) => (
@@ -1154,6 +1180,8 @@ const PdpTemplate = (props: PdpTemplateProps) => {
       <div className={`${styles.mobilePurchase} ${drawerOpen ? styles.mobileOpen : ''}`}>
         <div className={styles.mobileDrawer}>
           <div className={styles.mobileDrawerScroll}>
+            {!isUsVisitor ? <p className={styles.mobileDrawerNote}>{distributorNote}</p> : null}
+            <div className={styles.mobileDrawerCtas}>{secondaryButtons}</div>
             <div className={styles.mobileSupportWrap}>
               <div className={styles.supportPanel}>{supportRows}</div>
             </div>
@@ -1167,13 +1195,18 @@ const PdpTemplate = (props: PdpTemplateProps) => {
             onClick={() => setDrawerOpen(!drawerOpen)}
             aria-expanded={drawerOpen}
           >
-            <span className={styles.mobileSupportLabel}>
-              {drawerOpen ? 'Hide support options' : 'More support options'}
-            </span>
+            <span className={styles.mobileSupportLabel}>See Support</span>
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M6 15l6-6 6 6" />
             </svg>
           </button>
+
+          <PdpMobileSizePicker
+            options={variantOptions}
+            selected={selectedVariant}
+            showPrices={priceVisible}
+            onChange={(value) => handleSelectOptionChange(selectOption, value)}
+          />
 
           {isUsVisitor && showAddToCart ? (
             <>
