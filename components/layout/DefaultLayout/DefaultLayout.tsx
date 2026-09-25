@@ -142,7 +142,7 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
                   ) : (
                     <Container
                       disableGutters
-                      sx={{ maxWidth: '1200px !important', mx: 'auto', px: { xs: 2, md: 0 } }}
+                      sx={{ maxWidth: '1300px !important', mx: 'auto', px: { xs: 2, md: 0 } }}
                     >
                       {children}
                     </Container>

@@ -1,34 +1,11 @@
-import React, { useState, PropsWithChildren, useEffect, useRef, MouseEvent } from 'react'
+import React from 'react'
 
 import { ArrowForwardIos } from '@mui/icons-material'
-import Add from '@mui/icons-material/Add'
-import Apps from '@mui/icons-material/Apps'
-import FavoriteBorderRounded from '@mui/icons-material/FavoriteBorderRounded'
-import FavoriteRounded from '@mui/icons-material/FavoriteRounded'
-import ReorderRounded from '@mui/icons-material/ReorderRounded'
-import {
-  Grid,
-  MenuItem,
-  Box,
-  Button,
-  Typography,
-  Breadcrumbs,
-  Stack,
-  useMediaQuery,
-  Card,
-  CardMedia,
-  IconButton,
-} from '@mui/material'
-import getConfig from 'next/config'
+import { Box, Button, Typography, Card, CardMedia } from '@mui/material'
 import Link from 'next/link'
-import router, { useRouter } from 'next/router'
-import { useTranslation } from 'next-i18next'
 
-import { KiboImage, Price } from '@/components/common'
-import { PLPStyles } from '@/components/page-templates/ProductListingTemplate/ProductListingTemplate.styles'
-import { ProductCardStyles } from '@/components/product/ProductCard/ProductCard.styles'
-import { useAuthContext } from '@/context/AuthContext'
-import { plpClick } from '@/lib/utils/google-tag-manager'
+import { KiboImage } from '@/components/common'
+import { ProductHitGridViewStyles as ProductCardStyles } from '@/components/product/ProductHit/ProductHitGridView.styles'
 import abcore from '@/public/Brand_Logo/abcore-logo.png'
 import arista from '@/public/Brand_Logo/arista-logo.png'
 import bethyl from '@/public/Brand_Logo/bethyl-logo.png'
@@ -55,6 +32,7 @@ type Product = {
   format: any
   reactivity: any
   host: any
+  conjugate: any
   applications: any
   product_name_variant: any
   brand: any
@@ -107,7 +85,7 @@ const ProductHitGridView = ({
   queryId,
   dataInsideMethod,
 }: ProductHitGridViewProps): JSX.Element => {
-  const imageHeight = 180
+  const imageHeight = 247.5
   const placeholderImageUrl = DefaultImage,
     kiboImagesData = hit?.product_images,
     variationProductCode = hit?.sku,
@@ -118,8 +96,21 @@ const ProductHitGridView = ({
     ProductCatalogNumber = hit?.plp_catalog_number,
     brandLabel = hit?.brand,
     brand = hit?.brand_code,
+    applications = hit?.applications,
+    host = hit?.host,
+    conjugate = hit?.conjugate,
+    trialSizeAvailable = hit?.trial_size_available,
+    validated = hit?.validation_text,
+    formulation = hit?.formulation,
+    citation = hit?.plp_citation_count,
     newProduct = hit.new_product
   position = position ?? hit.__position
+
+  const tags = [
+    Array.isArray(applications) ? applications.join(', ') : applications,
+    host,
+    conjugate,
+  ].filter(Boolean)
 
   const firstImage = hit?.product_images?.[0]
     ? `https://cdn-tp1.mozu.com/31165-m1/cms/files/${kiboImagesData[0]}`
@@ -177,7 +168,7 @@ const ProductHitGridView = ({
               : 'product-card'
           }
         >
-          <Box>
+          <Box sx={{ height: '100%' }}>
             <Card sx={ProductCardStyles.cardRoot} data-testid="product-card">
               <Box>
                 {newProduct ? (
@@ -200,10 +191,7 @@ const ProductHitGridView = ({
                 className="product-image"
                 sx={{
                   ...ProductCardStyles.cardMedia,
-                  height: {
-                    xs: imageHeight,
-                    // sm: 'auto',
-                  },
+                  height: imageHeight,
                 }}
               >
                 <KiboImage
@@ -213,42 +201,89 @@ const ProductHitGridView = ({
                   data-testid="product-image"
                 />
               </CardMedia>
-              <Box flexDirection="column" m={1} className="product-info">
+              <Box sx={ProductCardStyles.cardContent} className="product-info">
+                {brandLabel && (
+                  <Typography component="span" sx={ProductCardStyles.brandLabel}>
+                    {brandLabel}
+                  </Typography>
+                )}
                 <Typography
-                  variant="body1"
-                  gutterBottom
-                  color="text.primary"
-                  sx={ProductCardStyles.brandLabel}
-                >
-                  {brandLabel}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  gutterBottom
-                  fontWeight={500}
+                  component="p"
                   className="productNameStyle"
-                  sx={{ ...ProductCardStyles.productNameStyle, marginBottom: '25px' }}
+                  sx={{ ...ProductCardStyles.productNameStyle, marginTop: '4px' }}
                   tabIndex={0}
                 >
                   {sliceValue ? variantProductName : title}
                 </Typography>
-                <Typography
-                  variant="body1"
-                  gutterBottom
-                  color="text.primary"
-                  sx={ProductCardStyles.brandLabel}
-                >
-                  {uniqueVal}
-                </Typography>
+                {(sliceValue ? variationProductCode : ProductCatalogNumber) && (
+                  <Typography component="span" sx={ProductCardStyles.catalogNum}>
+                    {sliceValue ? variationProductCode : ProductCatalogNumber}
+                  </Typography>
+                )}
+                {tags.length > 0 && (
+                  <Box sx={ProductCardStyles.tagsRow}>
+                    {tags.map((tag, idx) => (
+                      <Box key={idx} component="span" sx={ProductCardStyles.tagPill}>
+                        {tag}
+                      </Box>
+                    ))}
+                  </Box>
+                )}
+                {(validated || trialSizeAvailable || citation || formulation) && (
+                  <Box sx={ProductCardStyles.badgeRow}>
+                    {validated && (
+                      <Box sx={ProductCardStyles.badgeItem}>
+                        <Typography
+                          component="span"
+                          sx={{ ...ProductCardStyles.badgeText, color: '#348345' }}
+                        >
+                          Validated
+                        </Typography>
+                      </Box>
+                    )}
+                    {trialSizeAvailable && (
+                      <Box sx={ProductCardStyles.badgeItem}>
+                        <Typography
+                          component="span"
+                          sx={{ ...ProductCardStyles.badgeText, color: '#1468C8' }}
+                        >
+                          Trial Size Available
+                        </Typography>
+                      </Box>
+                    )}
+                    {formulation && (
+                      <Box sx={ProductCardStyles.badgeItem}>
+                        <Typography
+                          component="span"
+                          sx={{ ...ProductCardStyles.badgeText, color: '#9E6C00' }}
+                        >
+                          {formulation}
+                        </Typography>
+                      </Box>
+                    )}
+                    {citation && (
+                      <Box sx={ProductCardStyles.badgeItem}>
+                        <Typography
+                          component="span"
+                          sx={{ ...ProductCardStyles.badgeText, color: '#30299A' }}
+                        >
+                          Citations ({citation})
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                )}
+                <Box sx={ProductCardStyles.ctaButton}>
+                  <Button
+                    component="span"
+                    endIcon={<ArrowForwardIos sx={{ fontSize: '12px !important' }} />}
+                    title="View product details"
+                    aria-label="View product details"
+                  >
+                    View Details
+                  </Button>
+                </Box>
               </Box>
-              <IconButton
-                component="span"
-                sx={{ ...ProductCardStyles.iconButton }}
-                title="View product details"
-                aria-label="View product details"
-              >
-                <ArrowForwardIos sx={{ color: 'white' }} />
-              </IconButton>
             </Card>
           </Box>
         </Link>

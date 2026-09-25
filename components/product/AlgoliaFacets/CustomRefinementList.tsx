@@ -20,19 +20,52 @@ interface CustomRefinementListProps {
   searchableAttributes: string[]
 }
 const style = {
+  facetRow: {
+    padding: '8px 0',
+  },
   formControlLabel: {
     width: '100%',
-    fontSize: (theme: Theme) => theme.typography.body2,
+    margin: 0,
     '& .MuiFormControlLabel-label': {
-      fontSize: '16px',
-      fontWeight: '300',
-      lineHeight: 'normal',
+      fontFamily: 'Poppins',
+      fontSize: '13.5px',
+      lineHeight: '22px',
+      color: '#5C5A70',
+    },
+    '&.item-selected .MuiFormControlLabel-label': {
+      fontWeight: 600,
+      color: '#1B1A24',
     },
   } as SxProps<Theme> | undefined,
+  checkbox: {
+    padding: '4px 8px 4px 0',
+    color: '#C9C7D6',
+    '& .MuiSvgIcon-root': {
+      fontSize: '18px',
+      borderRadius: '4px',
+    },
+    '&.Mui-checked': {
+      color: '#30299A',
+    },
+  } as SxProps<Theme> | undefined,
+  count: {
+    fontFamily: 'Poppins',
+    fontSize: '11.5px',
+    lineHeight: '18px',
+    color: '#8B8AA0',
+    whiteSpace: 'nowrap',
+  } as SxProps<Theme> | undefined,
   viewMore: {
-    textTransform: 'capitalize',
-    color: 'text.primary',
+    textTransform: 'none',
+    color: '#30299A',
+    fontFamily: 'Poppins',
+    fontWeight: 600,
+    fontSize: '12.5px',
     pl: 0,
+    '&:hover': {
+      backgroundColor: 'transparent',
+      textDecoration: 'underline',
+    },
   },
   searchInput: {
     marginBottom: '8px',
@@ -126,23 +159,8 @@ function CustomRefinementList({ attribute, searchableAttributes }: CustomRefinem
           display="flex"
           alignItems="center"
           justifyContent="space-between"
-          sx={{ width: '100%' }}
+          sx={{ width: '100%', ...style.facetRow }}
         >
-          {/* <Box display="flex" alignItems="center" flex="1">
-            <Checkbox
-              icon={<CheckBoxOutlineBlank />}
-              checkedIcon={<CheckBox />}
-              checked={item.isRefined}
-              onChange={() => refine(item.value)}
-              size="small"
-              inputProps={{
-                'aria-label': isMobile
-                  ? `${item.label} (${item.count})`
-                  : item.label,
-              }}
-            />
-            <Typography variant="body2" fontSize={'16px'}>{item.label}</Typography>
-          </Box> */}
           <FormControlLabel
             control={
               <Checkbox
@@ -151,6 +169,7 @@ function CustomRefinementList({ attribute, searchableAttributes }: CustomRefinem
                 checked={item.isRefined}
                 onChange={() => refine(item.value)}
                 size="small"
+                sx={style.checkbox}
                 inputProps={
                   {
                     'aria-label': `${item.label} (${item.count})`,
@@ -161,12 +180,13 @@ function CustomRefinementList({ attribute, searchableAttributes }: CustomRefinem
               />
             }
             label={item.label}
+            className={item.isRefined ? 'item-selected' : undefined}
             sx={style.formControlLabel}
           />
 
           {/* Count */}
-          <Typography variant="body2" color="text.primary" fontSize={'16px'}>
-            ({item.count})
+          <Typography component="span" sx={style.count}>
+            {item.count}
           </Typography>
         </Box>
       ))}
@@ -175,7 +195,7 @@ function CustomRefinementList({ attribute, searchableAttributes }: CustomRefinem
         <Button
           onClick={toggleShowMore}
           variant="text"
-          sx={{ ...style.viewMore, marginTop: '8px', fontSize: '16px' }}
+          sx={{ ...style.viewMore, marginTop: '8px' }}
           startIcon={isShowingMore ? <Remove fontSize="small" /> : <Add fontSize="small" />}
         >
           {isShowingMore ? 'View Less' : 'View More'}
