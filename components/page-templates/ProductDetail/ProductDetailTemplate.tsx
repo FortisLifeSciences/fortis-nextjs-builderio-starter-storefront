@@ -181,6 +181,7 @@ const getDocumentListDocuments = async (documentListName: string, filter: string
 }
 const variantProperties = [
   'tenant~applications-variant',
+  'tenant~new-product-variant',
   'tenant~conjugate-type-variant',
   'tenant~purity-variant',
   'tenant~stock-concentration',
@@ -301,6 +302,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
   // Getters
   const {
     productName,
+    newVariantProductAttribute,
     productCode,
     variationProductCode,
     fulfillmentMethod,
@@ -1052,6 +1054,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                     <FortisRadio
                       name={option?.attributeDetail?.name || ''}
                       title={option?.attributeDetail?.name}
+                      newVariantProductAttribute={newVariantProductAttribute}
                       selected={productGetters.getOptionSelectedValue(option as ProductOption)}
                       radioOptions={radioOptions}
                       skuStatusText={skuStatusText}
@@ -1483,7 +1486,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
           width={'100%'}
           display={'flex'}
           flexDirection={'row'}
-          key={keyVal}
+          key={citeabProductCode ?? 'no-citation'}
           sx={{
             marginTop: '35px',
           }}

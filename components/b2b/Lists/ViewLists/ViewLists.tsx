@@ -178,10 +178,14 @@ const ViewLists = (props: ViewListsProps) => {
 
   return (
     <>
-      <Box sx={{ padding: '10px 10px 10px 0' }}>
+      <Box sx={{ padding: 0 }}>
         <FormControlLabel
           label={t('show-only-my-lists')}
-          control={<Checkbox onChange={handleFilterChange} sx={{ fontSize: '16px' }} />}
+          sx={{
+            marginBottom: '1rem',
+            '& .MuiFormControlLabel-label': { fontSize: '0.9375rem' },
+          }}
+          control={<Checkbox size="small" onChange={handleFilterChange} />}
           data-testid="currentUserFilterCheckbox"
         />
         {!mdScreen && (
@@ -205,7 +209,9 @@ const ViewLists = (props: ViewListsProps) => {
           </>
         )}
         {wishlistsResponse?.items?.length === 0 ? (
-          <Typography>{t('no-list-found')}</Typography>
+          <Typography sx={{ color: 'text.secondary', padding: '2rem 0' }}>
+            {t('no-list-found')}
+          </Typography>
         ) : (
           <>
             <ListTable
@@ -221,7 +227,7 @@ const ViewLists = (props: ViewListsProps) => {
               count={wishlistsResponse ? wishlistsResponse.pageCount : 1}
               shape={`rounded`}
               size="small"
-              sx={{ marginTop: '15px' }}
+              sx={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}
               onChange={handlePageChange}
               data-testid="pagination"
             />
