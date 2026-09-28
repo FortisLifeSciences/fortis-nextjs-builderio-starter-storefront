@@ -107,7 +107,9 @@ const ProductHitGridView = ({
 
   const firstImage = hit?.product_images?.[0]
     ? `https://cdn-tp1.mozu.com/31165-m1/cms/files/${kiboImagesData[0]}`
-    : pdpBrandLogos[brand.toLowerCase()]
+    : typeof brand === 'string' && brand
+    ? pdpBrandLogos[brand.toLowerCase()]
+    : undefined
 
   let truncatedTitle = title && title.length > 30 ? `${title.substring(0, 30)}` : title
   const uniqueVal = `${

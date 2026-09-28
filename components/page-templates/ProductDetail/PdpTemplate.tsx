@@ -453,10 +453,11 @@ const PdpTemplate = (props: PdpTemplateProps) => {
   )[0]
   let dilutionRows: { Application: string; ApplicationDilutionRange: string }[] = []
   try {
-    dilutionRows = JSON.parse(
+    const parsedDilutionRows = JSON.parse(
       getPropertyValues(findProperty(currentProduct, 'tenant~application-dilution-range'))[0] ||
         '[]'
     )
+    dilutionRows = Array.isArray(parsedDilutionRows) ? parsedDilutionRows : []
   } catch (error) {
     dilutionRows = []
   }
@@ -770,7 +771,8 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     </>
   )
 
-  const brandLogoSrc = brand ? brandImagesWhite[brand.toLowerCase()] : undefined
+  const brandLogoSrc =
+    typeof brand === 'string' && brand ? brandImagesWhite[brand.toLowerCase()] : undefined
 
   const brandCardInner = brandContent.brandCard ? (
     <>
