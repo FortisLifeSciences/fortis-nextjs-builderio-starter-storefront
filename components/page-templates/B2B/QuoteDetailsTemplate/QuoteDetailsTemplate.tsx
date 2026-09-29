@@ -578,7 +578,7 @@ const QuoteDetailsTemplate = (props: QuoteDetailsTemplateProps) => {
         updateMode,
       })
       if (response?.invalidCoupons?.length) {
-        setPromoError(`<strong>${couponCode}</strong> ${response?.invalidCoupons[0]?.reason}`)
+        setPromoError(`<strong>${couponCode}</strong> ${t('invalidPromoError')}`)
       }
     } catch (err) {
       console.error(err)
