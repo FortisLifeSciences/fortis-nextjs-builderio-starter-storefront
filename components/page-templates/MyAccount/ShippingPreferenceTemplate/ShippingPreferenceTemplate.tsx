@@ -3,17 +3,20 @@ import React, { useEffect, useState } from 'react'
 import InfoOutlined from '@mui/icons-material/InfoOutlined'
 import {
   Box,
+  Button,
   Chip,
   FormControlLabel,
   IconButton,
   Radio,
   RadioGroup,
+  Stack,
   TextField,
   Typography,
 } from '@mui/material'
 import { useTranslation } from 'next-i18next'
 
 import { AccountPageHeader, AccountSectionCard, accountType } from '@/components/my-account/common'
+import { useSnackbarContext } from '@/context'
 import { useCustomerAttribute } from '@/hooks'
 
 import type { CustomerAccount } from '@/lib/gql/types'
@@ -33,6 +36,9 @@ export enum PreferredShippingMethod {
   Fedex = 'fedex',
   Ups = 'ups',
 }
+
+const FEDEX_ACCOUNT_LENGTH = 9
+const UPS_ACCOUNT_LENGTH = 6
 
 const styles = {
   methodOption: {
@@ -86,11 +92,15 @@ const styles = {
     fontWeight: 700,
     marginBottom: '0.5rem',
   },
+  fieldActions: {
+    marginTop: '0.75rem',
+  },
 }
 
 const ShippingPreferenceTemplate = (props: ShippingPreferenceTemplateProps) => {
   const { user } = props
   const { t } = useTranslation('common')
+  const { showSnackbar } = useSnackbarContext()
 
   const attributeParams = { userId: user?.userId, accountId: user?.id }
 
@@ -109,6 +119,8 @@ const ShippingPreferenceTemplate = (props: ShippingPreferenceTemplateProps) => {
 
   const [fedexDraft, setFedexDraft] = useState('')
   const [upsDraft, setUpsDraft] = useState('')
+  const [fedexError, setFedexError] = useState('')
+  const [upsError, setUpsError] = useState('')
   const [showFedexHelp, setShowFedexHelp] = useState(true)
 
   useEffect(() => setFedexDraft(fedex.value), [fedex.value])
@@ -125,6 +137,38 @@ const ShippingPreferenceTemplate = (props: ShippingPreferenceTemplateProps) => {
   const sanitizeAccountNumber = (value: string, maxLength: number) =>
     value.replace(/[^0-9]/g, '').slice(0, maxLength)
 
+  const handleMethodChange = async (method: string) => {
+    const isSaved = await preferredMethod.saveAttribute(method)
+    showSnackbar(
+      String(isSaved ? t('shipping-preference-saved') : t('something-went-wrong')),
+      isSaved ? 'success' : 'error'
+    )
+  }
+
+  const handleSaveAccount = async (
+    draft: string,
+    requiredLength: number,
+    lengthErrorKey: string,
+    setError: (message: string) => void,
+    save: (value: string) => Promise<boolean | undefined>
+  ) => {
+    if (draft && draft.length !== requiredLength) {
+      setError(String(t(lengthErrorKey)))
+      return
+    }
+
+    setError('')
+
+    const isSaved = await save(draft)
+    showSnackbar(
+      String(isSaved ? t('shipping-account-saved') : t('something-went-wrong')),
+      isSaved ? 'success' : 'error'
+    )
+  }
+
+  const isFedexDirty = fedexDraft !== fedex.value
+  const isUpsDirty = upsDraft !== ups.value
+
   return (
     <>
       <AccountPageHeader title={String(t('shipping-preference'))} />
@@ -132,7 +176,7 @@ const ShippingPreferenceTemplate = (props: ShippingPreferenceTemplateProps) => {
       <AccountSectionCard title={String(t('preferred-shipping-methods'))}>
         <RadioGroup
           value={selectedMethod}
-          onChange={(event) => preferredMethod.saveAttribute(event.target.value)}
+          onChange={(event) => handleMethodChange(event.target.value)}
         >
           {shippingMethods.map((method) => (
             <FormControlLabel
@@ -140,6 +184,7 @@ const ShippingPreferenceTemplate = (props: ShippingPreferenceTemplateProps) => {
               value={method.value}
               control={<Radio />}
               label={method.label}
+              disabled={preferredMethod.isSaving}
               sx={{
                 ...styles.methodOption,
                 ...(selectedMethod === method.value ? styles.methodOptionSelected : {}),
@@ -182,10 +227,44 @@ const ShippingPreferenceTemplate = (props: ShippingPreferenceTemplateProps) => {
             fullWidth
             value={fedexDraft}
             label={t('ending')}
-            onChange={(event) => setFedexDraft(sanitizeAccountNumber(event.target.value, 9))}
-            onBlur={() => fedexDraft !== fedex.value && fedex.saveAttribute(fedexDraft)}
-            inputProps={{ maxLength: 9, 'aria-label': `FedEx ${t('ending')}` }}
+            error={Boolean(fedexError)}
+            helperText={fedexError}
+            onChange={(event) => {
+              setFedexDraft(sanitizeAccountNumber(event.target.value, FEDEX_ACCOUNT_LENGTH))
+              setFedexError('')
+            }}
+            inputProps={{ maxLength: FEDEX_ACCOUNT_LENGTH, 'aria-label': `FedEx ${t('ending')}` }}
           />
+
+          <Stack direction="row" spacing={1} sx={{ ...styles.fieldActions }}>
+            <Button
+              variant="contained"
+              size="small"
+              disabled={!isFedexDirty || fedex.isSaving}
+              onClick={() =>
+                handleSaveAccount(
+                  fedexDraft,
+                  FEDEX_ACCOUNT_LENGTH,
+                  'fedex-account-number-length',
+                  setFedexError,
+                  fedex.saveAttribute
+                )
+              }
+            >
+              {t('save')}
+            </Button>
+            <Button
+              variant="text"
+              size="small"
+              disabled={!isFedexDirty || fedex.isSaving}
+              onClick={() => {
+                setFedexDraft(fedex.value)
+                setFedexError('')
+              }}
+            >
+              {t('cancel')}
+            </Button>
+          </Stack>
         </Box>
 
         <Box>
@@ -197,10 +276,44 @@ const ShippingPreferenceTemplate = (props: ShippingPreferenceTemplateProps) => {
             fullWidth
             value={upsDraft}
             placeholder={String(t('enter-your-ups-account-number'))}
-            onChange={(event) => setUpsDraft(sanitizeAccountNumber(event.target.value, 6))}
-            onBlur={() => upsDraft !== ups.value && ups.saveAttribute(upsDraft)}
-            inputProps={{ maxLength: 6, 'aria-label': `UPS ${t('ending')}` }}
+            error={Boolean(upsError)}
+            helperText={upsError}
+            onChange={(event) => {
+              setUpsDraft(sanitizeAccountNumber(event.target.value, UPS_ACCOUNT_LENGTH))
+              setUpsError('')
+            }}
+            inputProps={{ maxLength: UPS_ACCOUNT_LENGTH, 'aria-label': `UPS ${t('ending')}` }}
           />
+
+          <Stack direction="row" spacing={1} sx={{ ...styles.fieldActions }}>
+            <Button
+              variant="contained"
+              size="small"
+              disabled={!isUpsDirty || ups.isSaving}
+              onClick={() =>
+                handleSaveAccount(
+                  upsDraft,
+                  UPS_ACCOUNT_LENGTH,
+                  'ups-account-number-length',
+                  setUpsError,
+                  ups.saveAttribute
+                )
+              }
+            >
+              {t('save')}
+            </Button>
+            <Button
+              variant="text"
+              size="small"
+              disabled={!isUpsDirty || ups.isSaving}
+              onClick={() => {
+                setUpsDraft(ups.value)
+                setUpsError('')
+              }}
+            >
+              {t('cancel')}
+            </Button>
+          </Stack>
         </Box>
       </AccountSectionCard>
     </>
