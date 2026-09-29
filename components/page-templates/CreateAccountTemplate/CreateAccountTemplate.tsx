@@ -121,7 +121,7 @@ const CreateAccountTemplate = ({ prefill }: { prefill?: CreateAccountPrefill }) 
     setIsSubmitting(true)
     setSubmitError('')
     try {
-      await new Promise<void>((resolve) => {
+      await new Promise<void>((resolve, reject) => {
         createAccount(
           {
             email: formData.email,
@@ -131,10 +131,9 @@ const CreateAccountTemplate = ({ prefill }: { prefill?: CreateAccountPrefill }) 
             companyOrOrganization: formData.companyOrOrganization,
             acceptsMarketing: formData.acceptsMarketing,
           },
-          () => resolve()
+          () => resolve(),
+          (error) => reject(error)
         )
-        // createAccount doesn't currently surface failures back to the caller (it shows its own
-        // snackbar on error), so this promise just resolves the happy path via the callback.
       })
       router.push('/my-account')
     } catch (error) {

@@ -32,7 +32,11 @@ export interface AuthContextType {
   isAuthLoading: boolean
   user?: CustomerAccountWithRole
   login: (params: LoginData, onSuccessCallBack: () => void) => any
-  createAccount: (params: RegisterAccountInputData, onSuccessCallBack?: () => void) => any
+  createAccount: (
+    params: RegisterAccountInputData,
+    onSuccessCallBack?: () => void,
+    onErrorCallback?: (error: unknown) => void
+  ) => any
   logout: () => void
 }
 interface AuthContextProviderProps {
@@ -108,7 +112,8 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
   // register user
   const createAccount = async (
     params: RegisterAccountInputData,
-    onSuccessCallBack?: () => void
+    onSuccessCallBack?: () => void,
+    onErrorCallback?: (error: unknown) => void
   ) => {
     try {
       const createAccountAndLoginMutationVars = {
@@ -127,9 +132,14 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
         onSuccess: (account: any) => {
           handleOnSuccess(account, onSuccessCallBack)
         },
+        onError: (error: any) => {
+          showSnackbar('Registration Failed', 'error')
+          onErrorCallback?.(error)
+        },
       })
     } catch (err: any) {
       showSnackbar('Registration Failed', 'error')
+      onErrorCallback?.(err)
     }
   }
 
