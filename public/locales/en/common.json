@@ -643,5 +643,9 @@
   "enter-valid-phone-number": "Please provide a valid phone number",
   "product": "Product",
   "no-results-found": "No results found",
-  "something-went-wrong": "Something went wrong. Please try again."
+  "something-went-wrong": "Something went wrong. Please try again.",
+  "fedex-account-number-length": "FedEx account number must be 9 digits",
+  "ups-account-number-length": "UPS account number must be 6 digits",
+  "shipping-preference-saved": "Shipping preference updated",
+  "shipping-account-saved": "Shipping account updated"
 }

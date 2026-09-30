@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 
 import { useRouter } from 'next/router'
+import { useTranslation } from 'next-i18next'
 
 import { DetailsStep, MultiShippingStep, PaymentStep, ReviewStep } from '@/components/checkout'
 import { CheckoutUITemplate } from '@/components/page-templates'
@@ -44,6 +45,7 @@ interface MultiShipCheckoutShippingMethod {
 const MultiShipCheckoutTemplate = (props: MultiShipCheckoutProps) => {
   const { checkout: initialCheckout, isMultiShipEnabled } = props
 
+  const { t } = useTranslation('common')
   const router = useRouter()
   const checkoutId = router?.query?.checkoutId
   // States
@@ -116,7 +118,7 @@ const MultiShipCheckoutTemplate = (props: MultiShipCheckoutProps) => {
         couponCode,
       })
       if (response?.invalidCoupons?.length) {
-        setPromoError(`<strong>${couponCode}</strong> ${response?.invalidCoupons[0]?.reason}`)
+        setPromoError(`<strong>${couponCode}</strong> ${t('invalidPromoError')}`)
       }
     } catch (err) {
       console.error(err)

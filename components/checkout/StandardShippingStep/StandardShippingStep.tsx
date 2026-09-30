@@ -193,7 +193,7 @@ const StandardShippingStep = (props: ShippingProps) => {
 
       if (isAddressSavedToAccount) {
         const customerSavedAddress = await handleSaveAddressToAccount(contact)
-        const { accountId: _, types: __, ...customerContact } = customerSavedAddress
+        const { accountId: _, types: __, label: ___, ...customerContact } = customerSavedAddress
         await updateOrderShippingInfo.mutateAsync({ checkout, contact: customerContact })
         setSelectedShippingAddressId(customerSavedAddress?.id as number)
       } else {
