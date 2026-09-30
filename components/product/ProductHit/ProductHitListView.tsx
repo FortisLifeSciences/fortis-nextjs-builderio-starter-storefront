@@ -164,8 +164,8 @@ const ProductHitListView = ({
     validated = hit?.validation_text,
     formulation = hit?.formulation,
     citation = hit?.plp_citation_count,
-    newProduct = hit.new_product,
-    newVariantProduct = hit.new_variant_plp
+    newProduct = hit?.new_product,
+    newVariantProduct = hit?.new_variant_plp
 
   position = position ?? hit.__position
 

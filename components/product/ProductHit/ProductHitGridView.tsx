@@ -119,8 +119,8 @@ const ProductHitGridView = ({
     ProductCatalogNumber = hit?.plp_catalog_number,
     brandLabel = hit?.brand,
     brand = hit?.brand_code,
-    newProduct = hit.new_product,
-    newVariantProduct = hit.new_variant_plp
+    newProduct = hit?.new_product,
+    newVariantProduct = hit?.new_variant_plp
   position = position ?? hit.__position
 
   const firstImage = hit?.product_images?.[0]
