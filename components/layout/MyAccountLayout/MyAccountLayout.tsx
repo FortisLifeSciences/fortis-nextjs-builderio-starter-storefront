@@ -6,6 +6,7 @@ import { useTranslation } from 'next-i18next'
 
 import { MyAccountLayoutStyles } from './MyAccountLayout.styles'
 import MyAccountSidebar from './MyAccountSidebar'
+import { OngoingOrderBanner } from '@/components/order'
 
 import type { CustomerAccount } from '@/lib/gql/types'
 
@@ -33,6 +34,8 @@ const MyAccountLayout = (props: MyAccountLayoutProps) => {
         </Box>
         <Box component="span">{t('my-account')}</Box>
       </Typography>
+
+      <OngoingOrderBanner />
 
       <Grid container spacing={{ xs: 0, md: 4 }}>
         <Grid item xs={12} md={3}>

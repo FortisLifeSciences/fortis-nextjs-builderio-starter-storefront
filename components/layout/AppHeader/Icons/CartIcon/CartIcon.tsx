@@ -5,6 +5,7 @@ import { useTranslation } from 'next-i18next'
 
 import ShoppingCartIcon from '@/assets/icons/cartIcon.svg'
 import { HeaderAction } from '@/components/common'
+import { useHeaderContext } from '@/context'
 import { useGetCart } from '@/hooks'
 import { cartGetters } from '@/lib/getters'
 import type { IconProps } from '@/lib/types'
@@ -14,6 +15,7 @@ const CartIcon = ({ size, isElementVisible, mobileIconColor }: IconProps) => {
 
   const { data: cart } = useGetCart()
   const [itemCount, setItemCount] = useState(0)
+  const { toggleCartDrawer } = useHeaderContext()
 
   const router = useRouter()
   useEffect(() => {
@@ -21,8 +23,8 @@ const CartIcon = ({ size, isElementVisible, mobileIconColor }: IconProps) => {
     setItemCount(count)
   }, [cart, router.pathname, router.asPath])
 
-  const gotoCart = () => {
-    router.push('/cart')
+  const openCartDrawer = () => {
+    toggleCartDrawer(true)
   }
 
   return (
@@ -31,7 +33,7 @@ const CartIcon = ({ size, isElementVisible, mobileIconColor }: IconProps) => {
       icon={ShoppingCartIcon}
       badgeContent={itemCount}
       iconFontSize={size}
-      onClick={gotoCart}
+      onClick={openCartDrawer}
       isElementVisible={isElementVisible}
       mobileIconColor={mobileIconColor}
     />
