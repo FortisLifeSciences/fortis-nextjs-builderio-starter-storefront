@@ -292,6 +292,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
     trigger,
     reset,
     setValue,
+    getValues,
     formState: { errors, isValid, isDirty },
   } = useForm<ContactShippingFormData>({
     mode: 'onChange',
@@ -330,6 +331,22 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   }, [defaultContact])
 
   const applySavedAddress = (address: CustomerContact) => {
+    setValue('firstName', address.firstName || getValues('firstName') || '', {
+      shouldValidate: true,
+    })
+    setValue(
+      'lastNameOrSurname',
+      address.lastNameOrSurname || getValues('lastNameOrSurname') || '',
+      { shouldValidate: true }
+    )
+    setValue('workEmail', address.email || getValues('workEmail') || '', {
+      shouldValidate: true,
+    })
+    setValue(
+      'phoneNumbers.home',
+      address.phoneNumbers?.home || getValues('phoneNumbers.home') || '',
+      { shouldValidate: true }
+    )
     setValue('companyOrOrganization', address.companyOrOrganization || '', {
       shouldValidate: true,
     })
