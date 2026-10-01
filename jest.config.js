@@ -25,15 +25,16 @@ const customJestConfig = {
     // Handle CSS imports (without CSS modules)
     '^.+\\.(css|sass|scss)$': '<rootDir>/__mocks__/styleMock.js',
 
+    // Handle image imports
+    // https://jestjs.io/docs/webpack#handling-static-assets
+    '^.+\\.(jpg|jpeg|png|gif|webp|avif|svg)$': `<rootDir>/__mocks__/fileMock.js`,
+
     // Handle packages whose entry point is a stylesheet
     '^@algolia/autocomplete-theme-classic$': '<rootDir>/__mocks__/styleMock.js',
     '^swiper/css(/.*)?$': '<rootDir>/__mocks__/styleMock.js',
     '^swiper/modules$': '<rootDir>/__mocks__/swiperModulesMock.js',
     '^swiper/react$': '<rootDir>/__mocks__/swiperReactMock.js',
 
-    // Handle image imports
-    // https://jestjs.io/docs/webpack#handling-static-assets
-    '^.+\\.(jpg|jpeg|png|gif|webp|avif|svg)$': `<rootDir>/__mocks__/fileMock.js`,
     // Handle module aliases
     '^@/components/(.*)$': '<rootDir>/components/$1',
     // Handle Lib aliases
