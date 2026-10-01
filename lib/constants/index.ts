@@ -223,3 +223,5 @@ export const KIBO_HEADERS = {
   TENANT: 'x-vol-tenant',
   SITE: 'x-vol-site',
 }
+
+export const DIGITAL_ASSETS_LIST = 'digitalassets@Fortis'
