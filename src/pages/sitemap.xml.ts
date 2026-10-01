@@ -10,7 +10,7 @@ const CACHE_KEY = 'sitemap:index'
 async function fetchCursorsData(): Promise<ProductSearchRandomAccessCursor | null> {
   const authToken = await apiAuthClient.getAccessToken()
   const baseUrl = process.env.KIBO_API_HOST
-  const url = `https://${baseUrl}/api/commerce/catalog/storefront/productsearch/randomAccessCursor?pageSize=200`
+  const url = `https://${baseUrl}/api/commerce/catalog/storefront/productsearch/randomAccessCursor?pageSize=50`
 
   try {
     const response = await fetch(url, {
