@@ -180,7 +180,6 @@ const Page = (props: any) => {
     resourcesPage,
     section,
     resourceCategoryCode,
-    facets,
     pathLength,
     pCategory,
     pageURL,
