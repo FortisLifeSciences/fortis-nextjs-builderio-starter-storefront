@@ -952,7 +952,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
           width={'100%'}
           display={'flex'}
           flexDirection={'row'}
-          key={keyVal}
+          key={citeabProductCode ?? 'no-citation'}
           sx={{
             marginTop: '35px',
           }}
