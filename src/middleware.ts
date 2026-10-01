@@ -214,6 +214,9 @@ export async function middleware(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith('/my-account')) {
     if (checkIsAuthenticated(request)) {
       return applySecurityHeaders(NextResponse.next())
+    } else if (request.nextUrl.pathname.startsWith('/checkout')) {
+      const cartUrl = new URL('/cart', request.url)
+      return applySecurityHeaders(NextResponse.redirect(cartUrl))
     }
 
     const homeUrl = new URL('/', request.url)
