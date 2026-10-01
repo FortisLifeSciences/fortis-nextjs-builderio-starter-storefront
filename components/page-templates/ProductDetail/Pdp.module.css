@@ -162,6 +162,23 @@
   transform: translateY(-2px);
 }
 
+.optionNew {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+
 .chips {
   display: flex;
   gap: 8px;

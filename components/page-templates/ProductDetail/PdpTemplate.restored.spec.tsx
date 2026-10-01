@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 
 import PdpTemplate from './PdpTemplate'
 import type { ProductCustom } from '@/lib/types'
@@ -55,6 +55,7 @@ const buildOption = (attributeFQN: string, inputType: string, values: any[]) => 
 const renderPdp = (overrides: Partial<Record<string, any>> = {}) => {
   const product = {
     productCode: 'A303-500A',
+    variationProductCode: overrides.variationProductCode,
     content: { productName: 'Parent Antibody', productImages: [] },
     options: overrides.options ?? [],
     properties: [
@@ -154,6 +155,46 @@ describe('PdpTemplate restored elements', () => {
 
       expect(screen.getAllByText('100ug').length).toBeGreaterThan(0)
       expect(screen.getAllByText('Lyophilized').length).toBeGreaterThan(0)
+    })
+  })
+
+  describe('new variant tag', () => {
+    const sizeOptions = [
+      buildOption('tenant~size-variant', 'List', [
+        {
+          value: '100ug',
+          stringValue: '100ug',
+          isEnabled: true,
+          variationProductCode: 'A303-500A-100',
+        },
+        {
+          value: '500ug',
+          stringValue: '500ug',
+          isEnabled: true,
+          variationProductCode: 'A303-500A-500',
+        },
+      ]),
+    ]
+
+    it('tags only the option that matches the current new variant', () => {
+      renderPdp({
+        options: sizeOptions,
+        variationProductCode: 'A303-500A-100',
+        properties: [buildProperty('tenant~new-product-variant', true)],
+      })
+
+      expect(
+        within(screen.getByRole('radio', { name: /100ug/ })).getByText('new')
+      ).toBeInTheDocument()
+      expect(
+        within(screen.getByRole('radio', { name: /500ug/ })).queryByText('new')
+      ).not.toBeInTheDocument()
+    })
+
+    it('shows no tag when the current variant is not flagged', () => {
+      renderPdp({ options: sizeOptions, variationProductCode: 'A303-500A-100' })
+
+      expect(screen.queryByText('new')).not.toBeInTheDocument()
     })
   })
 })

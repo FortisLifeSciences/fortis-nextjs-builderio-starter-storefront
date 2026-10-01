@@ -127,6 +127,38 @@ describe('usePdpViewModel first-render (server) correctness', () => {
     expect(result.current.quantity).toBe(1)
   })
 
+  describe('new variant flag', () => {
+    it('flags the configured variant when tenant~new-product-variant is true', () => {
+      const { result } = renderViewModel({
+        ...activeVariant,
+        properties: [
+          ...(activeVariant.properties ?? []),
+          buildProperty('tenant~new-product-variant', true),
+        ],
+      } as ConfiguredProduct)
+
+      expect(result.current.isNewVariant).toBe(true)
+    })
+
+    it('does not flag the variant when the attribute is false', () => {
+      const { result } = renderViewModel({
+        ...activeVariant,
+        properties: [
+          ...(activeVariant.properties ?? []),
+          buildProperty('tenant~new-product-variant', false),
+        ],
+      } as ConfiguredProduct)
+
+      expect(result.current.isNewVariant).toBe(false)
+    })
+
+    it('does not flag the variant when the attribute is absent', () => {
+      const { result } = renderViewModel(activeVariant)
+
+      expect(result.current.isNewVariant).toBe(false)
+    })
+  })
+
   describe('without a configured variant', () => {
     it('falls back to parent properties rather than throwing', () => {
       const { result } = renderViewModel(null)

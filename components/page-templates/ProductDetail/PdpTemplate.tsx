@@ -176,6 +176,7 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     brand,
     brandName,
     newProduct,
+    isNewVariant,
     variantProductName,
     productOptions,
     optionsVisibility,
@@ -373,6 +374,10 @@ const PdpTemplate = (props: PdpTemplateProps) => {
       sku: value?.variationProductCode,
       price: value?.price?.price != null ? `$${value.price.price.toFixed(2)}` : null,
       disabled: !value?.isEnabled,
+      isNew:
+        isNewVariant &&
+        Boolean(value?.variationProductCode) &&
+        value?.variationProductCode === variationProductCode,
     }))
 
   const handleSelectOptionChange = async (option: any, value: string) => {

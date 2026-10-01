@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
+import { useTranslation } from 'next-i18next'
+
 import styles from './Pdp.module.css'
 
 export interface PdpVariantOption {
@@ -8,6 +10,17 @@ export interface PdpVariantOption {
   sku?: string | null
   price?: string | null
   disabled?: boolean
+  isNew?: boolean
+}
+
+const OptionLabel = ({ option }: { option: PdpVariantOption }) => {
+  const { t } = useTranslation('common')
+  return (
+    <span className={styles.sizeMain}>
+      {option.label}
+      {option.isNew ? <span className={styles.optionNew}>{t('new')}</span> : null}
+    </span>
+  )
 }
 
 interface PdpVariantPickerProps {
@@ -41,7 +54,7 @@ const PdpVariantPicker = ({
               className={`${styles.sizeOption} ${isSelected ? styles.sizeOptionSelected : ''}`}
             >
               <span className={styles.optionRadio} aria-hidden="true" />
-              <span className={styles.sizeMain}>{option.label}</span>
+              <OptionLabel option={option} />
               {option.sku ? <span className={styles.sizeSku}>{option.sku}</span> : null}
               {showPrices && option.price ? (
                 <span className={styles.sizePrice}>{option.price}</span>
@@ -78,7 +91,7 @@ export const PdpMobileSizePicker = ({
 
   const optionContent = (option: PdpVariantOption) => (
     <>
-      <span className={styles.sizeMain}>{option.label}</span>
+      <OptionLabel option={option} />
       <span className={styles.sizeSku}>{option.sku}</span>
       <span className={styles.sizePrice}>{showPrices ? option.price : null}</span>
     </>

@@ -46,6 +46,7 @@ const getDocumentListDocuments = async (documentListName: string, filter: string
 
 const variantProperties = [
   'tenant~applications-variant',
+  'tenant~new-product-variant',
   'tenant~conjugate-type-variant',
   'tenant~purity-variant',
   'tenant~stock-concentration',
@@ -191,6 +192,9 @@ export const usePdpViewModel = (params: UsePdpViewModelParams) => {
     (data: any) => data?.attributeFQN === 'tenant~new-product'
   )
   const newProduct = (newProductData?.values?.[0]?.value as string) ?? null
+  const isNewVariant =
+    properties?.find((data: any) => data?.attributeFQN === 'tenant~new-product-variant')?.value ===
+    'true'
   const brandValue = product?.properties?.find((data: any) => data?.attributeFQN === 'tenant~brand')
   const brand = (brandValue?.values?.[0]?.value as string) ?? null
   const brandName = (brandValue?.values?.[0]?.stringValue as string) ?? null
@@ -581,6 +585,7 @@ export const usePdpViewModel = (params: UsePdpViewModelParams) => {
     brand,
     brandName,
     newProduct,
+    isNewVariant,
     variantProductName,
     variantProductTitle,
     isLoading,
