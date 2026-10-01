@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from 'react'
 
+import { Box, CircularProgress } from '@mui/material'
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
-import { DetailsStep, PaymentStep, ReviewStep, StandardShippingStep } from '@/components/checkout'
+import {
+  DetailsStep,
+  GuestCheckoutStep,
+  PaymentStep,
+  POCheckoutStep,
+  ReviewStep,
+  StandardShippingStep,
+} from '@/components/checkout'
 import { CheckoutUITemplate } from '@/components/page-templates'
 import { useAuthContext } from '@/context'
 import {
@@ -53,7 +61,7 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
     initialCheckout,
   })
 
-  const { isAuthenticated, user } = useAuthContext()
+  const { isAuthenticated, isAuthLoading, user } = useAuthContext()
   const { data: addressCollection } = useGetCustomerAddresses(user?.id as number)
   const { data: cardCollection } = useGetCards(user?.id as number)
   const { createCustomerAddress } = useCreateCustomerAddress()
@@ -64,6 +72,9 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
     user?.id as number,
     isB2BUser
   )
+  // A PO-enabled B2B account gets the single-page PO checkout (Card/PO option selector,
+  // Billing Account, PO Number) instead of the shipping/payment/review stepper.
+  const isPOCheckout = isAuthenticated && !!customerPurchaseOrderAccount?.isEnabled
 
   const { updateOrderCoupon } = useUpdateOrderCoupon()
   const { deleteOrderCoupon } = useDeleteOrderCoupon()
@@ -76,7 +87,11 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
         couponCode,
       })
       if (response?.invalidCoupons?.length) {
-        setPromoError(`<strong>${couponCode}</strong>  ${t('invalidPromoError')}`)
+        setPromoError(
+          `<strong>${couponCode}</strong> ${
+            response.invalidCoupons[0]?.reason || t('invalidPromoError')
+          }`
+        )
       }
     } catch (err) {
       console.error(err)
@@ -218,20 +233,49 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
           checkout={order as CrOrder}
           updateCheckoutPersonalInfo={updateCheckoutPersonalInfo}
         /> */}
-        <StandardShippingStep
-          checkout={order as CrOrder}
-          savedUserAddressData={addressCollection}
-          isAuthenticated={isAuthenticated}
-        />
-        <PaymentStep
-          checkout={order as CrOrder}
-          addressCollection={addressCollection}
-          cardCollection={cardCollection}
-          customerPurchaseOrderAccount={customerPurchaseOrderAccount}
-          onVoidPayment={handleVoidPayment}
-          onAddPayment={handleAddPayment}
-          isMultiShipEnabled={false}
-        />
+        {isAuthLoading ? (
+          // isAuthenticated starts false on every load and only flips once the session
+          // check resolves - branching before that would flash the guest flow at anyone
+          // who's actually logged in.
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+            <CircularProgress />
+          </Box>
+        ) : !isAuthenticated ? (
+          <GuestCheckoutStep
+            checkout={order as CrOrder}
+            updateCheckoutPersonalInfo={updateCheckoutPersonalInfo}
+            onVoidPayment={handleVoidPayment}
+            onAddPayment={handleAddPayment}
+            onCreateOrder={handleCreateOrder}
+          />
+        ) : isPOCheckout ? (
+          <POCheckoutStep
+            checkout={order as CrOrder}
+            addressCollection={addressCollection}
+            customerPurchaseOrderAccount={customerPurchaseOrderAccount}
+            updateCheckoutPersonalInfo={updateCheckoutPersonalInfo}
+            onVoidPayment={handleVoidPayment}
+            onAddPayment={handleAddPayment}
+            onCreateOrder={handleCreateOrder}
+          />
+        ) : (
+          <StandardShippingStep
+            checkout={order as CrOrder}
+            savedUserAddressData={addressCollection}
+            isAuthenticated={isAuthenticated}
+          />
+        )}
+        {isAuthenticated && !isPOCheckout && (
+          <PaymentStep
+            checkout={order as CrOrder}
+            addressCollection={addressCollection}
+            cardCollection={cardCollection}
+            customerPurchaseOrderAccount={customerPurchaseOrderAccount}
+            onVoidPayment={handleVoidPayment}
+            onAddPayment={handleAddPayment}
+            isMultiShipEnabled={false}
+          />
+        )}
         <ReviewStep
           checkout={order as CrOrder}
           isMultiShipEnabled={isMultiShipEnabled}

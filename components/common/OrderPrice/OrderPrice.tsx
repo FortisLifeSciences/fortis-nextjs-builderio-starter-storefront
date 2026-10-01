@@ -66,6 +66,12 @@ const OrderPrice = <T extends CrCart | CrOrder | Checkout>(props: OrderPriceProp
 
   return (
     <Box sx={{ width: '100%' }} data-testid={'order-price-component'}>
+      {promoComponent && (
+        <>
+          <Divider sx={{ margin: '12px 0', borderColor: '#C4C4C4' }} />
+          <Box sx={{ mb: 2 }}>{promoComponent}</Box>
+        </>
+      )}
       <>
         {isShippingTaxIncluded && (
           <>
@@ -149,15 +155,34 @@ const OrderPrice = <T extends CrCart | CrOrder | Checkout>(props: OrderPriceProp
           </>
         )}
       </>
-      <Divider sx={{ margin: '0' }} />
+      <Divider sx={{ margin: '12px 0', borderColor: '#C4C4C4' }} />
 
       <Box sx={{ ...styles.priceTotalRow }}>
-        <Typography variant="body1" component="h4" sx={{ ...styles.priceLabel }}>
+        <Typography
+          component="h4"
+          sx={{
+            fontFamily: 'Poppins',
+            fontWeight: 600,
+            fontSize: '15px',
+            lineHeight: '150%',
+            letterSpacing: '-0.005em',
+            color: '#070707',
+          }}
+        >
           {totalLabel}
         </Typography>
-        <Price variant="body1" fontWeight="500" price={t('currency', { val: total })} />
+        <Price
+          fontWeight="600"
+          color="#070707"
+          sx={{
+            fontFamily: 'Poppins',
+            fontSize: '17px',
+            lineHeight: '150%',
+            letterSpacing: '-0.005em',
+          }}
+          price={t('currency', { val: total })}
+        />
       </Box>
-      {promoComponent && <Box>{promoComponent}</Box>}
     </Box>
   )
 }

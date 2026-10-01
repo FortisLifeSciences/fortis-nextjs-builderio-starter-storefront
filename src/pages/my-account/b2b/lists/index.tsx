@@ -1,24 +1,14 @@
-import { GetServerSidePropsContext, NextPage } from 'next'
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-
+import { getMyAccountServerSideProps } from '@/components/layout/MyAccountLayout/getMyAccountServerSideProps'
+import { MyAccountPageShell } from '@/components/layout/MyAccountLayout/withMyAccountPage'
+import type { MyAccountPageProps } from '@/components/layout/MyAccountLayout/withMyAccountPage'
 import { ListsTemplate } from '@/components/page-templates'
 
-export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const { locale } = context
+import type { NextPage } from 'next'
 
-  return {
-    props: {
-      ...(await serverSideTranslations(locale as string, ['common'])),
-    },
-  }
-}
+export const getServerSideProps = getMyAccountServerSideProps
 
-const B2BListsPage: NextPage = () => {
-  return (
-    <>
-      <ListsTemplate />
-    </>
-  )
-}
+const B2BListsPage: NextPage<MyAccountPageProps> = (props) => (
+  <MyAccountPageShell {...props}>{() => <ListsTemplate />}</MyAccountPageShell>
+)
 
 export default B2BListsPage

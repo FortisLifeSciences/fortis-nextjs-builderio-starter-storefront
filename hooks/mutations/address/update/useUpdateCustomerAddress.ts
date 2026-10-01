@@ -14,6 +14,7 @@ import type { CustomerContactInput } from '@/lib/gql/types'
 export interface UpdateCustomerAccountContactDetailsParams {
   accountId: number
   contactId: number
+  userId?: string
   customerContactInput: CustomerContactInput
 }
 

@@ -181,6 +181,7 @@ const getDocumentListDocuments = async (documentListName: string, filter: string
 }
 const variantProperties = [
   'tenant~applications-variant',
+  'tenant~new-product-variant',
   'tenant~conjugate-type-variant',
   'tenant~purity-variant',
   'tenant~stock-concentration',
@@ -301,6 +302,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
   // Getters
   const {
     productName,
+    newVariantProductAttribute,
     productCode,
     variationProductCode,
     fulfillmentMethod,
@@ -438,7 +440,8 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
         })
 
         const result = await response.json()
-        setMinQuantity(result?.minQty)
+        // Fall back to 1 - undefined minQuantity broke the `quantity >= minQuantity` check below.
+        setMinQuantity(result?.minQty || 1)
         if (result?.minQty) setQuantity(result?.minQty)
         else setQuantity(1)
       } catch (error) {
@@ -1052,6 +1055,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                     <FortisRadio
                       name={option?.attributeDetail?.name || ''}
                       title={option?.attributeDetail?.name}
+                      newVariantProductAttribute={newVariantProductAttribute}
                       selected={productGetters.getOptionSelectedValue(option as ProductOption)}
                       radioOptions={radioOptions}
                       skuStatusText={skuStatusText}
@@ -1192,8 +1196,8 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                       >
                         <QuantitySelector
                           label="Quantity"
-                          quantity={quantity >= minQuantity ? quantity : minQuantity}
-                          minQty={minQuantity}
+                          quantity={quantity >= (minQuantity || 1) ? quantity : minQuantity || 1}
+                          minQty={minQuantity || 1}
                           {...(maxQuantity ? { maxQuantity } : {})}
                           onIncrease={() => setQuantity((prevQuantity) => Number(prevQuantity) + 1)}
                           onDecrease={() => setQuantity((prevQuantity) => Number(prevQuantity) - 1)}
