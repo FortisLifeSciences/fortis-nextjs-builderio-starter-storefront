@@ -28,13 +28,28 @@ interface ShippingPreferenceTemplateProps {
 export const SHIPPING_ATTRIBUTE_FQN = {
   fedex: 'tenant~customer-fedex-account-number',
   ups: 'tenant~customer-ups-account-number',
-  preferredMethod: 'tenant~customer-preferred-shipping-method',
+  shippingMethod: 'tenant~shipping-method',
 }
 
 export enum PreferredShippingMethod {
   FortisOvernight = 'fortis-overnight',
   Fedex = 'fedex',
   Ups = 'ups',
+}
+
+const FEDEX_ACCOUNT_METHOD_NAME = 'FedEx Account'
+const UPS_ACCOUNT_METHOD_NAME = 'UPS Account'
+
+const SHIPPING_METHOD_ATTRIBUTE_VALUE: Record<PreferredShippingMethod, string> = {
+  [PreferredShippingMethod.FortisOvernight]: 'Fortis Overnight',
+  [PreferredShippingMethod.Fedex]: FEDEX_ACCOUNT_METHOD_NAME,
+  [PreferredShippingMethod.Ups]: UPS_ACCOUNT_METHOD_NAME,
+}
+
+const getPreferredShippingMethod = (shippingMethodName: string) => {
+  if (shippingMethodName.includes(FEDEX_ACCOUNT_METHOD_NAME)) return PreferredShippingMethod.Fedex
+  if (shippingMethodName.includes(UPS_ACCOUNT_METHOD_NAME)) return PreferredShippingMethod.Ups
+  return PreferredShippingMethod.FortisOvernight
 }
 
 const FEDEX_ACCOUNT_LENGTH = 9
@@ -112,9 +127,9 @@ const ShippingPreferenceTemplate = (props: ShippingPreferenceTemplateProps) => {
     ...attributeParams,
     attributeFqn: SHIPPING_ATTRIBUTE_FQN.ups,
   })
-  const preferredMethod = useCustomerAttribute({
+  const shippingMethod = useCustomerAttribute({
     ...attributeParams,
-    attributeFqn: SHIPPING_ATTRIBUTE_FQN.preferredMethod,
+    attributeFqn: SHIPPING_ATTRIBUTE_FQN.shippingMethod,
   })
 
   const [fedexDraft, setFedexDraft] = useState('')
@@ -126,7 +141,7 @@ const ShippingPreferenceTemplate = (props: ShippingPreferenceTemplateProps) => {
   useEffect(() => setFedexDraft(fedex.value), [fedex.value])
   useEffect(() => setUpsDraft(ups.value), [ups.value])
 
-  const selectedMethod = preferredMethod.value || PreferredShippingMethod.FortisOvernight
+  const selectedMethod = getPreferredShippingMethod(shippingMethod.value)
 
   const shippingMethods = [
     { value: PreferredShippingMethod.FortisOvernight, label: t('fortis-overnight-shipping') },
@@ -137,8 +152,8 @@ const ShippingPreferenceTemplate = (props: ShippingPreferenceTemplateProps) => {
   const sanitizeAccountNumber = (value: string, maxLength: number) =>
     value.replace(/[^0-9]/g, '').slice(0, maxLength)
 
-  const handleMethodChange = async (method: string) => {
-    const isSaved = await preferredMethod.saveAttribute(method)
+  const handleMethodChange = async (method: PreferredShippingMethod) => {
+    const isSaved = await shippingMethod.saveAttribute(SHIPPING_METHOD_ATTRIBUTE_VALUE[method])
     showSnackbar(
       String(isSaved ? t('shipping-preference-saved') : t('something-went-wrong')),
       isSaved ? 'success' : 'error'
@@ -176,7 +191,7 @@ const ShippingPreferenceTemplate = (props: ShippingPreferenceTemplateProps) => {
       <AccountSectionCard title={String(t('preferred-shipping-methods'))}>
         <RadioGroup
           value={selectedMethod}
-          onChange={(event) => handleMethodChange(event.target.value)}
+          onChange={(event) => handleMethodChange(event.target.value as PreferredShippingMethod)}
         >
           {shippingMethods.map((method) => (
             <FormControlLabel
@@ -184,7 +199,7 @@ const ShippingPreferenceTemplate = (props: ShippingPreferenceTemplateProps) => {
               value={method.value}
               control={<Radio />}
               label={method.label}
-              disabled={preferredMethod.isSaving}
+              disabled={shippingMethod.isSaving}
               sx={{
                 ...styles.methodOption,
                 ...(selectedMethod === method.value ? styles.methodOptionSelected : {}),
