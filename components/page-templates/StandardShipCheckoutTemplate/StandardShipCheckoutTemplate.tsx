@@ -68,10 +68,10 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
   const { createCustomerCard } = useCreateCustomerCard()
   const isB2BUser = user?.accountType?.toLowerCase() === AccountType.B2B.toLowerCase()
 
-  const { data: customerPurchaseOrderAccount } = useGetCustomerPurchaseOrderAccount(
-    user?.id as number,
-    isB2BUser
-  )
+  const { data: customerPurchaseOrderAccount, isLoading: isPOAccountLoading } =
+    useGetCustomerPurchaseOrderAccount(user?.id as number, isB2BUser)
+  const isCheckoutVariantLoading =
+    isAuthLoading || (isAuthenticated && isB2BUser && !!user?.id && isPOAccountLoading)
   // A PO-enabled B2B account gets the single-page PO checkout (Card/PO option selector,
   // Billing Account, PO Number) instead of the shipping/payment/review stepper.
   const isPOCheckout = isAuthenticated && !!customerPurchaseOrderAccount?.isEnabled
@@ -233,7 +233,7 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
           checkout={order as CrOrder}
           updateCheckoutPersonalInfo={updateCheckoutPersonalInfo}
         /> */}
-        {isAuthLoading ? (
+        {isCheckoutVariantLoading ? (
           // isAuthenticated starts false on every load and only flips once the session
           // check resolves - branching before that would flash the guest flow at anyone
           // who's actually logged in.
@@ -265,7 +265,7 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
             isAuthenticated={isAuthenticated}
           />
         )}
-        {isAuthenticated && !isPOCheckout && (
+        {isAuthenticated && !isCheckoutVariantLoading && !isPOCheckout && (
           <PaymentStep
             checkout={order as CrOrder}
             addressCollection={addressCollection}

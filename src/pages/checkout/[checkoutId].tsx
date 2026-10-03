@@ -62,21 +62,18 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
 const CheckoutPage: NextPage<CheckoutPageProps> = (props) => {
   const { t } = useTranslation('common')
-  const { isAuthenticated, user } = useAuthContext()
+  const { isAuthenticated, isAuthLoading, user } = useAuthContext()
   const { checkout, isMultiShipEnabled, builderContent, ...rest } = props
   const isB2BUser = user?.accountType?.toLowerCase() === AccountType.B2B.toLowerCase()
-  const { data: customerPurchaseOrderAccount } = useGetCustomerPurchaseOrderAccount(
-    user?.id as number,
-    isB2BUser
-  )
-  // A PO-enabled B2B account uses the single-page PO checkout (like guest checkout, it
-  // collects contact/shipping/payment/review in one step and places the order itself).
+  const { data: customerPurchaseOrderAccount, isLoading: isPOAccountLoading } =
+    useGetCustomerPurchaseOrderAccount(user?.id as number, isB2BUser)
+  const isCheckoutVariantLoading =
+    isAuthLoading || (isAuthenticated && isB2BUser && !!user?.id && isPOAccountLoading)
+
   const isPOCheckout = isAuthenticated && !!customerPurchaseOrderAccount?.isEnabled
-  // Guest checkout (and PO checkout) combine contact/shipping/payment/review into a single
-  // step that places the order itself - there's no separate "payment" or "review" step to
-  // advance to.
+
   const steps =
-    (isAuthenticated && !isPOCheckout) || isMultiShipEnabled
+    (isAuthenticated && !isCheckoutVariantLoading && !isPOCheckout) || isMultiShipEnabled
       ? [t('shipping'), t('payment'), t('review')] //t('details'),
       : [t('shipping')]
   const quoteCheckout = !isMultiShipEnabled ? (checkout as CrOrder) : null
