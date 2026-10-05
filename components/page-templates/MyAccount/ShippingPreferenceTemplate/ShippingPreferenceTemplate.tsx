@@ -102,11 +102,6 @@ const styles = {
   fieldGroup: {
     marginBottom: '1.5rem',
   },
-  fieldLabel: {
-    ...accountType.body,
-    fontWeight: 700,
-    marginBottom: '0.5rem',
-  },
   fieldActions: {
     marginTop: '0.75rem',
   },
@@ -283,9 +278,14 @@ const ShippingPreferenceTemplate = (props: ShippingPreferenceTemplateProps) => {
         </Box>
 
         <Box>
-          <Typography component="h3" sx={{ ...styles.fieldLabel }}>
-            UPS
-          </Typography>
+          <Box sx={{ ...styles.accountHeader }}>
+            <Typography component="h3" sx={{ ...styles.accountTitle }}>
+              UPS
+            </Typography>
+            {selectedMethod === PreferredShippingMethod.Ups && (
+              <Chip label={t('primary')} size="small" sx={{ ...styles.primaryChip }} />
+            )}
+          </Box>
           <TextField
             variant="standard"
             fullWidth
