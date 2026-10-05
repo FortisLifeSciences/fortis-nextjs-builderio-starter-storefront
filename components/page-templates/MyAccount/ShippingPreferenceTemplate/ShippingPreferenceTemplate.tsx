@@ -84,8 +84,8 @@ const styles = {
     fontWeight: 700,
   },
   primaryChip: {
-    backgroundColor: 'success.light',
-    color: 'success.dark',
+    backgroundColor: '#E4F5E6',
+    color: '#00550A',
     fontWeight: 600,
     borderRadius: '1rem',
   },
