@@ -5,14 +5,7 @@ import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
-import {
-  DetailsStep,
-  GuestCheckoutStep,
-  PaymentStep,
-  POCheckoutStep,
-  ReviewStep,
-  StandardShippingStep,
-} from '@/components/checkout'
+import { AccountCheckoutStep, GuestCheckoutStep } from '@/components/checkout'
 import { CheckoutUITemplate } from '@/components/page-templates'
 import { useAuthContext } from '@/context'
 import {
@@ -72,9 +65,6 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
     useGetCustomerPurchaseOrderAccount(user?.id as number, isB2BUser)
   const isCheckoutVariantLoading =
     isAuthLoading || (isAuthenticated && isB2BUser && !!user?.id && isPOAccountLoading)
-  // A PO-enabled B2B account gets the single-page PO checkout (Card/PO option selector,
-  // Billing Account, PO Number) instead of the shipping/payment/review stepper.
-  const isPOCheckout = isAuthenticated && !!customerPurchaseOrderAccount?.isEnabled
 
   const { updateOrderCoupon } = useUpdateOrderCoupon()
   const { deleteOrderCoupon } = useDeleteOrderCoupon()
@@ -145,7 +135,7 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
   }
 
   const handleAddPayment = async (id: string, paymentAction: PaymentActionInput) => {
-    await addOrderPayment.mutateAsync({ orderId: id, paymentAction })
+    const orderWithPayment = await addOrderPayment.mutateAsync({ orderId: id, paymentAction })
     await updateOrderBillingInfo.mutateAsync({
       orderId: id,
       billingInfoInput: { ...paymentAction.newBillingInfo },
@@ -155,24 +145,18 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
       paymentAction?.newBillingInfo?.paymentType as PaymentType,
       user?.userId
     )
+    return orderWithPayment as CrOrder
   }
 
-  //Review Step
   const { createOrder } = useCreateOrder()
 
-  const orderDetails = orderGetters.getCheckoutDetails(order as CrOrder)
-
-  const personalDetails = {
-    ...orderDetails.personalDetails,
-    showAccountFields: false,
-    password: '',
-  }
-
   const handleCreateOrder = async (order: CrOrder) => {
+    let isOrderPlaced = false
     try {
       const orderPayments = orderGetters.getNewOrderPayments(order as CrOrder)
       await createOrder.mutateAsync(order)
-      if (orderPayments[0]?.billingInfo?.card?.isCardInfoSaved === false) {
+      isOrderPlaced = true
+      if (user?.id && orderPayments[0]?.billingInfo?.card?.isCardInfoSaved === false) {
         const address: any = {
           ...orderPayments[0].billingInfo.billingContact.address,
           contact: {
@@ -197,12 +181,6 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
           await createCustomerCard.mutateAsync(cardParams)
         } catch (error) {
           console.warn('Customer card creation failed:', error)
-        } finally {
-          // Proceed to the next steps regardless of success or failure
-          const affiliation = process.env.NEXT_PUBLIC_KIBO_HOST
-          purchaseGTM(order as CrOrder, user?.userId, affiliation)
-
-          router.push({ pathname: '/order-confirmation', query: { checkoutId: order.id } })
         }
       }
       const affiliation = process.env.NEXT_PUBLIC_KIBO_HOST
@@ -211,10 +189,9 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
       router.push({ pathname: '/order-confirmation', query: { checkoutId: order.id } })
     } catch (error) {
       checkoutFailure(order as CrOrder, user?.userId, error as any, 'Website Error')
+      if (!isOrderPlaced) throw error
     }
   }
-
-  const { shipItems, pickupItems, digitalItems } = orderGetters.getCheckoutDetails(order as CrOrder)
 
   useEffect(() => {
     updateCheckoutPersonalInfo({ email: user?.emailAddress })
@@ -229,10 +206,6 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
         promoError={promoError}
         builderContent={builderContent}
       >
-        {/* <DetailsStep
-          checkout={order as CrOrder}
-          updateCheckoutPersonalInfo={updateCheckoutPersonalInfo}
-        /> */}
         {isCheckoutVariantLoading ? (
           // isAuthenticated starts false on every load and only flips once the session
           // check resolves - branching before that would flash the guest flow at anyone
@@ -248,44 +221,18 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
             onAddPayment={handleAddPayment}
             onCreateOrder={handleCreateOrder}
           />
-        ) : isPOCheckout ? (
-          <POCheckoutStep
+        ) : (
+          <AccountCheckoutStep
             checkout={order as CrOrder}
             addressCollection={addressCollection}
+            cardCollection={cardCollection}
             customerPurchaseOrderAccount={customerPurchaseOrderAccount}
             updateCheckoutPersonalInfo={updateCheckoutPersonalInfo}
             onVoidPayment={handleVoidPayment}
             onAddPayment={handleAddPayment}
             onCreateOrder={handleCreateOrder}
           />
-        ) : (
-          <StandardShippingStep
-            checkout={order as CrOrder}
-            savedUserAddressData={addressCollection}
-            isAuthenticated={isAuthenticated}
-          />
         )}
-        {isAuthenticated && !isCheckoutVariantLoading && !isPOCheckout && (
-          <PaymentStep
-            checkout={order as CrOrder}
-            addressCollection={addressCollection}
-            cardCollection={cardCollection}
-            customerPurchaseOrderAccount={customerPurchaseOrderAccount}
-            onVoidPayment={handleVoidPayment}
-            onAddPayment={handleAddPayment}
-            isMultiShipEnabled={false}
-          />
-        )}
-        <ReviewStep
-          checkout={order as CrOrder}
-          isMultiShipEnabled={isMultiShipEnabled}
-          shipItems={shipItems}
-          pickupItems={pickupItems}
-          digitalItems={digitalItems}
-          // personalDetails={personalDetails}
-          orderSummaryProps={orderDetails}
-          onCreateOrder={handleCreateOrder}
-        />
       </CheckoutUITemplate>
     </>
   )

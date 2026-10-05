@@ -61,6 +61,7 @@ import {
   buildCardPaymentActionForCheckoutParams,
   buildPurchaseOrderPaymentActionForCheckoutParams,
   hasPermission,
+  isCardExpired,
   tokenizeCreditCardPayment,
   validateGoogleReCaptcha,
 } from '@/lib/helpers'
@@ -1135,14 +1136,6 @@ const PaymentStep = (props: PaymentStepProps) => {
   const uniqueCards = cardOptions.filter(
     (card, index, self) => index === self.findIndex((c) => c?.cardInfo?.id === card?.cardInfo?.id)
   )
-  function isCardExpired(expireMonth: number, expireYear: number): boolean {
-    const today = new Date()
-    const currentMonth = today.getMonth() + 1
-    const currentYear = today.getFullYear()
-
-    return expireYear < currentYear || (expireYear === currentYear && expireMonth < currentMonth)
-  }
-
   return (
     <Stack data-testid="checkout-payment">
       <Typography

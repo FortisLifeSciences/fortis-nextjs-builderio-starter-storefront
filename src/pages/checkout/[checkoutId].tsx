@@ -8,11 +8,8 @@ import {
   StandardShipCheckoutTemplate,
   MultiShipCheckoutTemplate,
 } from '@/components/page-templates'
-import { useAuthContext } from '@/context'
 import { CheckoutStepProvider } from '@/context/CheckoutStepContext/CheckoutStepContext'
-import { useGetCustomerPurchaseOrderAccount } from '@/hooks'
 import { getCheckout, getMultiShipCheckout, updateOrder } from '@/lib/api/operations'
-import { AccountType } from '@/lib/constants'
 
 import type { Checkout, CrOrder, CrOrderInput } from '@/lib/gql/types'
 import type { NextPage, GetServerSidePropsContext, NextApiRequest, NextApiResponse } from 'next'
@@ -62,20 +59,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
 const CheckoutPage: NextPage<CheckoutPageProps> = (props) => {
   const { t } = useTranslation('common')
-  const { isAuthenticated, isAuthLoading, user } = useAuthContext()
   const { checkout, isMultiShipEnabled, builderContent, ...rest } = props
-  const isB2BUser = user?.accountType?.toLowerCase() === AccountType.B2B.toLowerCase()
-  const { data: customerPurchaseOrderAccount, isLoading: isPOAccountLoading } =
-    useGetCustomerPurchaseOrderAccount(user?.id as number, isB2BUser)
-  const isCheckoutVariantLoading =
-    isAuthLoading || (isAuthenticated && isB2BUser && !!user?.id && isPOAccountLoading)
-
-  const isPOCheckout = isAuthenticated && !!customerPurchaseOrderAccount?.isEnabled
-
-  const steps =
-    (isAuthenticated && !isCheckoutVariantLoading && !isPOCheckout) || isMultiShipEnabled
-      ? [t('shipping'), t('payment'), t('review')] //t('details'),
-      : [t('shipping')]
+  const steps = isMultiShipEnabled ? [t('shipping'), t('payment'), t('review')] : [t('shipping')]
   const quoteCheckout = !isMultiShipEnabled ? (checkout as CrOrder) : null
   const quoteId = quoteCheckout?.originalQuoteId
   return (
