@@ -57,14 +57,22 @@ const getSavedCardsAndBillingDetails = (
   if (!cards?.length) return []
 
   return cards?.map((card: Card) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const selectedContact = contacts?.find(
       (contact) => contact.id === card.contactId
     ) as CustomerContact
 
-    const { accountId, types, ...rest } = selectedContact
-      ? selectedContact
-      : { accountId: 0, types: undefined }
+    const billingContact = selectedContact
+      ? {
+          id: selectedContact.id,
+          firstName: selectedContact.firstName,
+          middleNameOrInitial: selectedContact.middleNameOrInitial,
+          lastNameOrSurname: selectedContact.lastNameOrSurname,
+          companyOrOrganization: selectedContact.companyOrOrganization,
+          email: selectedContact.email,
+          phoneNumbers: selectedContact.phoneNumbers,
+          address: selectedContact.address,
+        }
+      : {}
 
     return {
       cardInfo: {
@@ -73,7 +81,7 @@ const getSavedCardsAndBillingDetails = (
         paymentType: PaymentType.CREDITCARD,
       },
       billingAddressInfo: {
-        contact: rest as CrContact,
+        contact: billingContact as CrContact,
       },
     }
   })
