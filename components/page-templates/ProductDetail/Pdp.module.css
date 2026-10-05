@@ -1010,7 +1010,7 @@
 
 .benefit {
   background: #fff;
-  color: #0b0929;
+  color: #1b1a24;
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -1030,10 +1030,10 @@
   height: 24px;
   flex: 0 0 24px;
   border-radius: 50%;
-  border: 1.5px solid #0b0929;
+  border: 1.5px solid #1b1a24;
   display: grid;
   place-items: center;
-  color: #0b0929;
+  color: #1b1a24;
   align-self: center;
 }
 
@@ -1056,14 +1056,16 @@
 .specTable {
   width: 100%;
   max-width: 920px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.specTable > div {
+  display: contents;
 }
 
 .specRow {
-  display: grid;
-  grid-template-columns: 232px minmax(0, 1fr);
-  align-items: stretch;
-  min-height: 47px;
-  padding: 0;
+  display: contents;
   font-size: 13px;
 }
 
@@ -1094,6 +1096,7 @@
   font-size: 13px;
   line-height: 1.4;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .specValue,
@@ -1218,6 +1221,7 @@
 }
 
 .specGroup {
+  grid-column: 1 / -1;
   min-height: 47px;
   display: flex;
   align-items: center;
@@ -1246,13 +1250,12 @@
   width: 100%;
   max-width: 920px;
   margin-top: 12px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
 }
 
 .applicationRow {
-  display: grid;
-  grid-template-columns: 232px minmax(0, 1fr);
-  align-items: stretch;
-  min-height: 47px;
+  display: contents;
   font-size: 13px;
 }
 
@@ -1263,6 +1266,7 @@
   min-height: 47px;
   border-bottom: 1px solid #f2f2f7;
   box-sizing: border-box;
+  font-size: 13px;
 }
 
 .applicationLabel {
@@ -1270,6 +1274,7 @@
   background: #eeeff3;
   font-weight: 600;
   line-height: 1.4;
+  white-space: nowrap;
 }
 
 .applicationValue {
@@ -2242,6 +2247,10 @@
     font-size: 11px;
   }
 
+  .resourcesGrid {
+    grid-template-columns: 1fr;
+  }
+
   .relatedGrid {
     display: flex;
     overflow-x: auto;
@@ -2363,19 +2372,12 @@
 }
 
 @media (max-width: 760px) {
-  .specRow,
-  .applicationRow {
-    grid-template-columns: 145px minmax(0, 1fr);
-  }
-
-  .specLabel,
-  .applicationLabel {
+  .specLabel {
     padding: 0 10px;
   }
 
   .specValue,
-  .specLink,
-  .applicationValue {
+  .specLink {
     padding: 0 0 0 12px;
   }
 
@@ -2385,7 +2387,6 @@
     min-height: 44px;
   }
 
-  .specRow,
   .specLabel,
   .specValue,
   .specLink,
@@ -2624,15 +2625,7 @@
 }
 
 .mobileDrawerCtas {
-  margin-bottom: 12px;
-}
-
-.mobileDrawerCtas:empty {
   display: none;
-}
-
-.mobileDrawerCtas > :first-child {
-  margin-top: 0;
 }
 
 /* ---------- mobile size picker ---------- */

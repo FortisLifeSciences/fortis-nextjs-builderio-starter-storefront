@@ -51,7 +51,7 @@ const Arrow = () => (
 
 const CheckIcon = () => (
   <svg viewBox="0 0 16 16" aria-hidden="true">
-    <path d="M3.5 8.5 6.5 11.5 12.5 5" />
+    <path d="M3.5 8.5L6.5 11.5L12.5 5" />
   </svg>
 )
 

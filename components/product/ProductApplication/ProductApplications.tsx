@@ -167,7 +167,7 @@ const ProductApplications = ({ product, currentProduct }: any) => {
                         variant="head"
                         sx={{
                           ...styles.text,
-                          width: '25%',
+                          whiteSpace: 'nowrap',
                           backgroundColor: 'grey.300',
                           fontWeight: 500,
                         }}
@@ -177,7 +177,7 @@ const ProductApplications = ({ product, currentProduct }: any) => {
                       <TableCell
                         sx={{
                           ...styles.text,
-                          width: '75%',
+                          width: '100%',
                           color: `${grey[900]}`,
                           fontWeight: 300,
                         }}
