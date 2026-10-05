@@ -84,6 +84,45 @@ describe('resolveDefaultVariant', () => {
       expect(values?.slice(1)).toEqual([150, 154])
     })
 
+    it('skips a disabled top-priority value and selects the next enabled one', () => {
+      const product = cloneProduct()
+      const lengthOption = product.options?.find(
+        (option: any) => option?.attributeFQN === 'tenant~length-cm'
+      ) as any
+      lengthOption.values.forEach((value: any) => {
+        value.isEnabled = value.value !== 154
+      })
+      const variations = buildVariations([
+        { value: 150, childPriority: 3, code: 'MS-LEN-150' },
+        { value: 154, childPriority: 1, code: 'MS-LEN-154' },
+        { value: 156, childPriority: 2, code: 'MS-LEN-156' },
+      ])
+
+      const result = resolveDefaultOptionValue({ product, productVariations: variations })
+
+      expect(result?.value).toBe(156)
+      expect(result?.isEnabled).toBe(true)
+    })
+
+    it('falls back to the top-priority value when every value is disabled', () => {
+      const product = cloneProduct()
+      const lengthOption = product.options?.find(
+        (option: any) => option?.attributeFQN === 'tenant~length-cm'
+      ) as any
+      lengthOption.values.forEach((value: any) => {
+        value.isEnabled = false
+      })
+      const variations = buildVariations([
+        { value: 150, childPriority: 3, code: 'MS-LEN-150' },
+        { value: 154, childPriority: 1, code: 'MS-LEN-154' },
+      ])
+
+      const result = resolveDefaultOptionValue({ product, productVariations: variations })
+
+      expect(result?.value).toBe(154)
+      expect(result?.isEnabled).toBe(false)
+    })
+
     it('falls back to the first declared value when there are no variations', () => {
       const result = resolveDefaultOptionValue({
         product: cloneProduct(),

@@ -78,7 +78,11 @@ export const resolveDefaultOptionValue = (params: {
   const firstSelectOption = optionData?.selectOptions?.[0]
   if (!firstSelectOption?.attributeFQN) return null
 
-  let selectedValue = sliceValue ? sliceValue : firstSelectOption?.values?.[0]?.value
+  const defaultValue =
+    firstSelectOption?.values?.find((value: any) => value?.isEnabled) ??
+    firstSelectOption?.values?.[0]
+
+  let selectedValue = sliceValue ? sliceValue : defaultValue?.value
 
   const selectedValueFromUrl = selectedUrlVariant
     ? firstSelectOption?.values?.find(
