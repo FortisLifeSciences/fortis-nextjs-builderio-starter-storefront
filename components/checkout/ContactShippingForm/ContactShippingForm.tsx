@@ -2,11 +2,9 @@
 import React, { useEffect, useRef, useState } from 'react'
 
 import { yupResolver } from '@hookform/resolvers/yup'
-import AddIcon from '@mui/icons-material/Add'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'
 import { LoadingButton } from '@mui/lab'
-import { Box, Chip, Grid, Stack, Typography } from '@mui/material'
+import { Box, Grid, Stack, Typography } from '@mui/material'
 import MenuItem from '@mui/material/MenuItem'
 import uniqBy from 'lodash/uniqBy'
 import getConfig from 'next/config'
@@ -15,7 +13,7 @@ import { Controller, useForm, useWatch } from 'react-hook-form'
 import { isValidPhoneNumber } from 'react-phone-number-input'
 import * as yup from 'yup'
 
-import { ShippingMethod } from '@/components/checkout'
+import { ChoiceCard, ShippingMethod } from '@/components/checkout'
 import { checkoutColors } from '@/components/checkout/checkoutStyles'
 import { KiboPhoneInput, KiboSelect, KiboTextBox } from '@/components/common'
 import { useUpdateOrderShippingInfo, useGetShippingMethods } from '@/hooks'
@@ -152,89 +150,7 @@ const getAddressDedupeKey = (contact: CustomerContact) =>
     .join('|')
     .toLowerCase()
 
-// A full-width saved-address row, or the trailing "Add New" row.
-const AddressChoiceCard = ({
-  selected,
-  onClick,
-  primary,
-  addNew,
-  title,
-  subtitle,
-}: {
-  selected: boolean
-  onClick: () => void
-  primary?: boolean
-  addNew?: boolean
-  title?: string
-  subtitle?: string
-}) => {
-  const { t } = useTranslation('common')
-  return (
-    <Box
-      onClick={onClick}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1.5,
-        padding: '14px 20px',
-        borderRadius: '12px',
-        border: `1px solid ${selected ? checkoutColors.selectedBorder : checkoutColors.border}`,
-        backgroundColor: selected ? checkoutColors.selectedBg : '#fff',
-        cursor: 'pointer',
-        width: '100%',
-      }}
-    >
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '40px',
-          height: '40px',
-          borderRadius: '50%',
-          flexShrink: 0,
-          backgroundColor: selected ? checkoutColors.selectedBorder : '#F0F0F0',
-          color: selected ? '#fff' : checkoutColors.placeholder,
-        }}
-      >
-        {addNew ? <AddIcon /> : <LocationOnOutlinedIcon />}
-      </Box>
-      <Stack gap={0.25} flex={1} sx={{ minWidth: 0 }}>
-        <Stack direction="row" alignItems="center" gap={1} flexWrap="wrap">
-          <Typography
-            sx={{
-              fontWeight: 600,
-              fontSize: '15px',
-              color: addNew ? checkoutColors.selectedBorder : checkoutColors.subtitle,
-            }}
-          >
-            {addNew ? t('add-new') : title}
-          </Typography>
-          {primary && (
-            <Chip
-              label={t('primary')}
-              size="small"
-              sx={{
-                backgroundColor: checkoutColors.selectedBg,
-                color: checkoutColors.selectedBorder,
-                fontWeight: 600,
-                fontSize: '12px',
-              }}
-            />
-          )}
-        </Stack>
-        {subtitle && (
-          <Typography sx={{ fontSize: '13px', color: checkoutColors.placeholder }}>
-            {subtitle}
-          </Typography>
-        )}
-      </Stack>
-      {selected && <CheckCircleIcon sx={{ color: '#22C55E', flexShrink: 0 }} />}
-    </Box>
-  )
-}
-
-// Contact & shipping collection form shared by guest checkout and the logged-in PO
+// Contact & shipping collection form shared by guest checkout and the logged-in
 // checkout - identical fields/validation/mutations, only what happens on a valid
 // "Continue" differs per caller.
 const ContactShippingForm = (props: ContactShippingFormProps) => {
@@ -569,8 +485,9 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
         {savedShippingAddresses?.length > 0 && (
           <Stack gap={1.5}>
             {savedShippingAddresses.map((address) => (
-              <AddressChoiceCard
+              <ChoiceCard
                 key={address.id}
+                icon={<LocationOnOutlinedIcon />}
                 selected={selectedAddressId === String(address.id)}
                 onClick={() => handleSelectSavedAddress(address)}
                 primary={isPrimaryShippingAddress(address)}
@@ -591,7 +508,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                   .join(' ')}
               />
             ))}
-            <AddressChoiceCard
+            <ChoiceCard
               selected={selectedAddressId === NEW_ADDRESS_OPTION}
               onClick={handleSelectNewAddress}
               addNew

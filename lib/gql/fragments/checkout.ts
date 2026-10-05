@@ -253,6 +253,7 @@ export const checkoutPaymentFragment = /* GraphQL */ `
     id
     paymentType
     status
+    availableActions
     paymentWorkflow
     amountCollected
     amountCredited
