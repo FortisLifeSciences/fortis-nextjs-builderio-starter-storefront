@@ -1099,6 +1099,13 @@
   white-space: nowrap;
 }
 
+.specLabelTop {
+  align-items: flex-start;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  line-height: 1.55;
+}
+
 .specValue,
 .specLink {
   justify-content: flex-start;
@@ -1122,21 +1129,6 @@
 .specValue :global(a):hover {
   text-decoration: underline;
   text-underline-offset: 3px;
-}
-
-.specList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px 0;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.specList li + li::before {
-  content: '•';
-  margin: 0 8px;
-  color: var(--slate);
 }
 
 .pairingTrack {
@@ -1185,7 +1177,6 @@
 }
 
 .specRowAlt {
-  color: var(--slate);
   font-weight: 400;
   line-height: 1.55;
   padding-top: 12px;
@@ -2379,6 +2370,12 @@
   .specValue,
   .specLink {
     padding: 0 0 0 12px;
+  }
+
+  .specRowAlt,
+  .specLabelTop {
+    padding-top: 10px;
+    padding-bottom: 10px;
   }
 
   .specLabel,
