@@ -926,6 +926,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                     isUserLoggedIn={false}
                     setAutoFocus={false}
                     validateForm={true}
+                    internationalPhoneInput
                     onSaveAddress={({ contact }) => setBillingContactForm(contact as CrContact)}
                     onFormStatusChange={(isValid) => {
                       setIsBillingFormValid(isValid)

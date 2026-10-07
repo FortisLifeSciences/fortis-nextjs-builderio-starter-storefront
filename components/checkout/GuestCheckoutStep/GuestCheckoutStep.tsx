@@ -328,6 +328,7 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
                   isUserLoggedIn={false}
                   setAutoFocus={false}
                   validateForm={true}
+                  internationalPhoneInput
                   onSaveAddress={({ contact }) => setBillingContactForm(contact as CrContact)}
                   onFormStatusChange={(isValid) => {
                     setIsBillingFormValid(isValid)

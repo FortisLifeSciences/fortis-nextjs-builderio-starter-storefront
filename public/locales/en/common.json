@@ -408,7 +408,6 @@
   "no-shipping-methods-available": "No shipping methods are available for this address. Please check the address or try a different one.",
   "no-shipping-address-on-file": "No shipping address on file for this order.",
   "no-billing-information-on-file": "No billing information on file for this order.",
-  "expiration-date-placeholder": "MM/YY",
   "cvv-placeholder": "3 digits on back of card",
   "please-agree-to-terms": "Please agree to the Sales Terms & Conditions to continue",
   "create-account-description": "Complete the form below to create your Fortis account.",

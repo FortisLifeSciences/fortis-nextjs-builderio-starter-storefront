@@ -350,6 +350,7 @@ const OrderConfirmation = ({ order }: { order: CrOrder }) => {
         <OrderPrice
           subTotalLabel={t('subtotal')}
           shippingTotalLabel={t('shipping')}
+          handlingLabel={t('handling')}
           taxLabel={t('tax')}
           totalLabel={t('total')}
           orderDetails={order}
