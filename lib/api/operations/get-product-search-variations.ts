@@ -31,10 +31,6 @@ interface PropertyValue {
 }
 const getBooleanPropertyValue = (properties: Property[] = [], attributeFQN: string): boolean => {
   const property = properties.find((prop) => prop?.attributeFQN === attributeFQN)
-  console.log('*********************************************************')
-  console.log(attributeFQN)
-  console.log('prop=========>', property)
-  console.log('properties=========>', properties)
   const rawValue = property?.values?.[0]?.value ?? property?.values?.[0]?.stringValue
 
   if (typeof rawValue === 'boolean') {
@@ -121,13 +117,6 @@ export default async function getProductSearchVariations(
           (prop: any) => prop?.attributeFQN?.toLowerCase() === 'tenant~new-product-variant'
         )
 
-        console.log('===== NEW VARIANT DATA =====')
-        console.log('VARIANT CODE:', variant.variationProductCode)
-        console.log('PROPERTY:', newVariantProperty)
-        console.log('VALUE:', newVariantProperty?.values?.[0]?.value)
-        console.log('STRING VALUE:', newVariantProperty?.values?.[0]?.stringValue)
-        console.log('============================')
-
         if (variationProduct) {
           variant.inventoryInfo = variationProduct.inventoryInfo ?? variant.inventoryInfo
 
@@ -156,14 +145,6 @@ export default async function getProductSearchVariations(
       console.log('This is variant level response', variationResponse)
 
       const variationProduct: Product = variationResponse.data?.product
-
-      console.log(
-        'FULL VARIANT CHECK:',
-        variationProduct?.variationProductCode,
-        variationProduct?.properties?.find(
-          (prop) => prop?.attributeFQN === 'tenant~new-product-variant'
-        )
-      )
       console.log('This is variationProduct', variationProduct)
       if (variationProduct) {
         const selectedValues =
@@ -193,12 +174,6 @@ export default async function getProductSearchVariations(
       }
     }
   }
-  console.table(
-    result.map((variant) => ({
-      code: variant.variationProductCode,
-      isNewVariant: variant.isNewVariant,
-    }))
-  )
   console.log('In get product search variations', result)
   return result
 }

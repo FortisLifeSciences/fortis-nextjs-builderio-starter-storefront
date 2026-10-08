@@ -234,20 +234,9 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     (type) => type === FulfillmentOptionsConstant.DIGITAL
   )
 
-  // console.log('This is updatedProduct ---> ', updatedProduct)
-
-  console.log('product', product)
-  console.log('productVariations', productVariations)
-
-  console.log('========== VARIANT PROPERTY CHECK ==========')
-  console.log('Variant:', product.variationProductCode)
-  console.log('Properties:', product.properties)
-
   const newVariantProperty = product.properties?.find(
     (prop) => prop?.attributeFQN?.toLowerCase() === 'tenant~new-product-variant'
   )
-
-  console.log('NEW VARIANT PROPERTY:', newVariantProperty)
 
   const sectionTargetUrl = PDPCustomAndBulkDisplayContentSection?.data?.targetUrl
   const [purchaseType, setPurchaseType] = useState<string>(PurchaseTypes.ONETIMEPURCHASE)
@@ -341,7 +330,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     },
     productPriceResponse?.price as ProductPrice
   )
-  console.log('currentProduct', currentProduct)
+
   const [variationCodeDynamic, setVariationCodeDynamic] = useState<string>()
   const [variantProductTitle, setVariantProductTitle] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(true)
