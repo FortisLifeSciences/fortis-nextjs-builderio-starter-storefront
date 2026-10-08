@@ -13,7 +13,12 @@ import {
   Typography,
 } from '@mui/material'
 import { alpha, styled } from '@mui/material/styles'
-import PhoneInput, { getCountryCallingCode, type Value } from 'react-phone-number-input'
+import PhoneInput, {
+  getCountryCallingCode,
+  parsePhoneNumber,
+  type Country,
+  type Value,
+} from 'react-phone-number-input'
 import flags from 'react-phone-number-input/flags'
 import 'react-phone-number-input/style.css'
 
@@ -229,6 +234,13 @@ const PhoneInputWrapper = styled('div')<{ error?: boolean }>(({ theme, error }) 
   },
 }))
 
+export const toE164PhoneNumber = (value?: string | null, defaultCountry = 'US'): string => {
+  if (!value) return ''
+  if (value.startsWith('+')) return value
+  const digits = value.replace(/\D/g, '')
+  return parsePhoneNumber(value, defaultCountry as Country)?.number || (digits ? `+${digits}` : '')
+}
+
 const KiboPhoneInput = (props: KiboPhoneInputProps) => {
   const {
     label,
@@ -248,7 +260,7 @@ const KiboPhoneInput = (props: KiboPhoneInputProps) => {
   // number - a saved contact's phone can come back as plain digits (no leading "+"), which the
   // library can't parse: it falls back to a generic globe icon and shows the raw digits verbatim.
   // Normalize for display only; typed input already round-trips through onChange as E.164.
-  const normalizedValue = value && !value.startsWith('+') ? `+${value.replace(/\D/g, '')}` : value
+  const normalizedValue = toE164PhoneNumber(value, defaultCountry)
 
   return (
     <FormControl variant="standard" error={error} required={required} fullWidth {...rest}>
@@ -274,10 +286,12 @@ const KiboPhoneInput = (props: KiboPhoneInputProps) => {
         <PhoneInput
           id={label}
           international
+          limitMaxLength
+          addInternationalOption={false}
           defaultCountry={defaultCountry as any}
           flags={flags}
           countrySelectComponent={CountrySelect}
-          value={normalizedValue ?? undefined}
+          value={normalizedValue || undefined}
           placeholder={placeholder}
           aria-label={label || name}
           onChange={(newValue?: Value) => onChange && onChange(name as string, newValue ?? '')}
