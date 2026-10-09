@@ -31,16 +31,15 @@ interface PropertyValue {
   stringValue?: string
 }
 
-const getBooleanPropertyValue = (
-  properties: Property[] = [],
-  attributeFQN: string
-): boolean | undefined => {
+const getPropertyValue = (properties: Property[] = [], attributeFQN: string) => {
   const property = properties.find(
     (prop) => prop?.attributeFQN?.toLowerCase() === attributeFQN.toLowerCase()
   )
-  const rawValue = property?.values?.[0]?.value ?? property?.values?.[0]?.stringValue
+  return property?.values?.[0]?.value ?? property?.values?.[0]?.stringValue
+}
 
-  if (rawValue == null) return undefined
+const getBooleanPropertyValue = (properties: Property[] = [], attributeFQN: string): boolean => {
+  const rawValue = getPropertyValue(properties, attributeFQN)
   if (typeof rawValue === 'boolean') return rawValue
   if (typeof rawValue === 'number') return rawValue === 1
   if (typeof rawValue === 'string') {
@@ -48,6 +47,11 @@ const getBooleanPropertyValue = (
   }
 
   return false
+}
+
+const hasPropertyValue = (properties: Property[] = [], attributeFQN: string): boolean => {
+  const value = getPropertyValue(properties, attributeFQN)
+  return value !== undefined && value !== null
 }
 
 export default async function getProductSearchVariations(
@@ -87,14 +91,12 @@ export default async function getProductSearchVariations(
         price: product.price,
         childPriority: childPriorityProperty ? Number(childPriorityProperty.values[0].value) : null,
         inventoryInfo: (product as any).inventoryInfo ?? null,
-        isNewVariant:
-          getBooleanPropertyValue(product.properties, 'tenant~new-product-variant') ?? false,
+        isNewVariant: getBooleanPropertyValue(product.properties, 'tenant~new-product-variant'),
       }
     })
 
     const missingNewVariantFlags = products.filter(
-      (product) =>
-        getBooleanPropertyValue(product.properties, 'tenant~new-product-variant') === undefined
+      (product) => !hasPropertyValue(product.properties, 'tenant~new-product-variant')
     )
     const newVariantFlagLookups = await Promise.all(
       missingNewVariantFlags.map(async (product) => {
@@ -111,11 +113,10 @@ export default async function getProductSearchVariations(
           return variationProduct
             ? {
                 variationProductCode: product.variationProductCode,
-                isNewVariant:
-                  getBooleanPropertyValue(
-                    variationProduct.properties,
-                    'tenant~new-product-variant'
-                  ) ?? false,
+                isNewVariant: getBooleanPropertyValue(
+                  variationProduct.properties,
+                  'tenant~new-product-variant'
+                ),
               }
             : null
         } catch (error) {
@@ -205,9 +206,10 @@ export default async function getProductSearchVariations(
             ? Number(childPriorityProperty.values[0].value)
             : null,
           inventoryInfo: (variationProduct as any).inventoryInfo ?? null,
-          isNewVariant:
-            getBooleanPropertyValue(variationProduct.properties, 'tenant~new-product-variant') ??
-            false,
+          isNewVariant: getBooleanPropertyValue(
+            variationProduct.properties,
+            'tenant~new-product-variant'
+          ),
         })
       }
     }
