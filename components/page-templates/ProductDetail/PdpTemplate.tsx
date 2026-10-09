@@ -390,9 +390,10 @@ const PdpTemplate = (props: PdpTemplateProps) => {
       price: formatVariantPrice(value?.price),
       disabled: !value?.isEnabled,
       isNew:
-        isNewVariant &&
-        Boolean(value?.variationProductCode) &&
-        value?.variationProductCode === variationProductCode,
+        value?.isNewVariant ??
+        (isNewVariant &&
+          Boolean(value?.variationProductCode) &&
+          value?.variationProductCode === variationProductCode),
     }))
 
   const handleSelectOptionChange = async (option: any, value: string) => {
