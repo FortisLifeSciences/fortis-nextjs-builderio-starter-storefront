@@ -7,6 +7,7 @@ import { HydrationBoundary } from '@tanstack/react-query'
 import creditCardType from 'credit-card-type'
 import Router, { useRouter } from 'next/router'
 
+import { CartSideDrawer } from '@/components/cart'
 import { AnnouncementBar, GlobalFetchingIndicator } from '@/components/common'
 import { Footer, FortisHeader } from '@/components/layout'
 import { isTransparentPagePath } from '@/components/layout/AppHeader/transparentPages'
@@ -102,6 +103,7 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
           <AuthContextProvider>
             <HeaderContextProvider>
               <GlobalFetchingIndicator />
+              <CartSideDrawer />
               <Stack sx={{ minHeight: '100vh', width: '100%' }}>
                 <Stack
                   ref={headerRef}
@@ -145,7 +147,7 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
                   ) : (
                     <Container
                       disableGutters
-                      sx={{ maxWidth: '1200px !important', mx: 'auto', px: { xs: 2, md: 0 } }}
+                      sx={{ maxWidth: '1300px !important', mx: 'auto', px: { xs: 2, md: 0 } }}
                     >
                       {children}
                     </Container>

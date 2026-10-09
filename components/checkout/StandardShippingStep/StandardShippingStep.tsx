@@ -193,7 +193,7 @@ const StandardShippingStep = (props: ShippingProps) => {
 
       if (isAddressSavedToAccount) {
         const customerSavedAddress = await handleSaveAddressToAccount(contact)
-        const { accountId: _, types: __, ...customerContact } = customerSavedAddress
+        const { accountId: _, types: __, label: ___, ...customerContact } = customerSavedAddress
         await updateOrderShippingInfo.mutateAsync({ checkout, contact: customerContact })
         setSelectedShippingAddressId(customerSavedAddress?.id as number)
       } else {
@@ -260,9 +260,9 @@ const StandardShippingStep = (props: ShippingProps) => {
   )
 
   const handleSaveShippingMethod = async (shippingMethodCode: string) => {
-    const shippingMethodName = shippingMethods.find(
-      (method) => method.shippingMethodCode === shippingMethodCode
-    )?.shippingMethodName as string
+    const shippingMethodName =
+      shippingMethods.find((method) => method.shippingMethodCode === shippingMethodCode)
+        ?.shippingMethodName ?? ''
 
     try {
       await updateOrderShippingInfo.mutateAsync({

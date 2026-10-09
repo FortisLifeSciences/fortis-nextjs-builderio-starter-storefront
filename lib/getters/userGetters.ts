@@ -57,14 +57,22 @@ const getSavedCardsAndBillingDetails = (
   if (!cards?.length) return []
 
   return cards?.map((card: Card) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const selectedContact = contacts?.find(
       (contact) => contact.id === card.contactId
     ) as CustomerContact
 
-    const { accountId, types, ...rest } = selectedContact
-      ? selectedContact
-      : { accountId: 0, types: undefined }
+    const billingContact = selectedContact
+      ? {
+          id: selectedContact.id,
+          firstName: selectedContact.firstName,
+          middleNameOrInitial: selectedContact.middleNameOrInitial,
+          lastNameOrSurname: selectedContact.lastNameOrSurname,
+          companyOrOrganization: selectedContact.companyOrOrganization,
+          email: selectedContact.email,
+          phoneNumbers: selectedContact.phoneNumbers,
+          address: selectedContact.address,
+        }
+      : {}
 
     return {
       cardInfo: {
@@ -73,7 +81,7 @@ const getSavedCardsAndBillingDetails = (
         paymentType: PaymentType.CREDITCARD,
       },
       billingAddressInfo: {
-        contact: rest as CrContact,
+        contact: billingContact as CrContact,
       },
     }
   })
@@ -177,6 +185,8 @@ const getOtherBillingAddress = (addresses: CustomerContact[], defaultBillingAddr
   return Array.from(new Set(addresses?.filter((each) => each?.id != defaultBillingAddressId))) || []
 }
 
+const getCompanyOrOrganization = (user: CustomerAccount) => user?.companyOrOrganization ?? ''
+
 const getCustomerAccountDetails = (user: CustomerAccount) => {
   return {
     id: getUserId(user),
@@ -184,6 +194,7 @@ const getCustomerAccountDetails = (user: CustomerAccount) => {
     lastName: getLastName(user),
     emailAddress: getEmailAddress(user),
     fullName: getFullName(user),
+    companyOrOrganization: getCompanyOrOrganization(user),
   }
 }
 
@@ -204,6 +215,7 @@ export const userGetters = {
   getLastName,
   getFullName,
   getEmailAddress,
+  getCompanyOrOrganization,
   getUserId,
   getAllShippingAddresses,
   getAllBillingAddresses,

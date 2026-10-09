@@ -85,7 +85,7 @@ export const navInnerStyles: SxProps = {
   alignItems: 'center',
   padding: '16px 24px',
   gap: '20px',
-  maxWidth: '1200px',
+  maxWidth: '1300px',
   width: '100%',
   margin: '0 auto',
   height: '74px',

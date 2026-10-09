@@ -138,33 +138,39 @@ export default async function getProductSearchVariations(
 
     // productSearch inventory is stale — always verify with live individual queries when stock <= 0.
     // Trust productSearch only when it explicitly shows stock > 0 (InStock is safe to use as-is).
-    const inventoryFallbacks = result
-      .filter((v) => {
-        if (!v.inventoryInfo) return true
-        const inv = v.inventoryInfo as any
-        if (inv.onlineStockAvailable == null) return true
-        return (inv.onlineStockAvailable ?? 0) <= 0
-      })
-      .map((v) =>
-        fetcher(
+
+    for (const variant of result) {
+      try {
+        const variationResponse = await fetcher(
           {
             query: getProductVariationQuery,
-            variables: { productCode, variationProductCode: v.variationProductCode },
+            variables: {
+              productCode,
+              variationProductCode: variant.variationProductCode,
+            },
           },
           { headers }
         )
-          .then((res) => ({
-            variationProductCode: v.variationProductCode,
-            inventoryInfo: res.data?.product?.inventoryInfo ?? null,
-          }))
-          .catch(() => null)
-      )
 
-    const inventoryResults = await Promise.all(inventoryFallbacks)
-    for (const inv of inventoryResults) {
-      if (!inv) continue
-      const variant = result.find((v) => v.variationProductCode === inv.variationProductCode)
-      if (variant && inv.inventoryInfo != null) variant.inventoryInfo = inv.inventoryInfo
+        const variationProduct = variationResponse.data?.product
+
+        const isNewVariant = getBooleanPropertyValue(
+          variationProduct?.properties ?? [],
+          'tenant~new-product-variant'
+        )
+
+        const newVariantProperty = variationProduct?.properties?.find(
+          (prop: any) => prop?.attributeFQN?.toLowerCase() === 'tenant~new-product-variant'
+        )
+
+        if (variationProduct) {
+          variant.inventoryInfo = variationProduct.inventoryInfo ?? variant.inventoryInfo
+
+          variant.isNewVariant = isNewVariant
+        }
+      } catch (error) {
+        console.error('Error fetching variant:', variant.variationProductCode, error)
+      }
     }
   } else {
     console.log('Entered else statement')
