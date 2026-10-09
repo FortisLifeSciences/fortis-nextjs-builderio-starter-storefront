@@ -7,6 +7,7 @@ interface VariationData {
   childPriority?: number
   price?: any
   variationProductCode?: string
+  isNewVariant?: boolean
 }
 
 export interface DefaultOptionSelection {
@@ -26,6 +27,7 @@ export const buildVariationMap = (
         childPriority: variation.childPriority,
         price: variation.price,
         variationProductCode: variation.variationProductCode,
+        isNewVariant: variation.isNewVariant,
       })
     }
   })
@@ -47,6 +49,7 @@ export const applyVariationData = (
           optionValue.childPriority = variationData.childPriority
           optionValue.price = { ...variationData.price }
           optionValue.variationProductCode = variationData.variationProductCode
+          optionValue.isNewVariant = variationData.isNewVariant
         }
       }
     })

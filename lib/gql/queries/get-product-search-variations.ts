@@ -23,6 +23,7 @@ const getProductSearchVariationsQuery = /* GraphQL */ `
           attributeFQN
           values {
             value
+            stringValue
           }
         }
       }
