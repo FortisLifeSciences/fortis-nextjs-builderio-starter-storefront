@@ -375,9 +375,10 @@ const PdpTemplate = (props: PdpTemplateProps) => {
       price: value?.price?.price != null ? `$${value.price.price.toFixed(2)}` : null,
       disabled: !value?.isEnabled,
       isNew:
-        isNewVariant &&
-        Boolean(value?.variationProductCode) &&
-        value?.variationProductCode === variationProductCode,
+        value?.isNewVariant ??
+        (isNewVariant &&
+          Boolean(value?.variationProductCode) &&
+          value?.variationProductCode === variationProductCode),
     }))
 
   const handleSelectOptionChange = async (option: any, value: string) => {
@@ -879,7 +880,15 @@ const PdpTemplate = (props: PdpTemplateProps) => {
                 {group.label ? <div className={styles.specGroup}>{group.label}</div> : null}
                 {group.resolvedRows.map((row) => (
                   <div className={styles.specRow} key={row.key}>
-                    <span className={styles.specLabel}>{row.label}</span>
+                    <span
+                      className={`${styles.specLabel} ${
+                        row.config.render === 'list' || row.config.render === 'html'
+                          ? styles.specLabelTop
+                          : ''
+                      }`}
+                    >
+                      {row.label}
+                    </span>
                     {row.config.render === 'link' && row.config.href ? (
                       <a
                         className={styles.specLink}
@@ -891,11 +900,7 @@ const PdpTemplate = (props: PdpTemplateProps) => {
                       </a>
                     ) : row.config.render === 'list' ? (
                       <div className={`${styles.specValue} ${styles.specRowAlt}`}>
-                        <ul className={styles.specList}>
-                          {row.items.map((item) => (
-                            <li key={item}>{item}</li>
-                          ))}
-                        </ul>
+                        {row.items.join('  •  ')}
                       </div>
                     ) : row.config.render === 'html' ? (
                       <div
