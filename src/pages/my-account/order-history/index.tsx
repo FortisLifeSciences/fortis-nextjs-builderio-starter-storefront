@@ -1,36 +1,23 @@
 import { useRouter } from 'next/router'
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
-import { OrderHistoryTemplate } from '@/components/page-templates'
+import { getMyAccountServerSideProps } from '@/components/layout/MyAccountLayout/getMyAccountServerSideProps'
+import { MyAccountPageShell } from '@/components/layout/MyAccountLayout/withMyAccountPage'
+import type { MyAccountPageProps } from '@/components/layout/MyAccountLayout/withMyAccountPage'
+import { MyAccountOrderHistoryTemplate } from '@/components/page-templates'
 
-import type { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next'
+import type { NextPage } from 'next'
 
-export const getServerSideProps: GetServerSideProps = async (
-  context: GetServerSidePropsContext
-) => {
-  const { locale } = context
+export const getServerSideProps = getMyAccountServerSideProps
 
-  return {
-    props: {
-      ...(await serverSideTranslations(locale as string, ['common'])),
-    },
-  }
-}
-
-const OrderHistoryPage: NextPage = () => {
+const OrderHistoryPage: NextPage<MyAccountPageProps> = (props) => {
   const router = useRouter()
-  const qs = router?.query as { filters: string }
+  const qs = router?.query as { filters?: string }
   const queryFilters = qs?.filters ? qs.filters.split(',') : []
 
-  const handleAccountTitleClick = () => router.push('/my-account')
-
   return (
-    <>
-      <OrderHistoryTemplate
-        queryFilters={queryFilters}
-        onAccountTitleClick={handleAccountTitleClick}
-      />
-    </>
+    <MyAccountPageShell {...props}>
+      {(user) => <MyAccountOrderHistoryTemplate user={user} queryFilters={queryFilters} />}
+    </MyAccountPageShell>
   )
 }
 

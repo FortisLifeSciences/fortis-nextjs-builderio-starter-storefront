@@ -12,13 +12,21 @@ export const buildAddToWishlistItemParams = (
     wishlistItemInput: {
       quantity: quantity ? quantity : 1,
       product: {
-        options: product?.options?.map((option: any) => {
-          return {
-            name: option?.attributeDetail?.name,
-            value: option?.value,
-            attributeFQN: option?.attributeFQN,
-          }
-        }),
+        options: product?.options
+          ?.map((option: any) => {
+            const selected = option?.values?.find((value: any) => value?.isSelected)
+
+            return {
+              name: option?.attributeDetail?.name ?? option?.name,
+              value:
+                option?.value ??
+                selected?.value ??
+                selected?.stringValue ??
+                selected?.shopperEnteredValue,
+              attributeFQN: option?.attributeFQN,
+            }
+          })
+          .filter((option: any) => option?.value !== undefined && option?.value !== null),
         productCode: product?.productCode,
         variationProductCode: product?.variationProductCode,
         isPackagedStandAlone: product?.isPackagedStandAlone || false,

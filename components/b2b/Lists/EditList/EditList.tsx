@@ -1,27 +1,15 @@
 import { useState } from 'react'
 
 import EditIcon from '@mui/icons-material/Edit'
-import {
-  Box,
-  Button,
-  Grid,
-  IconButton,
-  Typography,
-  useMediaQuery,
-  useTheme,
-  FormControl,
-  Stack,
-  Link,
-} from '@mui/material'
+import { Box, Grid, Button, IconButton, Typography, Stack } from '@mui/material'
 import { useTranslation } from 'next-i18next'
 import { Maybe } from 'yup/lib/types'
 
-import { B2BProductSearch, ListItem } from '@/components/b2b'
-import styles from '@/components/b2b/Lists/EditList/EditList.style'
+import { ListItem, ListProductSearch } from '@/components/b2b'
+import { listFormStyles } from '@/components/b2b/Lists/listFormStyles'
 import { KiboTextBox } from '@/components/common'
+import { accountActionButton, accountTextButton } from '@/components/my-account/common'
 import { useProductCardActions, useUpdateWishlistItemMutation } from '@/hooks'
-import { productGetters } from '@/lib/getters'
-import { ProductCustom } from '@/lib/types'
 
 import { CrWishlist, CrWishlistInput, CrWishlistItem, Product } from '@/lib/gql/types'
 
@@ -50,12 +38,9 @@ const EditList = (props: EditListProps) => {
     name: listData?.name,
     openNameForm: false,
   })
-  const theme = useTheme()
-  const mdScreen = useMediaQuery<boolean>(theme.breakpoints.up('md'))
   const { t } = useTranslation('common')
   const { updateWishlist } = useUpdateWishlistItemMutation()
-  const { openProductQuickViewModal, handleAddToList, handleDeleteCurrentCart } =
-    useProductCardActions()
+  const { handleAddToList, handleDeleteCurrentCart } = useProductCardActions()
 
   const handleAddListToCart = async (id: string) => {
     await handleSaveWishlist()
@@ -112,150 +97,103 @@ const EditList = (props: EditListProps) => {
   }
 
   const handleAddProduct = async (product?: Product) => {
-    if (productGetters.isVariationProduct(product as Product)) {
-      const dialogProps = {
-        title: t('product-configuration-options'),
-        cancel: t('cancel'),
-        addItemToList: t('add-item-to-list'),
-        isB2B: true,
-      }
-      openProductQuickViewModal({
-        product: product as ProductCustom,
-        dialogProps,
-        listData,
-        onUpdateListData,
-      })
-    } else {
-      handleAddToList({
-        listData,
-        product: product as Product,
-        onUpdateListData,
-      })
-    }
+    handleAddToList({
+      listData,
+      product: product as Product,
+      onUpdateListData,
+    })
   }
 
   return (
     <>
-      <Box>
-        <Grid
-          container
-          spacing={0.5}
-          rowSpacing={1}
-          columnSpacing={{ xs: 1, sm: 2, md: 3 }}
-          justifyContent="flex-end"
-          alignItems="center"
-          sx={{ marginBottom: '20px' }}
-        >
-          <Grid item xs={mdScreen ? 9 : 12}>
-            {editListState.openNameForm ? (
-              <>
-                <FormControl fullWidth sx={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Box maxWidth="360px">
-                    <KiboTextBox
-                      onChange={(e, value) => setEditListState({ ...editListState, name: value })}
-                      value={editListState.name as string}
-                      sx={{ ...styles.listNameForm }}
-                    />
-                  </Box>
-                  <Box component="span" sx={{ marginLeft: '5px' }}>
-                    <Button
-                      variant="contained"
-                      onClick={() => setEditListState({ ...editListState, openNameForm: false })}
-                      data-testid="saveNameBtn"
-                    >
-                      {t('save')}
-                    </Button>
-                  </Box>
-                </FormControl>
-              </>
-            ) : (
-              <>
-                <Typography variant="h1" fontWeight={'bold'}>
-                  {editListState.name}
-                  <IconButton
-                    onClick={() => setEditListState({ ...editListState, openNameForm: true })}
-                    data-testid="editNameBtn"
-                  >
-                    <EditIcon />
-                  </IconButton>
-                </Typography>
-              </>
-            )}
-          </Grid>
-          {mdScreen ? (
-            <>
-              <Grid item xs={3} display="flex" justifyContent="end">
-                <Box component="span" display="inline-flex" gap={2}>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    size="medium"
-                    onClick={() => onEditFormToggle()}
-                  >
-                    {t('cancel')}
-                  </Button>
-                  <Button variant="contained" size="medium" onClick={handleSaveWishlist}>
-                    {t('save-and-close')}
-                  </Button>
-                </Box>
-              </Grid>
-            </>
-          ) : (
-            <></>
-          )}
-        </Grid>
-        <Grid item xs={12}>
-          <Box sx={{ maxWidth: '360px' }}>
-            <B2BProductSearch onAddProduct={handleAddProduct} />
-          </Box>
-          <Grid
-            container
-            spacing={0.5}
-            rowSpacing={1}
-            columnSpacing={{ xs: 1, sm: 2, md: 3 }}
-            direction="row"
-            justifyContent="flex-start"
-            alignItems="top"
-          >
-            <Grid item xs={4}></Grid>
-            <Grid item xs={4}></Grid>
-            <Grid item xs={4}></Grid>
-          </Grid>
-        </Grid>
+      <Box sx={{ ...listFormStyles.card }}>
+        {editListState.openNameForm ? (
+          <Stack direction="row" alignItems="flex-end" gap={2} sx={{ maxWidth: '32rem' }}>
+            <Box sx={{ flexGrow: 1 }}>
+              <KiboTextBox
+                label={t('list-name')}
+                onChange={(e, value) => setEditListState({ ...editListState, name: value })}
+                value={editListState.name as string}
+                sx={{ ...listFormStyles.textBox }}
+              />
+            </Box>
+            <Button
+              variant="contained"
+              disableElevation
+              sx={{ ...accountActionButton }}
+              onClick={() => setEditListState({ ...editListState, openNameForm: false })}
+              data-testid="saveNameBtn"
+            >
+              {t('save')}
+            </Button>
+          </Stack>
+        ) : (
+          <Stack direction="row" alignItems="center" gap={1}>
+            <Typography component="p" sx={{ ...listFormStyles.listName }}>
+              {editListState.name}
+            </Typography>
+            <IconButton
+              size="small"
+              onClick={() => setEditListState({ ...editListState, openNameForm: true })}
+              data-testid="editNameBtn"
+            >
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Stack>
+        )}
+
+        <Box sx={{ maxWidth: '26rem', marginTop: '1.25rem' }}>
+          <ListProductSearch onAddProduct={handleAddProduct} />
+        </Box>
       </Box>
-      <Box>
-        <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'baseline' }}>
-          <Typography variant="h3" fontWeight={'bold'}>
+
+      <Box sx={{ ...listFormStyles.card }}>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          sx={{ ...listFormStyles.itemsHeader }}
+          gap={1}
+        >
+          <Typography component="h2" sx={{ ...listFormStyles.sectionTitle, marginBottom: 0 }}>
             {t('list-items')}
           </Typography>
           {listData?.items && listData?.items?.length > 0 && (
-            <Stack direction="row">
+            <Stack direction="row" gap={1}>
               <Button
+                variant="text"
+                sx={{ ...listFormStyles.inlineLink }}
                 onClick={() => handleEmptyCartAndAddListToCart(listData?.id as string)}
-                sx={{ ...styles.addAllItemsToCartButton }}
               >
-                <Link sx={{ ...styles.addAllItemsToCartLink }}>
-                  {t('empty-cart-add-list-to-cart')}
-                </Link>
+                {t('empty-cart-add-list-to-cart')}
               </Button>
               <Button
+                variant="text"
+                sx={{ ...listFormStyles.inlineLink }}
                 onClick={() => handleAddListToCart(listData?.id as string)}
-                sx={{ ...styles.addAllItemsToCartButton }}
               >
-                <Link sx={{ ...styles.addAllItemsToCartLink }}>{t('add-all-items-to-cart')}</Link>
+                {t('add-all-items-to-cart')}
               </Button>
             </Stack>
           )}
         </Stack>
-      </Box>
 
-      {listData?.items?.length === 0 ? (
-        <Typography variant="body2" color="GrayText" marginTop="20px">
-          {t('no-item-in-list-text')}
-        </Typography>
-      ) : (
-        listData?.items?.map((item: Maybe<CrWishlistItem>, index) => {
-          return (
+        {Boolean(listData?.items?.length) && (
+          <Grid container sx={{ ...listFormStyles.itemsHeaderRow }}>
+            <Grid item xs={3} sm={2}>
+              {t('qty')}
+            </Grid>
+            <Grid item xs={7} sm={8}>
+              {t('product')}
+            </Grid>
+            <Grid item xs={2} sm={2} sx={{ textAlign: 'right' }}>
+              {t('unit-price')}
+            </Grid>
+          </Grid>
+        )}
+
+        {!listData?.items?.length ? (
+          <Typography sx={{ ...listFormStyles.hint }}>{t('no-item-in-list-text')}</Typography>
+        ) : (
+          listData?.items?.map((item: Maybe<CrWishlistItem>, index) => (
             <ListItem
               key={(item?.product?.productCode as string) + index}
               item={item as CrWishlistItem}
@@ -263,32 +201,23 @@ const EditList = (props: EditListProps) => {
               onChangeQuantity={handleChangeQuantity}
               listId={listData.id as string}
             />
-          )
-        })
-      )}
-      {!mdScreen && (
-        <>
-          <Box display={'flex'} flexDirection={'column'} gap={2} marginTop={'20px'}>
-            <Button
-              variant="contained"
-              color="secondary"
-              size="medium"
-              onClick={() => onEditFormToggle()}
-              sx={{ width: '100%' }}
-            >
-              {t('cancel')}
-            </Button>
-            <Button
-              variant="contained"
-              size="medium"
-              onClick={handleSaveWishlist}
-              sx={{ width: '100%' }}
-            >
-              {t('save-and-close')}
-            </Button>
-          </Box>
-        </>
-      )}
+          ))
+        )}
+      </Box>
+
+      <Stack direction="row" alignItems="center" gap={2}>
+        <Button
+          variant="contained"
+          disableElevation
+          sx={{ ...accountActionButton }}
+          onClick={handleSaveWishlist}
+        >
+          {t('save-and-close')}
+        </Button>
+        <Button variant="text" sx={{ ...accountTextButton }} onClick={() => onEditFormToggle()}>
+          {t('cancel')}
+        </Button>
+      </Stack>
     </>
   )
 }

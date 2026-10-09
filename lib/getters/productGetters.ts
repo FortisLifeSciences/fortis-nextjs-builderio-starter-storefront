@@ -306,6 +306,9 @@ const isVariationProduct = (product: Product): boolean =>
 const getProductDetails = (product: ProductCustom, pdpProductPrice?: ProductPrice) => {
   const productOptions = getSegregatedOptions(product)
   const productProperties = getProperties(product) as ProductProperties[]
+  const newVariantProductAttribute = productProperties?.find(
+    (data: ProductProperties) => data?.attributeFQN === 'tenant~new-product-variant'
+  )?.value
 
   return {
     productName: getName(product),

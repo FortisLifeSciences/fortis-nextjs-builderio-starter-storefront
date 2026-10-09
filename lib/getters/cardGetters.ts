@@ -35,6 +35,33 @@ const getExpireYear = (creditCardData?: GenericCard | CrPaymentCard): number =>
 const getCardHolderName = (creditCardData?: GenericCard | CrPaymentCard): string =>
   creditCardData?.nameOnCard as string
 
+const EXPIRING_SOON_MONTHS = 3
+
+const getIsExpired = (creditCardData?: GenericCard | CrPaymentCard): boolean => {
+  const month = getExpireMonth(creditCardData)
+  const year = getExpireYear(creditCardData)
+
+  if (!month || !year) return false
+
+  const now = new Date()
+  const expiry = new Date(year, month, 1)
+
+  return expiry.getTime() <= now.getTime()
+}
+
+const getIsExpiringSoon = (creditCardData?: GenericCard | CrPaymentCard): boolean => {
+  const month = getExpireMonth(creditCardData)
+  const year = getExpireYear(creditCardData)
+
+  if (!month || !year || getIsExpired(creditCardData)) return false
+
+  const now = new Date()
+  const expiry = new Date(year, month, 1)
+  const threshold = new Date(now.getFullYear(), now.getMonth() + EXPIRING_SOON_MONTHS, 1)
+
+  return expiry.getTime() <= threshold.getTime()
+}
+
 const getCardDetails = (card: GenericCard) => {
   return {
     cardNumberPart: getCardNumberPart(card),
@@ -68,6 +95,8 @@ export const cardGetters = {
   getPaymentType,
   getIsCardInfoSaved,
   getExpireDate,
+  getIsExpired,
+  getIsExpiringSoon,
   getPaymentServiceCardId,
   getCardNumberPartOrMask,
 

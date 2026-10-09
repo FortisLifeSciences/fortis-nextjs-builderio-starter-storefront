@@ -81,6 +81,12 @@ export default async function graphQLHandler(req: NextApiRequestWithLogger, res:
     } else {
       req.logger.error(error)
     }
-    res.status(error?.code).json({ message: error?.message })
+    const statusCode = Number(error?.code)
+    const isValidHttpStatus = Number.isInteger(statusCode) && statusCode >= 400 && statusCode <= 599
+
+    res.status(isValidHttpStatus ? statusCode : 500).json({
+      message: error?.message,
+      code: error?.code,
+    })
   }
 }

@@ -68,6 +68,7 @@ export const orderItemFragment = /* GraphQL */ `
     fulfillmentLocationCode
     lineId
     originalCartItemId
+    expectedDeliveryDate
     product {
       ...orderItemProductFragment
     }
@@ -131,6 +132,8 @@ export const baseOrderFragment = /* GraphQL */ `
     orderNumber
     submittedDate
     status
+    paymentStatus
+    fulfillmentStatus
     orderDiscounts {
       impact
       discount {
@@ -157,6 +160,18 @@ export const baseOrderFragment = /* GraphQL */ `
       }
     }
     returnStatus
+    fulfillmentStatus
+    packages {
+      carrier
+      fulfillmentDate
+      status
+      trackingNumber
+      trackingNumbers
+      trackings {
+        number
+        url
+      }
+    }
   }
   ${contactForOrdersFragment}
 `

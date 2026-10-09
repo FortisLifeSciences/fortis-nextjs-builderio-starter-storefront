@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
 import { yupResolver } from '@hookform/resolvers/yup'
+import AddIcon from '@mui/icons-material/Add'
 import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
 import { styled, FormControl, Box, Stack, Button } from '@mui/material'
@@ -9,6 +10,7 @@ import { useForm, Controller } from 'react-hook-form'
 import * as yup from 'yup'
 
 import { PasswordValidation, KiboTextBox } from '@/components/common'
+import { accountActionButton, accountTextButton } from '@/components/my-account/common'
 import { isPasswordValid } from '@/lib/helpers/validations/validations'
 import { ProfileDetails, UpdateProfileDataParam } from '@/lib/types'
 
@@ -17,6 +19,7 @@ type PasswordFieldType = 'currentPassword' | 'newPassword' | 'confirmPassword'
 export interface ProfileDetailsFormProps extends ProfileDetails {
   isEmailForm?: boolean
   isPasswordForm?: boolean
+  isCompanyEditable?: boolean
   onSaveProfileData: <T extends UpdateProfileDataParam>(profileData: T) => void
   onCancel: () => void
 }
@@ -68,8 +71,10 @@ const ProfileDetailsForm = (props: ProfileDetailsFormProps) => {
     firstName = '',
     lastName = '',
     emailAddress = '',
+    companyOrOrganization = '',
     isEmailForm = false,
     isPasswordForm = false,
+    isCompanyEditable = true,
     onSaveProfileData,
     onCancel,
   } = props
@@ -254,21 +259,40 @@ const ProfileDetailsForm = (props: ProfileDetailsFormProps) => {
                   />
                 )}
               />
+              {isCompanyEditable && (
+                <Controller
+                  name="companyOrOrganization"
+                  control={control}
+                  defaultValue={companyOrOrganization}
+                  render={({ field }) => (
+                    <KiboTextBox
+                      value={field.value || ''}
+                      label={t('company-institution-or-organization')}
+                      onChange={(_name, value) => field.onChange(value)}
+                      onBlur={field.onBlur}
+                      error={!!errors?.companyOrOrganization}
+                      helperText={errors?.companyOrOrganization?.message as string}
+                    />
+                  )}
+                />
+              )}
             </>
           )}
 
-          <Stack gap={2} sx={{ width: { xs: '100%', md: '50%' } }}>
-            <Button variant="contained" color="secondary" onClick={onCancel}>
-              {t('cancel')}
-            </Button>
+          <Stack direction="row" alignItems="center" gap={2} sx={{ marginTop: '1rem' }}>
             <Button
               variant="contained"
               color="primary"
               disableElevation
+              startIcon={<AddIcon />}
+              sx={{ ...accountActionButton }}
               {...((!isValid || !isDirty) && { disabled: true })}
               onClick={() => handleSubmit(onValid)()}
             >
-              {t('save')}
+              {t('save-changes')}
+            </Button>
+            <Button variant="text" sx={{ ...accountTextButton }} onClick={onCancel}>
+              {t('cancel')}
             </Button>
           </Stack>
         </FormControl>

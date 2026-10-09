@@ -22,12 +22,23 @@ export const buildCheckoutShippingParams = (params: CheckoutShippingParams): Shi
     fulfillmentInfoInput: {
       fulfillmentContact: {
         ...(contact ? contact : checkout.fulfillmentInfo?.fulfillmentContact),
-        email: email && email !== '' ? email : checkout.email,
+        // Prefer an explicit `email` override, then `contact`'s own email, then the order's.
+        email: (email && email !== '' ? email : contact?.email) || checkout.email,
       },
 
-      shippingMethodCode: shippingMethodCode ? shippingMethodCode : null,
+      // `undefined` means "this caller doesn't touch shipping method" (e.g. the contact-save
+      // call) - fall back to whatever's already saved. An explicit '' means "clear it" (e.g.
+      // switching to an account-shipping option before its account number is valid yet) and
+      // must actually clear to null, not silently re-assert the previous method.
+      shippingMethodCode:
+        shippingMethodCode !== undefined
+          ? shippingMethodCode || null
+          : checkout.fulfillmentInfo?.shippingMethodCode || null,
 
-      shippingMethodName: shippingMethodName ? shippingMethodName : null,
+      shippingMethodName:
+        shippingMethodName !== undefined
+          ? shippingMethodName || null
+          : checkout.fulfillmentInfo?.shippingMethodName || null,
     } as CrFulfillmentInfoInput,
   } as ShippingParams
 }
