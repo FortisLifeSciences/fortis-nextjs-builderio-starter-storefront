@@ -235,9 +235,16 @@ const ReviewStep = (props: ReviewStepProps) => {
   const userEnteredPassword: string = watch(['password']).join('')
 
   const [instructionsValue, setInstructionsValue] = useState<string>('')
+  const [quoteReferenceValue, setQuoteReferenceValue] = useState<string>('')
+  const [isPlacingOrder, setIsPlacingOrder] = useState<boolean>(false)
+  const specialInstructionMaxLength = 500
 
   const handleInstChange = (event: any) => {
-    setInstructionsValue(event.target.value)
+    setInstructionsValue(event.target.value.slice(0, specialInstructionMaxLength))
+  }
+
+  const handleQuoteReferenceChange = (event: any) => {
+    setQuoteReferenceValue(event.target.value)
   }
 
   const isEnabled = () => {
@@ -257,6 +264,8 @@ const ReviewStep = (props: ReviewStepProps) => {
     setAgreeWithTermsAndConditions(event.target.checked)
 
   const onValid = async (formData: PersonalDetails) => {
+    if (isPlacingOrder) return
+    setIsPlacingOrder(true)
     try {
       if (formData?.showAccountFields) {
         const account = await createAccount({
@@ -271,9 +280,16 @@ const ReviewStep = (props: ReviewStepProps) => {
         }
       }
 
-      if (instructionsValue) {
+      const comments = [
+        quoteReferenceValue ? `${t('quote-reference-number')}: ${quoteReferenceValue}` : '',
+        instructionsValue,
+      ]
+        .filter(Boolean)
+        .join('\n')
+
+      if (comments) {
         checkout.shopperNotes = checkout.shopperNotes || {}
-        checkout.shopperNotes.comments = instructionsValue
+        checkout.shopperNotes.comments = comments
         await updateOrder.mutateAsync(checkout as CrOrder)
       }
       await onCreateOrder(checkout)
@@ -282,6 +298,8 @@ const ReviewStep = (props: ReviewStepProps) => {
       // setStepNext()
     } catch (e) {
       console.log('error', e)
+    } finally {
+      setIsPlacingOrder(false)
     }
   }
   const algoliaObjectData = () => {
@@ -711,6 +729,35 @@ const ReviewStep = (props: ReviewStepProps) => {
         </Box>
       </Box>
 
+      <Box sx={{ marginBottom: '20px' }}>
+        <Typography
+          variant="body2"
+          component="label"
+          htmlFor="quoteReference"
+          sx={{ marginBottom: '10px' }}
+        >
+          {t('do-you-have-a-quote')}
+        </Typography>
+        <Box>
+          <TextField
+            id="quoteReference"
+            variant="outlined"
+            fullWidth
+            aria-label="Quote Reference #"
+            placeholder={t('quote-reference-number')}
+            InputProps={{
+              sx: { fontSize: '16px' },
+              'aria-label': 'Quote Reference #',
+            }}
+            value={quoteReferenceValue}
+            onChange={handleQuoteReferenceChange}
+          />
+        </Box>
+        <Typography variant="caption" color="text.secondary">
+          {t('quoted-pricing-reflected-in-final-invoice')}
+        </Typography>
+      </Box>
+
       <Box sx={{ marginBottom: '10px' }}>
         <Typography
           variant="body2"
@@ -728,6 +775,7 @@ const ReviewStep = (props: ReviewStepProps) => {
             variant="outlined"
             fullWidth
             aria-label="Special Instruction"
+            inputProps={{ maxLength: specialInstructionMaxLength }}
             InputProps={{
               sx: {
                 fontSize: '16px',
@@ -738,12 +786,12 @@ const ReviewStep = (props: ReviewStepProps) => {
             onChange={handleInstChange}
           />
         </Box>
-      </Box>
-
-      <Box>
-        <Typography variant="body2">
-          If you have received a Quote, please include the Quote Reference # in the Special
-          Instructions section above. Quoted pricing will be reflected in your final invoice.
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ display: 'block', textAlign: 'right' }}
+        >
+          {instructionsValue.length}/{specialInstructionMaxLength}
         </Typography>
       </Box>
 
@@ -796,7 +844,7 @@ const ReviewStep = (props: ReviewStepProps) => {
               defaultValue={isAuthenticated ? false : personalDetails?.showAccountFields}
               render={({ field }) => (
                 <FormControlLabel
-                  sx={{ display: isAuthenticated ? 'none' : 'none' }}
+                  sx={{ display: isAuthenticated ? 'none' : 'flex' }}
                   control={
                     <Checkbox
                       inputProps={{
@@ -886,6 +934,7 @@ const ReviewStep = (props: ReviewStepProps) => {
             ...styles.confirmAndPayButtonStyle,
           }}
           disabled={!isEnabled()}
+          loading={isPlacingOrder}
           onClick={handleComplete}
           tabIndex={0}
         >

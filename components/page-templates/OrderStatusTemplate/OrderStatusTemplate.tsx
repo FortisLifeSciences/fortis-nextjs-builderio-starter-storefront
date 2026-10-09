@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
 
-import { Grid } from '@mui/material'
+import { Box, CircularProgress, Grid } from '@mui/material'
+import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
 import KiboBreadcrumbs from '@/components/core/Breadcrumbs/KiboBreadcrumbs'
-import { ViewOrderDetails, ViewOrderStatus } from '@/components/order'
+import { OrderStatusDetails, ViewOrderStatus } from '@/components/order'
 import type { OrderStatusFormDataProps } from '@/components/order/ViewOrderStatus/ViewOrderStatus'
 import { useGetCustomerOrders } from '@/hooks'
 
@@ -18,10 +19,15 @@ const styles = {
 }
 
 const OrderStatusTemplate = () => {
+  const router = useRouter()
+  // Deep-linked from "Track Order" via ?orderNumber=&billingEmail=
+  const { orderNumber: queryOrderNumber, billingEmail: queryBillingEmail } = router.query
+  const hasDeepLinkedOrder = Boolean(queryOrderNumber && queryBillingEmail)
+
   const [queryFilters, setQueryFilters] = useState<OrderStatusFormDataProps>({
-    billingEmail: '',
-    orderNumber: '',
-    isRefetching: true,
+    billingEmail: typeof queryBillingEmail === 'string' ? queryBillingEmail : '',
+    orderNumber: typeof queryOrderNumber === 'string' ? queryOrderNumber : '',
+    isRefetching: hasDeepLinkedOrder,
   })
 
   const { t } = useTranslation('common')
@@ -40,16 +46,23 @@ const OrderStatusTemplate = () => {
     if (isFetching) setQueryFilters({ ...queryFilters, isRefetching: false })
   }, [isFetching])
 
+  // `pageCount` only exists once a fetch has completed - a pending lookup isn't "no order found".
+  const isLookingUpOrder =
+    Boolean(queryFilters.orderNumber && queryFilters.billingEmail) && pageCount === undefined
+
   return (
     <Grid container px={1}>
       <Grid item xs={12} sx={{ ...styles.breadcrumbsClass }}>
         <KiboBreadcrumbs breadcrumbs={breadCrumbsList} />
       </Grid>
       <Grid item xs={12}>
-        {order?.id && (
-          <ViewOrderDetails title={t('view-order-status')} isOrderStatus={true} order={order} />
-        )}
-        {!order?.id && (
+        {order?.id ? (
+          <OrderStatusDetails order={order} />
+        ) : isLookingUpOrder ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+            <CircularProgress />
+          </Box>
+        ) : (
           <ViewOrderStatus
             onOrderStatusSubmit={handleOrderStatusSubmit}
             lookupWarningMessage={pageCount === 0 ? t('no-orders-found') : ''}

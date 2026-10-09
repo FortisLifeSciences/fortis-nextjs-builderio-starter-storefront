@@ -4,6 +4,7 @@ import type { PriceOnly, PriceRange, SalePrice } from '@/lib/types'
 interface PriceProps extends PriceOnly, SalePrice, PriceStyles {
   priceRange?: PriceRange
   color?: string
+  sx?: SxProps<Theme>
 }
 interface PriceStyles {
   variant?: 'body2' | 'body1' | 'subtitle1'
@@ -53,8 +54,10 @@ const PriceTypography = (priceTypographyProps: PriceTypographyProps) => {
   )
 }
 
-const SalePriceTypography = (salePriceTypographyProps: SalePrice & PriceStyles) => {
-  const { price, salePrice, variant, fontWeight, color } = salePriceTypographyProps
+const SalePriceTypography = (
+  salePriceTypographyProps: SalePrice & PriceStyles & { sx?: SxProps<Theme> }
+) => {
+  const { price, salePrice, variant, fontWeight, color, sx } = salePriceTypographyProps
 
   return (
     <>
@@ -66,6 +69,7 @@ const SalePriceTypography = (salePriceTypographyProps: SalePrice & PriceStyles) 
         sx={{
           ...styles.price,
           ...(salePrice && styles.oldPrice),
+          ...sx,
         }}
       >
         {price}
@@ -96,7 +100,7 @@ const PriceRangeTypography = ({ priceRange }: { priceRange: PriceRange }) => {
 }
 
 const Price = (props: PriceProps) => {
-  const { price, salePrice, priceRange, variant, fontWeight, color } = props
+  const { price, salePrice, priceRange, variant, fontWeight, color, sx } = props
 
   return (
     <Box display="flex" gap="0.625rem" alignItems="center">
@@ -109,6 +113,7 @@ const Price = (props: PriceProps) => {
           variant={variant}
           color={color}
           fontWeight={fontWeight}
+          sx={sx}
         />
       )}
     </Box>

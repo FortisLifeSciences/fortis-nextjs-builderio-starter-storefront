@@ -1,4 +1,4 @@
-import { Stack } from '@mui/material'
+import { Box, Stack } from '@mui/material'
 import getConfig from 'next/config'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 
@@ -35,7 +35,9 @@ const OrderConfirmationPage: NextPage = (props: any) => {
   return (
     <>
       <Stack sx={{ paddingY: 2 }}>
-        <OrderConfirmation order={checkout as CrOrder} />
+        <Box sx={{ maxWidth: '630px', width: '100%', mx: 'auto' }}>
+          <OrderConfirmation order={checkout as CrOrder} />
+        </Box>
       </Stack>
     </>
   )

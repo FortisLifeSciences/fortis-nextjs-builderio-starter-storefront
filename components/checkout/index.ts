@@ -1,4 +1,5 @@
 export { default as DetailsStep } from '@/components/checkout/DetailsStep/DetailsStep'
+export { default as GuestCheckoutStep } from '@/components/checkout/GuestCheckoutStep/GuestCheckoutStep'
 export { default as CardDetailsForm } from '@/components/checkout/CardDetailsForm/CardDetailsForm'
 export { default as PaymentStep } from '@/components/checkout/PaymentStep/PaymentStep'
 export { default as KiboStepper } from '@/components/checkout/KiboStepper/KiboStepper'
@@ -9,3 +10,7 @@ export { default as StandardShippingStep } from '@/components/checkout/StandardS
 export { default as MultiShippingStep } from '@/components/checkout/MultiShippingStep/MultiShippingStep'
 export { default as CheckoutUITemplate } from '@/components/checkout/CheckoutUITemplate/CheckoutUITemplate'
 export { default as PurchaseOrderForm } from '@/components/checkout/PurchaseOrderForm/PurchaseOrderForm'
+export { default as PaymentOptionCard } from '@/components/checkout/PaymentOptionCard/PaymentOptionCard'
+export { default as ContactShippingSummary } from '@/components/checkout/ContactShippingSummary/ContactShippingSummary'
+export { default as ContactShippingForm } from '@/components/checkout/ContactShippingForm/ContactShippingForm'
+export { default as POCheckoutStep } from '@/components/checkout/POCheckoutStep/POCheckoutStep'
