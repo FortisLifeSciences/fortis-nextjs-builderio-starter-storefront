@@ -361,6 +361,10 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
     handleSubmit((formData) => onValidContact(formData, contactSignature))()
   }, [isValid, contactSignature])
 
+  useEffect(() => {
+    if (checkoutShippingMethodCode) setShippingMethodError('')
+  }, [checkoutShippingMethodCode])
+
   const handleSaveShippingMethod = (shippingMethodCode: string) => {
     const shippingMethodName =
       shippingMethods.find((method) => method.shippingMethodCode === shippingMethodCode)

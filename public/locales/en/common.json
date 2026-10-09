@@ -198,6 +198,8 @@
   "shipped": "Shipped",
   "shipped-description": "Package is on its way",
   "delivered-description": "Expected {{date}}",
+  "order-cancelled": "Cancelled",
+  "order-cancelled-description": "This order has been cancelled",
   "tracking-number": "Tracking Number: {{trackingNumber}}",
   "carrier-tracking": "{{carrier}} Tracking",
   "need-help": "Need help?",
