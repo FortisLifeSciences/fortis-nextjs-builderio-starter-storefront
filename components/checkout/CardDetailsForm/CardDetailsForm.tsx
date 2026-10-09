@@ -166,7 +166,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                 <KiboTextBox
                   value={field.value || ''}
                   label={t('expires-mm-yyyy')}
-                  placeholder={t('expiration-date-placeholder')}
+                  placeholder={t('expiry-date-placeholder')}
                   required={true}
                   onChange={(_name, value) => {
                     const formattedValue = value

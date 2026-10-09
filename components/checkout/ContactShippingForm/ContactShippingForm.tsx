@@ -2,11 +2,9 @@
 import React, { useEffect, useRef, useState } from 'react'
 
 import { yupResolver } from '@hookform/resolvers/yup'
-import AddIcon from '@mui/icons-material/Add'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'
 import { LoadingButton } from '@mui/lab'
-import { Box, Chip, Grid, Stack, Typography } from '@mui/material'
+import { Box, Grid, Stack, Typography } from '@mui/material'
 import MenuItem from '@mui/material/MenuItem'
 import uniqBy from 'lodash/uniqBy'
 import getConfig from 'next/config'
@@ -15,9 +13,10 @@ import { Controller, useForm, useWatch } from 'react-hook-form'
 import { isValidPhoneNumber } from 'react-phone-number-input'
 import * as yup from 'yup'
 
-import { ShippingMethod } from '@/components/checkout'
+import { ChoiceCard, ShippingMethod } from '@/components/checkout'
 import { checkoutColors } from '@/components/checkout/checkoutStyles'
 import { KiboPhoneInput, KiboSelect, KiboTextBox } from '@/components/common'
+import { toE164PhoneNumber } from '@/components/common/KiboPhoneInput/KiboPhoneInput'
 import { useUpdateOrderShippingInfo, useGetShippingMethods } from '@/hooks'
 import { AddressType, CountryCode, DefaultId } from '@/lib/constants'
 import { orderGetters, userGetters } from '@/lib/getters'
@@ -138,7 +137,7 @@ const isPrimaryShippingAddress = (contact: CustomerContact) =>
 
 // The account API can return the same address under more than one contact id - dedupe by
 // address content rather than id.
-const getAddressDedupeKey = (contact: CustomerContact) =>
+const getAddressDedupeKey = (contact?: Maybe<DefaultContact>) =>
   [
     contact?.companyOrOrganization,
     contact?.address?.address1,
@@ -152,89 +151,7 @@ const getAddressDedupeKey = (contact: CustomerContact) =>
     .join('|')
     .toLowerCase()
 
-// A full-width saved-address row, or the trailing "Add New" row.
-const AddressChoiceCard = ({
-  selected,
-  onClick,
-  primary,
-  addNew,
-  title,
-  subtitle,
-}: {
-  selected: boolean
-  onClick: () => void
-  primary?: boolean
-  addNew?: boolean
-  title?: string
-  subtitle?: string
-}) => {
-  const { t } = useTranslation('common')
-  return (
-    <Box
-      onClick={onClick}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1.5,
-        padding: '14px 20px',
-        borderRadius: '12px',
-        border: `1px solid ${selected ? checkoutColors.selectedBorder : checkoutColors.border}`,
-        backgroundColor: selected ? checkoutColors.selectedBg : '#fff',
-        cursor: 'pointer',
-        width: '100%',
-      }}
-    >
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '40px',
-          height: '40px',
-          borderRadius: '50%',
-          flexShrink: 0,
-          backgroundColor: selected ? checkoutColors.selectedBorder : '#F0F0F0',
-          color: selected ? '#fff' : checkoutColors.placeholder,
-        }}
-      >
-        {addNew ? <AddIcon /> : <LocationOnOutlinedIcon />}
-      </Box>
-      <Stack gap={0.25} flex={1} sx={{ minWidth: 0 }}>
-        <Stack direction="row" alignItems="center" gap={1} flexWrap="wrap">
-          <Typography
-            sx={{
-              fontWeight: 600,
-              fontSize: '15px',
-              color: addNew ? checkoutColors.selectedBorder : checkoutColors.subtitle,
-            }}
-          >
-            {addNew ? t('add-new') : title}
-          </Typography>
-          {primary && (
-            <Chip
-              label={t('primary')}
-              size="small"
-              sx={{
-                backgroundColor: checkoutColors.selectedBg,
-                color: checkoutColors.selectedBorder,
-                fontWeight: 600,
-                fontSize: '12px',
-              }}
-            />
-          )}
-        </Stack>
-        {subtitle && (
-          <Typography sx={{ fontSize: '13px', color: checkoutColors.placeholder }}>
-            {subtitle}
-          </Typography>
-        )}
-      </Stack>
-      {selected && <CheckCircleIcon sx={{ color: '#22C55E', flexShrink: 0 }} />}
-    </Box>
-  )
-}
-
-// Contact & shipping collection form shared by guest checkout and the logged-in PO
+// Contact & shipping collection form shared by guest checkout and the logged-in
 // checkout - identical fields/validation/mutations, only what happens on a valid
 // "Continue" differs per caller.
 const ContactShippingForm = (props: ContactShippingFormProps) => {
@@ -258,6 +175,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   // Signature of the contact fields last successfully saved - lets a re-selected saved address
   // (valid before and after, so `isValid` never flips) still trigger a fresh save.
   const lastSavedContactSignatureRef = useRef<string | null>(null)
+  const shippingMethodSaveQueueRef = useRef<Promise<boolean>>(Promise.resolve(true))
 
   // Primary sorted first, deduped by address content.
   const savedShippingAddresses = uniqBy(
@@ -266,9 +184,24 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
     ) as CustomerContact[],
     getAddressDedupeKey
   )
-  const [selectedAddressId, setSelectedAddressId] = useState<string>(
-    savedShippingAddresses?.length ? String(savedShippingAddresses[0].id) : NEW_ADDRESS_OPTION
-  )
+
+  const orderShippingContact = checkout?.fulfillmentInfo?.fulfillmentContact
+  const hasOrderShippingAddress = Boolean(orderShippingContact?.address?.address1)
+  const initialContact = hasOrderShippingAddress ? orderShippingContact : defaultContact
+
+  const getInitialAddressId = () => {
+    if (hasOrderShippingAddress) {
+      const orderAddressKey = getAddressDedupeKey(orderShippingContact)
+      const orderSavedAddress = savedShippingAddresses.find(
+        (address) => getAddressDedupeKey(address) === orderAddressKey
+      )
+      return orderSavedAddress ? String(orderSavedAddress.id) : NEW_ADDRESS_OPTION
+    }
+    return savedShippingAddresses?.length
+      ? String(savedShippingAddresses[0].id)
+      : NEW_ADDRESS_OPTION
+  }
+  const [selectedAddressId, setSelectedAddressId] = useState<string>(getInitialAddressId)
 
   const shipItems = orderGetters.getShipItems(checkout)
   const pickupItems = orderGetters.getPickupItems(checkout)
@@ -276,8 +209,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
 
   // A destination address may already be on the checkout from an earlier visit or an
   // auto-applied saved address - don't wait on `isNewAddressAdded`, a purely local flag.
-  const hasDestinationAddress =
-    isNewAddressAdded || Boolean(checkout?.fulfillmentInfo?.fulfillmentContact?.address?.address1)
+  const hasDestinationAddress = isNewAddressAdded || hasOrderShippingAddress
 
   const { updateOrderShippingInfo } = useUpdateOrderShippingInfo()
   const { data: shippingMethods, isLoading: isLoadingShippingMethods } = useGetShippingMethods(
@@ -309,26 +241,26 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   const contactSignature = JSON.stringify(watchedContactFields)
 
   useEffect(() => {
-    // `defaultContact` (a logged-in shopper's saved address) can arrive after this form has
+    // The contact already on the order (or else `defaultContact`) can arrive after this form has
     // already mounted and rendered with blank defaults - hydrate it in once it shows up.
     // Skip once the shopper has actually started editing, so this can't clobber their input.
-    if (!defaultContact || isDirty) return
+    if (!initialContact || isDirty) return
     reset({
-      firstName: defaultContact.firstName || '',
-      lastNameOrSurname: defaultContact.lastNameOrSurname || '',
-      workEmail: defaultContact.email || checkout?.email || '',
-      companyOrOrganization: defaultContact.companyOrOrganization || '',
-      phoneNumbers: { home: defaultContact.phoneNumbers?.home || '' },
+      firstName: initialContact.firstName || '',
+      lastNameOrSurname: initialContact.lastNameOrSurname || '',
+      workEmail: initialContact.email || checkout?.email || '',
+      companyOrOrganization: initialContact.companyOrOrganization || '',
+      phoneNumbers: { home: toE164PhoneNumber(initialContact.phoneNumbers?.home) },
       address: {
-        address1: defaultContact.address?.address1 || '',
-        address2: defaultContact.address?.address2 || '',
-        countryCode: defaultContact.address?.countryCode || countries?.[0]?.code,
-        stateOrProvince: defaultContact.address?.stateOrProvince || '',
-        cityOrTown: defaultContact.address?.cityOrTown || '',
-        postalOrZipCode: defaultContact.address?.postalOrZipCode || '',
+        address1: initialContact.address?.address1 || '',
+        address2: initialContact.address?.address2 || '',
+        countryCode: initialContact.address?.countryCode || countries?.[0]?.code,
+        stateOrProvince: initialContact.address?.stateOrProvince || '',
+        cityOrTown: initialContact.address?.cityOrTown || '',
+        postalOrZipCode: initialContact.address?.postalOrZipCode || '',
       },
     })
-  }, [defaultContact])
+  }, [initialContact])
 
   const applySavedAddress = (address: CustomerContact) => {
     setValue('firstName', address.firstName || getValues('firstName') || '', {
@@ -344,7 +276,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
     })
     setValue(
       'phoneNumbers.home',
-      address.phoneNumbers?.home || getValues('phoneNumbers.home') || '',
+      toE164PhoneNumber(address.phoneNumbers?.home) || getValues('phoneNumbers.home') || '',
       { shouldValidate: true }
     )
     setValue('companyOrOrganization', address.companyOrOrganization || '', {
@@ -365,11 +297,12 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   }
 
   useEffect(() => {
-    // Saved addresses load asynchronously - once the primary one shows up, select and apply
-    // it automatically (the shopper can still pick a different saved address, or "Add New").
+    // Saved addresses load asynchronously - once they show up, select the one already on the
+    // order, or else select and apply the primary one (the shopper can still pick a different
+    // saved address, or "Add New").
     if (!savedShippingAddresses?.length) return
-    setSelectedAddressId(String(savedShippingAddresses[0].id))
-    applySavedAddress(savedShippingAddresses[0])
+    setSelectedAddressId(getInitialAddressId())
+    if (!hasOrderShippingAddress) applySavedAddress(savedShippingAddresses[0])
   }, [savedShippingAddresses?.length])
 
   const handleSelectSavedAddress = (address: CustomerContact) => {
@@ -428,22 +361,27 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
     handleSubmit((formData) => onValidContact(formData, contactSignature))()
   }, [isValid, contactSignature])
 
-  const handleSaveShippingMethod = async (shippingMethodCode: string) => {
+  const handleSaveShippingMethod = (shippingMethodCode: string) => {
     const shippingMethodName =
       shippingMethods.find((method) => method.shippingMethodCode === shippingMethodCode)
         ?.shippingMethodName ?? ''
 
-    try {
-      await updateOrderShippingInfo.mutateAsync({
-        checkout,
-        contact: undefined,
-        email: checkout?.email as string,
-        shippingMethodCode,
-        shippingMethodName,
-      })
-    } catch (error) {
-      console.error(error)
-    }
+    shippingMethodSaveQueueRef.current = shippingMethodSaveQueueRef.current.then(async () => {
+      try {
+        await updateOrderShippingInfo.mutateAsync({
+          checkout,
+          contact: undefined,
+          email: checkout?.email as string,
+          shippingMethodCode,
+          shippingMethodName,
+        })
+        return true
+      } catch (error) {
+        console.error(error)
+        return false
+      }
+    })
+    return shippingMethodSaveQueueRef.current
   }
 
   const handleContinue = async () => {
@@ -569,8 +507,9 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
         {savedShippingAddresses?.length > 0 && (
           <Stack gap={1.5}>
             {savedShippingAddresses.map((address) => (
-              <AddressChoiceCard
+              <ChoiceCard
                 key={address.id}
+                icon={<LocationOnOutlinedIcon />}
                 selected={selectedAddressId === String(address.id)}
                 onClick={() => handleSelectSavedAddress(address)}
                 primary={isPrimaryShippingAddress(address)}
@@ -591,7 +530,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                   .join(' ')}
               />
             ))}
-            <AddressChoiceCard
+            <ChoiceCard
               selected={selectedAddressId === NEW_ADDRESS_OPTION}
               onClick={handleSelectNewAddress}
               addNew

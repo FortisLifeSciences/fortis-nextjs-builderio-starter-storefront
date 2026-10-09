@@ -42,7 +42,7 @@ interface GuestCheckoutStepProps {
   checkout: CrOrder
   updateCheckoutPersonalInfo: (params: { email: Maybe<string> | undefined }) => Promise<void>
   onVoidPayment: (id: string, paymentId: string, paymentAction: PaymentActionInput) => Promise<void>
-  onAddPayment: (id: string, paymentAction: PaymentActionInput) => Promise<void>
+  onAddPayment: (id: string, paymentAction: PaymentActionInput) => Promise<CrOrder | void>
   onCreateOrder: (checkout: CrOrder) => Promise<void>
 }
 
@@ -328,6 +328,7 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
                   isUserLoggedIn={false}
                   setAutoFocus={false}
                   validateForm={true}
+                  internationalPhoneInput
                   onSaveAddress={({ contact }) => setBillingContactForm(contact as CrContact)}
                   onFormStatusChange={(isValid) => {
                     setIsBillingFormValid(isValid)
