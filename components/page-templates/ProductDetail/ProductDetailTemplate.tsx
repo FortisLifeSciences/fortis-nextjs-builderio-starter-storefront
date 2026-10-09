@@ -108,11 +108,14 @@ const pdpBrandLogos: Record<string, string> = {
   nanocomposix: nanocomposixLogo.src,
   vector: vectorLogo.src,
 }
+type ProductVariation = (Product | FilteredProduct) & {
+  isNewVariant?: boolean
+}
 interface ProductDetailTemplateProps {
   product: ProductCustom
   sliceValue?: string
   selectedUrlVariant?: string
-  productVariations?: Product[] | FilteredProduct[]
+  productVariations?: ProductVariation[]
   breadcrumbs?: BreadCrumb[]
   isQuickViewModal?: boolean
   children?: any
@@ -231,7 +234,9 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     (type) => type === FulfillmentOptionsConstant.DIGITAL
   )
 
-  // console.log('This is updatedProduct ---> ', updatedProduct)
+  const newVariantProperty = product.properties?.find(
+    (prop) => prop?.attributeFQN?.toLowerCase() === 'tenant~new-product-variant'
+  )
 
   const sectionTargetUrl = PDPCustomAndBulkDisplayContentSection?.data?.targetUrl
   const [purchaseType, setPurchaseType] = useState<string>(PurchaseTypes.ONETIMEPURCHASE)
@@ -302,7 +307,6 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
   // Getters
   const {
     productName,
-    newVariantProductAttribute,
     productCode,
     variationProductCode,
     fulfillmentMethod,
@@ -326,6 +330,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     },
     productPriceResponse?.price as ProductPrice
   )
+
   const [variationCodeDynamic, setVariationCodeDynamic] = useState<string>()
   const [variantProductTitle, setVariantProductTitle] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -358,6 +363,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
           childPriority: variation.childPriority,
           price: variation.price,
           variationProductCode: variation.variationProductCode, // Add this if it exists
+          isNewVariant: variation.isNewVariant,
         })
       }
     })
@@ -372,6 +378,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
             optionValue.childPriority = variationData.childPriority
             optionValue.price = { ...variationData.price }
             optionValue.variationProductCode = variationData.variationProductCode
+            optionValue.isNewVariant = variationData.isNewVariant
           }
         }
       })
@@ -1044,6 +1051,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                   childPriority: value?.childPriority,
                   price: value?.price,
                   variationProductCode: value?.variationProductCode,
+                  isNewVariant: value?.isNewVariant,
                   label: value?.stringValue || value?.value,
                   value: value?.value,
                   name: option?.attributeDetail?.name || '',
@@ -1055,7 +1063,6 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                     <FortisRadio
                       name={option?.attributeDetail?.name || ''}
                       title={option?.attributeDetail?.name}
-                      newVariantProductAttribute={newVariantProductAttribute}
                       selected={productGetters.getOptionSelectedValue(option as ProductOption)}
                       radioOptions={radioOptions}
                       skuStatusText={skuStatusText}
