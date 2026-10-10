@@ -24,6 +24,7 @@ export enum OrderStatus {
   COMPLETED = 'Completed',
   CREATED = 'Created',
   CANCELED = 'Cancelled',
+  ERRORED = 'Errored',
 }
 
 export enum ReturnStatus {
