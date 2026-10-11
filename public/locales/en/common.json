@@ -200,6 +200,8 @@
   "delivered-description": "Expected {{date}}",
   "order-cancelled": "Cancelled",
   "order-cancelled-description": "This order has been cancelled",
+  "order-errored": "Order Issue",
+  "order-errored-description": "We ran into a problem processing this order. Please contact support.",
   "tracking-number": "Tracking Number: {{trackingNumber}}",
   "carrier-tracking": "{{carrier}} Tracking",
   "need-help": "Need help?",

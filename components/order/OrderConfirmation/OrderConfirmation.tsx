@@ -12,6 +12,7 @@ import { useReactToPrint } from 'react-to-print'
 
 import { OrderPrice } from '@/components/common'
 import { useProductCardActions } from '@/hooks'
+import { OrderStatus } from '@/lib/constants'
 import { orderGetters, productGetters } from '@/lib/getters'
 
 import type { CrOrder, CrOrderItem, CrProduct, Maybe } from '@/lib/gql/types'
@@ -107,7 +108,7 @@ const OrderConfirmation = ({ order }: { order: CrOrder }) => {
     const fetchShopperNotes = async () => {
       const response = await getOrderNotes(order)
       setShopperNotes(response?.data?.shopperNotes)
-      if (response.data && response.data.status && response.data.status !== 'Errored') {
+      if (response.data && response.data.status && response.data.status !== OrderStatus.ERRORED) {
         handleDeleteCurrentCart()
       }
     }
