@@ -271,7 +271,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
       address.lastNameOrSurname || getValues('lastNameOrSurname') || '',
       { shouldValidate: true }
     )
-    setValue('workEmail', address.email || getValues('workEmail') || '', {
+    setValue('workEmail', getValues('workEmail') || address.email || '', {
       shouldValidate: true,
     })
     setValue(
