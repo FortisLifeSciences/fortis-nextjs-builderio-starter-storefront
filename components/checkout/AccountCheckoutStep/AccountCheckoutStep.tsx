@@ -255,8 +255,10 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   const provinces = publicRuntimeConfig.provinces
 
   const accountName = user?.companyOrOrganization || shippingContact?.companyOrOrganization || ''
-  const paymentTermDescription =
-    customerPurchaseOrderAccount?.customerPurchaseOrderPaymentTerms?.[0]?.description
+  const paymentTerm = customerPurchaseOrderAccount?.customerPurchaseOrderPaymentTerms?.find(
+    (term) => term?.siteId === checkout.siteId
+  )
+  const paymentTermDescription = paymentTerm?.description
 
   const handleSelectCard = (cardId: string) => {
     setSelectedCardId(cardId)
@@ -297,7 +299,13 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     return buildPurchaseOrderPaymentActionForCheckoutParams(
       CurrencyCode.US,
       checkout,
-      { purchaseOrderNumber: poNumber, customFields: [] } as CrPurchaseOrderPayment,
+      {
+        purchaseOrderNumber: poNumber,
+        paymentTerm: paymentTerm
+          ? { code: paymentTerm.code, description: paymentTerm.description }
+          : undefined,
+        customFields: [],
+      } as CrPurchaseOrderPayment,
       billingContact,
       billingAddressSameAsShipping
     )
