@@ -5,6 +5,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined'
 import { LoadingButton } from '@mui/lab'
 import { Box, Drawer, IconButton, Stack, Typography, Divider, Button, Link } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
@@ -13,8 +14,9 @@ import LoginDialog from '@/components/layout/Login/LoginDialog/LoginDialog'
 import { useAuthContext, useHeaderContext, useModalContext } from '@/context'
 import { useGetCart, useUpdateCartItemQuantity, useDeleteCartItem, useInitiateOrder } from '@/hooks'
 import { cartGetters, cartItemGetters, orderGetters } from '@/lib/getters'
+import { cartKeys, checkoutKeys, shippingMethodKeys } from '@/lib/react-query/queryKeys'
 
-import type { CrCartItem } from '@/lib/gql/types'
+import type { CrCart, CrCartItem, CrOrder } from '@/lib/gql/types'
 
 const styles = {
   paper: {
@@ -47,6 +49,10 @@ const CartSideDrawer = () => {
   const { isCartDrawerVisible } = headerState
   const { isAuthenticated } = useAuthContext()
   const { showModal } = useModalContext()
+  const queryClient = useQueryClient()
+
+  const isCheckoutPage = router.pathname === '/checkout/[checkoutId]'
+  const checkoutId = router.query.checkoutId as string | undefined
 
   const { data: cart } = useGetCart()
   const cartItems = cartGetters.getCartItems(cart) as CrCartItem[]
@@ -62,13 +68,43 @@ const CartSideDrawer = () => {
 
   const handleClose = () => toggleCartDrawer(false)
 
+  const refreshCheckoutQueries = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: checkoutKeys.all }),
+      queryClient.invalidateQueries({ queryKey: shippingMethodKeys.all }),
+    ])
+
+  const syncCheckoutWithCart = async () => {
+    if (!isCheckoutPage || !checkoutId) return
+
+    const currentCheckout = queryClient.getQueryData<CrOrder>(checkoutKeys.detail(checkoutId))
+    if (currentCheckout?.originalQuoteId) return
+
+    const latestCart = queryClient.getQueryData<CrCart>(cartKeys.all)
+    if (!latestCart?.items?.length) {
+      router.replace('/')
+      return
+    }
+
+    try {
+      const syncedCheckout = await initiateOrder.mutateAsync({ cartId: latestCart.id as string })
+      if (syncedCheckout?.id && syncedCheckout.id !== checkoutId) {
+        router.replace(`/checkout/${syncedCheckout.id}`)
+        return
+      }
+      await refreshCheckoutQueries()
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   const handleQuantityChange = (cartItemId: string, quantity: number) => {
     if (quantity < 1) return
-    updateCartItemQuantity.mutate({ cartItemId, quantity })
+    updateCartItemQuantity.mutate({ cartItemId, quantity }, { onSettled: syncCheckoutWithCart })
   }
 
   const handleDelete = (cartItemId: string) => {
-    deleteCartItem.mutate({ cartItemId })
+    deleteCartItem.mutate({ cartItemId }, { onSettled: syncCheckoutWithCart })
   }
 
   const handleBrowseProducts = () => {
@@ -86,6 +122,10 @@ const CartSideDrawer = () => {
       const checkout = await initiateOrder.mutateAsync({ cartId: cart?.id as string })
       if (checkout?.id) {
         handleClose()
+        if (checkout.id === checkoutId) {
+          await refreshCheckoutQueries()
+          return
+        }
         router.push(`/checkout/${checkout.id}`)
       }
     } catch (err) {
@@ -190,7 +230,8 @@ const CartSideDrawer = () => {
               const lineId = cartItemGetters.getCartItemLineId(item)
               const quantity = cartItemGetters.getCartItemQuantity(item)
               const unitPrice = cartItemGetters.getCartItemUnitPrice(item)
-              const productCode = cartItemGetters.getCartItemProductCode(item)
+              const productCode =
+                item.product?.variationProductCode || cartItemGetters.getCartItemProductCode(item)
 
               return (
                 <Box key={lineId}>
