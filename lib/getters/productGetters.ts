@@ -312,10 +312,6 @@ const getProductDetails = (product: ProductCustom, pdpProductPrice?: ProductPric
 
   return {
     productName: getName(product),
-    newVariantProductAttribute: {
-      isNewVariant: newVariantProductAttribute === 'true' ? true : false,
-      variationProductCode: getVariationProductCodeOrProductCode(product),
-    },
     productCode: getProductId(product),
     variationProductCode: getVariationProductCodeOrProductCode(product),
     fulfillmentMethod: getSelectedFulfillmentOption(product),

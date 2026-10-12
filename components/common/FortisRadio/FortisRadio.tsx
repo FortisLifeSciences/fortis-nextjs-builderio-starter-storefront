@@ -15,7 +15,6 @@ import * as cookieNext from 'cookies-next'
 interface FortisRadioProps {
   name?: string
   title?: string | React.ReactNode
-  newVariantProductAttribute?: any
   selected?: string
   align?: 'baseline' | 'center' | 'flex-start'
   row?: boolean
@@ -24,6 +23,7 @@ interface FortisRadioProps {
   ousShowPrices?: boolean | null
   radioOptions: {
     variationProductCode?: string
+    isNewVariant?: boolean
     price?: any
     label: string | number | ReactElement<any, string | JSXElementConstructor<any>>
     value: string
@@ -39,7 +39,6 @@ export const FortisRadio = (props: FortisRadioProps) => {
   const {
     name,
     title,
-    newVariantProductAttribute,
     radioOptions,
     skuStatusText,
     showPrices,
@@ -189,22 +188,20 @@ export const FortisRadio = (props: FortisRadioProps) => {
                 >
                   {radio.label}
                 </Typography>
-                {newVariantProductAttribute?.isNewVariant &&
-                  radio.variationProductCode ===
-                    newVariantProductAttribute.variationProductCode && (
-                    <Box
-                      sx={{
-                        width: { md: '80px', sm: '80px', xs: '40px' },
-                        height: { md: '40px', sm: '40px', xs: '20px' },
-                        backgroundSize: { md: 'cover', sm: 'cover', xs: 'cover' },
-                        backgroundRepeat: 'no-repeat',
-                        backgroundPosition: 'center',
-                      }}
-                      style={{
-                        backgroundImage: `url('/NewTag.svg')`,
-                      }}
-                    ></Box>
-                  )}
+                {radio.isNewVariant && (
+                  <Box
+                    sx={{
+                      width: { md: '80px', sm: '80px', xs: '40px' },
+                      height: { md: '40px', sm: '40px', xs: '20px' },
+                      backgroundSize: 'cover',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'center',
+                    }}
+                    style={{
+                      backgroundImage: `url('/NewTag.svg')`,
+                    }}
+                  />
+                )}
               </Box>
 
               {/* Catalog Number */}
