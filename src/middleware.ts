@@ -172,7 +172,6 @@ export async function middleware(request: NextRequest) {
     if (cachedRedirects && cachedRedirectsTimestamp) {
       const currentTime = Date.now()
       if (currentTime - cachedRedirectsTimestamp < CACHE_EXPIRATION_TIME * 1000) {
-        console.log('Using cached redirects')
         return handleRedirects(request, cachedRedirects)
       } else {
         // Cache is stale but within stale-while-revalidate window, serve stale data and re-fetch
@@ -180,7 +179,6 @@ export async function middleware(request: NextRequest) {
           currentTime - cachedRedirectsTimestamp <
           (CACHE_EXPIRATION_TIME + STALE_WHILE_REVALIDATE_TIME) * 1000
         ) {
-          console.log('Serving stale redirects while revalidating')
           // Serve the stale cached redirects while fetching fresh data in the background
           fetchEdgeConfigRedirects()
           return handleRedirects(request, cachedRedirects)
@@ -188,8 +186,6 @@ export async function middleware(request: NextRequest) {
       }
     } else {
       const edgeRedirects = await fetchEdgeConfigRedirects()
-
-      console.log('edgeRedirects in middlware function:', edgeRedirects)
 
       if (!Array.isArray(edgeRedirects)) {
         console.error('Error: Edge Config data is not an array')
@@ -199,7 +195,6 @@ export async function middleware(request: NextRequest) {
       const customEdgeRedirect = edgeRedirects.find((entry) => entry.source === pathname)
 
       if (customEdgeRedirect) {
-        console.log('Match found customEdgeRedirect:', customEdgeRedirect)
         const finalUrl = new URL(customEdgeRedirect.destination, request.url)
 
         return applySecurityHeaders(
@@ -307,10 +302,6 @@ async function handleRedirects(
   const customCachedEdgeRedirect = redirectsCached.find((entry) => entry.source === pathname)
 
   if (customCachedEdgeRedirect) {
-    console.log(
-      'Match found customCachedEdgeRedirect in handlredirects method:',
-      customCachedEdgeRedirect
-    )
     const finalUrl = new URL(customCachedEdgeRedirect.destination, request.url)
     return applySecurityHeaders(
       NextResponse.redirect(finalUrl, customCachedEdgeRedirect.permanent ? 308 : 307)
@@ -331,7 +322,6 @@ async function fetchEdgeConfigRedirects(): Promise<
       // Cache the redirects for subsequent requests
       cachedRedirects = edgeRedirectsFromApi
       cachedRedirectsTimestamp = Date.now()
-      console.log('Fetched edgeRedirectsFromApi from Edge Config:', edgeRedirectsFromApi)
       return edgeRedirectsFromApi
     } else {
       console.error('Error: Edge Config data is not a valid array or is empty')
