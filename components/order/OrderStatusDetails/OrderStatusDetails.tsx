@@ -4,6 +4,7 @@ import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import CreditCardOutlinedIcon from '@mui/icons-material/CreditCardOutlined'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined'
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
@@ -110,11 +111,30 @@ const OrderStatusDetails = ({ order }: { order: CrOrder }) => {
 
   // No dedicated "processing"/"shipped" status field exists on the order - derive a best-effort
   // timeline instead: a package means shipped, OrderStatus.COMPLETED means delivered.
-  const isCancelled = orderStatus === OrderStatus.CANCELED
   const hasShipped = packages.length > 0
   const isDelivered = orderStatus === OrderStatus.COMPLETED
   const isProcessingStarted = orderStatus === 'Processing' || hasShipped || isDelivered
-  const stepsComplete = isCancelled
+
+  const terminalStep: DeliveryStep | null =
+    orderStatus === OrderStatus.CANCELED
+      ? {
+          key: 'cancelled',
+          label: t('order-cancelled'),
+          description: t('order-cancelled-description'),
+          icon: <CancelOutlinedIcon />,
+          isError: true,
+        }
+      : orderStatus === OrderStatus.ERRORED
+      ? {
+          key: 'errored',
+          label: t('order-errored'),
+          description: t('order-errored-description'),
+          icon: <ErrorOutlineIcon />,
+          isError: true,
+        }
+      : null
+
+  const stepsComplete = terminalStep
     ? [true, true]
     : [true, isProcessingStarted, hasShipped || isDelivered, isDelivered]
   const currentStepIndex = stepsComplete.indexOf(false)
@@ -127,17 +147,8 @@ const OrderStatusDetails = ({ order }: { order: CrOrder }) => {
     date: submittedDate as string,
   }
 
-  const deliverySteps: DeliveryStep[] = isCancelled
-    ? [
-        placedStep,
-        {
-          key: 'cancelled',
-          label: t('order-cancelled'),
-          description: t('order-cancelled-description'),
-          icon: <CancelOutlinedIcon />,
-          isError: true,
-        },
-      ]
+  const deliverySteps: DeliveryStep[] = terminalStep
+    ? [placedStep, terminalStep]
     : [
         placedStep,
         {
