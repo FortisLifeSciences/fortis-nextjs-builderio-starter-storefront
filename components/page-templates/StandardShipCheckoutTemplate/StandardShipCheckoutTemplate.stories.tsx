@@ -21,7 +21,7 @@ export default {
 } as ComponentMeta<typeof StandardShipCheckoutTemplate>
 
 const Template: ComponentStory<typeof StandardShipCheckoutTemplate> = (args) => (
-  <CheckoutStepProvider steps={['details', 'shipping', 'payment', 'review']}>
+  <CheckoutStepProvider steps={['shipping']}>
     <StandardShipCheckoutTemplate {...args} />
   </CheckoutStepProvider>
 )

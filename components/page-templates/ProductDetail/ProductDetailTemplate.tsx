@@ -108,11 +108,14 @@ const pdpBrandLogos: Record<string, string> = {
   nanocomposix: nanocomposixLogo.src,
   vector: vectorLogo.src,
 }
+type ProductVariation = (Product | FilteredProduct) & {
+  isNewVariant?: boolean
+}
 interface ProductDetailTemplateProps {
   product: ProductCustom
   sliceValue?: string
   selectedUrlVariant?: string
-  productVariations?: Product[] | FilteredProduct[]
+  productVariations?: ProductVariation[]
   breadcrumbs?: BreadCrumb[]
   isQuickViewModal?: boolean
   children?: any
@@ -181,6 +184,7 @@ const getDocumentListDocuments = async (documentListName: string, filter: string
 }
 const variantProperties = [
   'tenant~applications-variant',
+  'tenant~new-product-variant',
   'tenant~conjugate-type-variant',
   'tenant~purity-variant',
   'tenant~stock-concentration',
@@ -230,7 +234,9 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     (type) => type === FulfillmentOptionsConstant.DIGITAL
   )
 
-  // console.log('This is updatedProduct ---> ', updatedProduct)
+  const newVariantProperty = product.properties?.find(
+    (prop) => prop?.attributeFQN?.toLowerCase() === 'tenant~new-product-variant'
+  )
 
   const sectionTargetUrl = PDPCustomAndBulkDisplayContentSection?.data?.targetUrl
   const [purchaseType, setPurchaseType] = useState<string>(PurchaseTypes.ONETIMEPURCHASE)
@@ -324,6 +330,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     },
     productPriceResponse?.price as ProductPrice
   )
+
   const [variationCodeDynamic, setVariationCodeDynamic] = useState<string>()
   const [variantProductTitle, setVariantProductTitle] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -356,6 +363,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
           childPriority: variation.childPriority,
           price: variation.price,
           variationProductCode: variation.variationProductCode, // Add this if it exists
+          isNewVariant: variation.isNewVariant,
         })
       }
     })
@@ -370,6 +378,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
             optionValue.childPriority = variationData.childPriority
             optionValue.price = { ...variationData.price }
             optionValue.variationProductCode = variationData.variationProductCode
+            optionValue.isNewVariant = variationData.isNewVariant
           }
         }
       })
@@ -438,7 +447,8 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
         })
 
         const result = await response.json()
-        setMinQuantity(result?.minQty)
+        // Fall back to 1 - undefined minQuantity broke the `quantity >= minQuantity` check below.
+        setMinQuantity(result?.minQty || 1)
         if (result?.minQty) setQuantity(result?.minQty)
         else setQuantity(1)
       } catch (error) {
@@ -1041,6 +1051,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                   childPriority: value?.childPriority,
                   price: value?.price,
                   variationProductCode: value?.variationProductCode,
+                  isNewVariant: value?.isNewVariant,
                   label: value?.stringValue || value?.value,
                   value: value?.value,
                   name: option?.attributeDetail?.name || '',
@@ -1192,8 +1203,8 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
                       >
                         <QuantitySelector
                           label="Quantity"
-                          quantity={quantity >= minQuantity ? quantity : minQuantity}
-                          minQty={minQuantity}
+                          quantity={quantity >= (minQuantity || 1) ? quantity : minQuantity || 1}
+                          minQty={minQuantity || 1}
                           {...(maxQuantity ? { maxQuantity } : {})}
                           onIncrease={() => setQuantity((prevQuantity) => Number(prevQuantity) + 1)}
                           onDecrease={() => setQuantity((prevQuantity) => Number(prevQuantity) - 1)}

@@ -20,12 +20,8 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '0 19px',
-    marginBottom: '5px',
-    px: {
-      xs: 0,
-      md: 0,
-    },
+    padding: 0,
+    marginBottom: '10px',
     width: {
       xs: '100%',
       md: '100%',
@@ -52,18 +48,29 @@ const OrderPriceList = (props: OrderPriceListProps) => {
           <ListItemText
             primary={
               <Typography
-                variant="body2"
                 component="h4"
-                color="grey.900"
-                sx={{ fontSize: '1.375rem' }}
+                sx={{
+                  fontFamily: 'Poppins',
+                  fontWeight: 400,
+                  fontSize: '15px',
+                  lineHeight: '150%',
+                  letterSpacing: '-0.005em',
+                  color: '#454545',
+                }}
               >
                 {t(title)}
               </Typography>
             }
           />
           <Price
-            fontWeight={Number(subTotal) < 0 ? '400' : '300'}
-            color={Number(subTotal) < 0 ? 'red.900' : 'grey.900'}
+            fontWeight="600"
+            color={Number(subTotal) < 0 ? 'error.main' : 'rgba(1, 1, 1, 0.74)'}
+            sx={{
+              fontFamily: 'Poppins',
+              fontSize: '15px',
+              lineHeight: '150%',
+              letterSpacing: '-0.005em',
+            }}
             price={t('currency', {
               val: discountedSubtotal ? discountedSubtotal : subTotal,
             })}
