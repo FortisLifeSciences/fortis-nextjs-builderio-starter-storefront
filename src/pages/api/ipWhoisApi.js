@@ -35,11 +35,6 @@ export default async function handler(req, res) {
         )
         const ipWhoisData = await ipWhoisResponse.json()
 
-        console.log('IP Address:', ip)
-        console.log('IPWhois Response:', ipWhoisData)
-
-        // console.log("IP Data:", ipWhoisData);
-
         if (ipWhoisData?.country_code) {
           setCookie('ipBasedCountryCode', ipWhoisData.country_code, {
             req,
