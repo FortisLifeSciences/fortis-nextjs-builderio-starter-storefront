@@ -176,9 +176,16 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
 
   const shippingContact = orderGetters.getShippingContact(checkout)
   const shippingAddress = shippingContact?.address
+  const isShippingStepComplete =
+    !!shippingContact?.email &&
+    (orderGetters.getShipItems(checkout).length === 0 ||
+      !!orderGetters.getShippingMethodCode(checkout))
   const [phase, setPhase] = useState<'shipping' | 'payment'>(
-    shippingContact?.email ? 'payment' : 'shipping'
+    isShippingStepComplete ? 'payment' : 'shipping'
   )
+  useEffect(() => {
+    setPhase(isShippingStepComplete ? 'payment' : 'shipping')
+  }, [checkout?.id])
   const isShippingLocked = phase !== 'shipping'
 
   const contactShippingDefaults = {

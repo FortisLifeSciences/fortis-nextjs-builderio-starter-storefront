@@ -31,9 +31,11 @@ import {
 import { AddressForm, KiboTextBox } from '@/components/common'
 import { LoginDialog } from '@/components/layout'
 import { useModalContext } from '@/context'
-import { useB2BAccountRequest, useUpdateOrder } from '@/hooks'
+import { useB2BAccountRequest, useInitiateOrder, useUpdateOrder } from '@/hooks'
 import { CurrencyCode, PaymentType, PaymentWorkflow } from '@/lib/constants'
 import { orderGetters } from '@/lib/getters'
+import { makeGraphQLClient } from '@/lib/gql/client'
+import { getCartQuery } from '@/lib/gql/queries'
 import { buildCardPaymentActionForCheckoutParams, tokenizeCreditCardPayment } from '@/lib/helpers'
 import type { CardForm, CardTypeForCheckout, TokenizedCard } from '@/lib/types'
 
@@ -59,6 +61,7 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
   const { showModal, closeModal } = useModalContext()
   const { updateOrder } = useUpdateOrder()
   const { createAccountAtCheckout } = useB2BAccountRequest()
+  const { initiateOrder } = useInitiateOrder()
   const router = useRouter()
   const accountResultRef = useRef<AccountAtCheckoutResult>()
 
@@ -82,13 +85,28 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
   // Purchase Order is a login-required option - opening the login dialog from here (rather
   // than a plain link) lets the shopper come straight back into checkout once they're signed
   // in. `checkoutPaymentIntent` tells the post-login PO checkout to default to the PO tab.
+  const moveToCheckoutForSignedInUser = async () => {
+    try {
+      const response = await makeGraphQLClient().request({ document: getCartQuery, variables: {} })
+      const cartId = response?.currentCart?.id
+      if (!cartId) return
+      const userCheckout = await initiateOrder.mutateAsync({ cartId })
+      if (userCheckout?.id && userCheckout.id !== checkout.id) {
+        router.replace(`/checkout/${userCheckout.id}`)
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   const openLoginModal = () =>
     showModal({
       Component: LoginDialog,
       props: {
-        onLoginSuccess: () => {
+        onLoginSuccess: async () => {
           sessionStorage.setItem('checkoutPaymentIntent', PaymentType.PURCHASEORDER)
           closeModal()
+          await moveToCheckoutForSignedInUser()
         },
       },
     })
