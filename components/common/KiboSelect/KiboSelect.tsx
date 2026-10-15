@@ -131,7 +131,6 @@ const KiboSelect = (props: KiboSelectProps) => {
         }}
         inputProps={{
           id: name,
-          'aria-hidden': false,
           'aria-label': label || name,
           'aria-labelledby': name,
         }}

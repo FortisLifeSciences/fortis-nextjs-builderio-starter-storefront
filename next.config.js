@@ -93,7 +93,7 @@ module.exports = {
       reCaptchaSecret: process.env.RECAPTCHA_SECRET,
       reCaptchaThreshold: process.env.RECAPTCHA_THRESHOLD,
     },
-    allowInvalidAddresses: true,
+    allowInvalidAddresses: false,
     customerAddressesPageSize: 50,
     shippingAddressPageSize: 5,
     billingAddressPageSize: 5,

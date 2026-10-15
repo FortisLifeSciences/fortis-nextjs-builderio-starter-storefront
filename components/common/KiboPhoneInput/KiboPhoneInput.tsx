@@ -290,6 +290,7 @@ const KiboPhoneInput = (props: KiboPhoneInputProps) => {
         <PhoneInput
           id={label}
           international
+          countryCallingCodeEditable={false}
           limitMaxLength
           addInternationalOption={false}
           defaultCountry={defaultCountry as any}

@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { yupResolver } from '@hookform/resolvers/yup'
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'
@@ -192,14 +192,19 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
         (address) => getAddressDedupeKey(address) === getAddressDedupeKey(orderShippingContact)
       )
     : undefined
-  const initialContact = hasOrderShippingAddress
-    ? {
-        ...orderShippingContact,
-        phoneNumbers: {
-          home: orderShippingContact?.phoneNumbers?.home || matchedSavedAddress?.phoneNumbers?.home,
-        },
-      }
-    : defaultContact
+  const initialContact = useMemo(
+    () =>
+      hasOrderShippingAddress
+        ? {
+            ...orderShippingContact,
+            phoneNumbers: {
+              home:
+                orderShippingContact?.phoneNumbers?.home || matchedSavedAddress?.phoneNumbers?.home,
+            },
+          }
+        : defaultContact,
+    [hasOrderShippingAddress, orderShippingContact, matchedSavedAddress]
+  )
 
   const getInitialAddressId = () => {
     if (hasOrderShippingAddress) {
@@ -233,6 +238,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
     reset,
     setValue,
     getValues,
+    setFocus,
     formState: { errors, isValid, isDirty },
   } = useForm<ContactShippingFormData>({
     mode: 'onChange',
@@ -403,10 +409,22 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
       // Force-validate on submit (mode: 'onChange' skips untouched fields otherwise). Only
       // validate the "Add New Address" fields when that's the active mode - they stay mounted
       // but hidden when a saved address is selected instead.
-      const isFormValid =
+      const fieldsToValidate =
         selectedAddressId === NEW_ADDRESS_OPTION
-          ? await trigger()
-          : await trigger(['firstName', 'lastNameOrSurname', 'workEmail', 'phoneNumbers.home'])
+          ? ([
+              'firstName',
+              'lastNameOrSurname',
+              'workEmail',
+              'phoneNumbers.home',
+              'companyOrOrganization',
+              'address.address1',
+              'address.cityOrTown',
+              'address.stateOrProvince',
+              'address.postalOrZipCode',
+              'address.countryCode',
+            ] as const)
+          : (['firstName', 'lastNameOrSurname', 'workEmail', 'phoneNumbers.home'] as const)
+      const isFormValid = await trigger(fieldsToValidate as any)
 
       // A shipping method is only choosable (and thus only required) when the order actually
       // has ship items - a pickup-only order has nothing to select and shouldn't be blocked on it.
@@ -414,7 +432,19 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
       const hasShippingMethod = !needsShippingMethod || !!checkoutShippingMethodCode
       setShippingMethodError(hasShippingMethod ? '' : t('please-select-shipping-method'))
 
-      if (isFormValid && hasShippingMethod) onContinue()
+      if (!isFormValid) {
+        for (const name of fieldsToValidate) {
+          // eslint-disable-next-line no-await-in-loop
+          const fieldIsValid = await trigger(name as any)
+          if (!fieldIsValid) {
+            setFocus(name as any)
+            break
+          }
+        }
+        return
+      }
+
+      if (hasShippingMethod) onContinue()
     } finally {
       setIsValidatingShipping(false)
     }
@@ -450,6 +480,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                   onChange={(_name: string, value: string) => field.onChange(value)}
                   onBlur={field.onBlur}
                   required
+                  autoComplete="new-first-name"
                 />
               )}
             />
@@ -468,6 +499,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                   onChange={(_name: string, value: string) => field.onChange(value)}
                   onBlur={field.onBlur}
                   required
+                  autoComplete="new-last-name"
                 />
               )}
             />
@@ -486,6 +518,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                   onChange={(_name: string, value: string) => field.onChange(value)}
                   onBlur={field.onBlur}
                   required
+                  autoComplete="new-work-email"
                 />
               )}
             />
@@ -570,6 +603,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                     onChange={(_name: string, value: string) => field.onChange(value)}
                     onBlur={field.onBlur}
                     required
+                    autoComplete="new-company"
                   />
                 )}
               />
@@ -588,6 +622,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                     onChange={(_name: string, value: string) => field.onChange(value)}
                     onBlur={field.onBlur}
                     required
+                    autoComplete="new-address1"
                   />
                 )}
               />
@@ -605,6 +640,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                     helperText={errors?.address?.address2?.message}
                     onChange={(_name: string, value: string) => field.onChange(value)}
                     onBlur={field.onBlur}
+                    autoComplete="new-address2"
                   />
                 )}
               />
@@ -671,6 +707,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                     onChange={(_name: string, value: string) => field.onChange(value)}
                     onBlur={field.onBlur}
                     required
+                    autoComplete="new-city"
                   />
                 )}
               />
@@ -691,6 +728,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                     }}
                     onBlur={field.onBlur}
                     required
+                    autoComplete="new-postal-code"
                     inputProps={{ minLength: 5, maxLength: 10 }}
                   />
                 )}
