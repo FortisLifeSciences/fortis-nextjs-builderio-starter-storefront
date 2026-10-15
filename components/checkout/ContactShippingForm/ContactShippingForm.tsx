@@ -475,7 +475,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                   onChange={(_name: string, value: string) => field.onChange(value)}
                   onBlur={field.onBlur}
                   required
-                  autoComplete="off"
+                  autoComplete="new-first-name"
                 />
               )}
             />
@@ -494,7 +494,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                   onChange={(_name: string, value: string) => field.onChange(value)}
                   onBlur={field.onBlur}
                   required
-                  autoComplete="off"
+                  autoComplete="new-last-name"
                 />
               )}
             />
@@ -513,7 +513,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                   onChange={(_name: string, value: string) => field.onChange(value)}
                   onBlur={field.onBlur}
                   required
-                  autoComplete="off"
+                  autoComplete="new-work-email"
                 />
               )}
             />
@@ -598,7 +598,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                     onChange={(_name: string, value: string) => field.onChange(value)}
                     onBlur={field.onBlur}
                     required
-                    autoComplete="off"
+                    autoComplete="new-company"
                   />
                 )}
               />
@@ -617,7 +617,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                     onChange={(_name: string, value: string) => field.onChange(value)}
                     onBlur={field.onBlur}
                     required
-                    autoComplete="off"
+                    autoComplete="new-address1"
                   />
                 )}
               />
@@ -635,7 +635,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                     helperText={errors?.address?.address2?.message}
                     onChange={(_name: string, value: string) => field.onChange(value)}
                     onBlur={field.onBlur}
-                    autoComplete="off"
+                    autoComplete="new-address2"
                   />
                 )}
               />
@@ -702,7 +702,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                     onChange={(_name: string, value: string) => field.onChange(value)}
                     onBlur={field.onBlur}
                     required
-                    autoComplete="off"
+                    autoComplete="new-city"
                   />
                 )}
               />
@@ -723,7 +723,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                     }}
                     onBlur={field.onBlur}
                     required
-                    autoComplete="off"
+                    autoComplete="new-postal-code"
                     inputProps={{ minLength: 5, maxLength: 10 }}
                   />
                 )}
