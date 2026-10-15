@@ -7,6 +7,9 @@ export const checkoutKeys = {
   all: ['checkout'] as const,
   detail: (id: string) => [...checkoutKeys.all, id] as const,
 }
+export const checkoutSyncKeys = {
+  all: ['checkoutSync'] as const,
+}
 export const checkoutDestinationKeys = {
   all: ['checkoutDestination'] as const,
   destinationId: (id: string) => [...checkoutDestinationKeys.all, id] as const,

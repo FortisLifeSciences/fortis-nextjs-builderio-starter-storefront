@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 
 import CreditCardIcon from '@mui/icons-material/CreditCard'
 import RequestQuoteOutlinedIcon from '@mui/icons-material/RequestQuoteOutlined'
@@ -31,7 +31,8 @@ import {
 import { AddressForm, KiboTextBox } from '@/components/common'
 import { LoginDialog } from '@/components/layout'
 import { useModalContext } from '@/context'
-import { useInitiateOrder, useUpdateOrder } from '@/hooks'
+import { useB2BAccountRequest, useInitiateOrder, useUpdateOrder } from '@/hooks'
+
 import { CurrencyCode, PaymentType, PaymentWorkflow } from '@/lib/constants'
 import { orderGetters } from '@/lib/getters'
 import { makeGraphQLClient } from '@/lib/gql/client'
@@ -39,6 +40,7 @@ import { getCartQuery } from '@/lib/gql/queries'
 import { buildCardPaymentActionForCheckoutParams, tokenizeCreditCardPayment } from '@/lib/helpers'
 import type { CardForm, CardTypeForCheckout, TokenizedCard } from '@/lib/types'
 
+import type { AccountAtCheckoutResult } from '@/hooks'
 import type { CrContact, CrOrder, Maybe, PaymentActionInput } from '@/lib/gql/types'
 
 interface GuestCheckoutStepProps {
@@ -59,8 +61,10 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
   const apiHost = publicRuntimeConfig?.apiHost as string
   const { showModal, closeModal } = useModalContext()
   const { updateOrder } = useUpdateOrder()
+  const { createAccountAtCheckout } = useB2BAccountRequest()
   const { initiateOrder } = useInitiateOrder()
   const router = useRouter()
+  const accountResultRef = useRef<AccountAtCheckoutRester>()
 
   // Payment is the last step of guest checkout (no separate Review step) - it places
   // the order itself, so its state lives here rather than behind the shared step context.
@@ -157,15 +161,40 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
         numberPart: tokenizedCardResponse.numberPart,
       }
 
+      let activeCheckout = checkout
+      let accountStatus: AccountAtCheckoutResult['status'] | undefined
+      if (wantsAccount) {
+        const accountResult =
+          accountResultRef.current ?? (await createAccountAtCheckout(checkout.id as string))
+        if (accountResult.status === 'failed') {
+          throw new Error('Account creation at checkout failed')
+        }
+        accountResultRef.current = accountResult
+        accountStatus = accountResult.status
+        if (accountResult.checkout) {
+          activeCheckout = accountResult.checkout
+          if (accountResult.status === 'guest' && activeCheckout.id !== checkout.id) {
+            router.replace(
+              {
+                pathname: router.pathname,
+                query: { ...router.query, checkoutId: activeCheckout.id },
+              },
+              undefined,
+              { shallow: true }
+            )
+          }
+        }
+      }
+
       const paymentAction = buildCardPaymentActionForCheckoutParams(
         CurrencyCode.US,
-        checkout,
+        activeCheckout,
         cardDetails,
         tokenizedData,
         billingContact,
         billingSameAsShipping
       )
-      await onAddPayment(checkout.id as string, paymentAction)
+      await onAddPayment(activeCheckout.id as string, paymentAction)
 
       const comments = [
         quoteReferenceValue ? `${t('quote-reference-number')}: ${quoteReferenceValue}` : '',
@@ -174,18 +203,17 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
         .filter(Boolean)
         .join('\n')
       if (comments) {
-        checkout.shopperNotes = checkout.shopperNotes || {}
-        checkout.shopperNotes.comments = comments
-        await updateOrder.mutateAsync(checkout)
+        activeCheckout.shopperNotes = activeCheckout.shopperNotes || {}
+        activeCheckout.shopperNotes.comments = comments
+        await updateOrder.mutateAsync(activeCheckout)
       }
 
-      // Persisted (rather than passed as component state) because placing the order navigates
-      // to a fresh page (/order-confirmation) that has to know this after the fact.
-      if (wantsAccount) {
+      if (accountStatus) {
         const shippingContact = orderGetters.getShippingContact(checkout)
         localStorage.setItem(
-          'wantsAccountCreation',
+          'accountCreationResult',
           JSON.stringify({
+            status: accountStatus === 'guest' ? 'failed' : accountStatus,
             firstName: shippingContact?.firstName || '',
             lastName: shippingContact?.lastNameOrSurname || '',
             company: shippingContact?.companyOrOrganization || '',
@@ -193,10 +221,10 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
           })
         )
       } else {
-        localStorage.removeItem('wantsAccountCreation')
+        localStorage.removeItem('accountCreationResult')
       }
 
-      await onCreateOrder(checkout)
+      await onCreateOrder(activeCheckout)
     } catch (error) {
       console.error(error)
       setPlaceOrderError(t('something-went-wrong'))

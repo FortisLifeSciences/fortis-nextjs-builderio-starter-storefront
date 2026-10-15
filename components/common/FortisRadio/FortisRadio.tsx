@@ -23,6 +23,7 @@ interface FortisRadioProps {
   ousShowPrices?: boolean | null
   radioOptions: {
     variationProductCode?: string
+    isNewVariant?: boolean
     price?: any
     label: string | number | ReactElement<any, string | JSXElementConstructor<any>>
     value: string
@@ -187,6 +188,20 @@ export const FortisRadio = (props: FortisRadioProps) => {
                 >
                   {radio.label}
                 </Typography>
+                {radio.isNewVariant && (
+                  <Box
+                    sx={{
+                      width: { md: '80px', sm: '80px', xs: '40px' },
+                      height: { md: '40px', sm: '40px', xs: '20px' },
+                      backgroundSize: 'cover',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'center',
+                    }}
+                    style={{
+                      backgroundImage: `url('/NewTag.svg')`,
+                    }}
+                  />
+                )}
               </Box>
 
               {/* Catalog Number */}

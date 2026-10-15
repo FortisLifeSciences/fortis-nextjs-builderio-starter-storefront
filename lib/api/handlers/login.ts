@@ -64,6 +64,6 @@ export default async function loginHandler(req: NextApiRequestWithLogger, res: N
     res.status(200).json(loginResponse)
   } catch (error: any) {
     res.status(error?.code).json({ message: error?.message })
-    req.logger.error(error, 'Error in Login handler')
+    req.logger.error('Error in Login handler', { message: error?.message, code: error?.code })
   }
 }

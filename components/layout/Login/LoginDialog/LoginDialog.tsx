@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 
-import { useLazyQuery } from '@apollo/client'
-import builder from '@builder.io/react'
 import { Stack, Typography, Link, styled } from '@mui/material'
 import router from 'next/router'
 import { useTranslation } from 'next-i18next'
@@ -12,8 +10,7 @@ import { RegisterAccountDialog, ResetPasswordDialog, ExistingUserDialog } from '
 import LoginContent, { LoginData } from '@/components/layout/Login/LoginContent/LoginContent'
 import { useAuthContext, useHeaderContext } from '@/context'
 import { useModalContext } from '@/context/ModalContext'
-import { useCreateCustomerB2bAccountMutation } from '@/hooks'
-import { buildCreateCustomerB2bAccountParams } from '@/lib/helpers'
+import { useB2BAccountRequest } from '@/hooks'
 import { CreateCustomerB2bAccountParams } from '@/lib/types'
 
 export interface LoginFooterProps {
@@ -53,8 +50,7 @@ const LoginDialog = (props: any) => {
   const { login } = useAuthContext()
   const { toggleCartDrawer } = useHeaderContext()
   const { showModal, closeModal } = useModalContext()
-  const { createCustomerB2bAccount } = useCreateCustomerB2bAccountMutation()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { submitAccountRequest, isSubmitting } = useB2BAccountRequest()
 
   const onRegisterClick = () => {
     showModal({
@@ -72,293 +68,24 @@ const LoginDialog = (props: any) => {
     })
   }
 
-  function extractDomain(email: string | string[]) {
-    // Assuming email is a valid email address
-    const atIndex = email.indexOf('@')
-    if (atIndex !== -1) {
-      return email.slice(atIndex + 1)
-    }
-    return '' // Handle invalid email format or other cases
-  }
-
-  const [googleReCaptcha, setGoogleReCaptcha] = useState(null)
-  const [pardOtFormUrl, setPardOtFormUrl] = useState('')
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      const settings = await builder.get('theme-setting').promise()
-      setGoogleReCaptcha(settings?.data?.googleReCaptcha)
-      setPardOtFormUrl(settings?.data?.pardotFormHandlerUrl)
-    }
-    fetchSettings()
-  }, [])
-
-  // const handleAccountRequest = async (formValues: CreateCustomerB2bAccountParams) => {
-  //   const variables = buildCreateCustomerB2bAccountParams(formValues)
-  //   const emailAddress = formValues?.emailAddress
-  //   const emailDomain = extractDomain(emailAddress)
-  //   const entityListFullName = 'B2BAccountMapping@fortis'
-  //   const entityPayLoad = {
-  //     entityListFullName: entityListFullName,
-  //     id: emailDomain,
-  //   }
-
-  //   const getExistingUser = await fetch('/api/user/getAccountsByUser', {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: JSON.stringify({ emailAddress }),
-  //   })
-
-  //   const userDetails = await getExistingUser.json()
-
-  //   if (userDetails.success === true) {
-  //     showModal({ Component: ExistingUserDialog })
-  //   } else {
-  //     const entityResponse = await fetch('/api/user/get-entity', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({ entityPayLoad }),
-  //     })
-
-  //     const entityResult = await entityResponse.json()
-
-  //     if ((googleReCaptcha as any)?.reCaptchAccountCreation) {
-  //       try {
-  //         // Ensure grecaptcha is available and ready
-  //         const siteKey = (googleReCaptcha as any)?.accountCreationSiteKey
-  //           ? (googleReCaptcha as any)?.accountCreationSiteKey
-  //           : process.env.accountCreationSiteKey
-
-  //         if (typeof grecaptcha !== 'undefined' && grecaptcha.enterprise) {
-  //           grecaptcha.enterprise.ready(async () => {
-  //             try {
-  //               const reCaptchaResponseCode = await grecaptcha.enterprise.execute(siteKey, {
-  //                 action: 'signup',
-  //               })
-  //               const payLoad = {
-  //                 googleReCaptcha: googleReCaptcha,
-  //                 responseKey: reCaptchaResponseCode,
-  //               }
-  //               const response = await fetch('/api/user/validate-recaptcha', {
-  //                 method: 'POST',
-  //                 headers: {
-  //                   'Content-Type': 'application/json',
-  //                 },
-  //                 body: JSON.stringify({ payLoad }),
-  //               })
-  //               const data = await response.json()
-  //               processUpdatedVariables(data, entityResult, variables)
-  //             } catch (error) {
-  //               processUpdatedVariables(null, entityResult, variables)
-  //             }
-  //           })
-  //         } else {
-  //           processUpdatedVariables(null, entityResult, variables)
-  //         }
-  //       } catch (error) {
-  //         processUpdatedVariables(null, entityResult, variables)
-  //       }
-  //     } else {
-  //       processUpdatedVariables(null, entityResult, variables)
-  //     }
-  //   }
-  // }
-
-  const handleAccountRequest = async (formValues: CreateCustomerB2bAccountParams) => {
-    if (isSubmitting) return
-    setIsSubmitting(true)
-
-    try {
-      const variables = buildCreateCustomerB2bAccountParams(formValues)
-      const emailAddress = formValues?.emailAddress
-      const emailDomain = extractDomain(emailAddress)
-      const entityListFullName = 'B2BAccountMapping@fortis'
-      const entityPayLoad = {
-        entityListFullName: entityListFullName,
-        id: emailDomain,
-      }
-
-      const getExistingUser = await fetch('/api/user/getAccountsByUser', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ emailAddress }),
-      })
-
-      const userDetails = await getExistingUser.json()
-
-      if (userDetails.success === true) {
-        setIsSubmitting(false)
-        showModal({ Component: ExistingUserDialog })
-        return
-      }
-
-      // Wait for get-entity
-      const entityResponse = await fetch('/api/user/get-entity', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ entityPayLoad }),
-      })
-
-      const entityResult = await entityResponse.json()
-
-      let reCaptchaResult = null
-
-      // Validate recaptcha if required
-      if ((googleReCaptcha as any)?.reCaptchAccountCreation) {
-        const siteKey =
-          (googleReCaptcha as any)?.accountCreationSiteKey || process.env.accountCreationSiteKey
-
-        if (typeof grecaptcha !== 'undefined' && grecaptcha.enterprise) {
-          reCaptchaResult = await new Promise((resolve) => {
-            grecaptcha.enterprise.ready(async () => {
-              try {
-                const responseKey = await grecaptcha.enterprise.execute(siteKey, {
-                  action: 'signup',
-                })
-                const payLoad = {
-                  googleReCaptcha,
-                  responseKey,
-                }
-
-                const response = await fetch('/api/user/validate-recaptcha', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ payLoad }),
-                })
-
-                const data = await response.json()
-                resolve(data)
-              } catch (error) {
-                resolve(null)
-              }
-            })
-          })
-        }
-      }
-
-      // Now all API calls are complete, safely proceed with:
-      await processUpdatedVariables(reCaptchaResult, entityResult, variables)
-    } catch (error) {
-      console.error('Account request error:', error)
-      setIsSubmitting(false)
-    }
-  }
-
-  const processUpdatedVariables = async (result: any, entityResult: any, variables: any) => {
-    const updatedVariables = {
-      ...variables,
-      b2BAccountInput: {
-        ...variables.b2BAccountInput,
-        ...(entityResult?.entityDetails?.externalID && {
-          externalId: entityResult.entityDetails.externalID,
-        }),
-        ...(result?.success
-          ? {
-              attributes: [
-                {
-                  fullyQualifiedName: 'tenant~recaptcha-score',
-                  values: result?.score,
-                },
-              ],
-            }
-          : {}),
-      },
-    }
-
-    try {
-      const createAccount = await createCustomerB2bAccount.mutateAsync(updatedVariables)
-      // Handle success
-      if (createAccount?.id) {
-        const accountId = createAccount?.id
-        const purchaseOrderPayLoad = {
-          accountId: accountId,
-        }
-
-        const addingSalesRep = await fetch('/api/user/addSalesRep', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ purchaseOrderPayLoad }),
-        })
-
-        const salesRepDetails = await addingSalesRep.json()
-        if (salesRepDetails?.success === true) {
-          const activeAccount = await fetch('/api/user/b2baccountActive', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ purchaseOrderPayLoad }),
-          })
-
-          const activeAccountDetails = await activeAccount.json()
-          if (activeAccountDetails?.success === true) {
-            const formData = new URLSearchParams({
-              userFirstName: activeAccountDetails?.data?.users?.[0]?.firstName,
-              userLastName: activeAccountDetails?.data?.users?.[0]?.lastName,
-              companyName: activeAccountDetails?.data?.companyOrOrganization,
-              userEmail: activeAccountDetails?.data?.users?.[0]?.emailAddress,
-              customerID: activeAccountDetails?.data?.users?.[0]?.userId,
-              accountID: activeAccountDetails?.data?.id,
-              marketing_optin: activeAccountDetails?.data?.users?.[0]?.acceptsMarketing,
-            })
-
-            const pardotFormHandlerRequest = await fetch(pardOtFormUrl, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Access-Control-Allow-Origin': '*',
-              },
-              mode: 'no-cors',
-              body: formData, // Send URLSearchParams as the body
-            })
-
-            if (
-              entityResult?.entityDetails?.creditLine === 'true' ||
-              entityResult?.entityDetails?.creditLine === true
-            ) {
-              const purchaseOrder = await fetch('/api/user/create-purchase-order', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ purchaseOrderPayLoad }),
-              })
-              const purchaseOrderResponse = await purchaseOrder.json()
-              if (purchaseOrderResponse?.success === true) {
-                closeModal()
-                router.push({ pathname: '/account-success' })
-              }
-            } else {
-              closeModal()
-              router.push({ pathname: '/account-success' })
-            }
-          }
-        }
-
+  const handleAccountRequest = (formValues: CreateCustomerB2bAccountParams) =>
+    submitAccountRequest(formValues, {
+      onExistingUser: () => showModal({ Component: ExistingUserDialog }),
+      onSuccess: () => {
         closeModal()
         router.push({ pathname: '/account-success' })
-      }
-    } catch (error) {
-      showModal({
-        Component: B2BAccountFormDialog,
-        props: {
-          primaryButtonText: t('contact-us'),
-          formTitle: t('b2b-account-request'),
-          isAccountCreationError: true,
-          onClose: () => closeModal(),
-        },
-      })
-    } finally {
-      // Always resetting the flag
-      setIsSubmitting(false)
-    }
-  }
+      },
+      onError: () =>
+        showModal({
+          Component: B2BAccountFormDialog,
+          props: {
+            primaryButtonText: t('contact-us'),
+            formTitle: t('b2b-account-request'),
+            isAccountCreationError: true,
+            onClose: () => closeModal(),
+          },
+        }),
+    })
 
   const onForgotPassword = () => {
     showModal({ Component: ResetPasswordDialog })

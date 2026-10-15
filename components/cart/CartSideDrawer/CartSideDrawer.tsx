@@ -5,7 +5,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined'
 import { LoadingButton } from '@mui/lab'
 import { Box, Drawer, IconButton, Stack, Typography, Divider, Button, Link } from '@mui/material'
-import { useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
@@ -14,7 +14,12 @@ import LoginDialog from '@/components/layout/Login/LoginDialog/LoginDialog'
 import { useAuthContext, useHeaderContext, useModalContext } from '@/context'
 import { useGetCart, useUpdateCartItemQuantity, useDeleteCartItem, useInitiateOrder } from '@/hooks'
 import { cartGetters, cartItemGetters, orderGetters } from '@/lib/getters'
-import { cartKeys, checkoutKeys, shippingMethodKeys } from '@/lib/react-query/queryKeys'
+import {
+  cartKeys,
+  checkoutKeys,
+  checkoutSyncKeys,
+  shippingMethodKeys,
+} from '@/lib/react-query/queryKeys'
 
 import type { CrCart, CrCartItem, CrOrder } from '@/lib/gql/types'
 
@@ -98,13 +103,29 @@ const CartSideDrawer = () => {
     }
   }
 
+  const checkoutSync = useMutation({
+    mutationKey: checkoutSyncKeys.all,
+    mutationFn: async (changeCart: () => Promise<unknown>) => {
+      await changeCart().catch(() => undefined)
+      await syncCheckoutWithCart()
+    },
+  })
+
   const handleQuantityChange = (cartItemId: string, quantity: number) => {
     if (quantity < 1) return
-    updateCartItemQuantity.mutate({ cartItemId, quantity }, { onSettled: syncCheckoutWithCart })
+    if (!isCheckoutPage) {
+      updateCartItemQuantity.mutate({ cartItemId, quantity })
+      return
+    }
+    checkoutSync.mutate(() => updateCartItemQuantity.mutateAsync({ cartItemId, quantity }))
   }
 
   const handleDelete = (cartItemId: string) => {
-    deleteCartItem.mutate({ cartItemId }, { onSettled: syncCheckoutWithCart })
+    if (!isCheckoutPage) {
+      deleteCartItem.mutate({ cartItemId })
+      return
+    }
+    checkoutSync.mutate(() => deleteCartItem.mutateAsync({ cartItemId }))
   }
 
   const handleBrowseProducts = () => {

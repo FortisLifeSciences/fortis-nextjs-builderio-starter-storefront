@@ -72,7 +72,18 @@ function generateSiteMap(categoryItems: any) {
       if (product?.categories?.[0]?.categoryCode && product?.content?.seoFriendlyUrl) {
         productUrl = `${baseUrl}products/${product.categories[0].categoryCode}/${product.content.seoFriendlyUrl}/${product.productCode}`
       }
+      // Lowercase product URL for libraries
+      const lowercaseProductCodes = [
+        'abnano-anti-nk-cell-vhh',
+        'abnano-anti-t-cell-vhh',
+        'abnano-vhh-naive',
+      ]
 
+      const productCodeFromUrl: any = productUrl.split('/').pop()?.toLowerCase()
+
+      if (lowercaseProductCodes.includes(productCodeFromUrl)) {
+        productUrl = productUrl.toLowerCase()
+      }
       // Apply redirect
       try {
         const productPath = new URL(productUrl).pathname

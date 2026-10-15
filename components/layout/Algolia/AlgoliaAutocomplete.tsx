@@ -361,6 +361,7 @@ const AlgoliaAutocomplete = ({ detachedMediaQuery }: AlgoliaAutocompleteProps = 
               const name = item.slice_product ? item.product_name_variant : item.product_name
               const sku = item.slice_product ? item.sku : item.plp_catalog_number
               const showNewTag = item.new_product
+              const showNewVariantTag = item.new_variant_plp
               const dataInsightMethod = 'clickedObjectIDsAfterSearch'
 
               return html`<div class="aa-ItemWrapper">
@@ -379,6 +380,11 @@ const AlgoliaAutocomplete = ({ detachedMediaQuery }: AlgoliaAutocompleteProps = 
                     ? html`<div
                         class="aa-NewTag"
                         style="background-image: url('/NewTag.svg');"
+                      ></div>`
+                    : showNewVariantTag
+                    ? html`<div
+                        class="aa-NewVariantTag"
+                        style="background-image: url('/NewVariantLogo.png');"
                       ></div>`
                     : ''}
                   <span class="aa-CardImageLink">
@@ -437,6 +443,7 @@ const AlgoliaAutocomplete = ({ detachedMediaQuery }: AlgoliaAutocompleteProps = 
               },
             })
           },
+
           //updated for website search algolia version update - WEB-1657
           //getItemInputValue(query: string) {
           //return query
