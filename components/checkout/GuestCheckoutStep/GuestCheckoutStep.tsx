@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useRef, useState } from 'react'
-
 import CreditCardIcon from '@mui/icons-material/CreditCard'
 import RequestQuoteOutlinedIcon from '@mui/icons-material/RequestQuoteOutlined'
 import { LoadingButton } from '@mui/lab'
@@ -32,14 +31,12 @@ import { AddressForm, KiboTextBox } from '@/components/common'
 import { LoginDialog } from '@/components/layout'
 import { useModalContext } from '@/context'
 import { useB2BAccountRequest, useInitiateOrder, useUpdateOrder } from '@/hooks'
-
 import { CurrencyCode, PaymentType, PaymentWorkflow } from '@/lib/constants'
 import { orderGetters } from '@/lib/getters'
 import { makeGraphQLClient } from '@/lib/gql/client'
 import { getCartQuery } from '@/lib/gql/queries'
 import { buildCardPaymentActionForCheckoutParams, tokenizeCreditCardPayment } from '@/lib/helpers'
 import type { CardForm, CardTypeForCheckout, TokenizedCard } from '@/lib/types'
-
 import type { AccountAtCheckoutResult } from '@/hooks'
 import type { CrContact, CrOrder, Maybe, PaymentActionInput } from '@/lib/gql/types'
 
@@ -64,7 +61,8 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
   const { createAccountAtCheckout } = useB2BAccountRequest()
   const { initiateOrder } = useInitiateOrder()
   const router = useRouter()
-  const accountResultRef = useRef<AccountAtCheckoutRester>()
+  const accountResultRef = useRef<AccountAtCheckoutResult>()
+
 
   // Payment is the last step of guest checkout (no separate Review step) - it places
   // the order itself, so its state lives here rather than behind the shared step context.
