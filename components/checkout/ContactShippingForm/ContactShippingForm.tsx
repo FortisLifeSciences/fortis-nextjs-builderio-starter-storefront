@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { yupResolver } from '@hookform/resolvers/yup'
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'
@@ -192,14 +192,19 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
         (address) => getAddressDedupeKey(address) === getAddressDedupeKey(orderShippingContact)
       )
     : undefined
-  const initialContact = hasOrderShippingAddress
-    ? {
-        ...orderShippingContact,
-        phoneNumbers: {
-          home: orderShippingContact?.phoneNumbers?.home || matchedSavedAddress?.phoneNumbers?.home,
-        },
-      }
-    : defaultContact
+  const initialContact = useMemo(
+    () =>
+      hasOrderShippingAddress
+        ? {
+            ...orderShippingContact,
+            phoneNumbers: {
+              home:
+                orderShippingContact?.phoneNumbers?.home || matchedSavedAddress?.phoneNumbers?.home,
+            },
+          }
+        : defaultContact,
+    [hasOrderShippingAddress, orderShippingContact, matchedSavedAddress]
+  )
 
   const getInitialAddressId = () => {
     if (hasOrderShippingAddress) {
