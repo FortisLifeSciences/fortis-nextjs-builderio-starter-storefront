@@ -1,7 +1,15 @@
 /** @format */
 import { Fragment, ReactNode } from 'react'
 
-import { Card, Typography, Box, CardContent, Link as MuiLink, Stack } from '@mui/material'
+import {
+  Card,
+  Typography,
+  Box,
+  CardContent,
+  CircularProgress,
+  Link as MuiLink,
+  Stack,
+} from '@mui/material'
 import { useTranslation } from 'next-i18next'
 
 import { OrderPriceProps } from '../OrderPrice/OrderPrice'
@@ -20,6 +28,7 @@ interface OrderSummaryProps<T extends CrCart | CrOrder | Checkout> extends Order
   children?: ReactNode
   editHref?: string
   showItems?: boolean
+  isLoading?: boolean
 }
 
 const styles = {
@@ -146,6 +155,7 @@ const OrderSummary = <T extends CrCart | CrOrder | Checkout>(props: OrderSummary
     // Off by default: consumers like the order-history detail page already render their own
     // item list and an "edit" link back to the cart wouldn't make sense there. Checkout opts in.
     showItems = false,
+    isLoading = false,
   } = props
   const { t } = useTranslation('common')
   const { toggleCartDrawer } = useHeaderContext()
@@ -168,7 +178,9 @@ const OrderSummary = <T extends CrCart | CrOrder | Checkout>(props: OrderSummary
 
   return (
     <Card
+      aria-busy={isLoading}
       sx={{
+        position: 'relative',
         bgcolor: '#FFFFFF',
         width: '100%',
         maxWidth: {
@@ -226,6 +238,22 @@ const OrderSummary = <T extends CrCart | CrOrder | Checkout>(props: OrderSummary
         <CardContent>
           <Box textAlign="center">{props.children}</Box>
         </CardContent>
+      )}
+      {isLoading && (
+        <Box
+          data-testid="order-summary-loading"
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: 'rgba(255, 255, 255, 0.7)',
+            zIndex: 1,
+          }}
+        >
+          <CircularProgress />
+        </Box>
       )}
     </Card>
   )

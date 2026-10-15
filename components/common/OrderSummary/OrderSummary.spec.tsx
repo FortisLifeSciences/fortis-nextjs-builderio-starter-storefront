@@ -20,4 +20,15 @@ describe('checkout Component', () => {
     expect(orderSummaryHeading).toBeVisible()
     expect(orderPriceComponent).toBeInTheDocument()
   })
+
+  it('should show a loader while the order is being updated', () => {
+    render(<Checkout {...Checkout.args} isLoading />)
+    expect(screen.getByTestId('order-summary-loading')).toBeInTheDocument()
+    expect(screen.getByRole('progressbar')).toBeInTheDocument()
+  })
+
+  it('should not show a loader by default', () => {
+    render(<Checkout {...Checkout.args} />)
+    expect(screen.queryByTestId('order-summary-loading')).not.toBeInTheDocument()
+  })
 })
