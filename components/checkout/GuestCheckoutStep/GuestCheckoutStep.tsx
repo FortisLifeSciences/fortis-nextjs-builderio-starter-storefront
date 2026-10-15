@@ -37,11 +37,10 @@ import { orderGetters } from '@/lib/getters'
 import { makeGraphQLClient } from '@/lib/gql/client'
 import { getCartQuery } from '@/lib/gql/queries'
 import { buildCardPaymentActionForCheckoutParams, tokenizeCreditCardPayment } from '@/lib/helpers'
-
 import type { CardForm, CardTypeForCheckout, TokenizedCard } from '@/lib/types'
+
 import type { AccountAtCheckoutResult } from '@/hooks'
 import type { CrContact, CrOrder, Maybe, PaymentActionInput } from '@/lib/gql/types'
-
 
 interface GuestCheckoutStepProps {
   checkout: CrOrder
