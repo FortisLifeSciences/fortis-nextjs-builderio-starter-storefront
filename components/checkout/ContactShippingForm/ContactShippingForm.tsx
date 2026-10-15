@@ -187,15 +187,23 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
 
   const orderShippingContact = checkout?.fulfillmentInfo?.fulfillmentContact
   const hasOrderShippingAddress = Boolean(orderShippingContact?.address?.address1)
-  const initialContact = hasOrderShippingAddress ? orderShippingContact : defaultContact
+  const matchedSavedAddress = hasOrderShippingAddress
+    ? savedShippingAddresses.find(
+        (address) => getAddressDedupeKey(address) === getAddressDedupeKey(orderShippingContact)
+      )
+    : undefined
+  const initialContact = hasOrderShippingAddress
+    ? {
+        ...orderShippingContact,
+        phoneNumbers: {
+          home: orderShippingContact?.phoneNumbers?.home || matchedSavedAddress?.phoneNumbers?.home,
+        },
+      }
+    : defaultContact
 
   const getInitialAddressId = () => {
     if (hasOrderShippingAddress) {
-      const orderAddressKey = getAddressDedupeKey(orderShippingContact)
-      const orderSavedAddress = savedShippingAddresses.find(
-        (address) => getAddressDedupeKey(address) === orderAddressKey
-      )
-      return orderSavedAddress ? String(orderSavedAddress.id) : NEW_ADDRESS_OPTION
+      return matchedSavedAddress ? String(matchedSavedAddress.id) : NEW_ADDRESS_OPTION
     }
     return savedShippingAddresses?.length
       ? String(savedShippingAddresses[0].id)
