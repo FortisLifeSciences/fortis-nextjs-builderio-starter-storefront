@@ -95,7 +95,7 @@ const KiboTextBox = (props: KiboTextBoxProps) => {
           // A fixed height only makes sense for single-line inputs - forcing it on a
           // multiline field crushes/clips the textarea instead of letting it grow.
           ...(!multiline && { height: '42px' }),
-          backgroundColor: '#fff',
+          backgroundColor: rest.readOnly ? '#F7F7F7' : '#fff',
         }}
         value={value}
         id={label}

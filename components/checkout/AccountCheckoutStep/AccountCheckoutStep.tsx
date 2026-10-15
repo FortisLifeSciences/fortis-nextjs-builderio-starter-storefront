@@ -19,6 +19,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import uniqBy from 'lodash/uniqBy'
 import getConfig from 'next/config'
 import { useTranslation } from 'next-i18next'
+import { isValidPhoneNumber } from 'react-phone-number-input'
 
 import {
   CardDetailsForm,
@@ -37,6 +38,7 @@ import {
   isSavedCardExpired,
 } from '@/components/checkout/SavedCardPicker/SavedCardPicker'
 import { AddressForm, KiboPhoneInput, KiboSelect, KiboTextBox } from '@/components/common'
+import { toE164PhoneNumber } from '@/components/common/KiboPhoneInput/KiboPhoneInput'
 import { useAuthContext } from '@/context'
 import { useUpdateOrder } from '@/hooks'
 import { AccountType, CurrencyCode, PaymentType, PaymentWorkflow } from '@/lib/constants'
@@ -255,6 +257,11 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   const [instructionsValue, setInstructionsValue] = useState('')
   const [agreeWithTerms, setAgreeWithTerms] = useState(false)
   const [agreePOAuthorization, setAgreePOAuthorization] = useState(false)
+  const [authorizerName, setAuthorizerName] = useState('')
+  const [authorizerPhone, setAuthorizerPhone] = useState('')
+  const [authorizerNameError, setAuthorizerNameError] = useState('')
+  const [authorizerPhoneError, setAuthorizerPhoneError] = useState('')
+  const [referenceNumber, setReferenceNumber] = useState('')
   const [isPlacingOrder, setIsPlacingOrder] = useState(false)
   const [placeOrderError, setPlaceOrderError] = useState('')
 
@@ -266,6 +273,45 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     (term) => term?.siteId === checkout.siteId
   )
   const paymentTermDescription = paymentTerm?.description
+
+  const authorizerDefaultName = [
+    user?.firstName || shippingContact?.firstName,
+    user?.lastName || shippingContact?.lastNameOrSurname,
+  ]
+    .filter(Boolean)
+    .join(' ')
+  const authorizerDefaultPhone = toE164PhoneNumber(
+    shippingContact?.phoneNumbers?.home ||
+      shippingContact?.phoneNumbers?.work ||
+      shippingContact?.phoneNumbers?.mobile
+  )
+  useEffect(() => {
+    if (!agreePOAuthorization) return
+    setAuthorizerName(authorizerDefaultName)
+    setAuthorizerPhone(authorizerDefaultPhone)
+    setAuthorizerNameError('')
+    setAuthorizerPhoneError('')
+  }, [agreePOAuthorization, authorizerDefaultName, authorizerDefaultPhone])
+  const isAuthorizerNameLocked = agreePOAuthorization && !!authorizerDefaultName
+  const isAuthorizerPhoneLocked = agreePOAuthorization && isValidPhoneNumber(authorizerDefaultPhone)
+
+  const getAuthorizerNameError = (value: string) =>
+    value.trim() ? '' : t('this-field-is-required')
+  const getAuthorizerPhoneError = (value: string) => {
+    if (!value) return t('this-field-is-required')
+    return isValidPhoneNumber(value) ? '' : t('enter-valid-phone-number')
+  }
+
+  const handlePOAuthorizationChange = (checked: boolean) => {
+    setAgreePOAuthorization(checked)
+    setPlaceOrderError('')
+    if (!checked) {
+      setAuthorizerName('')
+      setAuthorizerPhone('')
+      setAuthorizerNameError('')
+      setAuthorizerPhoneError('')
+    }
+  }
 
   const handleSelectCard = (cardId: string) => {
     setSelectedCardId(cardId)
@@ -311,7 +357,19 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
         paymentTerm: paymentTerm
           ? { code: paymentTerm.code, description: paymentTerm.description }
           : undefined,
-        customFields: [],
+        customFields: [
+          { code: 'authorizer-name', label: 'Authorizer Name', value: authorizerName.trim() },
+          { code: 'authorizer-phone', label: 'Authorizer Phone', value: authorizerPhone },
+          ...(referenceNumber.trim()
+            ? [
+                {
+                  code: 'reference-number',
+                  label: 'Reference Number',
+                  value: referenceNumber.trim(),
+                },
+              ]
+            : []),
+        ],
       } as CrPurchaseOrderPayment,
       billingContact,
       billingAddressSameAsShipping
@@ -402,11 +460,17 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
 
     if (isPurchaseOrder) {
       if (!agreePOAuthorization) {
-        setPlaceOrderError(t('please-confirm-po-authorization'))
+        setPlaceOrderError(t('please-complete-billing-information'))
         return false
       }
-      if (!poNumber.trim()) {
-        setPoNumberError(t('this-field-is-required'))
+
+      const isPoNumberMissing = !poNumber.trim()
+      const nameError = getAuthorizerNameError(authorizerName)
+      const phoneError = getAuthorizerPhoneError(authorizerPhone)
+      if (isPoNumberMissing) setPoNumberError(t('this-field-is-required'))
+      setAuthorizerNameError(nameError)
+      setAuthorizerPhoneError(phoneError)
+      if (isPoNumberMissing || nameError || phoneError) {
         setPlaceOrderError(t('please-complete-billing-information'))
         return false
       }
@@ -584,6 +648,55 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                 setPoNumber(value)
                 setPoNumberError('')
               }}
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={agreePOAuthorization}
+                  onChange={(_e, checked) => handlePOAuthorizationChange(checked)}
+                  inputProps={{ 'aria-label': 'poAuthorization' }}
+                />
+              }
+              label={
+                <>
+                  {t('i-am-authorized-to-commit-po-on-behalf-of')}{' '}
+                  <Typography component="span" sx={{ fontWeight: 700, fontSize: 'inherit' }}>
+                    {accountName}
+                  </Typography>
+                </>
+              }
+              sx={{ ...checkoutCheckboxLabelSx }}
+            />
+            <Stack direction={{ xs: 'column', sm: 'row' }} gap={2}>
+              <KiboTextBox
+                value={authorizerName}
+                label={t('authorizer-name')}
+                required
+                readOnly={isAuthorizerNameLocked}
+                error={!!authorizerNameError}
+                helperText={authorizerNameError}
+                onChange={(_name, value) => {
+                  setAuthorizerName(value)
+                  setAuthorizerNameError(getAuthorizerNameError(value))
+                }}
+              />
+              <KiboPhoneInput
+                value={authorizerPhone}
+                label={t('authorizer-phone')}
+                required
+                readOnly={isAuthorizerPhoneLocked}
+                error={!!authorizerPhoneError}
+                helperText={authorizerPhoneError}
+                onChange={(_name: string, value: string) => {
+                  setAuthorizerPhone(value)
+                  setAuthorizerPhoneError(getAuthorizerPhoneError(value))
+                }}
+              />
+            </Stack>
+            <KiboTextBox
+              value={referenceNumber}
+              label={t('reference-number')}
+              onChange={(_name, value) => setReferenceNumber(value)}
             />
           </Stack>
         </>
@@ -1011,31 +1124,6 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
               }
               sx={{ ...checkoutCheckboxLabelSx }}
             />
-
-            {isPurchaseOrder && (
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={agreePOAuthorization}
-                    onChange={(_e, checked) => {
-                      setAgreePOAuthorization(checked)
-                      setPlaceOrderError('')
-                    }}
-                    inputProps={{ 'aria-label': 'poAuthorization' }}
-                  />
-                }
-                label={
-                  <>
-                    {t('i-am-authorized-to-commit-po-on-behalf-of')}{' '}
-                    <Typography component="span" sx={{ fontWeight: 700, fontSize: 'inherit' }}>
-                      {accountName}
-                    </Typography>
-                    *
-                  </>
-                }
-                sx={{ ...checkoutCheckboxLabelSx }}
-              />
-            )}
 
             {!isPurchaseOrder && !selectedSavedCard && (
               <FormControlLabel
