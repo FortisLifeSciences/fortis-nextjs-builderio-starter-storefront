@@ -160,6 +160,12 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   >(selectedShippingMethodCode)
 
   useEffect(() => {
+    if (
+      requestedShippingMethodCodeRef.current !== undefined &&
+      (selectedShippingMethodCode || '') !== requestedShippingMethodCodeRef.current
+    ) {
+      return
+    }
     setLocalSelectedShippingMethodCode(selectedShippingMethodCode)
   }, [selectedShippingMethodCode])
 

@@ -233,6 +233,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
     reset,
     setValue,
     getValues,
+    setFocus,
     formState: { errors, isValid, isDirty },
   } = useForm<ContactShippingFormData>({
     mode: 'onChange',
@@ -403,10 +404,22 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
       // Force-validate on submit (mode: 'onChange' skips untouched fields otherwise). Only
       // validate the "Add New Address" fields when that's the active mode - they stay mounted
       // but hidden when a saved address is selected instead.
-      const isFormValid =
+      const fieldsToValidate =
         selectedAddressId === NEW_ADDRESS_OPTION
-          ? await trigger()
-          : await trigger(['firstName', 'lastNameOrSurname', 'workEmail', 'phoneNumbers.home'])
+          ? ([
+              'firstName',
+              'lastNameOrSurname',
+              'workEmail',
+              'phoneNumbers.home',
+              'companyOrOrganization',
+              'address.address1',
+              'address.cityOrTown',
+              'address.stateOrProvince',
+              'address.postalOrZipCode',
+              'address.countryCode',
+            ] as const)
+          : (['firstName', 'lastNameOrSurname', 'workEmail', 'phoneNumbers.home'] as const)
+      const isFormValid = await trigger(fieldsToValidate as any)
 
       // A shipping method is only choosable (and thus only required) when the order actually
       // has ship items - a pickup-only order has nothing to select and shouldn't be blocked on it.
@@ -414,7 +427,19 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
       const hasShippingMethod = !needsShippingMethod || !!checkoutShippingMethodCode
       setShippingMethodError(hasShippingMethod ? '' : t('please-select-shipping-method'))
 
-      if (isFormValid && hasShippingMethod) onContinue()
+      if (!isFormValid) {
+        for (const name of fieldsToValidate) {
+          // eslint-disable-next-line no-await-in-loop
+          const fieldIsValid = await trigger(name as any)
+          if (!fieldIsValid) {
+            setFocus(name as any)
+            break
+          }
+        }
+        return
+      }
+
+      if (hasShippingMethod) onContinue()
     } finally {
       setIsValidatingShipping(false)
     }
@@ -671,6 +696,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                     onChange={(_name: string, value: string) => field.onChange(value)}
                     onBlur={field.onBlur}
                     required
+                    autoComplete="off"
                   />
                 )}
               />
