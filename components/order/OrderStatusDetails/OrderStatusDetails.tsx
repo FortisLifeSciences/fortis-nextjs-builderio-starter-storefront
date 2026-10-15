@@ -206,6 +206,8 @@ const OrderStatusDetails = ({ order }: { order: CrOrder }) => {
         <Button
           component={Link}
           href="/contact-us"
+          target="_blank"
+          rel="noopener noreferrer"
           variant="outlined"
           sx={{
             borderRadius: '0px 20px',
@@ -578,6 +580,8 @@ const OrderStatusDetails = ({ order }: { order: CrOrder }) => {
                 <Stack
                   component={Link}
                   href="/contact-us"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   direction="row"
                   justifyContent="space-between"
                   alignItems="center"

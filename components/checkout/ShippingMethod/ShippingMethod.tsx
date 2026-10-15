@@ -155,6 +155,14 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   const [isUpsAccountUpdated, setIsUpsAccountUpdated] = useState<boolean>(false)
   const [localUpsError, setLocalUpsError] = useState('')
 
+  const [localSelectedShippingMethodCode, setLocalSelectedShippingMethodCode] = useState<
+    string | undefined
+  >(selectedShippingMethodCode)
+
+  useEffect(() => {
+    setLocalSelectedShippingMethodCode(selectedShippingMethodCode)
+  }, [selectedShippingMethodCode])
+
   const requestedShippingMethodCodeRef = useRef<string>()
   const lastOrderAttrsRef = useRef({
     b2bAccountName: '',
@@ -430,9 +438,11 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
 
   const saveShippingMethod = (value: string, name?: string) => {
     requestedShippingMethodCodeRef.current = value
+    setLocalSelectedShippingMethodCode(value)
     Promise.resolve(onShippingMethodChange && onShippingMethodChange(value, name)).then((saved) => {
       if (saved === false && requestedShippingMethodCodeRef.current === value) {
         requestedShippingMethodCodeRef.current = undefined
+        setLocalSelectedShippingMethodCode(selectedShippingMethodCode)
       }
     })
   }
@@ -800,14 +810,20 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                       fontWeight="600"
                       color="rgba(0, 0, 0, 0.8)"
                       sx={{ fontFamily: 'Poppins', fontSize: '15px', letterSpacing: '-0.005em' }}
-                      price={`${t('fortis-shipping')} (${item?.shippingMethodName})`}
+                      price={
+                        item?.shippingMethodName?.toLowerCase().startsWith('fortis shipping')
+                          ? item.shippingMethodName
+                          : `${t('fortis-shipping')} (${item?.shippingMethodName})`
+                      }
                     />
                   </MenuItem>
                 ),
               })) ?? []
             }
             selected={
-              isOtherShippingMethod && selectedShippingMethodCode ? selectedShippingMethodCode : ''
+              isOtherShippingMethod && localSelectedShippingMethodCode
+                ? localSelectedShippingMethodCode
+                : ''
             }
             align="center"
             boxSx={shippingMethodCardSx}

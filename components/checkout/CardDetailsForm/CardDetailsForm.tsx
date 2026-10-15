@@ -169,13 +169,41 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                   placeholder={t('expiry-date-placeholder')}
                   required={true}
                   onChange={(_name, value) => {
-                    const formattedValue = value
-                      .replace(/\D/g, '')
-                      .replace(/^(\d{2})(\d)/g, '$1/$2')
-                      .substring(0, 7)
+                    const previous = field.value || ''
+                    const isDeleting = value.length < previous.length
+                    const slashIndex = value.indexOf('/')
+
+                    let month: string
+                    let year: string
+                    if (slashIndex !== -1) {
+                      month = value.substring(0, slashIndex).replace(/\D/g, '').substring(0, 2)
+                      year = value
+                        .substring(slashIndex + 1)
+                        .replace(/\D/g, '')
+                        .substring(0, 4)
+                    } else {
+                      const digits = value.replace(/\D/g, '').substring(0, 6)
+                      month = digits.substring(0, 2)
+                      year = digits.substring(2)
+                    }
+
+                    const formattedValue =
+                      slashIndex !== -1 || (month.length === 2 && !isDeleting)
+                        ? `${month}/${year}`
+                        : month
+
                     field.onChange(formattedValue)
                   }}
-                  onBlur={field.onBlur}
+                  onBlur={() => {
+                    const current = field.value || ''
+                    if (current.includes('/')) {
+                      let [month, year] = current.split('/')
+                      if (month.length === 1) month = `0${month}`
+                      if (year.length === 2) year = `20${year}`
+                      field.onChange(`${month}/${year}`)
+                    }
+                    field.onBlur()
+                  }}
                   error={!!errors?.expiryDate}
                   helperText={errors?.expiryDate?.message as unknown as string}
                 />
