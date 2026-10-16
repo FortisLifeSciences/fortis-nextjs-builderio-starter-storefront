@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react'
 
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import CreditCardOutlinedIcon from '@mui/icons-material/CreditCardOutlined'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined'
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
@@ -12,6 +14,7 @@ import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 
 import { OrderPrice } from '@/components/common'
+import { useAuthContext } from '@/context'
 import { OrderStatus } from '@/lib/constants'
 import { orderGetters, productGetters } from '@/lib/getters'
 
@@ -44,6 +47,8 @@ const colors = {
   successBg: '#E4F5E6',
   pending: '#9E9E9E',
   pendingBg: '#F0F0F0',
+  error: '#D32F2F',
+  errorBg: '#FDECEA',
 }
 
 const cardSx = {
@@ -58,10 +63,12 @@ interface DeliveryStep {
   description: string
   icon: React.ReactNode
   date?: string
+  isError?: boolean
 }
 
 const OrderStatusDetails = ({ order }: { order: CrOrder }) => {
   const { t } = useTranslation('common')
+  const { isAuthenticated } = useAuthContext()
 
   const orderNumber = orderGetters.getOrderNumber(order)
   const submittedDate = orderGetters.getSubmittedDate(order)
@@ -107,38 +114,64 @@ const OrderStatusDetails = ({ order }: { order: CrOrder }) => {
   const hasShipped = packages.length > 0
   const isDelivered = orderStatus === OrderStatus.COMPLETED
   const isProcessingStarted = orderStatus === 'Processing' || hasShipped || isDelivered
-  const stepsComplete = [true, isProcessingStarted, hasShipped || isDelivered, isDelivered]
+
+  const terminalStep: DeliveryStep | null =
+    orderStatus === OrderStatus.CANCELED
+      ? {
+          key: 'cancelled',
+          label: t('order-cancelled'),
+          description: t('order-cancelled-description'),
+          icon: <CancelOutlinedIcon />,
+          isError: true,
+        }
+      : orderStatus === OrderStatus.ERRORED
+      ? {
+          key: 'errored',
+          label: t('order-errored'),
+          description: t('order-errored-description'),
+          icon: <ErrorOutlineIcon />,
+          isError: true,
+        }
+      : null
+
+  const stepsComplete = terminalStep
+    ? [true, true]
+    : [true, isProcessingStarted, hasShipped || isDelivered, isDelivered]
   const currentStepIndex = stepsComplete.indexOf(false)
 
-  const deliverySteps: DeliveryStep[] = [
-    {
-      key: 'placed',
-      label: t('order-placed'),
-      description: t('order-placed-description'),
-      icon: <CheckCircleIcon />,
-      date: submittedDate as string,
-    },
-    {
-      key: 'processing',
-      label: t('processing'),
-      description: t('processing-description'),
-      icon: <Inventory2OutlinedIcon />,
-    },
-    {
-      key: 'shipped',
-      label: t('shipped'),
-      description: t('shipped-description'),
-      icon: <LocalShippingOutlinedIcon />,
-    },
-    {
-      key: 'delivered',
-      label: t('delivered'),
-      description: expectedDeliveryDate
-        ? t('delivered-description', { date: expectedDeliveryDate })
-        : '',
-      icon: <PlaceOutlinedIcon />,
-    },
-  ]
+  const placedStep: DeliveryStep = {
+    key: 'placed',
+    label: t('order-placed'),
+    description: t('order-placed-description'),
+    icon: <CheckCircleIcon />,
+    date: submittedDate as string,
+  }
+
+  const deliverySteps: DeliveryStep[] = terminalStep
+    ? [placedStep, terminalStep]
+    : [
+        placedStep,
+        {
+          key: 'processing',
+          label: t('processing'),
+          description: t('processing-description'),
+          icon: <Inventory2OutlinedIcon />,
+        },
+        {
+          key: 'shipped',
+          label: t('shipped'),
+          description: t('shipped-description'),
+          icon: <LocalShippingOutlinedIcon />,
+        },
+        {
+          key: 'delivered',
+          label: t('delivered'),
+          description: expectedDeliveryDate
+            ? t('delivered-description', { date: expectedDeliveryDate })
+            : '',
+          icon: <PlaceOutlinedIcon />,
+        },
+      ]
 
   return (
     <Box data-testid="order-status-details">
@@ -244,6 +277,7 @@ const OrderStatusDetails = ({ order }: { order: CrOrder }) => {
               <OrderPrice
                 subTotalLabel={t('subtotal')}
                 shippingTotalLabel={t('shipping')}
+                handlingLabel={t('handling')}
                 taxLabel={t('tax')}
                 totalLabel={t('total')}
                 orderDetails={order}
@@ -261,12 +295,16 @@ const OrderStatusDetails = ({ order }: { order: CrOrder }) => {
                 {deliverySteps.map((step, index) => {
                   const isComplete = stepsComplete[index]
                   const isCurrent = index === currentStepIndex
-                  const iconColor = isComplete
+                  const iconColor = step.isError
+                    ? colors.error
+                    : isComplete
                     ? colors.success
                     : isCurrent
                     ? colors.accent
                     : colors.pending
-                  const iconBg = isComplete
+                  const iconBg = step.isError
+                    ? colors.errorBg
+                    : isComplete
                     ? colors.successBg
                     : isCurrent
                     ? colors.accentBg
@@ -577,7 +615,7 @@ const OrderStatusDetails = ({ order }: { order: CrOrder }) => {
                 )}
                 <Stack
                   component={Link}
-                  href="/my-account/order-history"
+                  href={isAuthenticated ? '/my-account/order-history' : '/contact-us'}
                   direction="row"
                   justifyContent="space-between"
                   alignItems="center"

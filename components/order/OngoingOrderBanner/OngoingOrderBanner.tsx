@@ -18,6 +18,7 @@ const closedStatuses: string[] = [
   OrderStatus.COMPLETED,
   OrderStatus.CANCELED,
   OrderStatus.ABANDONED,
+  OrderStatus.ERRORED,
 ]
 
 const OngoingOrderBanner = () => {

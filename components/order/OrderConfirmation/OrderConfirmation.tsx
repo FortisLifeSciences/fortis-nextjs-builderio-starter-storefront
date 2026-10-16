@@ -5,6 +5,7 @@ import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined
 import MailOutlineIcon from '@mui/icons-material/MailOutline'
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined'
 import { Box, Button, Divider, Grid, Stack, Typography } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import getConfig from 'next/config'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
@@ -12,7 +13,9 @@ import { useReactToPrint } from 'react-to-print'
 
 import { OrderPrice } from '@/components/common'
 import { useProductCardActions } from '@/hooks'
+import { OrderStatus } from '@/lib/constants'
 import { orderGetters, productGetters } from '@/lib/getters'
+import { loginKeys } from '@/lib/react-query/queryKeys'
 
 import type { CrOrder, CrOrderItem, CrProduct, Maybe } from '@/lib/gql/types'
 
@@ -107,28 +110,44 @@ const OrderConfirmation = ({ order }: { order: CrOrder }) => {
     const fetchShopperNotes = async () => {
       const response = await getOrderNotes(order)
       setShopperNotes(response?.data?.shopperNotes)
-      if (response.data && response.data.status && response.data.status !== 'Errored') {
+      if (response.data && response.data.status && response.data.status !== OrderStatus.ERRORED) {
         handleDeleteCurrentCart()
       }
     }
     fetchShopperNotes()
   }, [order])
 
-  // Set by GuestCheckoutStep's "Save information for next time" checkbox before it navigated
-  // here - read once, then clear so it doesn't leak into a future order this shopper didn't
-  // opt into.
-  const [createAccountQuery, setCreateAccountQuery] = useState<Record<string, string> | null>(null)
+  const queryClient = useQueryClient()
+  const [accountResult, setAccountResult] = useState<Record<string, string> | null>(null)
   useEffect(() => {
-    const raw = localStorage.getItem('wantsAccountCreation')
-    if (raw) {
-      try {
-        setCreateAccountQuery(JSON.parse(raw))
-      } catch {
-        // ignore malformed value
+    const raw = localStorage.getItem('accountCreationResult')
+    if (!raw) return
+    localStorage.removeItem('accountCreationResult')
+    try {
+      const parsed = JSON.parse(raw)
+      setAccountResult(parsed)
+      if (parsed?.status === 'created') {
+        queryClient.invalidateQueries({ queryKey: loginKeys.user })
       }
-      localStorage.removeItem('wantsAccountCreation')
+    } catch {
+      setAccountResult(null)
     }
   }, [])
+
+  const accountStatus = accountResult?.status
+  const createAccountQuery = accountResult && {
+    firstName: accountResult.firstName,
+    lastName: accountResult.lastName,
+    company: accountResult.company,
+    email: accountResult.email,
+  }
+  const showCreateAccountButton = accountStatus === 'failed'
+  const accountStatusMessage =
+    {
+      created: t('account-created-check-email', { email: accountResult?.email }),
+      exists: t('account-already-exists-for-email'),
+      failed: t('account-creation-failed-try-again'),
+    }[accountStatus as string] || ''
 
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
@@ -350,6 +369,7 @@ const OrderConfirmation = ({ order }: { order: CrOrder }) => {
         <OrderPrice
           subTotalLabel={t('subtotal')}
           shippingTotalLabel={t('shipping')}
+          handlingLabel={t('handling')}
           taxLabel={t('tax')}
           totalLabel={t('total')}
           orderDetails={order}
@@ -384,11 +404,26 @@ const OrderConfirmation = ({ order }: { order: CrOrder }) => {
         </Stack>
       </Box>
 
+      {accountStatusMessage && (
+        <Box
+          sx={{
+            backgroundColor: accountStatus === 'failed' ? '#FDECEA' : '#EEEFFC',
+            borderRadius: '12px',
+            p: 3,
+            mb: 3,
+          }}
+        >
+          <Typography sx={{ fontSize: '15px', color: colors.accent }}>
+            {accountStatusMessage}
+          </Typography>
+        </Box>
+      )}
+
       <Stack direction={{ xs: 'column', sm: 'row' }} gap={2}>
-        {createAccountQuery ? (
+        {showCreateAccountButton ? (
           <Button
             component={Link}
-            href={`/create-account?${new URLSearchParams(createAccountQuery).toString()}`}
+            href={`/create-account?${new URLSearchParams(createAccountQuery || {}).toString()}`}
             variant="contained"
             sx={{
               ...actionButtonSx,
