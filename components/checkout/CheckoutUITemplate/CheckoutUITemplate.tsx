@@ -4,6 +4,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { LoadingButton } from '@mui/lab'
 import { Box, Stack, SxProps, Typography, Divider } from '@mui/material'
 import { Theme } from '@mui/material/styles'
+import { useIsMutating } from '@tanstack/react-query'
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
@@ -14,6 +15,7 @@ import { KiboStepper, OrderReview } from '@/components/checkout'
 import { OrderSummary, PromoCodeBadge } from '@/components/common'
 import { useCheckoutStepContext, STEP_STATUS } from '@/context'
 import { checkoutGetters, orderGetters } from '@/lib/getters'
+import { checkoutSyncKeys } from '@/lib/react-query/queryKeys'
 
 import type { Checkout, CrOrder } from '@/lib/gql/types'
 
@@ -97,6 +99,7 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
     children,
     builderContent,
   } = props
+  const isSyncingWithCart = useIsMutating({ mutationKey: checkoutSyncKeys.all }) > 0
 
   const { t } = useTranslation('common')
   const { activeStep, stepStatus, steps, setStepStatusSubmit, setStepBack } =
@@ -226,6 +229,7 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
     shippingLabel: t('go-to-shipping'),
     backLabel: t('go-back'),
     showItems: true,
+    isLoading: isSyncingWithCart,
     editHref: '/cart',
     promoComponent: (
       <PromoCodeBadge
