@@ -93,6 +93,7 @@ export type Product = {
   brand_code: any
   new_product: string
   plp_catalog_number: any
+  new_variant_plp: string
   product_url: string
   objectID: string
   product_name: string
@@ -163,7 +164,9 @@ const ProductHitListView = ({
     validated = hit?.validation_text,
     formulation = hit?.formulation,
     citation = hit?.plp_citation_count,
-    newProduct = hit.new_product
+    newProduct = hit?.new_product,
+    newVariantProduct = hit?.new_variant_plp
+
   position = position ?? hit.__position
 
   const firstImage = hit?.product_images?.[0]
@@ -238,6 +241,20 @@ const ProductHitListView = ({
                     }}
                     style={{
                       backgroundImage: `url('/NewTag.svg')`,
+                    }}
+                  />
+                ) : newVariantProduct ? (
+                  <Box
+                    sx={{
+                      width: 120,
+                      height: 45,
+                      top: '0px',
+                      position: 'absolute',
+                      left: '0px',
+                      zIndex: 2,
+                    }}
+                    style={{
+                      backgroundImage: `url('/NewVariantLogo.png')`,
                     }}
                   />
                 ) : null}

@@ -58,7 +58,6 @@ function requestMetaData(req: NextApiRequest) {
     site: getSite(req),
     userId: getUserId(req),
     'X-Forwarded-For': req.socket.remoteAddress,
-    variables: req.body.variables,
   }
 }
 function reverseProxyApiContextMeta(req: NextApiRequest) {

@@ -65,3 +65,11 @@ export const isCardTypeValid = (cardNumber: string | undefined) => {
   }
   return Boolean(supportedCards[creditCardType(cardNumber)[0]?.niceType.toUpperCase()])
 }
+
+export const isCardExpired = (expireMonth: number, expireYear: number): boolean => {
+  const today = new Date()
+  const currentMonth = today.getMonth() + 1
+  const currentYear = today.getFullYear()
+
+  return expireYear < currentYear || (expireYear === currentYear && expireMonth < currentMonth)
+}

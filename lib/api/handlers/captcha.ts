@@ -30,13 +30,14 @@ export default async function Captcha(req: NextApiRequestWithLogger, res: NextAp
           message: 'Google ReCaptcha Failure',
         })
       }
-    } catch (err) {
+    } catch (err: unknown) {
       res.status(405).json({
         status: 'failure',
         message: 'Error submitting the enquiry form',
       })
 
-      req.logger.error('Error in Captcha handler', err)
+      const error = err as { message?: string; code?: number }
+      req.logger.error('Error in Captcha handler', { message: error.message, code: error.code })
     }
   } else {
     res.status(405)

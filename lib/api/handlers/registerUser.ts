@@ -66,6 +66,9 @@ export default async function registerUserHandler(
     res.status(200).json(registerResponse)
   } catch (error: any) {
     res.status(error?.code).json({ message: error?.message })
-    req.logger.error(error, 'Error in Register user handler')
+    req.logger.error('Error in Register user handler', {
+      message: error?.message,
+      code: error?.code,
+    })
   }
 }

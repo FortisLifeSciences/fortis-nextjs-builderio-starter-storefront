@@ -5,14 +5,7 @@ import * as stories from './OrderConfirmation.stories'
 
 const { Common } = composeStories(stories)
 
-const orderSummaryMock = () => <div data-testid="order-summary-component" />
-jest.mock('@/components/common/OrderSummary/OrderSummary', () => () => orderSummaryMock())
-const productItemListMock = () => <div data-testid="product-item-list-component" />
-jest.mock('@/components/common/ProductItemList/ProductItemList', () => () => productItemListMock())
-const KeyValueDisplayMock = () => <div data-testid="key-value-display-component" />
-jest.mock('@/components/common/KeyValueDisplay/KeyValueDisplay', () => () => KeyValueDisplayMock())
-
-describe('[component] - ViewOrderDetails', () => {
+describe('[component] - OrderConfirmation', () => {
   const setup = () => {
     render(<Common {...Common.args} />)
   }
@@ -20,18 +13,22 @@ describe('[component] - ViewOrderDetails', () => {
   it('should render component', () => {
     setup()
 
+    expect(screen.getByTestId('order-confirmation-new')).toBeVisible()
     expect(
       screen.getByRole('heading', {
-        name: /thank-you/i,
+        name: /order-confirmed/i,
       })
     ).toBeVisible()
-    expect(screen.getByText(/currency/i)).toBeVisible()
-    expect(screen.getByText(/your-order-was-placed-successfully/i)).toBeVisible()
-    expect(screen.getByText(/check-your-email-for-your-order-confirmation/i)).toBeVisible()
-    expect(screen.getByText(/we-have-sent-the-order-confirmation-details-to/i)).toBeVisible()
-    expect(screen.getByText(/order-details/i)).toBeVisible()
-    expect(screen.getByTestId('order-summary-component')).toBeVisible()
-    expect(screen.getAllByTestId('product-item-list-component')).toHaveLength(2)
-    expect(screen.getAllByTestId('key-value-display-component')).toHaveLength(2)
+    expect(screen.getByText(/order-confirmed-description/i)).toBeVisible()
+    expect(screen.getByText(/estimated-delivery/i)).toBeVisible()
+    expect(screen.getByText(/shipping-details/i)).toBeVisible()
+    expect(screen.getByText(/contact-information/i)).toBeVisible()
+    expect(screen.getByText(/billing-information/i)).toBeVisible()
+    expect(screen.getByText(/order-summary/i)).toBeVisible()
+    expect(screen.getByText(/special-instructions/i)).toBeVisible()
+    expect(screen.getByText(/whats-next/i)).toBeVisible()
+    expect(screen.getByRole('link', { name: /continue-shopping/i })).toBeVisible()
+    expect(screen.getByRole('link', { name: /track-order/i })).toBeVisible()
+    expect(screen.getByRole('button', { name: /download-receipt/i })).toBeVisible()
   })
 })

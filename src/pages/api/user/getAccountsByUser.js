@@ -17,8 +17,18 @@ export default async function handler(req, res) {
         authorization: `Bearer ${authToken}`,
       },
     })
-    const data = await response.json()
-    const success = data.length > 0 ? true : false
+    const accountIds = await response.json()
+    const accounts = await Promise.all(
+      (Array.isArray(accountIds) ? accountIds : []).map((accountId) =>
+        fetch(`https://${baseUrl}/api/commerce/customer/accounts/${accountId}`, {
+          headers: {
+            accept: 'application/json',
+            authorization: `Bearer ${authToken}`,
+          },
+        }).then((accountResponse) => accountResponse.json())
+      )
+    )
+    const success = accounts.some((account) => !account?.isAnonymous)
     res.status(200).json({
       success: success,
     })
