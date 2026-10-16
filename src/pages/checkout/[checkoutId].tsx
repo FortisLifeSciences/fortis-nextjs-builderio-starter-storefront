@@ -8,8 +8,11 @@ import {
   StandardShipCheckoutTemplate,
   MultiShipCheckoutTemplate,
 } from '@/components/page-templates'
+import { useAuthContext } from '@/context'
 import { CheckoutStepProvider } from '@/context/CheckoutStepContext/CheckoutStepContext'
+import { useGetCustomerPurchaseOrderAccount } from '@/hooks'
 import { getCheckout, getMultiShipCheckout, updateOrder } from '@/lib/api/operations'
+import { AccountType } from '@/lib/constants'
 
 import type { Checkout, CrOrder, CrOrderInput } from '@/lib/gql/types'
 import type { NextPage, GetServerSidePropsContext, NextApiRequest, NextApiResponse } from 'next'
@@ -59,13 +62,28 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
 const CheckoutPage: NextPage<CheckoutPageProps> = (props) => {
   const { t } = useTranslation('common')
-  const steps = [t('shipping'), t('payment'), t('review')] //t('details'),
+  const { isAuthenticated, user } = useAuthContext()
   const { checkout, isMultiShipEnabled, builderContent, ...rest } = props
+  const isB2BUser = user?.accountType?.toLowerCase() === AccountType.B2B.toLowerCase()
+  const { data: customerPurchaseOrderAccount } = useGetCustomerPurchaseOrderAccount(
+    user?.id as number,
+    isB2BUser
+  )
+  // A PO-enabled B2B account uses the single-page PO checkout (like guest checkout, it
+  // collects contact/shipping/payment/review in one step and places the order itself).
+  const isPOCheckout = isAuthenticated && !!customerPurchaseOrderAccount?.isEnabled
+  // Guest checkout (and PO checkout) combine contact/shipping/payment/review into a single
+  // step that places the order itself - there's no separate "payment" or "review" step to
+  // advance to.
+  const steps =
+    (isAuthenticated && !isPOCheckout) || isMultiShipEnabled
+      ? [t('shipping'), t('payment'), t('review')] //t('details'),
+      : [t('shipping')]
   const quoteCheckout = !isMultiShipEnabled ? (checkout as CrOrder) : null
   const quoteId = quoteCheckout?.originalQuoteId
   return (
     <>
-      <CheckoutStepProvider steps={steps} initialActiveStep={quoteId ? 2 : 0}>
+      <CheckoutStepProvider steps={steps} initialActiveStep={quoteId ? steps.length - 1 : 0}>
         {isMultiShipEnabled ? (
           <MultiShipCheckoutTemplate
             {...rest}

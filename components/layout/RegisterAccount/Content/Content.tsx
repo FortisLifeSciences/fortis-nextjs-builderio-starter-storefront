@@ -17,6 +17,8 @@ export interface RegisterAccountInputData {
   firstName: string
   lastNameOrSurname: string
   password: string
+  companyOrOrganization?: string
+  acceptsMarketing?: boolean
 }
 
 interface ContentProps {

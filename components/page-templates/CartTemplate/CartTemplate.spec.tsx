@@ -1,9 +1,7 @@
 import React, { ReactNode } from 'react'
 
-import { screen, waitFor, act } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { updateCard } from 'credit-card-type'
-import mockRouter from 'next-router-mock'
 
 import CartTemplate from './CartTemplate'
 import { cartMock } from '@/__mocks__/stories'
@@ -53,21 +51,18 @@ describe('[components] CartTemplate', () => {
     await waitFor(async () => expect(orderSummary).toBeVisible())
   })
 
-  it('should render empty cart when no items present in cart', async () => {
+  it('should render empty cart with category tiles when no items present in cart', async () => {
     const isCartEmpty = true
-    const { user } = setup(isCartEmpty)
+    setup(isCartEmpty)
 
-    const emptyCartSubTitle = await screen.findByText(/empty-cart-message/)
-    expect(emptyCartSubTitle).toBeVisible()
+    const emptyCartTitle = await screen.findByText(/empty-cart-title/)
+    expect(emptyCartTitle).toBeVisible()
 
-    const shopNowButton = screen.getByRole('button', { name: /shop-now/ })
+    expect(screen.getByText(/browse-our-products/)).toBeVisible()
+    expect(screen.getByText(/browse-our-services/)).toBeVisible()
 
-    user.click(shopNowButton)
-
-    await waitFor(() => {
-      expect(mockRouter).toMatchObject({
-        pathname: '/',
-      })
-    })
+    const antibodiesLink = screen.getByRole('link', { name: /antibodies & antigens/i })
+    expect(antibodiesLink).toBeVisible()
+    expect(antibodiesLink).toHaveAttribute('href', '/products/antibodies-antigens')
   })
 })

@@ -10,7 +10,7 @@ import { CustomDialog, KiboDialog } from '@/components/common'
 import { B2BAccountFormDialog } from '@/components/dialogs'
 import { RegisterAccountDialog, ResetPasswordDialog, ExistingUserDialog } from '@/components/layout'
 import LoginContent, { LoginData } from '@/components/layout/Login/LoginContent/LoginContent'
-import { useAuthContext } from '@/context'
+import { useAuthContext, useHeaderContext } from '@/context'
 import { useModalContext } from '@/context/ModalContext'
 import { useCreateCustomerB2bAccountMutation } from '@/hooks'
 import { buildCreateCustomerB2bAccountParams } from '@/lib/helpers'
@@ -51,6 +51,7 @@ const LoginDialog = (props: any) => {
 
   const { isCartCheckout, onLoginSuccess } = props
   const { login } = useAuthContext()
+  const { toggleCartDrawer } = useHeaderContext()
   const { showModal, closeModal } = useModalContext()
   const { createCustomerB2bAccount } = useCreateCustomerB2bAccountMutation()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -370,7 +371,7 @@ const LoginDialog = (props: any) => {
       if (cameFromResetPassword) {
         sessionStorage.removeItem('fromResetPassword')
         closeModal() // 👈 close the modal first
-        router.replace('/cart')
+        toggleCartDrawer(true)
       } else if (onLoginSuccess) {
         onLoginSuccess()
       } else {

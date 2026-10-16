@@ -21,12 +21,16 @@ export interface CardDetailsFormProps {
   cardValue?: CardForm
   validateForm: boolean
   showCvv?: boolean
+  fullWidth?: boolean
+  showCardTypeIcon?: boolean
   onSaveCardData: (cardData: CardForm) => void
   onFormStatusChange?: (status: boolean, formData?: CardForm) => void
 }
 
-const StyledCardDiv = styled('div')(() => ({
-  maxWidth: '26.313rem',
+const StyledCardDiv = styled('div', {
+  shouldForwardProp: (prop) => prop !== 'fullWidth',
+})<{ fullWidth?: boolean }>(({ fullWidth }) => ({
+  maxWidth: fullWidth ? '100%' : '26.313rem',
   paddingLeft: '0.5rem',
 }))
 
@@ -61,6 +65,8 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
   const {
     validateForm = false,
     showCvv = true,
+    fullWidth = false,
+    showCardTypeIcon = true,
     onSaveCardData,
     onFormStatusChange,
     cardValue,
@@ -113,9 +119,9 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
   }, [isValid, validateForm, watchedFormData])
 
   return (
-    <StyledCardDiv data-testid="card-details" sx={{ ml: 0, pl: 0 }}>
+    <StyledCardDiv data-testid="card-details" fullWidth={fullWidth} sx={{ ml: 0, pl: 0 }}>
       <FormControl sx={{ width: '100%' }}>
-        <Grid container columnGap={4}>
+        <Grid container columnGap={4} rowGap={2}>
           <Grid item xs={12}>
             <Controller
               name="cardNumber"
@@ -133,18 +139,25 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                   onBlur={field.onBlur}
                   error={!!errors?.cardNumber}
                   helperText={errors?.cardNumber?.message as unknown as string}
-                  icon={
-                    <Box pr={1} mt={1}>
-                      <KiboImage src={cardTypeLogo.src} alt={'cardType'} width={45} height={24} />
-                    </Box>
-                  }
+                  {...(showCardTypeIcon && {
+                    icon: (
+                      <Box pr={1} mt={1}>
+                        <KiboImage src={cardTypeLogo.src} alt={'cardType'} width={45} height={24} />
+                      </Box>
+                    ),
+                  })}
                   {...(cardValue && { disabled: true })}
                   inputProps={{ maxLength: 16 }}
                 />
               )}
             />
           </Grid>
-          <Grid item xs={12} md={8}>
+          <Grid
+            item
+            xs={12}
+            md
+            sx={{ flexBasis: { md: 'calc(50% - 16px)' }, maxWidth: { md: 'calc(50% - 16px)' } }}
+          >
             <Controller
               name="expiryDate"
               control={control}
@@ -153,6 +166,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                 <KiboTextBox
                   value={field.value || ''}
                   label={t('expires-mm-yyyy')}
+                  placeholder={t('expiration-date-placeholder')}
                   required={true}
                   onChange={(_name, value) => {
                     const formattedValue = value
@@ -170,7 +184,12 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
           </Grid>
           {showCvv && (
             <>
-              <Grid item xs={8} md={3}>
+              <Grid
+                item
+                xs={12}
+                md
+                sx={{ flexBasis: { md: 'calc(50% - 16px)' }, maxWidth: { md: 'calc(50% - 16px)' } }}
+              >
                 <Controller
                   name="cvv"
                   control={control}
@@ -181,6 +200,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                         type="password"
                         value={field.value || ''}
                         label={t('cvv-code')}
+                        placeholder={t('cvv-placeholder')}
                         required={true}
                         onChange={(_name, value) => {
                           const sanitizedValue = value.replace(/\D/g, '').substring(0, 4)
