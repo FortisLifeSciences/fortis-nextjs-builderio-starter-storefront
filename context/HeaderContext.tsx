@@ -5,6 +5,7 @@ interface HeaderState {
   isSearchBarVisible?: boolean
   isStoreLocatorVisible?: boolean
   isMobileSearchPortalVisible?: boolean
+  isCartDrawerVisible?: boolean
 }
 
 export interface HeaderContextType {
@@ -13,6 +14,7 @@ export interface HeaderContextType {
   toggleHamburgerMenu: () => void
   toggleStoreLocator: () => void
   toggleMobileSearchPortal: () => void
+  toggleCartDrawer: (value?: boolean) => void
 }
 
 interface HeaderContextProviderProps {
@@ -25,11 +27,13 @@ export const HeaderContext = createContext({
     isHamburgerMenuVisible: false,
     isStoreLocatorVisible: false,
     isMobileSearchPortalVisible: false,
+    isCartDrawerVisible: false,
   },
   toggleSearchBar: (value: boolean) => null,
   toggleHamburgerMenu: () => null,
   toggleStoreLocator: () => null,
   toggleMobileSearchPortal: () => null,
+  toggleCartDrawer: (value?: boolean) => null,
 } as HeaderContextType)
 
 export const HeaderContextProvider = ({ children }: HeaderContextProviderProps) => {
@@ -38,6 +42,7 @@ export const HeaderContextProvider = ({ children }: HeaderContextProviderProps) 
     isHamburgerMenuVisible: false,
     isStoreLocatorVisible: false,
     isMobileSearchPortalVisible: false,
+    isCartDrawerVisible: false,
   })
 
   const toggleSearchBar = (value: boolean) =>
@@ -65,12 +70,19 @@ export const HeaderContextProvider = ({ children }: HeaderContextProviderProps) 
       isMobileSearchPortalVisible: !headerState.isMobileSearchPortalVisible,
     })
 
+  const toggleCartDrawer = (value?: boolean) =>
+    setHeaderState({
+      ...headerState,
+      isCartDrawerVisible: value !== undefined ? value : !headerState.isCartDrawerVisible,
+    })
+
   const values = {
     headerState,
     toggleSearchBar,
     toggleHamburgerMenu,
     toggleStoreLocator,
     toggleMobileSearchPortal,
+    toggleCartDrawer,
   }
   return <HeaderContext.Provider value={values}>{children}</HeaderContext.Provider>
 }

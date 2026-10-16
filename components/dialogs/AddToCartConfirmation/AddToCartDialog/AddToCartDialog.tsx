@@ -1,11 +1,10 @@
 import React from 'react'
 
-import { useRouter } from 'next/router'
-
 import { KiboDialog } from '@/components/common'
 import Actions from '@/components/dialogs/AddToCartConfirmation/Actions/Actions'
 import Content from '@/components/dialogs/AddToCartConfirmation/Content/Content'
 import Title from '@/components/dialogs/AddToCartConfirmation/Title/Title'
+import { useHeaderContext } from '@/context'
 
 import type { CrCartItem as CartItemType } from '@/lib/gql/types'
 
@@ -22,11 +21,11 @@ const AddToCartDialog = (props: CartDetailsProps) => {
     cartItem,
   }
 
-  const router = useRouter()
+  const { toggleCartDrawer } = useHeaderContext()
 
   const handleGoToCart = () => {
-    router.push('/cart')
     closeModal()
+    toggleCartDrawer(true)
   }
   const handleContinueShopping = () => {
     closeModal()
