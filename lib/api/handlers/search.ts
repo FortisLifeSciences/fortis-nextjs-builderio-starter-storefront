@@ -19,6 +19,6 @@ export default async function searchHandler(req: NextApiRequestWithLogger, res: 
     res.status(200).json({ results: response?.data?.products })
   } catch (error: any) {
     res.status(error?.code).json({ message: error?.message })
-    req.logger.error(error, 'Error in Search handler')
+    req.logger.error('Error in Search handler', { message: error?.message, code: error?.code })
   }
 }
