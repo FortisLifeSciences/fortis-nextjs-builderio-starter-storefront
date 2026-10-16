@@ -56,10 +56,6 @@ const ProductInventoryMessages = ({
   availabilityMessageArr,
   countryCode,
 }: any) => {
-  const variantAvailabilityMessageArr =
-    product?.properties?.find(
-      (data: any) => data?.attributeFQN === 'tenant~availability-message-variant'
-    )?.values?.[0]?.stringValue || null
   //   let manageStock = product?.inventoryInfo?.manageStock,
   //     //itemCode = product.get('variationProductCode') || product.get('productCode'),
   //     locationCode = 'BETHYL'
@@ -68,11 +64,7 @@ const ProductInventoryMessages = ({
   let scenario: number | null = null
   let skuStatus: string | null = null
   let stockBehaviour: string | null = null
-  const availabilityMessage: string | null = variantAvailabilityMessageArr
-    ? variantAvailabilityMessageArr
-    : availabilityMessageArr
-    ? availabilityMessageArr
-    : null
+  const availabilityMessage: string | null = availabilityMessageArr ? availabilityMessageArr : null
   let minimumStock = 0
   let restockDate: Date | null = null
   let showToday = false
@@ -283,10 +275,9 @@ const ProductInventoryMessages = ({
             buffer
           )
           //console.log("deliverydate:"+deliveryDate);
-          // inventoryMessage = inventoryMessages?.normalAvailability
-          //   .replace('{CountDown}', countDown)
-          //   .replace('{DeliveryDate}', deliveryDate)
-          inventoryMessage = availabilityMessage
+          inventoryMessage = inventoryMessages?.normalAvailability
+            .replace('{CountDown}', countDown)
+            .replace('{DeliveryDate}', deliveryDate)
           cartDisplayStatus = true
           scenario = 1
           return { inventoryMessage, cartDisplayStatus, scenario }
