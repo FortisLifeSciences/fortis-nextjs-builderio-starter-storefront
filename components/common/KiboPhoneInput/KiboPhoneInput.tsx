@@ -33,6 +33,7 @@ export interface KiboPhoneInputProps {
   onChange?: (name: string, value: string) => void
   onBlur?: (name: string, value: string) => void
   name?: string
+  readOnly?: boolean
   [x: string]: any
 }
 
@@ -175,7 +176,9 @@ const CountrySelect = ({
 
 // Re-skin react-phone-number-input's own markup (PhoneInput/PhoneInputCountry/PhoneInputInput
 // classes) to match KiboTextBox's chrome instead of the library's default look.
-const PhoneInputWrapper = styled('div')<{ error?: boolean }>(({ theme, error }) => ({
+const PhoneInputWrapper = styled('div', {
+  shouldForwardProp: (prop) => prop !== 'readOnly',
+})<{ error?: boolean; readOnly?: boolean }>(({ theme, error, readOnly }) => ({
   width: '100%',
   boxSizing: 'border-box',
   '& *': { boxSizing: 'border-box' },
@@ -189,7 +192,7 @@ const PhoneInputWrapper = styled('div')<{ error?: boolean }>(({ theme, error }) 
     border: `1px solid ${error ? theme.palette.error.main : '#D3D7D9'}`,
     borderRadius: '8px',
     boxShadow: '0px 1px 2px rgba(10, 13, 18, 0.05)',
-    backgroundColor: '#fff',
+    backgroundColor: readOnly ? '#F7F7F7' : '#fff',
     transition: theme.transitions.create(['border-color', 'background-color', 'box-shadow']),
     '&:focus-within': {
       boxShadow: `${alpha(
@@ -253,6 +256,7 @@ const KiboPhoneInput = (props: KiboPhoneInputProps) => {
     onChange,
     onBlur,
     name,
+    readOnly = false,
     ...rest
   } = props
 
@@ -282,7 +286,7 @@ const KiboPhoneInput = (props: KiboPhoneInputProps) => {
       >
         {label}
       </InputLabel>
-      <PhoneInputWrapper error={error}>
+      <PhoneInputWrapper error={error} readOnly={readOnly}>
         <PhoneInput
           id={label}
           international
@@ -291,6 +295,7 @@ const KiboPhoneInput = (props: KiboPhoneInputProps) => {
           defaultCountry={defaultCountry as any}
           flags={flags}
           countrySelectComponent={CountrySelect}
+          readOnly={readOnly}
           value={normalizedValue || undefined}
           placeholder={placeholder}
           aria-label={label || name}
