@@ -402,6 +402,12 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
     return shippingMethodSaveQueueRef.current
   }
 
+  // A shipping method is only choosable (and thus only required) when the order actually has
+  // ship items - a pickup-only order has nothing to select and shouldn't be blocked on it.
+  const needsShippingMethod = shipItems.length > 0
+  const hasShippingMethod = !needsShippingMethod || !!checkoutShippingMethodCode
+  const canContinue = isValid && hasShippingMethod
+
   const handleContinue = async () => {
     if (isValidatingShipping) return
     setIsValidatingShipping(true)
@@ -426,10 +432,6 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
           : (['firstName', 'lastNameOrSurname', 'workEmail', 'phoneNumbers.home'] as const)
       const isFormValid = await trigger(fieldsToValidate as any)
 
-      // A shipping method is only choosable (and thus only required) when the order actually
-      // has ship items - a pickup-only order has nothing to select and shouldn't be blocked on it.
-      const needsShippingMethod = shipItems.length > 0
-      const hasShippingMethod = !needsShippingMethod || !!checkoutShippingMethodCode
       setShippingMethodError(hasShippingMethod ? '' : t('please-select-shipping-method'))
 
       if (!isFormValid) {
@@ -776,6 +778,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
           color="primary"
           loading={isValidatingShipping}
           onClick={handleContinue}
+          aria-disabled={!canContinue}
           sx={{
             borderRadius: '0px 26px',
             padding: '12px 30px',
@@ -787,6 +790,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
             letterSpacing: 'normal',
             textTransform: 'capitalize',
             cursor: 'pointer',
+            opacity: canContinue ? 1 : 0.5,
             '&.Mui-disabled': { cursor: 'not-allowed' },
           }}
         >

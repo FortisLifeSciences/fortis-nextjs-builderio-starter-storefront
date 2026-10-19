@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useRef, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 
 import CreditCardIcon from '@mui/icons-material/CreditCard'
 import RequestQuoteOutlinedIcon from '@mui/icons-material/RequestQuoteOutlined'
@@ -113,6 +113,16 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
     })
 
   const isShippingLocked = phase !== 'shipping'
+
+  // Read-only mirror of handlePlaceOrder's gate checks, so the button can show it's not ready
+  // before the shopper clicks - clicking still runs the real checks and surfaces the specific
+  // reason via placeOrderError, so an incomplete click is never silent.
+  const canPlaceOrder = useMemo(() => {
+    if (!agreeWithTerms) return false
+    if (!isCardFormValid) return false
+    if (!billingSameAsShipping && !isBillingFormValid) return false
+    return true
+  }, [agreeWithTerms, isCardFormValid, billingSameAsShipping, isBillingFormValid])
 
   const handlePlaceOrder = async () => {
     if (isPlacingOrder) return
@@ -478,7 +488,8 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
                 color="primary"
                 loading={isPlacingOrder}
                 onClick={handlePlaceOrder}
-                sx={{ ...checkoutPrimaryButtonSx }}
+                aria-disabled={!canPlaceOrder}
+                sx={{ ...checkoutPrimaryButtonSx, opacity: canPlaceOrder ? 1 : 0.5 }}
               >
                 {t('Place Order')}
               </LoadingButton>

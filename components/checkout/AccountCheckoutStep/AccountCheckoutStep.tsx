@@ -511,6 +511,57 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     return true
   }
 
+  // Mirrors validateBeforePlacingOrder's checks (read-only, no side effects) so the button can
+  // show it's not ready before the shopper clicks - clicking still runs the real validation and
+  // surfaces the specific reason via placeOrderError, so an incomplete click is never silent.
+  const canPlaceOrder = useMemo(() => {
+    if (!agreeWithTerms) return false
+    if (isPurchaseOrder) {
+      if (!agreePOAuthorization) return false
+      if (!poNumber.trim()) return false
+      if (!authorizerName.trim()) return false
+      if (!isValidPhoneNumber(authorizerPhone)) return false
+      if (
+        !billingContactSameAsContact &&
+        (!billingContactOverride.firstName ||
+          !billingContactOverride.lastNameOrSurname ||
+          !billingContactOverride.email)
+      ) {
+        return false
+      }
+      if (
+        !billingAddressSameAsShipping &&
+        (!billingAddressOverride.address1 ||
+          !billingAddressOverride.cityOrTown ||
+          !billingAddressOverride.postalOrZipCode ||
+          !billingAddressOverride.countryCode)
+      ) {
+        return false
+      }
+      return true
+    }
+    if (selectedSavedCard) return /^\d{3,4}$/.test(cvv)
+    if (!isCardFormValid) return false
+    if (!billingSameAsShipping && !isBillingFormValid) return false
+    return true
+  }, [
+    agreeWithTerms,
+    isPurchaseOrder,
+    agreePOAuthorization,
+    poNumber,
+    authorizerName,
+    authorizerPhone,
+    billingContactSameAsContact,
+    billingContactOverride,
+    billingAddressSameAsShipping,
+    billingAddressOverride,
+    selectedSavedCard,
+    cvv,
+    isCardFormValid,
+    billingSameAsShipping,
+    isBillingFormValid,
+  ])
+
   const handlePlaceOrder = async () => {
     if (isPlacingOrder || !validateBeforePlacingOrder()) return
 
@@ -1152,7 +1203,8 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
               color="primary"
               loading={isPlacingOrder}
               onClick={handlePlaceOrder}
-              sx={{ ...checkoutPrimaryButtonSx }}
+              aria-disabled={!canPlaceOrder}
+              sx={{ ...checkoutPrimaryButtonSx, opacity: canPlaceOrder ? 1 : 0.5 }}
             >
               {t('Place Order')}
             </LoadingButton>
