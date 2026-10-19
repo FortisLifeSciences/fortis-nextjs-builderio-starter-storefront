@@ -37,7 +37,13 @@ import {
   NEW_CARD_OPTION,
   isSavedCardExpired,
 } from '@/components/checkout/SavedCardPicker/SavedCardPicker'
-import { AddressForm, KiboPhoneInput, KiboSelect, KiboTextBox } from '@/components/common'
+import {
+  AddressForm,
+  KiboPhoneInput,
+  KiboSelect,
+  KiboStateSelect,
+  KiboTextBox,
+} from '@/components/common'
 import { toE164PhoneNumber } from '@/components/common/KiboPhoneInput/KiboPhoneInput'
 import { useAuthContext } from '@/context'
 import { useUpdateOrder } from '@/hooks'
@@ -964,23 +970,18 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                       </KiboSelect>
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <KiboSelect
+                      <KiboStateSelect
                         name="billing-state-or-province"
                         label={t('state-or-province')}
                         value={billingAddressOverride.stateOrProvince}
+                        options={provinces}
                         onChange={(_name, value) =>
                           setBillingAddressOverride((prev) => ({
                             ...prev,
                             stateOrProvince: value,
                           }))
                         }
-                      >
-                        {provinces?.map((province: { name: string; code: string }) => (
-                          <MenuItem key={province.code} value={province.code}>
-                            {province.name}
-                          </MenuItem>
-                        ))}
-                      </KiboSelect>
+                      />
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <KiboTextBox

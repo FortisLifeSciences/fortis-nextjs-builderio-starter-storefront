@@ -15,7 +15,7 @@ import * as yup from 'yup'
 
 import { ChoiceCard, ShippingMethod } from '@/components/checkout'
 import { checkoutColors } from '@/components/checkout/checkoutStyles'
-import { KiboPhoneInput, KiboSelect, KiboTextBox } from '@/components/common'
+import { KiboPhoneInput, KiboSelect, KiboStateSelect, KiboTextBox } from '@/components/common'
 import { toE164PhoneNumber } from '@/components/common/KiboPhoneInput/KiboPhoneInput'
 import { useUpdateOrderShippingInfo, useGetShippingMethods } from '@/hooks'
 import { AddressType, CountryCode, DefaultId } from '@/lib/constants'
@@ -46,11 +46,6 @@ interface ContactShippingFormData {
 }
 
 interface Country {
-  name: string
-  code: string
-}
-
-interface Province {
   name: string
   code: string
 }
@@ -676,22 +671,17 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                 name="address.stateOrProvince"
                 control={control}
                 render={({ field }) => (
-                  <KiboSelect
+                  <KiboStateSelect
                     name="state-or-province"
                     label={t('state-or-province')}
                     value={field.value}
+                    options={provinces}
                     error={!!errors?.address?.stateOrProvince}
                     helperText={errors?.address?.stateOrProvince?.message}
                     onChange={(_name: string, value: string) => field.onChange(value)}
                     onBlur={field.onBlur}
                     required
-                  >
-                    {provinces?.map((province: Province) => (
-                      <MenuItem key={province.code} value={province.code}>
-                        {province.name}
-                      </MenuItem>
-                    ))}
-                  </KiboSelect>
+                  />
                 )}
               />
             </Grid>
