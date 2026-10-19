@@ -105,14 +105,9 @@ const KiboStateSelect = (props: KiboStateSelectProps) => {
         renderValue={() => selectedLabel || placeholder || ''}
         MenuProps={{
           autoFocus: false,
-          // Select's own Menu always needs to own `onClose` to actually close (it builds the
-          // menu as `{ onClose: <its real close handler>, ...MenuProps }`, so a custom
-          // `onClose` here would silently replace it, not add to it, and the dropdown would
-          // stop closing on an outside click/backdrop press). Reset the search text via the
-          // exit transition instead, which doesn't touch the close mechanism at all.
+          onClose: () => setSearch(''),
           TransitionProps: {
             onEntered: () => searchInputRef.current?.focus(),
-            onExited: () => setSearch(''),
           },
           PaperProps: {
             style: {
