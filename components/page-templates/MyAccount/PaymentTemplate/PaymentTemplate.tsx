@@ -89,8 +89,14 @@ const PaymentTemplate = (props: PaymentTemplateProps) => {
   }
 
   const handleSetAsPrimary = async (paymentAndBilling: PaymentAndBilling) => {
-    const { cardInfo } = paymentAndBilling
+    const { cardInfo, billingAddressInfo } = paymentAndBilling
     const cardId = cardGetters.getCardId(cardInfo)
+    const contactId = cardInfo?.contactId ?? billingAddressInfo?.contact?.id
+
+    if (!contactId) {
+      console.error('Error: set primary card - billing contact not found for card', cardId)
+      return
+    }
 
     try {
       await updateCustomerCard.mutateAsync({
@@ -98,7 +104,7 @@ const PaymentTemplate = (props: PaymentTemplateProps) => {
         cardId,
         cardInput: {
           id: cardId,
-          contactId: cardInfo?.contactId as number,
+          contactId: contactId as number,
           cardType: cardGetters.getCardType(cardInfo),
           cardNumberPart: cardGetters.getCardNumberPart(cardInfo),
           expireMonth: cardGetters.getExpireMonth(cardInfo),
