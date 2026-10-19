@@ -772,6 +772,10 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
           )
         }
       } else {
+        // Selecting this option with no (or an incomplete) account number already on file
+        // wouldn't otherwise show an error until the shopper types into the field themselves -
+        // surface it immediately so Continue doing nothing isn't a silent dead end.
+        setLocalError(t('fedex-account-number-invalid'))
         handleShippingMethodSelectChange('', '')
       }
     } else if (method === 'ups') {
@@ -790,6 +794,9 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
           )
         }
       } else {
+        // Same as the FedEx case above - show the error immediately on selection, not only
+        // after the shopper types into the account number field.
+        setLocalUpsError(t('ups-account-number-invalid'))
         handleShippingMethodSelectChange('', '')
       }
     }
