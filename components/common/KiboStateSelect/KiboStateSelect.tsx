@@ -109,6 +109,7 @@ const KiboStateSelect = (props: KiboStateSelectProps) => {
           TransitionProps: {
             onEntered: () => searchInputRef.current?.focus(),
           },
+          MenuListProps: { autoFocusItem: false },
           PaperProps: {
             style: {
               maxHeight: ITEM_HEIGHT * 5.5 + ITEM_PADDING_TOP,
@@ -123,7 +124,6 @@ const KiboStateSelect = (props: KiboStateSelectProps) => {
             },
           },
         }}
-        MenuListProps={{ autoFocusItem: false }}
         sx={{
           borderColor: error ? 'error.main' : '#D3D7D9',
           borderWidth: '1px',
