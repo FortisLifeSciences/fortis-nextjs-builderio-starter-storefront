@@ -223,3 +223,9 @@ export const KIBO_HEADERS = {
   TENANT: 'x-vol-tenant',
   SITE: 'x-vol-site',
 }
+
+export const SESSION_EXPIRED = {
+  CODE: 'SESSION_EXPIRED',
+  EVENT: 'kibo:session-expired',
+  COOKIE: 'session_expired',
+}
