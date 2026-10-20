@@ -26,29 +26,11 @@ import { KiboImage, Price } from '@/components/common'
 import { useAuthContext } from '@/context/AuthContext'
 import { usePriceRangeFormatter } from '@/hooks'
 import { FulfillmentOptions as FulfillmentOptionsConstant } from '@/lib/constants'
+import { brandImages } from '@/lib/constants/brandLogos'
 import { productGetters } from '@/lib/getters'
 import { ProductProperties } from '@/lib/types'
 import { plpClick } from '@/lib/utils/google-tag-manager'
-import abcore from '@/public/Brand_Logo/abcore-logo.png'
-import arista from '@/public/Brand_Logo/arista-logo.png'
-import bethyl from '@/public/Brand_Logo/bethyl-logo.png'
-import empirical from '@/public/Brand_Logo/empirical-logo.png'
-import fortis from '@/public/Brand_Logo/fortis-logo.png'
-import ipoc from '@/public/Brand_Logo/ipoc-logo.png'
-import nanocomposix from '@/public/Brand_Logo/nanocomposix-logo.png'
-import vector from '@/public/Brand_Logo/vector-logo.png'
 import DefaultImage from '@/public/noImage.png'
-
-const brandImages: Record<string, string> = {
-  arista: arista.src,
-  bethyl: bethyl.src,
-  abcore: abcore.src,
-  empirical: empirical.src,
-  nanocomposix: nanocomposix.src,
-  vector: vector.src,
-  ipoc: ipoc.src,
-  fortis: fortis.src,
-}
 
 import type { CrProductOption, Product, ProductPriceRange } from '@/lib/gql/types'
 export interface ProductCardProps {
