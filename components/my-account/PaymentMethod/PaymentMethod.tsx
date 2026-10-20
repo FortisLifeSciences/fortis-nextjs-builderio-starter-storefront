@@ -448,6 +448,7 @@ const PaymentMethod = (props: PaymentMethodProps) => {
                           postalOrZipCode={address.address?.postalOrZipCode as string}
                           companyOrOrganization={address?.companyOrOrganization as string}
                           countryCode={address.address?.countryCode as string}
+                          variant="body2"
                         />
                       ),
                     }
@@ -480,7 +481,7 @@ const PaymentMethod = (props: PaymentMethodProps) => {
                 sx={{ width: '100%', pl: '0.5rem' }}
                 defaultChecked={cardFormDetails.isDefaultPayMethod}
                 control={<Checkbox defaultChecked={cardFormDetails.isDefaultPayMethod} />}
-                label={`${t('make-this-my-default-payment')}`}
+                label={<Typography variant="body2">{t('make-this-my-default-payment')}</Typography>}
                 onChange={(_, value) => setIsDefaultPaymentMethod(value)}
               />
             )}

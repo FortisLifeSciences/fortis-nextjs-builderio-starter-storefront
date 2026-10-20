@@ -30,6 +30,21 @@ const StyledCardDiv = styled('div')(() => ({
   paddingLeft: '0.5rem',
 }))
 
+const cardInputSx = {
+  height: '44px',
+  borderRadius: '8px',
+  borderColor: '#C9C8D9',
+  transition: 'border-color 0.2s, box-shadow 0.2s',
+  '&:hover': { borderColor: '#30299A' },
+  '&.MuiInputBase-root:focus-within': {
+    borderColor: '#30299A',
+    boxShadow: '0 0 0 3px rgba(48, 41, 154, 0.15)',
+  },
+  '&.Mui-error': { borderColor: 'error.main' },
+  '& .MuiInputBase-input': { padding: '0 14px', letterSpacing: '0.02em' },
+  '& .MuiInputBase-input::placeholder': { color: '#8C8BA3', opacity: 1 },
+}
+
 const useCardSchema = (showCvv: boolean) => {
   const { t } = useTranslation('common')
   return yup.object({
@@ -126,6 +141,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                   value={field.value || ''}
                   label={t('card-number')}
                   required={true}
+                  sx={cardInputSx}
                   onChange={(_name, value) => {
                     const sanitizedValue = value.replace(/\s/g, '')
                     handleCardType(field, sanitizedValue)
@@ -134,8 +150,8 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                   error={!!errors?.cardNumber}
                   helperText={errors?.cardNumber?.message as unknown as string}
                   icon={
-                    <Box pr={1} mt={1}>
-                      <KiboImage src={cardTypeLogo.src} alt={'cardType'} width={45} height={24} />
+                    <Box pr={1.5} display="flex" alignItems="center">
+                      <KiboImage src={cardTypeLogo.src} alt={'cardType'} width={32} height={20} />
                     </Box>
                   }
                   {...(cardValue && { disabled: true })}
@@ -144,7 +160,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
               )}
             />
           </Grid>
-          <Grid item xs={12} md={8}>
+          <Grid item xs={12} md={showCvv ? 8 : 12}>
             <Controller
               name="expiryDate"
               control={control}
@@ -153,6 +169,8 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                 <KiboTextBox
                   value={field.value || ''}
                   label={t('expires-mm-yyyy')}
+                  placeholder={t('expiry-date-placeholder')}
+                  sx={cardInputSx}
                   required={true}
                   onChange={(_name, value) => {
                     const formattedValue = value
@@ -182,6 +200,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                         value={field.value || ''}
                         label={t('cvv-code')}
                         required={true}
+                        sx={cardInputSx}
                         onChange={(_name, value) => {
                           const sanitizedValue = value.replace(/\D/g, '').substring(0, 4)
                           field.onChange(sanitizedValue)

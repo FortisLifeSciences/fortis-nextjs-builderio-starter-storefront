@@ -65,7 +65,7 @@ export const KiboRadio = (props: KiboRadioProps) => {
         }}
       >
         {radio.optionIndicator && (
-          <Typography sx={{ fontSize: 'subtitle2', color: 'text.primary', fontWeight: 700, pl: 4 }}>
+          <Typography variant="body2" sx={{ color: 'text.primary', fontWeight: 700, pl: 4 }}>
             {radio.optionIndicator}
           </Typography>
         )}

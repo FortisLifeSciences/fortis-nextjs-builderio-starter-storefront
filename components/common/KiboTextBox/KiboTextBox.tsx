@@ -87,9 +87,9 @@ const KiboTextBox = (props: KiboTextBoxProps) => {
           borderStyle: 'solid',
           borderRadius: '5px',
           fontSize: { xs: '14px !important', md: '16px !important' },
-          ...sx,
           height: '32px',
           backgroundColor: '#fff',
+          ...sx,
         }}
         value={value}
         id={label}
