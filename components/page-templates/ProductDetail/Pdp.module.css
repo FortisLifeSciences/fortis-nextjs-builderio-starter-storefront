@@ -1962,6 +1962,10 @@
   display: none;
 }
 
+.mobileInventoryMessages {
+  margin-top: 14px;
+}
+
 .mobilePurchase {
   display: none;
 }
@@ -2516,12 +2520,17 @@
 .mobileSampleBtn {
   grid-column: 1 / -1;
   grid-row: 1;
-  height: 50px;
+  width: 100%;
+  height: 51px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid var(--accent);
   border-radius: 12px;
-  background: #fff;
-  color: var(--accent);
-  font-size: 14px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 15px;
   font-weight: 800;
   min-width: 0;
 }
@@ -2622,7 +2631,72 @@
 }
 
 .mobileDrawerCtas {
-  display: none;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.mobileDrawerCtas > a {
+  margin: 0;
+  min-width: 0;
+}
+
+.page[data-brand='arista'] .mobileDrawerCtas > a {
+  font-size: 12px;
+}
+
+.mobileBarWithSample .mobileSizePicker {
+  grid-row: 2;
+}
+
+.mobileBarWithSample .mobileCartBtn,
+.mobileBarWithSample .mobileFixedQty {
+  grid-row: 3;
+}
+
+@media (max-width: 680px) {
+  .page .mobileGalleryMount .mediaTop.mobileMediaDetails {
+    display: block;
+  }
+
+  .mobileMediaDetails .mediaCodeRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    margin: 0 0 10px;
+  }
+
+  .mobileMediaDetails .mediaSku {
+    font-size: 18px;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .mobileMediaDetails .copyChip {
+    flex: 0 0 auto;
+  }
+
+  .mobileGalleryMount .mobileMediaDetails .mediaMain {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+  }
+
+  .mobileGalleryMount .mobileMediaDetails .galleryMeta {
+    width: 100%;
+  }
+
+  .mobileMediaDetails .mediaLinkRow {
+    width: 100%;
+    gap: 12px;
+    margin-top: 10px;
+  }
+
+  .mobileMediaDetails .mediaLinkRow a {
+    font-size: 12px;
+  }
 }
 
 /* ---------- mobile size picker ---------- */
@@ -2762,7 +2836,8 @@
 
   .mobileSizeTrigger,
   .mobileCartBtn,
-  .mobileFixedQty {
+  .mobileFixedQty,
+  .mobileSampleBtn {
     height: 48px;
   }
 }

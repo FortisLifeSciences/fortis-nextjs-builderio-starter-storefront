@@ -152,11 +152,18 @@ interface PdpGalleryProps {
 }
 
 const PdpGallery = ({ digitalAssets, kiboImages, brandImage, title }: PdpGalleryProps) => {
-  const [index, setIndex] = useState(0)
+  const [selectedIndex, setSelectedIndex] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
 
   const images = mergeGalleryImages(digitalAssets, kiboImages)
   const hasImages = images.length > 0
+  const imagesKey = images.map((image) => image?.imageUrl).join('|')
+  const index = selectedIndex < images.length ? selectedIndex : 0
+
+  useEffect(() => {
+    setSelectedIndex(0)
+  }, [imagesKey])
+
   const current = images[index]
 
   const mainSrc = hasImages
@@ -210,7 +217,7 @@ const PdpGallery = ({ digitalAssets, kiboImages, brandImage, title }: PdpGallery
               type="button"
               key={image?.imageUrl ?? i}
               className={`${styles.thumb} ${i === index ? styles.thumbActive : ''}`}
-              onClick={() => setIndex(i)}
+              onClick={() => setSelectedIndex(i)}
               aria-label={`View image ${i + 1}`}
             >
               <img
@@ -240,7 +247,7 @@ const PdpGallery = ({ digitalAssets, kiboImages, brandImage, title }: PdpGallery
           index={index}
           title={title}
           onClose={() => setLightboxOpen(false)}
-          onIndexChange={setIndex}
+          onIndexChange={setSelectedIndex}
         />
       ) : null}
     </>

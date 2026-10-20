@@ -28,6 +28,7 @@ export interface PdpBrandConfig {
   specLabelOverrides: Record<string, string>
   productionHeading: string
   documentsLinkWithCode: boolean
+  mobileMediaDetails: boolean
   relatedCardVariant: 'plain' | 'branded'
 }
 
@@ -66,7 +67,7 @@ const DEFAULT_HERO_FACTS: PdpHeroFactConfig[] = [
 
 export const PDP_BRAND_CONFIGS: Record<PdpBrandKey, PdpBrandConfig> = {
   arista: {
-    leftSections: ['description', 'pairing', 'specs', 'documents'],
+    leftSections: ['description', 'pairing', 'specs', 'applications', 'documents'],
     belowSections: DEFAULT_BELOW_SECTIONS,
     mobileBarVariant: 'sample',
     brandCardStars: true,
@@ -87,6 +88,7 @@ export const PDP_BRAND_CONFIGS: Record<PdpBrandKey, PdpBrandConfig> = {
     },
     productionHeading: 'Production',
     documentsLinkWithCode: false,
+    mobileMediaDetails: true,
     relatedCardVariant: 'plain',
   },
   bethyl: {
@@ -105,6 +107,7 @@ export const PDP_BRAND_CONFIGS: Record<PdpBrandKey, PdpBrandConfig> = {
     specLabelOverrides: SHARED_SPEC_LABELS,
     productionHeading: 'Production & Epitope',
     documentsLinkWithCode: true,
+    mobileMediaDetails: false,
     relatedCardVariant: 'branded',
   },
   abcore: {
@@ -128,6 +131,7 @@ export const PDP_BRAND_CONFIGS: Record<PdpBrandKey, PdpBrandConfig> = {
     },
     productionHeading: 'Production',
     documentsLinkWithCode: true,
+    mobileMediaDetails: false,
     relatedCardVariant: 'branded',
   },
   default: {
@@ -140,6 +144,7 @@ export const PDP_BRAND_CONFIGS: Record<PdpBrandKey, PdpBrandConfig> = {
     specLabelOverrides: SHARED_SPEC_LABELS,
     productionHeading: 'Production',
     documentsLinkWithCode: false,
+    mobileMediaDetails: false,
     relatedCardVariant: 'branded',
   },
 }

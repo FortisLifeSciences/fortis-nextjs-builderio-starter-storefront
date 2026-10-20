@@ -406,6 +406,7 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
         <ProductDetailSkeleton />
       ) : (
         <PdpTemplate
+          key={product?.productCode}
           product={product as ProductCustom}
           productVariations={productVariations}
           relatedProducts={relatedProducts}

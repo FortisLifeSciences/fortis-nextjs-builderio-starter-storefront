@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
@@ -9,7 +9,7 @@ import { getPdpBrandConfig } from './pdpBrandConfig'
 import { getPdpBrandContent } from './pdpBrandContent'
 import PdpGallery from './PdpGallery'
 import { findProperty, getPropertyValues } from './pdpProperties'
-import { getSpecGroups } from './pdpSpecGroups'
+import { getSpecGroups, hasMarkup } from './pdpSpecGroups'
 import PdpVariantPicker, { PdpMobileSizePicker } from './PdpVariantPicker'
 import ProductInventoryMessages from './ProductInventoryMessages'
 import { usePdpViewModel } from './usePdpViewModel'
@@ -157,6 +157,9 @@ const PdpTemplate = (props: PdpTemplateProps) => {
   const { user } = useAuthContext()
 
   const [descExpanded, setDescExpanded] = useState(false)
+  const descRef = useRef<HTMLDivElement>(null)
+  const [descFullHeight, setDescFullHeight] = useState(0)
+  const [descOverflows, setDescOverflows] = useState(true)
   const [copied, setCopied] = useState(false)
   const [showAllDocs, setShowAllDocs] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -305,18 +308,25 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     : Boolean(ousShowPrices)
 
   const discountPercent =
-    productPrice?.special && productPrice?.regular && productPrice.special < productPrice.regular
+    priceVisible &&
+    productPrice?.special &&
+    productPrice?.regular &&
+    productPrice.special < productPrice.regular
       ? Math.round(((productPrice.regular - productPrice.special) / productPrice.regular) * 100)
       : null
 
   const brandContent = getPdpBrandContent(brandKey)
   const bulkQuoteCode = variationCodeDynamic || variationProductCode
-  const bulkQuoteHref =
-    !brandContent.secondaryCtas.length && sectionTargetUrl && bulkQuoteCode
+  const bulkFormHref =
+    sectionTargetUrl && bulkQuoteCode
       ? `/${String(sectionTargetUrl).replace(/^\//, '')}?Catalog_Num=${encodeURIComponent(
           bulkQuoteCode
         )}`
       : null
+  const bulkQuoteHref = !brandContent.secondaryCtas.length ? bulkFormHref : null
+  const bulkTrackingClass = algoliaQueryId
+    ? 'bulk-and-custom-button-search'
+    : 'bulk-and-custom-button'
   const brandConfig = getPdpBrandConfig(brandKey)
 
   const validationText = getPropertyValues(
@@ -367,12 +377,17 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     if (label) chips.push({ label, variant: 'outline' })
   })
 
+  const formatVariantPrice = (price: any): string | null => {
+    const amount = price?.salePrice ?? price?.price
+    return amount != null ? `$${amount.toFixed(2)}` : null
+  }
+
   const toVariantOptions = (option: any): PdpVariantOption[] =>
     (option?.values ?? []).map((value: any) => ({
       value: value?.value,
       label: value?.stringValue || value?.value,
       sku: value?.variationProductCode,
-      price: value?.price?.price != null ? `$${value.price.price.toFixed(2)}` : null,
+      price: formatVariantPrice(value?.price),
       disabled: !value?.isEnabled,
       isNew:
         isNewVariant &&
@@ -399,6 +414,19 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     shortDescription ||
     getPropertyValues(findProperty(currentProduct, 'tenant~description-variant'))[0] ||
     getPropertyValues(findProperty(updatedProduct, 'tenant~target-sentence'))[0]
+
+  useEffect(() => {
+    const element = descRef.current
+    if (!element) return
+    const measure = () => {
+      const collapsedHeight = parseFloat(getComputedStyle(element).lineHeight) * 3
+      setDescFullHeight(element.scrollHeight)
+      setDescOverflows(element.scrollHeight > collapsedHeight + 1)
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [descriptionHtml])
 
   const handleCopy = async () => {
     if (!catalogNumber) return
@@ -506,8 +534,10 @@ const PdpTemplate = (props: PdpTemplateProps) => {
           </>
         )
 
-        return row.href ? (
-          <Link className={styles.supportRow} key={row.id} href={row.href}>
+        const rowHref = row.id === 'bulk' && bulkFormHref ? bulkFormHref : row.href
+
+        return rowHref ? (
+          <Link className={styles.supportRow} key={row.id} href={rowHref}>
             {rowContent}
           </Link>
         ) : (
@@ -578,13 +608,31 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     </>
   )
 
-  const secondaryButtons = (
+  const sampleCtas = brandContent.secondaryCtas.filter((cta) => !cta.bulk)
+  const bulkCtas = brandContent.secondaryCtas.filter((cta) => cta.bulk)
+  const hasBulkButtons = bulkCtas.length > 0 || Boolean(bulkQuoteHref)
+  const showMobileSample = brandConfig.mobileBarVariant === 'sample' && sampleCtas.length > 0
+
+  const sampleButtons = sampleCtas.map((cta) => (
+    <Link
+      key={cta.label}
+      href={cta.href}
+      className={cta.variant === 'filled' ? styles.sampleBtn : styles.bulkBtn}
+    >
+      {cta.label}
+    </Link>
+  ))
+
+  const bulkButtons = (
     <>
-      {brandContent.secondaryCtas.map((cta) => (
+      {bulkCtas.map((cta) => (
         <Link
           key={cta.label}
-          href={cta.href}
-          className={cta.variant === 'filled' ? styles.sampleBtn : styles.bulkBtn}
+          href={bulkFormHref ?? cta.href}
+          className={`${styles.bulkBtn} ${bulkTrackingClass}`}
+          data-insights-object-id={variationProductCode}
+          data-insights-query-id={algoliaQueryId ? algoliaQueryId : undefined}
+          data-insights-index="products"
         >
           {cta.label}
         </Link>
@@ -593,9 +641,7 @@ const PdpTemplate = (props: PdpTemplateProps) => {
       {bulkQuoteHref ? (
         <Link
           href={bulkQuoteHref}
-          className={`${styles.bulkBtn} ${
-            algoliaQueryId ? 'bulk-and-custom-button-search' : 'bulk-and-custom-button'
-          }`}
+          className={`${styles.bulkBtn} ${bulkTrackingClass}`}
           data-insights-object-id={variationProductCode}
           data-insights-query-id={algoliaQueryId ? algoliaQueryId : undefined}
           data-insights-index="products"
@@ -604,6 +650,23 @@ const PdpTemplate = (props: PdpTemplateProps) => {
         </Link>
       ) : null}
     </>
+  )
+
+  const secondaryButtons = (
+    <>
+      {sampleButtons}
+      {bulkButtons}
+    </>
+  )
+
+  const inventoryMessages = (
+    <ProductInventoryMessages
+      product={currentProduct}
+      inventoryInfo={currentlocationInventory}
+      stockAvailable={stockAvailable}
+      availabilityMessageArr={availabilityMessageArr}
+      countryCode={'US'}
+    />
   )
 
   const buyPanel = (
@@ -619,15 +682,7 @@ const PdpTemplate = (props: PdpTemplateProps) => {
 
       {isUsVisitor ? (
         <>
-          <div style={{ marginTop: '14px' }}>
-            <ProductInventoryMessages
-              product={currentProduct}
-              inventoryInfo={currentlocationInventory}
-              stockAvailable={stockAvailable}
-              availabilityMessageArr={availabilityMessageArr}
-              countryCode={'US'}
-            />
-          </div>
+          <div style={{ marginTop: '14px' }}>{inventoryMessages}</div>
 
           {skuStatusText === 'CustomCTA' ? (
             <Link
@@ -724,52 +779,55 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     />
   )
 
+  const mediaCodeRow = catalogNumber ? (
+    <div className={styles.mediaCodeRow}>
+      <span className={styles.mediaSku}>{catalogNumber}</span>
+      <button type="button" className={styles.copyChip} onClick={handleCopy}>
+        {copied ? 'Copied' : 'Copy'}
+      </button>
+    </div>
+  ) : null
+
+  const mediaLinkRow =
+    hasDocuments || hasCitations ? (
+      <div className={styles.mediaLinkRow}>
+        {hasDocuments ? (
+          <a
+            href="#document-section"
+            onClick={(event) => {
+              event.preventDefault()
+              scrollToSection('document-section')
+            }}
+          >
+            <DocIcon />
+            <span>
+              {brandConfig.documentsLinkWithCode && catalogNumber
+                ? `Documents (${catalogNumber})`
+                : 'Product Documents'}
+            </span>
+          </a>
+        ) : null}
+        {hasCitations ? (
+          <a
+            href="#citation-document-section"
+            onClick={(event) => {
+              event.preventDefault()
+              scrollToSection('citation-document-section')
+            }}
+          >
+            <DocIcon />
+            <span>Citations ({citationCountVariant})</span>
+          </a>
+        ) : null}
+      </div>
+    ) : null
+
   const mediaCardInner = (
     <>
       <div className={styles.mediaTop}>
         {gallery}
-
-        {catalogNumber ? (
-          <div className={styles.mediaCodeRow}>
-            <span className={styles.mediaSku}>{catalogNumber}</span>
-            <button type="button" className={styles.copyChip} onClick={handleCopy}>
-              {copied ? 'Copied' : 'Copy'}
-            </button>
-          </div>
-        ) : null}
-
-        {hasDocuments || hasCitations ? (
-          <div className={styles.mediaLinkRow}>
-            {hasDocuments ? (
-              <a
-                href="#document-section"
-                onClick={(event) => {
-                  event.preventDefault()
-                  scrollToSection('document-section')
-                }}
-              >
-                <DocIcon />
-                <span>
-                  {brandConfig.documentsLinkWithCode && catalogNumber
-                    ? `Documents (${catalogNumber})`
-                    : 'Product Documents'}
-                </span>
-              </a>
-            ) : null}
-            {hasCitations ? (
-              <a
-                href="#citation-document-section"
-                onClick={(event) => {
-                  event.preventDefault()
-                  scrollToSection('citation-document-section')
-                }}
-              >
-                <DocIcon />
-                <span>Citations ({citationCountVariant})</span>
-              </a>
-            ) : null}
-          </div>
-        ) : null}
+        {mediaCodeRow}
+        {mediaLinkRow}
       </div>
       {buyPanel}
       <div className={styles.supportPanel}>{supportRows}</div>
@@ -831,17 +889,23 @@ const PdpTemplate = (props: PdpTemplateProps) => {
           <section className={styles.description}>
             <h2 className={styles.heading}>Product Description</h2>
             <div
-              className={`${styles.clamp} ${descExpanded ? styles.clampExpanded : ''}`}
+              ref={descRef}
+              className={`${styles.clamp} ${
+                descExpanded || !descOverflows ? styles.clampExpanded : ''
+              }`}
+              style={descExpanded && descFullHeight ? { maxHeight: descFullHeight } : undefined}
               dangerouslySetInnerHTML={{ __html: descriptionHtml }}
             />
-            <button
-              type="button"
-              className={`${styles.seeMore} ${descExpanded ? styles.seeMoreExpanded : ''}`}
-              onClick={() => setDescExpanded(!descExpanded)}
-            >
-              <span>{descExpanded ? 'See less' : 'See more'}</span>
-              <Arrow />
-            </button>
+            {descOverflows ? (
+              <button
+                type="button"
+                className={`${styles.seeMore} ${descExpanded ? styles.seeMoreExpanded : ''}`}
+                onClick={() => setDescExpanded(!descExpanded)}
+              >
+                <span>{descExpanded ? 'See less' : 'See more'}</span>
+                <Arrow />
+              </button>
+            ) : null}
           </section>
         ) : null}
 
@@ -881,7 +945,9 @@ const PdpTemplate = (props: PdpTemplateProps) => {
                   <div className={styles.specRow} key={row.key}>
                     <span
                       className={`${styles.specLabel} ${
-                        row.config.render === 'list' || row.config.render === 'html'
+                        row.config.render === 'list' ||
+                        row.config.render === 'html' ||
+                        hasMarkup(row.value)
                           ? styles.specLabelTop
                           : ''
                       }`}
@@ -901,7 +967,7 @@ const PdpTemplate = (props: PdpTemplateProps) => {
                       <div className={`${styles.specValue} ${styles.specRowAlt}`}>
                         {row.items.join('  •  ')}
                       </div>
-                    ) : row.config.render === 'html' ? (
+                    ) : row.config.render === 'html' || hasMarkup(row.value) ? (
                       <div
                         className={`${styles.specValue} ${styles.specRowAlt}`}
                         dangerouslySetInnerHTML={{ __html: row.value }}
@@ -1081,7 +1147,7 @@ const PdpTemplate = (props: PdpTemplateProps) => {
               <article className={styles.resourceCard} key={resource.id}>
                 <img className={styles.resourceIcon} src={resource.icon} alt="" />
                 <h3>{resource.title}</h3>
-                <Link href={resource.href}>
+                <Link href={resource.href} target={resource.newTab ? '_blank' : undefined}>
                   <span>{resource.ctaLabel}</span>
                   <Arrow />
                 </Link>
@@ -1166,7 +1232,18 @@ const PdpTemplate = (props: PdpTemplateProps) => {
             ) : null}
 
             <div className={styles.mobileGalleryMount}>
-              <div className={styles.mediaTop}>{gallery}</div>
+              {brandConfig.mobileMediaDetails ? (
+                <div className={`${styles.mediaTop} ${styles.mobileMediaDetails}`}>
+                  {mediaCodeRow}
+                  {gallery}
+                  {mediaLinkRow}
+                </div>
+              ) : (
+                <div className={styles.mediaTop}>{gallery}</div>
+              )}
+              {isUsVisitor ? (
+                <div className={styles.mobileInventoryMessages}>{inventoryMessages}</div>
+              ) : null}
               {hasExtraOptions ? (
                 <div className={styles.mobileExtraOptions}>{extraOptionControls}</div>
               ) : null}
@@ -1192,14 +1269,18 @@ const PdpTemplate = (props: PdpTemplateProps) => {
         <div className={styles.mobileDrawer}>
           <div className={styles.mobileDrawerScroll}>
             {!isUsVisitor ? <p className={styles.mobileDrawerNote}>{distributorNote}</p> : null}
-            <div className={styles.mobileDrawerCtas}>{secondaryButtons}</div>
+            {hasBulkButtons ? <div className={styles.mobileDrawerCtas}>{bulkButtons}</div> : null}
             <div className={styles.mobileSupportWrap}>
               <div className={styles.supportPanel}>{supportRows}</div>
             </div>
             <div className={styles.mobileBrandWrap}>{brandCard}</div>
           </div>
         </div>
-        <div className={`${styles.mobileBar} ${styles.mobileBarActive}`}>
+        <div
+          className={`${styles.mobileBar} ${styles.mobileBarActive} ${
+            showMobileSample ? styles.mobileBarWithSample : ''
+          }`}
+        >
           <button
             type="button"
             className={styles.mobileDrawerToggle}
@@ -1212,6 +1293,14 @@ const PdpTemplate = (props: PdpTemplateProps) => {
             </svg>
           </button>
 
+          {showMobileSample
+            ? sampleCtas.map((cta) => (
+                <Link key={cta.label} href={cta.href} className={styles.mobileSampleBtn}>
+                  {cta.label}
+                </Link>
+              ))
+            : null}
+
           <PdpMobileSizePicker
             options={variantOptions}
             selected={selectedVariant}
@@ -1223,9 +1312,19 @@ const PdpTemplate = (props: PdpTemplateProps) => {
             <>
               <button
                 type="button"
-                className={styles.mobileCartBtn}
+                className={`${styles.mobileCartBtn} ${
+                  algoliaQueryId ? 'add-to-cart-button-search' : 'add-to-cart-button'
+                }`}
                 onClick={() => handleAddToCart()}
                 disabled={addToCart.isPending}
+                data-insights-object-id={variationProductCode}
+                data-insights-query-id={algoliaQueryId ? algoliaQueryId : undefined}
+                data-insights-object-data={
+                  algoliaObjectData ? JSON.stringify(algoliaObjectData) : undefined
+                }
+                data-insights-product-price={JSON.stringify(addtocartvalue)}
+                data-insights-currency={JSON.stringify('USD')}
+                data-insights-index="products"
               >
                 {t('add-to-cart')}
               </button>
@@ -1252,7 +1351,15 @@ const PdpTemplate = (props: PdpTemplateProps) => {
               </div>
             </>
           ) : skuStatusText === 'CustomCTA' || ousShowDistributorBtn ? (
-            <Link href={ctaHref} className={styles.mobileCartBtn}>
+            <Link
+              href={ctaHref}
+              className={`${styles.mobileCartBtn} ${
+                algoliaQueryId ? 'custom-CTA-button-search' : 'custom-CTA-button'
+              }`}
+              data-insights-object-id={variationProductCode}
+              data-insights-query-id={algoliaQueryId ? algoliaQueryId : undefined}
+              data-insights-index="products"
+            >
               {ousShowDistributorBtn ? t('distributors') : customCTALabel}
             </Link>
           ) : null}

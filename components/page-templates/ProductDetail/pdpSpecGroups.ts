@@ -24,6 +24,9 @@ const uniprotUrl = (value: string) => `https://www.uniprot.org/uniprot/${encodeU
 
 const siteSearchUrl = (value: string) => `/search?query=${encodeURIComponent(value)}`
 
+export const hasMarkup = (value: string) =>
+  /<\/?[a-z][^>]*>|&(#\d+|#x[0-9a-f]+|[a-z]+);/i.test(value)
+
 export const DEFAULT_SPEC_GROUPS: SpecGroupConfig[] = [
   {
     id: 'identity',

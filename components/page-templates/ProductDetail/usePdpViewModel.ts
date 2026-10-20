@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 
 import * as cookieNext from 'cookies-next'
-import router from 'next/router'
+import router, { useRouter } from 'next/router'
 
 import { getPdpBrandConfig, resolveBrandKey, MAX_HERO_FACTS } from './pdpBrandConfig'
 import { buildFacts } from './pdpProperties'
@@ -213,7 +213,11 @@ export const usePdpViewModel = (params: UsePdpViewModelParams) => {
 
   const getModifiedOptionData = (options: any) => applyVariationData(options, productVariations)
 
+  const { isReady: isRouterReady } = useRouter()
+
   useEffect(() => {
+    if (!isRouterReady) return
+
     const fetchOptionData = async () => {
       const selection = resolveDefaultOptionValue({
         product,
@@ -233,7 +237,7 @@ export const usePdpViewModel = (params: UsePdpViewModelParams) => {
     }
 
     fetchOptionData()
-  }, [])
+  }, [isRouterReady, sliceValue, selectedUrlVariant])
 
   const factoredProductData = getModifiedOptionData(productOptions)
 
