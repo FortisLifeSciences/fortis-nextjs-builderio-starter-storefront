@@ -7,8 +7,10 @@ import { HydrationBoundary } from '@tanstack/react-query'
 import creditCardType from 'credit-card-type'
 import Router, { useRouter } from 'next/router'
 
+import { CartSideDrawer } from '@/components/cart'
 import { AnnouncementBar, GlobalFetchingIndicator } from '@/components/common'
-import { Footer, FortisHeader, KiboHeader } from '@/components/layout'
+import { Footer, FortisHeader } from '@/components/layout'
+import { TRANSPARENT_PAGES } from '@/components/layout/AppHeader/transparentPages'
 import {
   AuthContextProvider,
   ModalContextProvider,
@@ -25,17 +27,6 @@ creditCardType.updateCard('mastercard', {
 creditCardType.updateCard('american-express', {
   niceType: 'AMEX',
 })
-
-const TRANSPARENT_PAGES = [
-  '/',
-  '/new-home-page',
-  '/new-about',
-  '/about',
-  '/our-company',
-  '/new-services-page',
-  '/fortis-grant-2026-abnano-vhh-discovery',
-  '/data-in-focus',
-]
 
 const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: ReactElement }) => {
   const router = useRouter()
@@ -109,21 +100,8 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
           <AuthContextProvider>
             <HeaderContextProvider>
               <GlobalFetchingIndicator />
+              <CartSideDrawer />
               <Stack sx={{ minHeight: '100vh', width: '100%' }}>
-                {/* <KiboHeader
-                  navLinks={[
-                    {
-                      link: '/order-status',
-                      text: 'order-status',
-                    },
-                    {
-                      link: '/wishlist',
-                      text: 'wishlist',
-                    },
-                  ]}
-                  categoriesTree={pageProps.categoriesTree || []}
-                  isSticky={true}
-                /> */}
                 <Stack
                   ref={headerRef}
                   id="fixed-header-wrapper"

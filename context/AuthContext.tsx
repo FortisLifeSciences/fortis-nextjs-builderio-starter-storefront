@@ -25,9 +25,18 @@ type CustomerAccountWithRole = CustomerAccount & {
 }
 export interface AuthContextType {
   isAuthenticated: boolean
+  // True until the initial "who's logged in" check resolves. isAuthenticated starts false
+  // on every load (it's client-only, no SSR knowledge of the session) - a consumer that
+  // branches on isAuthenticated before this settles will render the anonymous view first
+  // and then flash to the real one. Gate on this instead when that flash matters.
+  isAuthLoading: boolean
   user?: CustomerAccountWithRole
   login: (params: LoginData, onSuccessCallBack: () => void) => any
-  createAccount: (params: RegisterAccountInputData, onSuccessCallBack?: () => void) => any
+  createAccount: (
+    params: RegisterAccountInputData,
+    onSuccessCallBack?: () => void,
+    onErrorCallback?: (error: unknown) => void
+  ) => any
   logout: () => void
 }
 interface AuthContextProviderProps {
@@ -36,6 +45,7 @@ interface AuthContextProviderProps {
 
 const initialState = {
   isAuthenticated: false,
+  isAuthLoading: true,
   user: undefined,
   login: () => null,
   createAccount: () => null,
@@ -102,7 +112,8 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
   // register user
   const createAccount = async (
     params: RegisterAccountInputData,
-    onSuccessCallBack?: () => void
+    onSuccessCallBack?: () => void,
+    onErrorCallback?: (error: unknown) => void
   ) => {
     try {
       const createAccountAndLoginMutationVars = {
@@ -112,6 +123,8 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
           emailAddress: params?.email,
           firstName: params?.firstName,
           lastName: params?.lastNameOrSurname,
+          companyOrOrganization: params?.companyOrOrganization,
+          acceptsMarketing: params?.acceptsMarketing,
         },
         password: params?.password,
       }
@@ -119,9 +132,14 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
         onSuccess: (account: any) => {
           handleOnSuccess(account, onSuccessCallBack)
         },
+        onError: (error: any) => {
+          showSnackbar('Registration Failed', 'error')
+          onErrorCallback?.(error)
+        },
       })
     } catch (err: any) {
       showSnackbar('Registration Failed', 'error')
+      onErrorCallback?.(err)
     }
   }
 
@@ -152,10 +170,11 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     }
   }
 
-  const { data: customerAccount } = useGetCurrentCustomer()
+  const { data: customerAccount, isLoading: isAuthLoading } = useGetCurrentCustomer()
 
   const values = {
     isAuthenticated,
+    isAuthLoading,
     user,
     login,
     createAccount,

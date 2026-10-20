@@ -78,15 +78,13 @@ export const navWrapperStyles: SxProps = {
   },
 }
 
-// Inner nav — 1440px max, centered, exact Figma spacing
 export const navInnerStyles: SxProps = {
   display: 'flex',
   flexDirection: 'row',
   justifyContent: 'space-between',
   alignItems: 'center',
-  // 16px horizontal padding on tablet (900-1199px), no padding on desktop (1200px+)
-  padding: { md: '16px 16px', lg: '16px 0' },
-  gap: { md: '12px', lg: '20px' },
+  padding: '16px 24px',
+  gap: '20px',
   maxWidth: '1200px',
   width: '100%',
   margin: '0 auto',
@@ -95,11 +93,10 @@ export const navInnerStyles: SxProps = {
   transition: 'height 0.3s ease-in-out, padding 0.3s ease-in-out',
   '.scrolled &': {
     height: '66px',
-    padding: { md: '18px 16px', lg: '18px 0' },
+    padding: '18px 24px',
   },
 }
 
-// Logo — exact Figma size: 115.4 × 30px
 export const logoStyles: SxProps = {
   flexShrink: 0,
   width: '115px',
@@ -109,18 +106,16 @@ export const logoStyles: SxProps = {
   alignItems: 'center',
 }
 
-// Right group: nav links + search + icons — right-aligned
 export const navRightContainerStyles: SxProps = {
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'center',
   justifyContent: 'flex-end',
-  gap: { md: '8px', lg: '24px' },
+  gap: '24px',
   flex: 1,
   minWidth: 0,
 }
 
-// Nav links — gap: 4px between items per Figma
 export const navLinksStyles: SxProps = {
   display: 'flex',
   flexDirection: 'row',
@@ -129,21 +124,19 @@ export const navLinksStyles: SxProps = {
   flexShrink: 0,
 }
 
-// Search — shrinks on tablet (900-1199px), full width on desktop (1200px+)
 export const searchWrapperStyles: SxProps = {
-  flex: { md: '0 1 120px', lg: '0 1 250px' },
-  width: { md: '120px', lg: '250px' },
-  maxWidth: { md: '120px', lg: '250px' },
+  flex: '0 1 250px',
+  width: '250px',
+  maxWidth: '250px',
   minWidth: 0,
   overflow: 'hidden',
   position: 'relative',
 }
 
-// Divider + cart + account
 export const iconGroupStyles: SxProps = {
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'center',
-  gap: { md: '8px', lg: '24px' },
+  gap: '20px',
   flexShrink: 0,
 }

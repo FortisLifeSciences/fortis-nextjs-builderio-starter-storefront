@@ -12,6 +12,7 @@ import fortisLogoBlue from '@/assets/fortisLogo.png'
 import { CartIcon } from '@/components/layout'
 import { HamburgerIcon } from '@/components/layout'
 import AlgoliaAutocomplete from '@/components/layout/Algolia/AlgoliaAutocomplete'
+import { isTransparentPagePath } from '@/components/layout/AppHeader/transparentPages'
 
 interface MobileHeaderProps {
   children?: React.ReactNode
@@ -19,9 +20,6 @@ interface MobileHeaderProps {
   onAccountIconClick?: () => void
   isTransparentPage?: boolean
 }
-
-// Legacy URL-based fallback used only when `isTransparentPage` is not passed in.
-const TRANSPARENT_PAGES = ['/', '/new-home-page']
 
 const MobileHeader = ({
   children,
@@ -32,7 +30,7 @@ const MobileHeader = ({
   const isTransparentPage =
     typeof isTransparentPageProp === 'boolean'
       ? isTransparentPageProp
-      : TRANSPARENT_PAGES.includes(router.asPath.split('?')[0])
+      : isTransparentPagePath(router.asPath)
   const [hasScrolled, setHasScrolled] = useState(false)
 
   useEffect(() => {

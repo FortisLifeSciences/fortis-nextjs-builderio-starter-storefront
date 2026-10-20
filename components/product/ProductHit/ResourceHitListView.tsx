@@ -171,7 +171,7 @@ const ProductHitListView = ({ hit }: { hit: Resources }): JSX.Element => {
                     {title}
                   </Typography>
                   {resourceType
-                    ? resourceTypeArr.map((data) => {
+                    ? resourceTypeArr.map((data, index) => {
                         return data.resourceType === resourceType ? (
                           <Box
                             sx={{
@@ -183,6 +183,7 @@ const ProductHitListView = ({ hit }: { hit: Resources }): JSX.Element => {
                               height: '42px',
                               color: 'primary.main',
                             }}
+                            key={index}
                           >
                             <span
                               className="material-symbols-outlined"

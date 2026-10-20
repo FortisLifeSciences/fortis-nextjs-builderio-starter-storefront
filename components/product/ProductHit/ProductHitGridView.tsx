@@ -64,6 +64,7 @@ type Product = {
   brand_code: string
   new_product: string
   plp_catalog_number: string
+  new_variant_plp: string
   product_url: string
   objectID: string
   product_name: string
@@ -118,7 +119,8 @@ const ProductHitGridView = ({
     ProductCatalogNumber = hit?.plp_catalog_number,
     brandLabel = hit?.brand,
     brand = hit?.brand_code,
-    newProduct = hit.new_product
+    newProduct = hit?.new_product,
+    newVariantProduct = hit?.new_variant_plp
   position = position ?? hit.__position
 
   const firstImage = hit?.product_images?.[0]
@@ -192,6 +194,20 @@ const ProductHitGridView = ({
                     }}
                     style={{
                       backgroundImage: `url('/NewTag.svg')`,
+                    }}
+                  />
+                ) : newVariantProduct ? (
+                  <Box
+                    sx={{
+                      width: 120,
+                      height: 45,
+                      top: '0px',
+                      position: 'absolute',
+                      left: '0px',
+                      zIndex: 2,
+                    }}
+                    style={{
+                      backgroundImage: `url('/NewVariantLogo.png')`,
                     }}
                   />
                 ) : null}
