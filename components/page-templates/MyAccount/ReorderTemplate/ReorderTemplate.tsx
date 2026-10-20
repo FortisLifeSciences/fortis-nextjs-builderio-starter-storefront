@@ -53,7 +53,7 @@ const createEmptyRow = (): ReorderRow => ({
 const styles = {
   searchWrapper: {
     position: 'relative',
-    maxWidth: '26rem',
+    maxWidth: '32rem',
     marginBottom: '1.5rem',
   },
   suggestions: {
@@ -67,12 +67,13 @@ const styles = {
     borderRadius: '0.5rem',
   },
   searchField: {
-    maxWidth: '26rem',
+    maxWidth: '32rem',
     '& .MuiOutlinedInput-root': {
       borderRadius: '2rem',
       backgroundColor: 'grey.100',
     },
     '& fieldset': { border: 'none' },
+    '& .MuiInputBase-input::placeholder': { textOverflow: 'ellipsis' },
   },
   headerRow: {
     ...accountType.body,

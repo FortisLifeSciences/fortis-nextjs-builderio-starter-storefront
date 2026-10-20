@@ -15,6 +15,12 @@ export const accountActionButton = {
     backgroundColor: 'primary.main',
     color: 'common.white',
     '&:hover': { backgroundColor: 'primary.light', boxShadow: 'none' },
+    '&.Mui-disabled': {
+      backgroundColor: 'grey.300',
+      color: 'grey.600',
+      cursor: 'not-allowed',
+      pointerEvents: 'auto',
+    },
   },
   '&.MuiButton-outlined': {
     borderColor: 'primary.main',
