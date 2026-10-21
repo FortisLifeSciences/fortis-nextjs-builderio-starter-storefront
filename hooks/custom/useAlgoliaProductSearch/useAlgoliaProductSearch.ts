@@ -8,6 +8,7 @@ export interface AlgoliaProductHit {
   productName: string
   productUrl?: string
   sku?: string
+  parentId?: string
 }
 
 interface UseAlgoliaProductSearchParams {
@@ -24,6 +25,7 @@ const mapHit = (hit: Record<string, unknown>): AlgoliaProductHit => ({
   productName: asText(hit?.product_name_variant) || asText(hit?.product_name),
   productUrl: asText(hit?.product_url),
   sku: asText(hit?.sku),
+  parentId: asText(hit?.parent_id),
 })
 
 export const useAlgoliaProductSearch = (params: UseAlgoliaProductSearchParams) => {
