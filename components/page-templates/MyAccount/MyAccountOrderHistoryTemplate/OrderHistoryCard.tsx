@@ -117,6 +117,7 @@ const OrderHistoryCard = (props: OrderHistoryCardProps) => {
   const orderNumber = orderGetters.getOrderNumber(order)
   const submittedDate = orderGetters.getSubmittedDate(order)
   const orderTotal = orderGetters.getOrderTotal(order)
+  const orderStatus = orderGetters.getOrderStatus(order)
   const paymentStatus = orderGetters.getOrderPaymentStatus(order)
   const fulfillmentStatus = orderGetters.getOrderFulfillmentStatus(order)
   const shippingAddress = orderGetters.getShippingAddress(order)
@@ -157,6 +158,13 @@ const OrderHistoryCard = (props: OrderHistoryCardProps) => {
         </Typography>
 
         <Box sx={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          {orderStatus && (
+            <Chip
+              label={orderStatus}
+              size="small"
+              sx={{ ...getStatusChipStyles(orderStatus), fontWeight: 600, borderRadius: '1rem' }}
+            />
+          )}
           {paymentStatus && (
             <Chip
               label={paymentStatus}
