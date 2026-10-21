@@ -64,6 +64,7 @@ const styles = {
       borderRadius: '2rem',
       backgroundColor: 'grey.100',
     },
+    '& .MuiOutlinedInput-input': { typography: 'body2', textOverflow: 'ellipsis' },
     '& fieldset': { border: 'none' },
   },
   select: {
