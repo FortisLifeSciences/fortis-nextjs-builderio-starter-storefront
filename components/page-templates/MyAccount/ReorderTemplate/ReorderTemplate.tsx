@@ -18,6 +18,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
@@ -27,6 +28,8 @@ import { useAuthContext, useSnackbarContext } from '@/context'
 import { useAlgoliaProductSearch, useDebounce, useGetSearchedProducts } from '@/hooks'
 import { useAddItemsToCurrentCart } from '@/hooks/mutations/cart/useAddItemsToCurrentCart/useAddItemsToCurrentCart'
 import { productGetters } from '@/lib/getters'
+import { makeGraphQLClient } from '@/lib/gql/client'
+import { getProductPriceQuery, getProductVariationQuery } from '@/lib/gql/queries'
 import type { ProductCustom } from '@/lib/types'
 import {
   addToCartGTM,
@@ -42,6 +45,7 @@ interface ReorderRow {
   catalogNumber: string
   quantity: number
   product?: Product
+  isPriceResolved?: boolean
 }
 
 const createEmptyRow = (): ReorderRow => ({
@@ -151,11 +155,22 @@ const ReorderTemplate = () => {
   })
 
   const debouncedLookup = useDebounce(lookupTerm, publicRuntimeConfig.debounceTimeout)
-  const { data: searchResult, isLoading } = useGetSearchedProducts({
-    search: debouncedLookup,
+  const { hits: lookupHits, isLoading: isLookupHitsLoading } = useAlgoliaProductSearch({
+    query: debouncedLookup,
+    hitsPerPage: 5,
+  })
+  const exactHit = lookupHits.find((hit) => {
+    const term = debouncedLookup.trim().toLowerCase()
+    return hit.sku?.toLowerCase() === term || hit.catalogNumber?.toLowerCase() === term
+  })
+  const { data: searchResult, isLoading: isProductLoading } = useGetSearchedProducts({
+    search: isLookupHitsLoading ? '' : exactHit?.parentId || debouncedLookup,
     pageSize: publicRuntimeConfig?.b2bProductSearchPageSize,
   })
 
+  const isLoading = isProductLoading || isLookupHitsLoading
+
+  const queryClient = useQueryClient()
   const { addItemsToCurrentCart } = useAddItemsToCurrentCart()
   const { showSnackbar } = useSnackbarContext()
   const { user } = useAuthContext()
@@ -164,11 +179,22 @@ const ReorderTemplate = () => {
     const term = catalogNumber.trim().toLowerCase()
     if (!term) return undefined
 
-    return (searchResult?.items ?? []).find(
+    const items = (searchResult?.items ?? []) as Product[]
+    const sku = exactHit?.sku
+    const parentId = exactHit?.parentId?.toLowerCase()
+
+    const match = items.find(
       (item) =>
-        productGetters.getProductId(item as Product)?.toLowerCase() === term ||
-        productGetters.getVariationProductCode(item as Product)?.toLowerCase() === term
-    ) as Product | undefined
+        productGetters.getProductId(item)?.toLowerCase() === term ||
+        productGetters.getVariationProductCode(item)?.toLowerCase() === term ||
+        (parentId && productGetters.getProductId(item)?.toLowerCase() === parentId)
+    )
+
+    if (!match) return undefined
+
+    return sku && !productGetters.getVariationProductCode(match)
+      ? ({ ...match, variationProductCode: sku } as Product)
+      : match
   }
 
   const updateRow = (key: string, changes: Partial<ReorderRow>) => {
@@ -176,7 +202,7 @@ const ReorderTemplate = () => {
   }
 
   const handleCatalogNumberChange = (key: string, value: string) => {
-    updateRow(key, { catalogNumber: value, product: undefined })
+    updateRow(key, { catalogNumber: value, product: undefined, isPriceResolved: false })
     setActiveRowKey(key)
     setLookupTerm(value)
   }
@@ -219,7 +245,54 @@ const ReorderTemplate = () => {
       })
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeRowKey, isLoading, searchResult])
+  }, [activeRowKey, isLoading, searchResult, exactHit])
+
+  // Search results only carry the parent product price; fetch the variation (SKU) price.
+  useEffect(() => {
+    rows
+      .filter((row) => row.product && !row.isPriceResolved)
+      .forEach(async (row) => {
+        const product = row.product as Product
+        const productCode = productGetters.getProductId(product)
+        const variationCode = productGetters.getVariationProductCode(product)
+
+        try {
+          const priced = await queryClient.fetchQuery({
+            queryKey: ['reorderProductPrice', productCode, variationCode],
+            queryFn: async () => {
+              const response = await makeGraphQLClient().request(
+                variationCode
+                  ? {
+                      document: getProductVariationQuery,
+                      variables: { productCode, variationProductCode: variationCode },
+                    }
+                  : { document: getProductPriceQuery, variables: { productCode } }
+              )
+              return response?.product as Product
+            },
+            staleTime: 60 * 1000,
+          })
+
+          setRows((current) =>
+            current.map((item) =>
+              item.key === row.key && item.product === row.product
+                ? {
+                    ...item,
+                    isPriceResolved: true,
+                    product: {
+                      ...product,
+                      price: priced?.price ?? product.price,
+                      options: priced?.options?.length ? priced.options : product.options,
+                    } as Product,
+                  }
+                : item
+            )
+          )
+        } catch (error) {
+          console.error('Error: reorder price lookup', error)
+        }
+      })
+  }, [rows, queryClient])
 
   useEffect(() => {
     const hasEmptyRow = rows.some((row) => !row.catalogNumber.trim())
@@ -237,15 +310,17 @@ const ReorderTemplate = () => {
   const totalItems = filledRows.reduce((sum, row) => sum + row.quantity, 0)
 
   const buildSelectedOptions = (product?: Product) =>
-    (product?.options ?? []).map((option) => {
-      const selected = option?.values?.find((value) => value?.isSelected)
+    (product?.options ?? [])
+      .map((option) => {
+        const selected = option?.values?.find((value) => value?.isSelected)
 
-      return {
-        attributeFQN: option?.attributeFQN,
-        name: option?.attributeDetail?.name,
-        value: selected?.value || selected?.stringValue || selected?.shopperEnteredValue,
-      }
-    })
+        return {
+          attributeFQN: option?.attributeFQN,
+          name: option?.attributeDetail?.name,
+          value: selected?.value || selected?.stringValue || selected?.shopperEnteredValue,
+        }
+      })
+      .filter((option) => option.value !== undefined && option.value !== null)
 
   const getSelectedOptionValues = (product?: Product) =>
     buildSelectedOptions(product)
@@ -285,6 +360,11 @@ const ReorderTemplate = () => {
       router.push('/cart')
     } catch (error) {
       console.error('Error: add reorder rows to cart', error)
+      showSnackbar(
+        (error as { response?: { errors?: { message?: string }[] } })?.response?.errors?.[0]
+          ?.message || String(t('something-went-wrong')),
+        'error'
+      )
     }
   }
 
@@ -385,9 +465,11 @@ const ReorderTemplate = () => {
                 size="small"
                 fullWidth
                 type="number"
-                value={row.quantity}
+                value={row.quantity || ''}
                 onChange={(event) =>
-                  updateRow(row.key, { quantity: Math.max(0, Number(event.target.value)) })
+                  updateRow(row.key, {
+                    quantity: Math.max(0, Math.floor(Number(event.target.value))),
+                  })
                 }
                 inputProps={{ min: 0, 'aria-label': String(t('qty')) }}
               />
