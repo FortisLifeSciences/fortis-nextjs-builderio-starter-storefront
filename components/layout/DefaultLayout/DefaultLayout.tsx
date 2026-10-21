@@ -9,6 +9,7 @@ import Router, { useRouter } from 'next/router'
 
 import { CartSideDrawer } from '@/components/cart'
 import { AnnouncementBar, GlobalFetchingIndicator } from '@/components/common'
+import SessionExpiredHandler from '@/components/common/SessionExpiredHandler/SessionExpiredHandler'
 import { Footer, FortisHeader } from '@/components/layout'
 import { isTransparentPagePath } from '@/components/layout/AppHeader/transparentPages'
 import {
@@ -102,6 +103,7 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
         <ModalContextProvider>
           <AuthContextProvider>
             <HeaderContextProvider>
+              <SessionExpiredHandler />
               <GlobalFetchingIndicator />
               <CartSideDrawer />
               <Stack sx={{ minHeight: '100vh', width: '100%' }}>

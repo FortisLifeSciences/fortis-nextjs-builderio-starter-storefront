@@ -13,8 +13,8 @@ const { Common } = composeStories(stories)
 const LoginContentMock = () => <input data-testid="kibo-login-content" />
 jest.mock('../LoginContent/LoginContent', () => () => LoginContentMock())
 
-const renderComponent = () => {
-  return render(<Common {...Common.args} />, { wrapper: ModalContextProvider })
+const renderComponent = (props = {}) => {
+  return render(<Common {...Common.args} {...props} />, { wrapper: ModalContextProvider })
 }
 
 describe('[components] (LoginDialog)', () => {
@@ -42,5 +42,17 @@ describe('[components] (LoginDialog)', () => {
     await act(async () => {
       await user.click(registerNowLink)
     })
+  })
+
+  it('should not show the session expired message by default', () => {
+    renderComponent()
+
+    expect(screen.queryByTestId('session-expired-alert')).not.toBeInTheDocument()
+  })
+
+  it('should show the session expired message when the session has expired', () => {
+    renderComponent({ sessionExpired: true })
+
+    expect(screen.getByTestId('session-expired-alert')).toHaveTextContent('session-expired-login')
   })
 })

@@ -14,7 +14,7 @@ import {
   useGetCurrentCustomer,
   useGetB2BUserQueries,
 } from '@/hooks'
-import { AccountType } from '@/lib/constants'
+import { AccountType, SESSION_EXPIRED } from '@/lib/constants'
 import { cartKeys, loginKeys, wishlistKeys } from '@/lib/react-query/queryKeys'
 
 import type { CustomerAccount } from '@/lib/gql/types'
@@ -38,6 +38,7 @@ export interface AuthContextType {
     onErrorCallback?: (error: unknown) => void
   ) => any
   logout: () => void
+  expireSession: () => void
 }
 interface AuthContextProviderProps {
   children: ReactNode
@@ -50,6 +51,7 @@ const initialState = {
   login: () => null,
   createAccount: () => null,
   logout: () => '',
+  expireSession: () => null,
 }
 
 export const AuthContext = createContext(initialState as AuthContextType)
@@ -63,14 +65,18 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
   const router = useRouter()
 
   const { mutate } = useLogin()
-  const { mutate: logOutUser } = useLogout(() => {
+  const expireSession = () => {
     setUser(undefined)
     deleteCookie('behaviors', {
       path: '/',
     })
-    router.push('/')
     queryClient.removeQueries({ queryKey: cartKeys.all })
     queryClient.removeQueries({ queryKey: loginKeys.user })
+  }
+
+  const { mutate: logOutUser } = useLogout(() => {
+    expireSession()
+    router.push('/')
   })
   const { registerUserAccount } = useRegister()
 
@@ -102,6 +108,7 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
   const handleOnSuccess = (account: any, onSuccessCallBack?: () => void) => {
     if (account?.customerAccount) {
       document.cookie = `behaviors=${account?.behaviors}; path=/`
+      deleteCookie(SESSION_EXPIRED.COOKIE, { path: '/' })
       setUser(account?.customerAccount)
     }
 
@@ -180,6 +187,7 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     createAccount,
     setUser,
     logout,
+    expireSession,
   }
 
   useEffect(() => {
