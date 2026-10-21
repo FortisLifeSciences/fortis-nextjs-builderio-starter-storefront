@@ -1,7 +1,5 @@
 import { QueryClient, MutationCache, QueryCache } from '@tanstack/react-query'
 
-import { SESSION_EXPIRED } from '@/lib/constants'
-
 const getErrorMessage = (code: string, message: string) => {
   const messages: any = {
     GRAPHQL_VALIDATION_FAILED: 'Something went wrong',
@@ -34,15 +32,17 @@ const parseGraphQLError = (errorString: any) => {
 }
 
 const DEFAULT_QUERY_RETRY_COUNT = 3
+const SESSION_EXPIRED_CODE = 'SESSION_EXPIRED'
+const SESSION_EXPIRED_EVENT = 'kibo:session-expired'
 
 const isSessionExpiredError = (error: any) =>
-  (error?.response?.code ?? parseGraphQLError(error)?.response?.code) === SESSION_EXPIRED.CODE
+  (error?.response?.code ?? parseGraphQLError(error)?.response?.code) === SESSION_EXPIRED_CODE
 
 const queryClientHandler = (error: any, showSnackbar: any) => {
   const parsedError = parseGraphQLError(error)
 
   if (isSessionExpiredError(error)) {
-    if (typeof window !== 'undefined') window.dispatchEvent(new Event(SESSION_EXPIRED.EVENT))
+    if (typeof window !== 'undefined') window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT))
     return
   }
 

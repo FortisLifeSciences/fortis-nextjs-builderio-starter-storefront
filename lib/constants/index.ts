@@ -218,14 +218,14 @@ export const CountryCode = {
   CA: 'CA',
 }
 
-export const KIBO_HEADERS = {
-  CORRELATION_ID: 'x-vol-correlation',
-  TENANT: 'x-vol-tenant',
-  SITE: 'x-vol-site',
-}
-
 export const SESSION_EXPIRED = {
   CODE: 'SESSION_EXPIRED',
   EVENT: 'kibo:session-expired',
   COOKIE: 'session_expired',
+}
+
+export const KIBO_HEADERS = {
+  CORRELATION_ID: 'x-vol-correlation',
+  TENANT: 'x-vol-tenant',
+  SITE: 'x-vol-site',
 }
