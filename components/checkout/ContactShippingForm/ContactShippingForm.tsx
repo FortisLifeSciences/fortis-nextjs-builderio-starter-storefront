@@ -15,7 +15,13 @@ import * as yup from 'yup'
 
 import { ChoiceCard, ShippingMethod } from '@/components/checkout'
 import { checkoutColors } from '@/components/checkout/checkoutStyles'
-import { KiboPhoneInput, KiboSelect, KiboStateSelect, KiboTextBox } from '@/components/common'
+import {
+  KiboPhoneInput,
+  KiboSelect,
+  KiboSkeleton,
+  KiboStateSelect,
+  KiboTextBox,
+} from '@/components/common'
 import { toE164PhoneNumber } from '@/components/common/KiboPhoneInput/KiboPhoneInput'
 import { useUpdateOrderShippingInfo, useGetShippingMethods } from '@/hooks'
 import { AddressType, CountryCode, DefaultId } from '@/lib/constants'
@@ -171,6 +177,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   // (valid before and after, so `isValid` never flips) still trigger a fresh save.
   const lastSavedContactSignatureRef = useRef<string | null>(null)
   const shippingMethodSaveQueueRef = useRef<Promise<boolean>>(Promise.resolve(true))
+  const shippingMethodSectionRef = useRef<HTMLDivElement>(null)
 
   // Primary sorted first, deduped by address content.
   const savedShippingAddresses = uniqBy(
@@ -401,10 +408,17 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   // ship items - a pickup-only order has nothing to select and shouldn't be blocked on it.
   const needsShippingMethod = shipItems.length > 0
   const hasShippingMethod = !needsShippingMethod || !!checkoutShippingMethodCode
-  const canContinue = isValid && hasShippingMethod
+  // `checkoutShippingMethodCode` only updates once the shipping-info save round-trips to the
+  // server - while that save is in flight (e.g. right after switching methods), it still holds
+  // the previous method's code, which would otherwise let Continue through on a stale value.
+  const isSavingShippingInfo = updateOrderShippingInfo.isPending
+  const canContinue = isValid && hasShippingMethod && !isSavingShippingInfo
 
   const handleContinue = async () => {
-    if (isValidatingShipping) return
+    // A shipping-info save still in flight means `checkoutShippingMethodCode` (and therefore
+    // `hasShippingMethod` below) is stale - wait for it to settle rather than letting the click
+    // through on an outdated value.
+    if (isValidatingShipping || isSavingShippingInfo) return
     setIsValidatingShipping(true)
     try {
       // Force-validate on submit (mode: 'onChange' skips untouched fields otherwise). Only
@@ -441,7 +455,11 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
         return
       }
 
-      if (hasShippingMethod) onContinue()
+      if (hasShippingMethod) {
+        onContinue()
+      } else {
+        shippingMethodSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
     } finally {
       setIsValidatingShipping(false)
     }
@@ -731,14 +749,12 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
       </Stack>
 
       {shipItems.length > 0 && hasDestinationAddress && (
-        <Stack gap={1.5}>
+        <Stack gap={1.5} ref={shippingMethodSectionRef}>
           <Typography sx={{ fontWeight: 600, fontSize: '18px', color: checkoutColors.subtitle }}>
             {t('shipping-method')}
           </Typography>
           {isLoadingShippingMethods ? (
-            <Typography sx={{ fontSize: '14px', color: checkoutColors.placeholder }}>
-              {t('loading-shipping-methods')}
-            </Typography>
+            <KiboSkeleton variant="rounded" height={64} count={2} gap={1.5} />
           ) : shippingMethods?.length > 0 ? (
             <ShippingMethod
               checkout={checkout}
@@ -766,7 +782,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
         <LoadingButton
           variant="contained"
           color="primary"
-          loading={isValidatingShipping}
+          loading={isValidatingShipping || isSavingShippingInfo}
           onClick={handleContinue}
           aria-disabled={!canContinue}
           sx={{
