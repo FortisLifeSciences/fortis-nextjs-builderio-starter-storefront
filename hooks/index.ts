@@ -27,6 +27,7 @@ export * from './queries/multishipCheckout/useGetDestinations/useGetDestinations
 export * from './queries/product/useGetProducts/useGetProducts'
 export * from './queries/product/useGetProductInventory/useGetProductInventory'
 export * from './queries/product/useGetProductPrice/useGetProductPrice'
+export * from './queries/product/useGetVariationPrices/useGetVariationPrices'
 
 //returns
 export * from './queries/returns/useGetReturnReasons/useGetReturnReasons'
