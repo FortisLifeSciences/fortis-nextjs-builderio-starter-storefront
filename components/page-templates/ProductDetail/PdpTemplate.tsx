@@ -49,6 +49,64 @@ const Arrow = () => (
   </svg>
 )
 
+const CollapsibleHtml = ({ html }: { html: string }) => {
+  const [expanded, setExpanded] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const [maxHeight, setMaxHeight] = useState<number | 'none'>()
+  const [overflows, setOverflows] = useState(true)
+
+  useEffect(() => {
+    const element = ref.current
+    if (!element) return
+    const measure = () => {
+      const lineHeight = parseFloat(getComputedStyle(element).lineHeight)
+      setOverflows(element.scrollHeight > lineHeight * 4 + 1)
+    }
+    measure()
+    document.fonts?.ready.then(measure)
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [html])
+
+  const toggle = () => {
+    const element = ref.current
+    if (!element) return
+    if (expanded) {
+      element.style.maxHeight = `${element.scrollHeight}px`
+      void element.offsetHeight
+      setMaxHeight(undefined)
+      setExpanded(false)
+    } else {
+      setMaxHeight(element.scrollHeight)
+      setExpanded(true)
+    }
+  }
+
+  return (
+    <>
+      <div
+        ref={ref}
+        className={`${styles.clamp} ${expanded || !overflows ? styles.clampExpanded : ''}`}
+        style={maxHeight !== undefined ? { maxHeight } : undefined}
+        onTransitionEnd={(event) => {
+          if (event.propertyName === 'max-height' && expanded) setMaxHeight('none')
+        }}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+      {overflows ? (
+        <button
+          type="button"
+          className={`${styles.seeMore} ${expanded ? styles.seeMoreExpanded : ''}`}
+          onClick={toggle}
+        >
+          <span>{expanded ? 'See less' : 'See more'}</span>
+          <Arrow />
+        </button>
+      ) : null}
+    </>
+  )
+}
+
 const CheckIcon = () => (
   <svg viewBox="0 0 16 16" aria-hidden="true">
     <path d="M3.5 8.5L6.5 11.5L12.5 5" />
@@ -156,10 +214,6 @@ const PdpTemplate = (props: PdpTemplateProps) => {
   const { showModal } = useModalContext()
   const { user } = useAuthContext()
 
-  const [descExpanded, setDescExpanded] = useState(false)
-  const descRef = useRef<HTMLDivElement>(null)
-  const [descMaxHeight, setDescMaxHeight] = useState<number | 'none'>()
-  const [descOverflows, setDescOverflows] = useState(true)
   const [copied, setCopied] = useState(false)
   const [showAllDocs, setShowAllDocs] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -415,33 +469,6 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     shortDescription ||
     getPropertyValues(findProperty(currentProduct, 'tenant~description-variant'))[0] ||
     getPropertyValues(findProperty(updatedProduct, 'tenant~target-sentence'))[0]
-
-  useEffect(() => {
-    const element = descRef.current
-    if (!element) return
-    const measure = () => {
-      const lineHeight = parseFloat(getComputedStyle(element).lineHeight)
-      setDescOverflows(element.scrollHeight > lineHeight * 4 + 1)
-    }
-    measure()
-    document.fonts?.ready.then(measure)
-    window.addEventListener('resize', measure)
-    return () => window.removeEventListener('resize', measure)
-  }, [descriptionHtml])
-
-  const toggleDescription = () => {
-    const element = descRef.current
-    if (!element) return
-    if (descExpanded) {
-      element.style.maxHeight = `${element.scrollHeight}px`
-      void element.offsetHeight
-      setDescMaxHeight(undefined)
-      setDescExpanded(false)
-    } else {
-      setDescMaxHeight(element.scrollHeight)
-      setDescExpanded(true)
-    }
-  }
 
   const handleCopy = async () => {
     if (!catalogNumber) return
@@ -903,34 +930,14 @@ const PdpTemplate = (props: PdpTemplateProps) => {
         {descriptionHtml ? (
           <section className={styles.description}>
             <h2 className={styles.heading}>Product Description</h2>
-            <div
-              ref={descRef}
-              className={`${styles.clamp} ${
-                descExpanded || !descOverflows ? styles.clampExpanded : ''
-              }`}
-              style={descMaxHeight !== undefined ? { maxHeight: descMaxHeight } : undefined}
-              onTransitionEnd={(event) => {
-                if (event.propertyName === 'max-height' && descExpanded) setDescMaxHeight('none')
-              }}
-              dangerouslySetInnerHTML={{ __html: descriptionHtml }}
-            />
-            {descOverflows ? (
-              <button
-                type="button"
-                className={`${styles.seeMore} ${descExpanded ? styles.seeMoreExpanded : ''}`}
-                onClick={toggleDescription}
-              >
-                <span>{descExpanded ? 'See less' : 'See more'}</span>
-                <Arrow />
-              </button>
-            ) : null}
+            <CollapsibleHtml html={descriptionHtml} />
           </section>
         ) : null}
 
         {description ? (
           <section className={styles.section}>
             <h2 className={styles.heading}>{t('product-details')}</h2>
-            <div className={styles.copy} dangerouslySetInnerHTML={{ __html: description }} />
+            <CollapsibleHtml html={description} />
           </section>
         ) : null}
       </>
