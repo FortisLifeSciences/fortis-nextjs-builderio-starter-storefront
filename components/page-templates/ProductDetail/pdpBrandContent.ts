@@ -96,7 +96,7 @@ const ANTIBODY_SUPPORT_ROWS: PdpSupportRow[] = [
     id: 'bulk',
     title: 'Bulk & Custom Option',
     subtitle: 'Bulk and custom supply options',
-    href: '/bulk-custom-oem',
+    href: 'https://www.fortislife.com/bulk-custom-oem',
     icon: 'truck',
   },
   ...CONTACT_ROWS,
