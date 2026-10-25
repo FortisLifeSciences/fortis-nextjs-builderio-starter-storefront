@@ -114,7 +114,7 @@ const MyAccountOrderHistoryTemplate = (props: OrderHistoryTemplateProps) => {
     sortBy,
     pageSize,
     startIndex: 0,
-    orderNumber: submittedSearch || undefined,
+    searchTerm: submittedSearch || undefined,
     isRefetching: true,
   })
 
