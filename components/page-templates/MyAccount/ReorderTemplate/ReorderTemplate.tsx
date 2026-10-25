@@ -75,8 +75,10 @@ const styles = {
     '& .MuiOutlinedInput-root': {
       borderRadius: '2rem',
       backgroundColor: 'grey.100',
+      paddingRight: '1rem',
     },
     '& fieldset': { border: 'none' },
+    '& .MuiInputBase-input': { fontSize: '0.875rem' },
     '& .MuiInputBase-input::placeholder': { textOverflow: 'ellipsis' },
   },
   headerRow: {
