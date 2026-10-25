@@ -29,7 +29,12 @@ import { useAlgoliaProductSearch, useDebounce, useGetSearchedProducts } from '@/
 import { useAddItemsToCurrentCart } from '@/hooks/mutations/cart/useAddItemsToCurrentCart/useAddItemsToCurrentCart'
 import { productGetters } from '@/lib/getters'
 import { makeGraphQLClient } from '@/lib/gql/client'
-import { getProductPriceQuery, getProductVariationQuery } from '@/lib/gql/queries'
+import {
+  getProductLocationInventoryQuery,
+  getProductPriceQuery,
+  getProductVariationQuery,
+} from '@/lib/gql/queries'
+import { inventoryKeys } from '@/lib/react-query/queryKeys'
 import type { ProductCustom } from '@/lib/types'
 import {
   addToCartGTM,
@@ -38,7 +43,7 @@ import {
 } from '@/lib/utils/google-tag-manager'
 
 import type { AlgoliaProductHit } from '@/hooks'
-import type { CrOrderItem, Product } from '@/lib/gql/types'
+import type { CrOrderItem, LocationInventory, Product } from '@/lib/gql/types'
 import type { Theme } from '@mui/material'
 
 interface ReorderRow {
@@ -47,6 +52,7 @@ interface ReorderRow {
   quantity: number
   product?: Product
   isPriceResolved?: boolean
+  maxQuantity?: number
 }
 
 const createEmptyRow = (): ReorderRow => ({
@@ -54,6 +60,39 @@ const createEmptyRow = (): ReorderRow => ({
   catalogNumber: '',
   quantity: 1,
 })
+
+const hasPrice = (price?: { price?: number | null; salePrice?: number | null } | null) =>
+  Boolean(price?.salePrice || price?.price)
+
+const INVENTORY_LOCATION_CODE = 'BETHYL'
+
+const getPropertyValue = (properties: Product['properties'], attributeFQN: string) => {
+  const value = properties?.find((property) => property?.attributeFQN === attributeFQN)?.values?.[0]
+  return value?.stringValue ?? value?.value ?? null
+}
+
+const getMaxQuantity = (
+  parent: Product,
+  variant: Product | undefined,
+  stockAvailable: number
+): number | undefined => {
+  const findValue = (attributeFQN: string) =>
+    getPropertyValue(variant?.properties, attributeFQN) ??
+    getPropertyValue(parent.properties, attributeFQN)
+
+  const skuStatusText = findValue('tenant~sku-status-text')
+  const stockBehaviour = findValue('tenant~stock-behavior-option')
+  const minimumStock = Number(findValue('tenant~minimum-stock')) || 0
+
+  return String(skuStatusText).toLowerCase() === 'active' &&
+    String(stockBehaviour).toLowerCase() === 'denybackorder' &&
+    stockAvailable >= minimumStock
+    ? stockAvailable - minimumStock
+    : undefined
+}
+
+const clampQuantity = (quantity: number, maxQuantity?: number) =>
+  maxQuantity === undefined ? quantity : Math.min(quantity, maxQuantity)
 
 const styles = {
   searchWrapper: {
@@ -239,7 +278,12 @@ const ReorderTemplate = () => {
   }
 
   const handleCatalogNumberChange = (key: string, value: string) => {
-    updateRow(key, { catalogNumber: value, product: undefined, isPriceResolved: false })
+    updateRow(key, {
+      catalogNumber: value,
+      product: undefined,
+      isPriceResolved: false,
+      maxQuantity: undefined,
+    })
     setActiveRowKey(key)
     setLookupTerm(value)
   }
@@ -294,6 +338,27 @@ const ReorderTemplate = () => {
         const variationCode = productGetters.getVariationProductCode(product)
 
         try {
+          const inventoryCode = variationCode || productCode
+          const inventoryRequest = queryClient
+            .fetchQuery({
+              queryKey: inventoryKeys.inventoryParams(inventoryCode, INVENTORY_LOCATION_CODE),
+              queryFn: async () => {
+                const response = await makeGraphQLClient().request({
+                  document: getProductLocationInventoryQuery,
+                  variables: {
+                    productCode: inventoryCode,
+                    locationCodes: INVENTORY_LOCATION_CODE,
+                  },
+                })
+                return (response?.productLocationInventory?.items ?? []) as LocationInventory[]
+              },
+              staleTime: 60 * 1000,
+            })
+            .catch((error) => {
+              console.error('Error: reorder inventory lookup', error)
+              return [] as LocationInventory[]
+            })
+
           const priced = await queryClient.fetchQuery({
             queryKey: ['reorderProductPrice', productCode, variationCode],
             queryFn: async () => {
@@ -310,12 +375,17 @@ const ReorderTemplate = () => {
             staleTime: 60 * 1000,
           })
 
+          const inventory = await inventoryRequest
+          const maxQuantity = getMaxQuantity(product, priced, inventory?.[0]?.stockAvailable || 0)
+
           setRows((current) =>
             current.map((item) =>
               item.key === row.key && item.product === row.product
                 ? {
                     ...item,
                     isPriceResolved: true,
+                    maxQuantity,
+                    quantity: clampQuantity(item.quantity, maxQuantity),
                     product: {
                       ...product,
                       price: priced?.price ?? product.price,
@@ -521,14 +591,17 @@ const ReorderTemplate = () => {
                 size="small"
                 fullWidth
                 type="number"
-                disabled={!row.product}
+                disabled={!row.product || !row.isPriceResolved}
                 value={row.quantity || ''}
                 onChange={(event) =>
                   updateRow(row.key, {
-                    quantity: Math.max(0, Math.floor(Number(event.target.value))),
+                    quantity: clampQuantity(
+                      Math.max(0, Math.floor(Number(event.target.value))),
+                      row.maxQuantity
+                    ),
                   })
                 }
-                inputProps={{ min: 0, 'aria-label': String(t('qty')) }}
+                inputProps={{ min: 0, max: row.maxQuantity, 'aria-label': String(t('qty')) }}
               />
             </Grid>
 
