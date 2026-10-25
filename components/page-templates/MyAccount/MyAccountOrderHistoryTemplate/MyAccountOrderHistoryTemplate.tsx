@@ -11,13 +11,14 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import getConfig from 'next/config'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
 import OrderHistoryCard from './OrderHistoryCard'
 import { AccountPageHeader, accountActionButton, accountType } from '@/components/my-account/common'
 import { useAuthContext, useSnackbarContext } from '@/context'
-import { useGetCustomerOrders, useProductCardActions } from '@/hooks'
+import { useDebounce, useGetCustomerOrders, useProductCardActions } from '@/hooks'
 import { useAddItemsToCurrentCart } from '@/hooks/mutations/cart/useAddItemsToCurrentCart/useAddItemsToCurrentCart'
 import { FacetListForHistory } from '@/lib/constants'
 import { orderGetters, userGetters } from '@/lib/getters'
@@ -105,8 +106,9 @@ const MyAccountOrderHistoryTemplate = (props: OrderHistoryTemplateProps) => {
   const [statusFilter, setStatusFilter] = useState<string>('')
   const [sortBy, setSortBy] = useState<string>('submittedDate desc')
   const [searchTerm, setSearchTerm] = useState<string>('')
-  const [submittedSearch, setSubmittedSearch] = useState<string>('')
   const [pageSize, setPageSize] = useState<number>(PAGE_SIZE)
+  const { publicRuntimeConfig } = getConfig()
+  const debouncedSearch = useDebounce(searchTerm.trim(), publicRuntimeConfig.debounceTimeout)
 
   const { data: orderCollection, isFetching } = useGetCustomerOrders({
     filters: [timeFilter],
@@ -114,7 +116,7 @@ const MyAccountOrderHistoryTemplate = (props: OrderHistoryTemplateProps) => {
     sortBy,
     pageSize,
     startIndex: 0,
-    searchTerm: submittedSearch || undefined,
+    searchTerm: debouncedSearch || undefined,
     isRefetching: true,
   })
 
@@ -134,7 +136,6 @@ const MyAccountOrderHistoryTemplate = (props: OrderHistoryTemplateProps) => {
     setStatusFilter('')
     setSortBy('submittedDate desc')
     setSearchTerm('')
-    setSubmittedSearch('')
     setPageSize(PAGE_SIZE)
   }
 
@@ -186,10 +187,6 @@ const MyAccountOrderHistoryTemplate = (props: OrderHistoryTemplateProps) => {
         placeholder={String(t('search-orders-placeholder'))}
         value={searchTerm}
         onChange={(event) => setSearchTerm(event.target.value)}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter') setSubmittedSearch(searchTerm.trim())
-        }}
-        onBlur={() => setSubmittedSearch(searchTerm.trim())}
         sx={{ ...styles.searchField }}
         InputProps={{
           startAdornment: (
