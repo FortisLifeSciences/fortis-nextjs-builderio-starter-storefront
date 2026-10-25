@@ -83,6 +83,8 @@
   "qty": "Cant.",
   "search-by-catalog-number-product-name": "Buscar por número de catálogo, nombre del producto",
   "product-name-appears-here": "El nombre del producto aparece aquí",
+  "product-not-found": "Producto no encontrado",
+  "enter-full-catalog-number": "Introduzca el número de catálogo completo, incluido el tamaño",
   "items-subtotal": "{{count}} artículos, subtotal {{subtotal}}",
   "where-to-find": "Dónde encontrarlo:",
   "fedex-account-help": "Su número de cuenta de 9 dígitos se encuentra en la esquina superior derecha de su factura de FedEx, o en la pestaña 'Perfil de cuenta' al iniciar sesión en su cuenta de FedEx en línea.",
