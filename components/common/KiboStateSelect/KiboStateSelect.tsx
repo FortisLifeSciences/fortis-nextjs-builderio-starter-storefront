@@ -122,8 +122,8 @@ const KiboStateSelect = (props: KiboStateSelectProps) => {
               },
             },
           },
+          MenuListProps: { autoFocusItem: false },
         }}
-        MenuListProps={{ autoFocusItem: false }}
         sx={{
           borderColor: error ? 'error.main' : '#D3D7D9',
           borderWidth: '1px',
