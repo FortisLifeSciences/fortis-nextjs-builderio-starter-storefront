@@ -327,6 +327,13 @@ const ReorderTemplate = () => {
           )
         } catch (error) {
           console.error('Error: reorder price lookup', error)
+          setRows((current) =>
+            current.map((item) =>
+              item.key === row.key && item.product === row.product
+                ? { ...item, isPriceResolved: true }
+                : item
+            )
+          )
         }
       })
   }, [rows, queryClient])
@@ -337,12 +344,19 @@ const ReorderTemplate = () => {
     if (!hasEmptyRow) setRows((current) => [...current, createEmptyRow()])
   }, [rows])
 
-  const filledRows = rows.filter((row) => row.product && row.quantity > 0)
+  const getUnitPrice = (product?: Product) => {
+    const price = product ? productGetters.getPrice(product) : undefined
+    return price?.special || price?.regular || 0
+  }
 
-  const subtotal = filledRows.reduce((sum, row) => {
-    const price = productGetters.getPrice(row.product as Product)
-    return sum + (price?.special || price?.regular || 0) * row.quantity
-  }, 0)
+  const filledRows = rows.filter(
+    (row) => row.product && row.isPriceResolved && getUnitPrice(row.product) > 0 && row.quantity > 0
+  )
+
+  const subtotal = filledRows.reduce(
+    (sum, row) => sum + getUnitPrice(row.product) * row.quantity,
+    0
+  )
 
   const totalItems = filledRows.reduce((sum, row) => sum + row.quantity, 0)
 
@@ -478,8 +492,8 @@ const ReorderTemplate = () => {
       </Grid>
 
       {visibleRows.map((row) => {
-        const price = row.product ? productGetters.getPrice(row.product) : undefined
-        const unitPrice = price?.special || price?.regular || 0
+        const unitPrice = getUnitPrice(row.product)
+        const isPriceLoading = Boolean(row.product) && !row.isPriceResolved
         const isLookingUp =
           isLoading && activeRowKey === row.key && Boolean(row.catalogNumber.trim())
         const isNotFound =
@@ -554,10 +568,14 @@ const ReorderTemplate = () => {
             <Grid item xs={2} sm={2}>
               <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end' }}>
                 <Box>
-                  <Typography component="p" sx={{ ...styles.unitPrice }}>
-                    {row.product ? t('currency', { val: unitPrice }) : '–'}
-                  </Typography>
-                  {row.product && row.quantity > 0 && (
+                  {isPriceLoading ? (
+                    <CircularProgress size={16} />
+                  ) : (
+                    <Typography component="p" sx={{ ...styles.unitPrice }}>
+                      {row.product ? t('currency', { val: unitPrice }) : '–'}
+                    </Typography>
+                  )}
+                  {!isPriceLoading && row.product && row.quantity > 0 && (
                     <Typography component="p" sx={{ ...styles.lineTotal }}>
                       {t('currency', { val: unitPrice * row.quantity })}
                     </Typography>
