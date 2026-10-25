@@ -12,7 +12,6 @@ import {
   Typography,
 } from '@mui/material'
 import getConfig from 'next/config'
-import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
 import OrderHistoryCard from './OrderHistoryCard'
@@ -100,7 +99,6 @@ const styles = {
 const MyAccountOrderHistoryTemplate = (props: OrderHistoryTemplateProps) => {
   const { user, queryFilters } = props
   const { t } = useTranslation('common')
-  const router = useRouter()
 
   const [timeFilter, setTimeFilter] = useState<string>(queryFilters?.[0] ?? DEFAULT_TIME_FILTER)
   const [statusFilter, setStatusFilter] = useState<string>('')
@@ -147,14 +145,12 @@ const MyAccountOrderHistoryTemplate = (props: OrderHistoryTemplateProps) => {
       const response = await addItemsToCurrentCart.mutateAsync({ items: orderItems })
 
       if (response) {
-        showSnackbar(t('list-added-to-cart'), 'success')
+        showSnackbar(t('reorder-replaced-cart'), 'success')
         const mappedGTMProducts = mapCartItemsToGAEvent(orderItems)
         const valueOfCart = getValueOfItemList(mappedGTMProducts)
 
         addToCartGTM(authUser?.userId, valueOfCart, mappedGTMProducts)
       }
-
-      router.push('/cart')
     } catch (error) {
       console.error('Error: reorder from order history', error)
     }
