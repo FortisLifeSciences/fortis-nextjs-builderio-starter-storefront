@@ -30,4 +30,25 @@ describe('[helpers] buildOrdersFilterParams function', () => {
     expect(buildOrdersFilterParams(orderStatusVariables)).toStrictEqual(buildOrdersFilterInputMock)
     expect(buildOrdersFilterParams(orderHistoryVariables)).toStrictEqual(buildOrdersHistoryMock)
   })
+
+  it('should filter by order number when the search term is numeric, ignoring a leading #', () => {
+    expect(
+      buildOrdersFilterParams({ startIndex: 0, pageSize: 20, searchTerm: ' #4236 ' })
+    ).toStrictEqual({
+      startIndex: 0,
+      pageSize: 20,
+      filter: 'orderNumber eq 4236 and status ne Abandoned',
+    })
+  })
+
+  it('should use keyword search when the search term is not numeric', () => {
+    expect(
+      buildOrdersFilterParams({ startIndex: 0, pageSize: 20, searchTerm: 'PO-12345' })
+    ).toStrictEqual({
+      startIndex: 0,
+      pageSize: 20,
+      filter: 'status ne Abandoned',
+      q: 'PO-12345',
+    })
+  })
 })

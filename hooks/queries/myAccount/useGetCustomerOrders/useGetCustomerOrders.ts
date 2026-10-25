@@ -13,6 +13,7 @@ import type { OrderCollection } from '@/lib/gql/types'
 interface UseUserOrder {
   orderNumber?: string
   billingEmail?: string
+  searchTerm?: string
   filters?: string | string[]
   status?: string
   sortBy?: string
@@ -75,6 +76,7 @@ export const useGetCustomerOrders = (param: UseUserOrder): UseUserOrderType => {
       param.pageSize,
       param.orderNumber,
       param.billingEmail,
+      param.searchTerm,
     ],
     queryFn: () => {
       if (param.orderNumber === '' && param.billingEmail === '') return []
