@@ -39,6 +39,7 @@ import {
 
 import type { AlgoliaProductHit } from '@/hooks'
 import type { CrOrderItem, Product } from '@/lib/gql/types'
+import type { Theme } from '@mui/material'
 
 interface ReorderRow {
   key: string
@@ -138,7 +139,15 @@ const styles = {
     color: 'text.secondary',
     marginLeft: 'auto',
   },
-  actionButton: accountActionButton,
+  actionButton: {
+    ...accountActionButton,
+    '&.MuiButton-contained.Mui-disabled': {
+      backgroundColor: (theme: Theme) => `${theme.palette.grey[300]} !important`,
+      color: (theme: Theme) => `${theme.palette.grey[600]} !important`,
+      cursor: 'not-allowed',
+      pointerEvents: 'auto',
+    },
+  },
 }
 
 const ReorderTemplate = () => {
@@ -467,6 +476,7 @@ const ReorderTemplate = () => {
                 size="small"
                 fullWidth
                 type="number"
+                disabled={!row.product}
                 value={row.quantity || ''}
                 onChange={(event) =>
                   updateRow(row.key, {
