@@ -472,6 +472,7 @@ const PaymentMethod = (props: PaymentMethodProps) => {
                   validateForm={validateForm}
                   onFormStatusChange={handleBillingFormValidDetails}
                   isAddressFormInDialog={isAddressFormInDialog}
+                  internationalPhoneInput
                 />
               </>
             )}
