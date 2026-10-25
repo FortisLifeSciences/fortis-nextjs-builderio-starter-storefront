@@ -729,7 +729,7 @@
   "newest-first": "Newest First",
   "oldest-first": "Oldest First",
   "all": "All",
-  "search-orders-placeholder": "Search by order#, PO#, catalog number etc",
+  "search-orders-placeholder": "Search by order#, catalog number etc",
   "delivery-status": "Delivery Status",
   "estimated-ship-date": "Estimated ship date",
   "add-row": "Add row",
