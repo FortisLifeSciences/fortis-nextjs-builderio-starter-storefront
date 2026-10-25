@@ -733,6 +733,8 @@
   "catalog-number": "Catalog number",
   "search-by-catalog-number-product-name": "Search by catalog number, product name",
   "product-name-appears-here": "Product name appears here",
+  "product-not-found": "Product not found",
+  "enter-full-catalog-number": "Enter the full catalog number, including the size",
   "items-subtotal": "{{count}} items, subtotal {{subtotal}}",
   "where-to-find": "Where to find:",
   "fedex-account-help": "Your 9-digit account number is located in the top-right corner of your FedEx invoice, or under the 'Account Profile' tab when logged into your FedEx account online.",

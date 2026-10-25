@@ -107,6 +107,10 @@ const styles = {
     typography: 'body2',
     color: 'text.secondary',
   },
+  notFoundText: {
+    typography: 'body2',
+    color: 'error.main',
+  },
   unitPrice: {
     ...accountType.body,
     fontWeight: 700,
@@ -174,19 +178,28 @@ const ReorderTemplate = () => {
     const term = debouncedLookup.trim().toLowerCase()
     return hit.sku?.toLowerCase() === term || hit.catalogNumber?.toLowerCase() === term
   })
-  const { data: searchResult, isLoading: isProductLoading } = useGetSearchedProducts({
+  const {
+    data: searchResult,
+    isLoading: isProductLoading,
+    isFetching: isProductFetching,
+  } = useGetSearchedProducts({
     search: isLookupHitsLoading ? '' : exactHit?.parentId || debouncedLookup,
     pageSize: publicRuntimeConfig?.b2bProductSearchPageSize,
   })
 
   const isLoading = isProductLoading || isLookupHitsLoading
+  const isLookupSettled =
+    Boolean(lookupTerm.trim()) &&
+    lookupTerm === debouncedLookup &&
+    !isLookupHitsLoading &&
+    !isProductFetching
 
   const queryClient = useQueryClient()
   const { addItemsToCurrentCart } = useAddItemsToCurrentCart()
   const { showSnackbar } = useSnackbarContext()
   const { user } = useAuthContext()
 
-  const resolveProduct = (catalogNumber: string): Product | undefined => {
+  const findProductMatch = (catalogNumber: string): Product | undefined => {
     const term = catalogNumber.trim().toLowerCase()
     if (!term) return undefined
 
@@ -206,6 +219,19 @@ const ReorderTemplate = () => {
     return sku && !productGetters.getVariationProductCode(match)
       ? ({ ...match, variationProductCode: sku } as Product)
       : match
+  }
+
+  const isMissingVariant = (product: Product) =>
+    product.productUsage === 'Configurable' && !productGetters.getVariationProductCode(product)
+
+  const resolveProduct = (catalogNumber: string): Product | undefined => {
+    const match = findProductMatch(catalogNumber)
+    return match && !isMissingVariant(match) ? match : undefined
+  }
+
+  const isGenericCatalogNumber = (catalogNumber: string) => {
+    const match = findProductMatch(catalogNumber)
+    return Boolean(match && isMissingVariant(match))
   }
 
   const updateRow = (key: string, changes: Partial<ReorderRow>) => {
@@ -456,6 +482,11 @@ const ReorderTemplate = () => {
         const unitPrice = price?.special || price?.regular || 0
         const isLookingUp =
           isLoading && activeRowKey === row.key && Boolean(row.catalogNumber.trim())
+        const isNotFound =
+          isLookupSettled &&
+          activeRowKey === row.key &&
+          Boolean(row.catalogNumber.trim()) &&
+          !row.product
 
         return (
           <Grid container key={row.key} sx={{ ...styles.row }}>
@@ -506,7 +537,14 @@ const ReorderTemplate = () => {
                   )}
                 </>
               )}
-              {!isLookingUp && !row.product && (
+              {isNotFound && (
+                <Typography component="p" role="alert" sx={{ ...styles.notFoundText }}>
+                  {isGenericCatalogNumber(row.catalogNumber)
+                    ? t('enter-full-catalog-number')
+                    : t('product-not-found')}
+                </Typography>
+              )}
+              {!isLookingUp && !isNotFound && !row.product && (
                 <Typography component="p" sx={{ ...styles.placeholderText }}>
                   {t('product-name-appears-here')}
                 </Typography>
