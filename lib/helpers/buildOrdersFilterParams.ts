@@ -22,16 +22,9 @@ export const buildOrdersFilterParams = (params: {
   startIndex: number
   pageSize: number
   sortBy?: string
-  q?: string
 } => {
   const { publicRuntimeConfig } = getConfig()
-  const variables: {
-    filter: string
-    startIndex: number
-    pageSize: number
-    sortBy?: string
-    q?: string
-  } = {
+  const variables = {
     filter: '',
     startIndex: params.startIndex ?? publicRuntimeConfig.orderHistory.startIndex,
     pageSize: params.pageSize || publicRuntimeConfig.orderHistory.pageSize,
@@ -70,16 +63,15 @@ export const buildOrdersFilterParams = (params: {
       ? variables.filter.concat(` and ${orderNumberFilter}`)
       : orderNumberFilter
   }
-  const searchTerm = params.searchTerm?.trim().replace(/^#/, '').trim()
+  const searchTerm = params.searchTerm?.replace(/[^\w\s.-]/g, '').trim()
   if (searchTerm) {
-    if (/^\d+$/.test(searchTerm)) {
-      const orderNumberFilter = `orderNumber eq ${searchTerm}`
-      variables.filter = variables.filter
-        ? variables.filter.concat(` and ${orderNumberFilter}`)
-        : orderNumberFilter
-    } else {
-      variables.q = searchTerm
-    }
+    const productCodeFilter = `items.productCode cont '${searchTerm}'`
+    const searchFilter = /^\d+$/.test(searchTerm)
+      ? `(orderNumber eq ${searchTerm} or ${productCodeFilter})`
+      : productCodeFilter
+    variables.filter = variables.filter
+      ? variables.filter.concat(` and ${searchFilter}`)
+      : searchFilter
   }
 
   const defaultQuery = `status ne ${OrderStatus.ABANDONED}`

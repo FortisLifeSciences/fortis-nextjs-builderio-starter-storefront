@@ -1,8 +1,8 @@
 import { baseOrderFragment, orderItemFragment, orderPaymentFragment } from '../fragments/orders'
 
 const getOrdersQuery = /* GraphQL */ `
-  query getOrders($filter: String, $startIndex: Int, $pageSize: Int, $sortBy: String, $q: String) {
-    orders(filter: $filter, startIndex: $startIndex, pageSize: $pageSize, sortBy: $sortBy, q: $q) {
+  query getOrders($filter: String, $startIndex: Int, $pageSize: Int, $sortBy: String) {
+    orders(filter: $filter, startIndex: $startIndex, pageSize: $pageSize, sortBy: $sortBy) {
       pageCount
       totalCount
       items {
