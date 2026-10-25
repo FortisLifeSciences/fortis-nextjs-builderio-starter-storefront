@@ -47,7 +47,7 @@ export const useAlgoliaProductSearch = (params: UseAlgoliaProductSearchParams) =
     setIsLoading(true)
 
     productIndex
-      .search(trimmed, { hitsPerPage })
+      .search(trimmed, { hitsPerPage, distinct: false })
       .then((response) => {
         if (isStale) return
         const returnedHits = (response as { hits?: Record<string, unknown>[] })?.hits ?? []
