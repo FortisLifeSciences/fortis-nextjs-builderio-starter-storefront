@@ -382,12 +382,18 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     return amount != null ? `$${amount.toFixed(2)}` : null
   }
 
+  const formatVariantOriginalPrice = (price: any): string | null =>
+    price?.salePrice != null && price?.price != null && price.salePrice < price.price
+      ? `$${price.price.toFixed(2)}`
+      : null
+
   const toVariantOptions = (option: any): PdpVariantOption[] =>
     (option?.values ?? []).map((value: any) => ({
       value: value?.value,
       label: value?.stringValue || value?.value,
       sku: value?.variationProductCode,
       price: formatVariantPrice(value?.price),
+      originalPrice: formatVariantOriginalPrice(value?.price),
       disabled: !value?.isEnabled,
       isNew:
         value?.isNewVariant ??

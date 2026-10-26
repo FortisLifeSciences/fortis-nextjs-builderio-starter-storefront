@@ -9,9 +9,19 @@ export interface PdpVariantOption {
   label: string
   sku?: string | null
   price?: string | null
+  originalPrice?: string | null
   disabled?: boolean
   isNew?: boolean
 }
+
+const OptionPrice = ({ option }: { option: PdpVariantOption }) => (
+  <span className={styles.sizePrice}>
+    {option.originalPrice ? (
+      <s className={styles.sizePriceOriginal}>{option.originalPrice}</s>
+    ) : null}
+    {option.price}
+  </span>
+)
 
 const OptionLabel = ({ option }: { option: PdpVariantOption }) => {
   const { t } = useTranslation('common')
@@ -56,9 +66,7 @@ const PdpVariantPicker = ({
               <span className={styles.optionRadio} aria-hidden="true" />
               <OptionLabel option={option} />
               {option.sku ? <span className={styles.sizeSku}>{option.sku}</span> : null}
-              {showPrices && option.price ? (
-                <span className={styles.sizePrice}>{option.price}</span>
-              ) : null}
+              {showPrices && option.price ? <OptionPrice option={option} /> : null}
             </button>
           )
         })}
@@ -93,7 +101,7 @@ export const PdpMobileSizePicker = ({
     <>
       <OptionLabel option={option} />
       <span className={styles.sizeSku}>{option.sku}</span>
-      <span className={styles.sizePrice}>{showPrices ? option.price : null}</span>
+      {showPrices ? <OptionPrice option={option} /> : <span className={styles.sizePrice} />}
     </>
   )
 

@@ -846,6 +846,12 @@
   color: var(--ink);
 }
 
+.sizePriceOriginal {
+  margin-right: 6px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
 .sizeDocLink {
   display: flex;
   align-items: center;
@@ -2832,6 +2838,10 @@
 .mobileSizeOptionSelected .sizeSku,
 .mobileSizeOptionSelected .sizePrice {
   color: #fff;
+}
+
+.mobileSizeOptionSelected .sizePriceOriginal {
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .mobileBrandWrap > div {
