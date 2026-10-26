@@ -541,10 +541,8 @@ const PdpTemplate = (props: PdpTemplateProps) => {
           </>
         )
 
-        const rowHref = row.id === 'bulk' && bulkFormHref ? bulkFormHref : row.href
-
-        return rowHref ? (
-          <Link className={styles.supportRow} key={row.id} href={rowHref}>
+        return row.href ? (
+          <Link className={styles.supportRow} key={row.id} href={row.href}>
             {rowContent}
           </Link>
         ) : (
