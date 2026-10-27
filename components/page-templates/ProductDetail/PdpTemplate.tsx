@@ -1160,7 +1160,7 @@ const PdpTemplate = (props: PdpTemplateProps) => {
           <div className={styles.servicesGrid}>
             {brandContent.services.map((service) => (
               <Link className={styles.serviceCard} href={service.href} key={service.id}>
-                <div className={styles.formatTitle}>{service.title}</div>
+                <h3 className={styles.formatTitle}>{service.title}</h3>
                 <p>{service.copy}</p>
                 <span className={styles.formatLink}>
                   <span>{service.ctaLabel}</span>
