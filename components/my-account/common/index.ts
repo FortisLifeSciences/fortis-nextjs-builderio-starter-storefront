@@ -3,5 +3,10 @@ export { default as AccountPageHeader } from './AccountPageHeader/AccountPageHea
 export { default as AccountItemMenu } from './AccountItemMenu/AccountItemMenu'
 export { default as InlineField } from './InlineField/InlineField'
 export type { AccountItemMenuAction } from './AccountItemMenu/AccountItemMenu'
-export { accountActionButton, accountTextButton, accountFormInput } from './accountButtonStyles'
+export {
+  accountActionButton,
+  accountTextButton,
+  accountFormInput,
+  accountSelectMenuProps,
+} from './accountButtonStyles'
 export { accountType } from './accountTypography'
