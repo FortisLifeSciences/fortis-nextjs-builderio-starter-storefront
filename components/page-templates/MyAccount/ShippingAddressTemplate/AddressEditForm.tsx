@@ -17,14 +17,18 @@ import {
 import getConfig from 'next/config'
 import { useTranslation } from 'next-i18next'
 import { Controller, useForm } from 'react-hook-form'
+import { isValidPhoneNumber } from 'react-phone-number-input'
 import * as yup from 'yup'
 
 import { getAddressDisplayName } from './AddressDisplayCard'
+import { KiboPhoneInput } from '@/components/common'
+import { toE164PhoneNumber } from '@/components/common/KiboPhoneInput/KiboPhoneInput'
 import {
   accountActionButton,
   accountFormInput,
   accountTextButton,
   accountType,
+  accountSelectMenuProps,
 } from '@/components/my-account/common'
 import { CountryCode } from '@/lib/constants'
 
@@ -95,27 +99,37 @@ const useAddressSchema = () => {
   const { t } = useTranslation('common')
 
   return yup.object().shape({
-    firstName: yup.string().required(t('this-field-is-required')),
-    lastNameOrSurname: yup.string().required(t('this-field-is-required')),
+    firstName: yup
+      .string()
+      .required(t('this-field-is-required'))
+      .test('not-blank', t('this-field-is-required'), (value) => !!value?.trim()),
+    lastNameOrSurname: yup
+      .string()
+      .required(t('this-field-is-required'))
+      .test('not-blank', t('this-field-is-required'), (value) => !!value?.trim()),
     email: yup
       .string()
+      .trim()
       .email(t('please-enter-a-valid-email-address'))
       .required(t('this-field-is-required')),
     phoneNumber: yup
       .string()
       .required(t('this-field-is-required'))
-      .matches(/^[0-9\s\-()+]{10,}$/, t('enter-valid-phone-number')),
-    companyOrOrganization: yup.string().required(t('this-field-is-required')),
-    address1: yup.string().required(t('this-field-is-required')),
-    address2: yup.string().nullable(true).notRequired(),
+      .test('is-valid-phone-number', t('enter-valid-phone-number'), (value) =>
+        value ? isValidPhoneNumber(value) : false
+      ),
+    companyOrOrganization: yup.string().trim().required(t('this-field-is-required')),
+    address1: yup.string().trim().required(t('this-field-is-required')),
+    address2: yup.string().trim().nullable(true).notRequired(),
     countryCode: yup.string().required(t('this-field-is-required')),
     stateOrProvince: yup.string().when('countryCode', {
       is: (value: string) => [CountryCode.US, CountryCode.CA].includes(value),
       then: yup.string().required(t('this-field-is-required')),
     }),
-    cityOrTown: yup.string().required(t('this-field-is-required')),
+    cityOrTown: yup.string().trim().required(t('this-field-is-required')),
     postalOrZipCode: yup
       .string()
+      .trim()
       .required(t('this-field-is-required'))
       .when('countryCode', {
         is: CountryCode.US,
@@ -141,6 +155,7 @@ const AddressEditForm = (props: AddressEditFormProps) => {
   const {
     control,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<AddressEditFormValues>({
     mode: 'onBlur',
@@ -150,7 +165,10 @@ const AddressEditForm = (props: AddressEditFormProps) => {
       firstName: customerContact?.firstName ?? '',
       lastNameOrSurname: customerContact?.lastNameOrSurname ?? '',
       email: customerContact?.email ?? '',
-      phoneNumber: customerContact?.phoneNumbers?.home ?? customerContact?.phoneNumbers?.work ?? '',
+      phoneNumber:
+        toE164PhoneNumber(
+          customerContact?.phoneNumbers?.home ?? customerContact?.phoneNumbers?.work
+        ) || '',
       companyOrOrganization: customerContact?.companyOrOrganization ?? '',
       address1: customerContact?.address?.address1 ?? '',
       address2: customerContact?.address?.address2 ?? '',
@@ -161,14 +179,27 @@ const AddressEditForm = (props: AddressEditFormProps) => {
     },
   })
 
+  const isStateRequired = [CountryCode.US, CountryCode.CA].includes(watch('countryCode'))
+
   const renderField = (
     name: keyof AddressEditFormValues,
     label: string,
-    options?: { select?: 'country' | 'province'; maxLength?: number; numeric?: boolean }
+    options?: {
+      select?: 'country' | 'province'
+      maxLength?: number
+      digitsAndHyphen?: boolean // add this
+      numeric?: boolean
+      required?: boolean
+    }
   ) => (
     <>
       <Typography component="label" htmlFor={name} sx={{ ...styles.fieldLabel }}>
         {label}
+        {options?.required && (
+          <Box component="span" aria-hidden="true" sx={{ color: 'error.main', ml: 0.5 }}>
+            *
+          </Box>
+        )}
       </Typography>
       <Controller
         name={name}
@@ -180,15 +211,25 @@ const AddressEditForm = (props: AddressEditFormProps) => {
             fullWidth
             size="small"
             select={Boolean(options?.select)}
+            SelectProps={{ MenuProps: accountSelectMenuProps }}
             error={Boolean(errors?.[name])}
             helperText={errors?.[name]?.message}
             sx={{ ...styles.input }}
-            inputProps={{ maxLength: options?.maxLength, 'aria-label': label }}
-            onChange={(event) =>
+            inputProps={{
+              maxLength: options?.maxLength,
+              'aria-label': label,
+              'aria-required': options?.required,
+            }}
+            onChange={(event) => {
+              const value = event.target.value
               field.onChange(
-                options?.numeric ? event.target.value.replace(/[^0-9]/g, '') : event.target.value
+                options?.numeric
+                  ? value.replace(/[^0-9]/g, '')
+                  : options?.digitsAndHyphen
+                  ? value.replace(/[^0-9-]/g, '')
+                  : value
               )
-            }
+            }}
           >
             {options?.select === 'country' &&
               countries.map((country: { name: string; code: string }) => (
@@ -234,19 +275,33 @@ const AddressEditForm = (props: AddressEditFormProps) => {
 
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              {renderField('firstName', String(t('first-name')))}
+              {renderField('firstName', String(t('first-name')), { required: true })}
             </Grid>
             <Grid item xs={12} sm={6}>
-              {renderField('lastNameOrSurname', String(t('last-name-or-sur-name')))}
-            </Grid>
-            <Grid item xs={12}>
-              {renderField('email', String(t('invoice-email')))}
-            </Grid>
-            <Grid item xs={12}>
-              {renderField('phoneNumber', String(t('phone-number')), {
-                maxLength: 15,
-                numeric: true,
+              {renderField('lastNameOrSurname', String(t('last-name-or-sur-name')), {
+                required: true,
               })}
+            </Grid>
+            <Grid item xs={12}>
+              {renderField('email', String(t('invoice-email')), { required: true })}
+            </Grid>
+            <Grid item xs={12}>
+              <Controller
+                name="phoneNumber"
+                control={control}
+                render={({ field }) => (
+                  <KiboPhoneInput
+                    {...field}
+                    value={field.value || ''}
+                    label={String(t('phone-number'))}
+                    error={Boolean(errors?.phoneNumber)}
+                    helperText={errors?.phoneNumber?.message}
+                    onChange={(_name: string, value: string) => field.onChange(value)}
+                    onBlur={field.onBlur}
+                    required
+                  />
+                )}
+              />
             </Grid>
           </Grid>
 
@@ -258,26 +313,37 @@ const AddressEditForm = (props: AddressEditFormProps) => {
             <Grid item xs={12}>
               {renderField(
                 'companyOrOrganization',
-                String(t('company-institution-or-organization'))
+                String(t('company-institution-or-organization')),
+                { required: true }
               )}
             </Grid>
             <Grid item xs={12}>
-              {renderField('address1', String(t('street-address-1')))}
+              {renderField('address1', String(t('street-address-1')), { required: true })}
             </Grid>
             <Grid item xs={12}>
               {renderField('address2', String(t('street-address-2')))}
             </Grid>
             <Grid item xs={12} sm={6}>
-              {renderField('countryCode', String(t('country')), { select: 'country' })}
+              {renderField('countryCode', String(t('country')), {
+                select: 'country',
+                required: true,
+              })}
             </Grid>
             <Grid item xs={12} sm={6}>
-              {renderField('stateOrProvince', String(t('state')), { select: 'province' })}
+              {renderField('stateOrProvince', String(t('state')), {
+                select: 'province',
+                required: isStateRequired,
+              })}
             </Grid>
             <Grid item xs={12} sm={6}>
-              {renderField('cityOrTown', String(t('city')))}
+              {renderField('cityOrTown', String(t('city')), { required: true })}
             </Grid>
             <Grid item xs={12} sm={6}>
-              {renderField('postalOrZipCode', String(t('zip-code')))}
+              {renderField('postalOrZipCode', String(t('zip-code')), {
+                required: true,
+                digitsAndHyphen: true,
+                maxLength: 10,
+              })}
             </Grid>
           </Grid>
 
@@ -300,7 +366,20 @@ const AddressEditForm = (props: AddressEditFormProps) => {
               disableElevation
               startIcon={<AddIcon />}
               sx={{ ...accountActionButton }}
-              onClick={handleSubmit((values) => onSave(values, makeDefault))}
+              onClick={handleSubmit((values) =>
+                onSave(
+                  {
+                    ...values,
+                    firstName: values.firstName.trim().replace(/\s+/g, ' '),
+                    lastNameOrSurname: values.lastNameOrSurname.trim().replace(/\s+/g, ' '),
+                    companyOrOrganization: values.companyOrOrganization.trim(),
+                    address1: values.address1.trim(),
+                    address2: values.address2?.trim() ?? '',
+                    cityOrTown: values.cityOrTown.trim(),
+                  },
+                  makeDefault
+                )
+              )}
             >
               {t('save-changes')}
             </Button>

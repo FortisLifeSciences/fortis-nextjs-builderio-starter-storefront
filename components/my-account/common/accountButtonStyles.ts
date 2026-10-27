@@ -57,3 +57,25 @@ export const accountFormInput = {
     lineHeight: 1.5,
   },
 }
+
+export const accountSelectMenuProps = {
+  PaperProps: {
+    sx: {
+      maxHeight: '280px',
+      marginTop: '4px',
+      borderRadius: '8px',
+      '& .MuiMenuItem-root': {
+        fontFamily: 'Poppins',
+        fontSize: '14px',
+        lineHeight: '140%',
+        color: '#454545',
+        minHeight: 'auto',
+        padding: '8px 14px',
+      },
+      '& .MuiMenuItem-root.Mui-selected': { backgroundColor: 'rgba(48, 41, 154, 0.08)' },
+      '& .MuiMenuItem-root:hover, & .MuiMenuItem-root.Mui-selected:hover': {
+        backgroundColor: 'rgba(48, 41, 154, 0.12)',
+      },
+    },
+  },
+}
