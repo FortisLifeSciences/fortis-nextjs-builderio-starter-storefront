@@ -573,7 +573,7 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
           product?.categories?.[0]?.content?.name,
           brandName,
           variationProductCode,
-          cartResponse?.product?.price?.price,
+          cartResponse?.product?.price?.salePrice || cartResponse?.product?.price?.price,
           quantity
         )
       }

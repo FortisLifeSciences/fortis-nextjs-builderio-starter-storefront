@@ -5,11 +5,12 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Box, Chip, Divider, Grid, Typography } from '@mui/material'
 import { useTranslation } from 'next-i18next'
 
+import { Price } from '@/components/common'
 import { AccountItemMenu, accountType } from '@/components/my-account/common'
 import type { AccountItemMenuAction } from '@/components/my-account/common'
-import { orderGetters } from '@/lib/getters'
+import { orderGetters, productGetters } from '@/lib/getters'
 
-import type { CrAddress, CrOrder, CrOrderItem } from '@/lib/gql/types'
+import type { CrAddress, CrOrder, CrOrderItem, CrProduct } from '@/lib/gql/types'
 
 interface OrderHistoryCardProps {
   order: CrOrder
@@ -252,9 +253,19 @@ const OrderHistoryCard = (props: OrderHistoryCardProps) => {
                   />
                 )}
               </Box>
-              <Typography component="span" sx={{ ...styles.fieldValue, fontWeight: 700 }}>
-                {t('currency', { val: item?.total ?? 0 })}
-              </Typography>
+              <Price
+                variant="body2"
+                price={t('currency', {
+                  val: productGetters.getPrice(item?.product as CrProduct).regular,
+                })}
+                salePrice={
+                  productGetters.getPrice(item?.product as CrProduct).special
+                    ? t('currency', {
+                        val: productGetters.getPrice(item?.product as CrProduct).special,
+                      })
+                    : undefined
+                }
+              />
             </Box>
           ))}
         </>
