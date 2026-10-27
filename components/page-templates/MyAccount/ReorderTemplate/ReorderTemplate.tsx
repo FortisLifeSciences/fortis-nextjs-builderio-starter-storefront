@@ -243,8 +243,9 @@ const ReorderTemplate = () => {
     if (!term) return undefined
 
     const items = (searchResult?.items ?? []) as Product[]
-    const sku = exactHit?.sku
-    const parentId = exactHit?.parentId?.toLowerCase()
+    const termHit = term === debouncedLookup.trim().toLowerCase() ? exactHit : undefined
+    const sku = termHit?.sku
+    const parentId = termHit?.parentId?.toLowerCase()
 
     const match = items.find(
       (item) =>
@@ -255,9 +256,15 @@ const ReorderTemplate = () => {
 
     if (!match) return undefined
 
-    return sku && !productGetters.getVariationProductCode(match)
-      ? ({ ...match, variationProductCode: sku } as Product)
-      : match
+    const matchedVariationCode = productGetters.getVariationProductCode(match)
+
+    if (!sku || matchedVariationCode?.toLowerCase() === sku.toLowerCase()) return match
+
+    return {
+      ...match,
+      variationProductCode: sku,
+      options: matchedVariationCode ? [] : match.options,
+    } as Product
   }
 
   const isMissingVariant = (product: Product) =>
