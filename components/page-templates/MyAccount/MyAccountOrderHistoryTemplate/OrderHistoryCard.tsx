@@ -242,8 +242,17 @@ const OrderHistoryCard = (props: OrderHistoryCardProps) => {
                   {item?.product?.name}
                 </Typography>
                 <Typography component="p" sx={{ ...styles.itemMeta }}>
-                  {item?.product?.productCode} · {t('quantity')}:{item?.quantity}
+                  {item?.product?.variationProductCode || item?.product?.productCode} ·{' '}
+                  {t('quantity')}:{item?.quantity}
                 </Typography>
+                {Boolean(item?.product?.options?.length) && (
+                  <Typography component="p" sx={{ ...styles.itemMeta }}>
+                    {(item?.product?.options ?? [])
+                      .map((option) => option?.value)
+                      .filter(Boolean)
+                      .join(', ')}
+                  </Typography>
+                )}
                 {item?.expectedDeliveryDate && (
                   <Chip
                     label={`${t('ships')} ${orderGetters.getExpectedDeliveryDate([item])}`}

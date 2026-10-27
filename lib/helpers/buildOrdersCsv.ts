@@ -57,7 +57,7 @@ export const buildOrdersCsv = (orders: CrOrder[]): string => {
         paymentStatus,
         fulfillmentStatus,
         String(total),
-        String(item?.product?.productCode ?? ''),
+        String(item?.product?.variationProductCode || item?.product?.productCode || ''),
         String(item?.product?.name ?? ''),
         String(item?.quantity ?? ''),
         String((item?.subtotal ?? 0) - (item?.discountTotal ?? 0)),

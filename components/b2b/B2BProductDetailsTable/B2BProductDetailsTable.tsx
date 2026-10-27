@@ -15,7 +15,7 @@ import { FulfillmentOptions, Price, ProductItem, QuantitySelector } from '@/comp
 import { FulfillmentOptions as FulfillmentOptionsConstant, QuoteStatus } from '@/lib/constants'
 import { cartGetters, productGetters } from '@/lib/getters'
 import { uiHelpers } from '@/lib/helpers'
-import { FulfillmentOption } from '@/lib/types'
+import type { FulfillmentOption, ProductCustom } from '@/lib/types'
 
 import { CrCartItem, CrProduct, Maybe, Location, CrOrderItem } from '@/lib/gql/types'
 
@@ -120,7 +120,9 @@ export default function B2BProductDetailsTable(props: B2BProductDetailsTableProp
                   isQuickOrder
                   image={productGetters.getProductImage(item.product as CrProduct)}
                   name={productGetters.getName(item.product as CrProduct)}
-                  productCode={productGetters.getProductId(item.product as CrProduct)}
+                  productCode={productGetters.getVariationProductCodeOrProductCode(
+                    item.product as ProductCustom
+                  )}
                   options={productGetters.getOptions(item.product as CrProduct)}
                   link={getProductLink(item.product?.productCode as string)}
                   discounts={item?.productDiscounts}
