@@ -138,7 +138,11 @@ const QuoteDetailsPrintTemplate: React.FC<QuoteDetailsPrintTemplateProps> = (pro
                   </TableCell>
                   <TableCell>{item?.quantity}</TableCell>
                   <TableCell>{item?.fulfillmentMethod}</TableCell>
-                  <TableCell>{t('currency', { val: item?.unitPrice?.listAmount })}</TableCell>
+                  <TableCell>
+                    {t('currency', {
+                      val: item?.unitPrice?.saleAmount || item?.unitPrice?.listAmount,
+                    })}
+                  </TableCell>
                   <TableCell>{t('currency', { val: item?.discountTotal })}</TableCell>
                   <TableCell>{t('currency', { val: item?.total })}</TableCell>
                 </TableRow>

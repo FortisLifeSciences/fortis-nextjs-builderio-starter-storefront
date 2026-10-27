@@ -314,7 +314,7 @@ const ReviewStep = (props: ReviewStepProps) => {
       const id = p?.product?.variationProductCode
       if (!id) return
       const matched = queryIdArr.find((data) => data?.ProductCode === id)
-      const price = typeof p?.product?.price?.price === 'number' ? p?.product?.price?.price : 0
+      const price = p?.product?.price?.salePrice || p?.product?.price?.price || 0
       objectIDs.push(id)
       objectData.push({
         ...(matched?.queryId ? { queryID: matched.queryId } : {}),

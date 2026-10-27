@@ -60,7 +60,7 @@ export const buildOrdersCsv = (orders: CrOrder[]): string => {
         String(item?.product?.productCode ?? ''),
         String(item?.product?.name ?? ''),
         String(item?.quantity ?? ''),
-        String(item?.total ?? ''),
+        String((item?.subtotal ?? 0) - (item?.discountTotal ?? 0)),
       ])
     })
   })
