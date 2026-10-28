@@ -22,6 +22,7 @@ import {
   ContactShippingForm,
   ContactShippingSummary,
   PaymentOptionCard,
+  scrollToFirstFieldError,
 } from '@/components/checkout'
 import {
   checkoutColors,
@@ -80,7 +81,17 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
   const [agreeWithTerms, setAgreeWithTerms] = useState(false)
   const [isPlacingOrder, setIsPlacingOrder] = useState(false)
   const [placeOrderError, setPlaceOrderError] = useState('')
+  const [showPlaceOrderIssues, setShowPlaceOrderIssues] = useState(false)
+  const stepRef = React.useRef<HTMLDivElement>(null)
+  const [cardValidationRequest, setCardValidationRequest] = useState(0)
   const [wantsAccount, setWantsAccount] = useState(false)
+
+  const isCardholderNameMissing = !cardholderName.trim()
+  const placeOrderIssues = [
+    !agreeWithTerms && t('please-agree-to-terms'),
+    (isCardholderNameMissing || !isCardFormValid) && t('please-complete-card-details'),
+    !billingSameAsShipping && !isBillingFormValid && t('please-complete-billing-information'),
+  ].filter(Boolean) as string[]
 
   // Purchase Order is a login-required option - opening the login dialog from here (rather
   // than a plain link) lets the shopper come straight back into checkout once they're signed
@@ -127,17 +138,12 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
     if (isPlacingOrder) return
 
     // The button used to be `disabled` until every condition was met, which silently ate the
-    // click and never told the shopper why - surface the specific reason instead.
-    if (!agreeWithTerms) {
-      setPlaceOrderError(t('please-agree-to-terms'))
-      return
-    }
-    if (!isCardFormValid) {
-      setPlaceOrderError(t('please-complete-card-details'))
-      return
-    }
-    if (!billingSameAsShipping && !isBillingFormValid) {
-      setPlaceOrderError(t('please-complete-billing-information'))
+    // click and never told the shopper why - surface every missing piece at once instead.
+    if (placeOrderIssues.length) {
+      setShowPlaceOrderIssues(true)
+      setCardValidationRequest((count) => count + 1)
+      scrollToFirstFieldError(stepRef.current)
+      setPlaceOrderError('')
       return
     }
 
@@ -243,7 +249,7 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
   }
 
   return (
-    <Stack gap={5} data-testid="guest-checkout-step">
+    <Stack ref={stepRef} gap={5} data-testid="guest-checkout-step">
       <Stack gap={1.5}>
         <Typography sx={{ fontWeight: 600, fontSize: '18px', color: checkoutColors.subtitle }}>
           {t('options')}
@@ -296,12 +302,20 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
               <KiboTextBox
                 value={cardholderName}
                 label={t('cardholder-name')}
+                required
+                error={showPlaceOrderIssues && isCardholderNameMissing}
+                helperText={
+                  showPlaceOrderIssues && isCardholderNameMissing
+                    ? t('cardholder-name-required')
+                    : ''
+                }
                 onChange={(_name, value) => setCardholderName(value)}
               />
               <CardDetailsForm
                 validateForm={false}
                 fullWidth
                 showCardTypeIcon={false}
+                validationRequest={cardValidationRequest}
                 onSaveCardData={(cardData) => setCardFormData(cardData)}
                 onFormStatusChange={(isValid, cardData) => {
                   setIsCardFormValid(isValid)
@@ -475,6 +489,12 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
               />
             </Stack>
 
+            {showPlaceOrderIssues &&
+              placeOrderIssues.map((issue) => (
+                <Typography key={issue} sx={{ color: 'error.main', fontSize: '14px' }}>
+                  {issue}
+                </Typography>
+              ))}
             {placeOrderError && (
               <Typography sx={{ color: 'error.main', fontSize: '14px' }}>
                 {placeOrderError}

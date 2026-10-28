@@ -16,3 +16,4 @@ export { default as ContactShippingSummary } from '@/components/checkout/Contact
 export { default as ContactShippingForm } from '@/components/checkout/ContactShippingForm/ContactShippingForm'
 export { default as SavedCardPicker } from '@/components/checkout/SavedCardPicker/SavedCardPicker'
 export { default as AccountCheckoutStep } from '@/components/checkout/AccountCheckoutStep/AccountCheckoutStep'
+export { scrollToFirstFieldError } from '@/components/checkout/scrollToFirstFieldError'

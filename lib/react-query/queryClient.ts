@@ -140,7 +140,10 @@ const queryClientHandler = (error: any, showSnackbar: any) => {
 
 export const generateQueryClient = (showSnackbar?: any): QueryClient => {
   const mutationCache = new MutationCache({
-    onError: (error) => queryClientHandler(error, showSnackbar),
+    onError: (error, _variables, _context, mutation) => {
+      if (mutation.meta?.suppressErrorSnackbar) return
+      queryClientHandler(error, showSnackbar)
+    },
   })
 
   const queryCache = new QueryCache({

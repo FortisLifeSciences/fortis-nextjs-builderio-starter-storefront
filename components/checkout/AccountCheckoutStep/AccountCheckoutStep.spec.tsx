@@ -26,10 +26,12 @@ jest.mock('../CardDetailsForm/CardDetailsForm', () => ({
   __esModule: true,
   default: ({
     onFormStatusChange,
+    validationRequest,
   }: {
     onFormStatusChange: (isValid: boolean, cardData?: CardForm) => void
+    validationRequest?: number
   }) => (
-    <div data-testid="card-form-mock">
+    <div data-testid="card-form-mock" data-validation-request={validationRequest}>
       <button
         type="button"
         onClick={() =>
@@ -164,6 +166,11 @@ const agreeToTermsAndPlaceOrder = async (user: ReturnType<typeof userEvent.setup
   await user.click(screen.getByRole('button', { name: 'Place Order' }))
 }
 
+const fillNewCard = async (user: ReturnType<typeof userEvent.setup>) => {
+  await user.type(screen.getByRole('textbox', { name: 'cardholder-name' }), 'Jane Doe')
+  await user.click(screen.getByRole('button', { name: 'fill-card' }))
+}
+
 describe('[component] AccountCheckoutStep', () => {
   beforeEach(() => {
     jest.mocked(tokenizeCreditCardPayment).mockReset()
@@ -213,6 +220,40 @@ describe('[component] AccountCheckoutStep', () => {
     expect(screen.queryByTestId('card-form-mock')).not.toBeInTheDocument()
     expect(screen.queryByRole('checkbox', { name: 'saveCard' })).not.toBeInTheDocument()
     expect(screen.getByText('9 Billing Road')).toBeVisible()
+  })
+
+  it('lists every missing item at once and flags the card fields', async () => {
+    const { user, onAddPayment } = setup()
+
+    await user.click(screen.getByRole('button', { name: 'Place Order' }))
+
+    expect(screen.getByText('please-agree-to-terms')).toBeVisible()
+    expect(screen.getByText('please-complete-card-details')).toBeVisible()
+    expect(screen.getByText('cardholder-name-required')).toBeVisible()
+    expect(screen.getByTestId('card-form-mock')).toHaveAttribute('data-validation-request', '1')
+    expect(onAddPayment).not.toHaveBeenCalled()
+  })
+
+  it('scrolls to and focuses the first field that needs fixing', async () => {
+    const { user } = setup()
+
+    await user.click(screen.getByRole('button', { name: 'Place Order' }))
+
+    const cardholderName = screen.getByRole('textbox', { name: 'cardholder-name' })
+    await waitFor(() => expect(cardholderName).toHaveFocus())
+    expect(Element.prototype.scrollIntoView).toHaveBeenCalled()
+  })
+
+  it('requires the cardholder name for a new card', async () => {
+    const { user, onAddPayment } = setup()
+
+    await user.click(screen.getByRole('button', { name: 'fill-card' }))
+    await agreeToTermsAndPlaceOrder(user)
+
+    expect(screen.getByText('cardholder-name-required')).toBeVisible()
+    expect(screen.getByText('please-complete-card-details')).toBeVisible()
+    expect(screen.queryByText('please-agree-to-terms')).not.toBeInTheDocument()
+    expect(onAddPayment).not.toHaveBeenCalled()
   })
 
   it('requires the CVV before paying with a saved card', async () => {
@@ -269,7 +310,7 @@ describe('[component] AccountCheckoutStep', () => {
       })
       const { user, onAddPayment, onCreateOrder } = setup()
 
-      await user.click(screen.getByRole('button', { name: 'fill-card' }))
+      await fillNewCard(user)
       if (saveCard) await user.click(screen.getByRole('checkbox', { name: 'saveCard' }))
       await agreeToTermsAndPlaceOrder(user)
 
@@ -308,7 +349,7 @@ describe('[component] AccountCheckoutStep', () => {
     } as Partial<CrOrder>)
     const { user, onVoidPayment, onAddPayment, onCreateOrder } = setup({ checkout })
 
-    await user.click(screen.getByRole('button', { name: 'fill-card' }))
+    await fillNewCard(user)
     await agreeToTermsAndPlaceOrder(user)
 
     await waitFor(() => expect(onCreateOrder).toHaveBeenCalled())
@@ -341,7 +382,7 @@ describe('[component] AccountCheckoutStep', () => {
     } as Partial<CrOrder>)
     const { user, onVoidPayment, onAddPayment, onCreateOrder } = setup({ checkout })
 
-    await user.click(screen.getByRole('button', { name: 'fill-card' }))
+    await fillNewCard(user)
     await agreeToTermsAndPlaceOrder(user)
 
     await waitFor(() => expect(onCreateOrder).toHaveBeenCalled())
@@ -359,7 +400,7 @@ describe('[component] AccountCheckoutStep', () => {
     const { user, onCreateOrder } = setup()
     onCreateOrder.mockRejectedValue(new Error('Auth declined'))
 
-    await user.click(screen.getByRole('button', { name: 'fill-card' }))
+    await fillNewCard(user)
     await agreeToTermsAndPlaceOrder(user)
 
     await waitFor(() =>
@@ -377,7 +418,7 @@ describe('[component] AccountCheckoutStep', () => {
     const { user, onCreateOrder } = setup()
     onCreateOrder.mockRejectedValue(new Error('createOrder failed'))
 
-    await user.click(screen.getByRole('button', { name: 'fill-card' }))
+    await fillNewCard(user)
     await agreeToTermsAndPlaceOrder(user)
 
     expect(await screen.findByText('something-went-wrong')).toBeVisible()
@@ -396,7 +437,7 @@ describe('[component] AccountCheckoutStep', () => {
     const { user, onAddPayment, onCreateOrder } = setup()
     onAddPayment.mockResolvedValue(orderWithPayment)
 
-    await user.click(screen.getByRole('button', { name: 'fill-card' }))
+    await fillNewCard(user)
     await user.click(screen.getByRole('checkbox', { name: 'saveCard' }))
     await agreeToTermsAndPlaceOrder(user)
 
