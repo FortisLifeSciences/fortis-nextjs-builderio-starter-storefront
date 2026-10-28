@@ -30,6 +30,21 @@ jest.mock('next/router', () => ({
   }),
 }))
 
+jest.mock('@/components/layout/Algolia/AlgoliaAutocomplete', () => () => null)
+
+jest.mock('@builder.io/react', () => ({
+  BuilderComponent: () => null,
+  Builder: { registerComponent: jest.fn() },
+  builder: {
+    init: jest.fn(),
+    get: jest.fn(() => ({ promise: () => Promise.resolve(null) })),
+  },
+}))
+
+jest.mock('@builder.io/utils', () => ({
+  setPixelProperties: jest.fn(),
+}))
+
 jest.mock('next-i18next/serverSideTranslations', () => ({
   serverSideTranslations: jest.fn(() => {
     return Promise.resolve({
@@ -72,6 +87,10 @@ jest.mock('@/lib/api/operations', () => ({
   getCategoryTree: jest.fn(() => {
     return mockCategoryTreeData?.categoriesTree?.items
   }),
+  getProductSearchVariations: jest.fn(() => Promise.resolve([])),
+  configureProduct: jest.fn(() => Promise.resolve(null)),
+  getDocumentListDocuments: jest.fn(() => Promise.resolve([])),
+  getProductPrice: jest.fn(() => Promise.resolve({ price: { price: 10 } })),
   productSearch: jest.fn(() => {
     return Promise.resolve({
       data: {
@@ -98,7 +117,7 @@ jest.mock('@/lib/api/operations', () => ({
 
 const ProductDetailTemplateMock = () => <div data-testid="productDetailTemplate-mock" />
 jest.mock(
-  '@/components/page-templates/ProductDetail/ProductDetailTemplate.tsx',
+  '@/components/page-templates/ProductDetail/PdpTemplate.tsx',
   () => () => ProductDetailTemplateMock()
 )
 const ProductDetailSkeletonMock = () => <div data-testid="productDetailSkeleton-mock" />
@@ -137,17 +156,34 @@ describe('[page] Product Details Page', () => {
 
   it('should render the Fallback page if isFallback is true', () => {
     isFallback = true
-    // render(<ProductDetailPage product={undefined} />)    // Due to a build error, this line has been commented out
+    render(<ProductDetailPage product={undefined} relatedProducts={[]} />)
 
     expect(screen.getByTestId(/productDetailSkeleton-mock/)).toBeVisible()
   })
 
   it('should render the ProductDetail page template if isFallback is false', () => {
     isFallback = false
-    ProductDetailPage.defaultProps = { product: mockProduct as Product }
-    // render(<ProductDetailPage />)  // Due to a build error, this line has been commented out
+    render(<ProductDetailPage product={mockProduct as Product} relatedProducts={[]} />)
 
     const productDetailTemplate = screen.getByTestId('productDetailTemplate-mock')
     expect(productDetailTemplate).toBeVisible()
+  })
+
+  it('should render product content from props without waiting for a client fetch', () => {
+    isFallback = false
+    render(<ProductDetailPage product={mockProduct as Product} relatedProducts={[]} />)
+
+    expect(screen.getByTestId('productDetailTemplate-mock')).toBeVisible()
+    expect(screen.queryByTestId('productDetailSkeleton-mock')).not.toBeInTheDocument()
+  })
+
+  it('should return digitalAssets and dehydratedState from getStaticProps', async () => {
+    const response: any = await getStaticProps({
+      ...context,
+      params: { productCode: 'SHOE12' },
+    } as any)
+
+    expect(response.props).toHaveProperty('digitalAssets')
+    expect(response.props).toHaveProperty('dehydratedState')
   })
 })

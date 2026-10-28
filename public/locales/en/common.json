@@ -184,6 +184,7 @@
 
   "save": "Save",
   "old-password": "Old Password",
+  "new": "New",
   "new-password": "New Password",
   "external-password": "Reenter new password",
   "spaces-are-not-allowed": "Spaces are not allowed",
