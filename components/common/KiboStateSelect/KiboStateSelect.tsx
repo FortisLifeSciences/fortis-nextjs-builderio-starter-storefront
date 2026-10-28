@@ -53,9 +53,9 @@ const KiboStateSelect = (props: KiboStateSelectProps) => {
   const [search, setSearch] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  const filteredOptions = search
-    ? (options ?? []).filter((option) => option.name.toLowerCase().includes(search.toLowerCase()))
-    : options ?? []
+  const filteredOptions = (options ?? [])
+    .filter((option) => option.name.toLowerCase().startsWith(search.trim().toLowerCase()))
+    .sort((a, b) => a.name.localeCompare(b.name))
 
   const selectedLabel = options?.find((option) => option.code === value)?.name ?? ''
 
