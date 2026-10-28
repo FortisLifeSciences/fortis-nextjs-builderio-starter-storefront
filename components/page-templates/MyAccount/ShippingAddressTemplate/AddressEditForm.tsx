@@ -21,7 +21,7 @@ import { isValidPhoneNumber } from 'react-phone-number-input'
 import * as yup from 'yup'
 
 import { getAddressDisplayName } from './AddressDisplayCard'
-import { KiboPhoneInput } from '@/components/common'
+import { KiboPhoneInput, KiboStateSelect } from '@/components/common'
 import { toE164PhoneNumber } from '@/components/common/KiboPhoneInput/KiboPhoneInput'
 import {
   accountActionButton,
@@ -86,10 +86,16 @@ const styles = {
     marginBottom: '0.75rem',
   },
   fieldLabel: {
-    typography: 'caption',
-    color: 'text.secondary',
     display: 'block',
-    marginBottom: '0.25rem',
+    fontFamily: 'Poppins',
+    fontSize: '15px',
+    fontStyle: 'normal',
+    fontWeight: 400,
+    lineHeight: '150%',
+    letterSpacing: '-0.005em',
+    color: '#3B3B3B', // rgb(59, 59, 59)
+    marginBottom: '6px',
+    padding: 0,
   },
   input: accountFormInput,
   cancelButton: accountTextButton,
@@ -118,15 +124,24 @@ const useAddressSchema = () => {
       .test('is-valid-phone-number', t('enter-valid-phone-number'), (value) =>
         value ? isValidPhoneNumber(value) : false
       ),
-    companyOrOrganization: yup.string().trim().required(t('this-field-is-required')),
-    address1: yup.string().trim().required(t('this-field-is-required')),
+    companyOrOrganization: yup
+      .string()
+      .required(t('this-field-is-required'))
+      .test('not-blank', t('this-field-is-required'), (value) => !!value?.trim()),
+    address1: yup
+      .string()
+      .required(t('this-field-is-required'))
+      .test('not-blank', t('this-field-is-required'), (value) => !!value?.trim()),
     address2: yup.string().trim().nullable(true).notRequired(),
     countryCode: yup.string().required(t('this-field-is-required')),
     stateOrProvince: yup.string().when('countryCode', {
       is: (value: string) => [CountryCode.US, CountryCode.CA].includes(value),
       then: yup.string().required(t('this-field-is-required')),
     }),
-    cityOrTown: yup.string().trim().required(t('this-field-is-required')),
+    cityOrTown: yup
+      .string()
+      .required(t('this-field-is-required'))
+      .test('not-blank', t('this-field-is-required'), (value) => !!value?.trim()),
     postalOrZipCode: yup
       .string()
       .trim()
@@ -187,7 +202,7 @@ const AddressEditForm = (props: AddressEditFormProps) => {
     options?: {
       select?: 'country' | 'province'
       maxLength?: number
-      digitsAndHyphen?: boolean // add this
+      digitsAndHyphen?: boolean
       numeric?: boolean
       required?: boolean
     }
@@ -196,7 +211,7 @@ const AddressEditForm = (props: AddressEditFormProps) => {
       <Typography component="label" htmlFor={name} sx={{ ...styles.fieldLabel }}>
         {label}
         {options?.required && (
-          <Box component="span" aria-hidden="true" sx={{ color: 'error.main', ml: 0.5 }}>
+          <Box component="span" aria-hidden="true" sx={{ color: 'text.secondary', ml: 0.5 }}>
             *
           </Box>
         )}
@@ -330,10 +345,23 @@ const AddressEditForm = (props: AddressEditFormProps) => {
               })}
             </Grid>
             <Grid item xs={12} sm={6}>
-              {renderField('stateOrProvince', String(t('state')), {
-                select: 'province',
-                required: isStateRequired,
-              })}
+              <Controller
+                name="stateOrProvince"
+                control={control}
+                render={({ field }) => (
+                  <KiboStateSelect
+                    name="stateOrProvince"
+                    label={String(t('state'))}
+                    options={provinces}
+                    value={field.value}
+                    error={Boolean(errors?.stateOrProvince)}
+                    helperText={errors?.stateOrProvince?.message}
+                    onChange={(_name: string, value: string) => field.onChange(value)}
+                    onBlur={field.onBlur}
+                    required={isStateRequired}
+                  />
+                )}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
               {renderField('cityOrTown', String(t('city')), { required: true })}
