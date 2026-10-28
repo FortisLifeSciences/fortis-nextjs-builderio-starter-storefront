@@ -4,6 +4,7 @@ const getProductVariationQuery = /* GraphQL */ `
       variationProductCode
       price {
         price
+        salePrice
       }
       inventoryInfo {
         onlineStockAvailable
