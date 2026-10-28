@@ -267,7 +267,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   // auto-applied saved address - don't wait on `isNewAddressAdded`, a purely local flag.
   const hasDestinationAddress = isNewAddressAdded || hasOrderShippingAddress
 
-  const { updateOrderShippingInfo } = useUpdateOrderShippingInfo()
+  const { updateOrderShippingInfo } = useUpdateOrderShippingInfo({ suppressErrorSnackbar: true })
   const { data: shippingMethods, isLoading: isLoadingShippingMethods } = useGetShippingMethods(
     checkout?.id,
     hasDestinationAddress,
@@ -412,16 +412,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
       setIsNewAddressAdded(true)
     } catch (error) {
       console.error(error)
-      // /api/graphql proxies the backend error as either `{ errors: [...] }` or `{ message }`.
-      const backendMessage =
-        (error as any)?.response?.errors?.[0]?.message ||
-        (error as any)?.response?.message ||
-        (error as any)?.message
-      setContactSaveError(
-        backendMessage
-          ? `${t('unable-to-save-shipping-address')} (${backendMessage})`
-          : t('unable-to-save-shipping-address')
-      )
+      setContactSaveError(t('unable-to-save-shipping-address'))
     }
   }
 

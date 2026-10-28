@@ -48,12 +48,13 @@ const updateShippingInfo = async (params: CheckoutShippingParams) => {
  * @returns 'response?.updateOrderBillingInfo', which contains updated shipping checkout information
  */
 
-export const useUpdateOrderShippingInfo = () => {
+export const useUpdateOrderShippingInfo = (options?: { suppressErrorSnackbar?: boolean }) => {
   const queryClient = useQueryClient()
 
   return {
     updateOrderShippingInfo: useMutation({
       mutationFn: updateShippingInfo,
+      meta: { suppressErrorSnackbar: options?.suppressErrorSnackbar },
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: checkoutKeys.all })
       },
