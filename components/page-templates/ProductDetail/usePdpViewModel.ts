@@ -13,6 +13,7 @@ import {
   useWishlist,
   useGetProductInventory,
   useGetProductPrice,
+  useGetVariationPrices,
 } from '@/hooks'
 import { hasAnalyticsConsent } from '@/lib/consent/consent'
 import {
@@ -211,7 +212,26 @@ export const usePdpViewModel = (params: UsePdpViewModelParams) => {
     selectedFulfillmentOption?.location?.code as string
   )
 
-  const getModifiedOptionData = (options: any) => applyVariationData(options, productVariations)
+  const variationProductCodes = useMemo(
+    () =>
+      ((productVariations ?? []) as any[])
+        .map((variation) => variation?.variationProductCode)
+        .filter(Boolean) as string[],
+    [productVariations]
+  )
+  const { data: liveVariationPrices } = useGetVariationPrices(
+    product?.productCode as string,
+    variationProductCodes
+  )
+  const pricedVariations = useMemo(() => {
+    if (!liveVariationPrices) return productVariations
+    return ((productVariations ?? []) as any[]).map((variation) => {
+      const livePrice = liveVariationPrices[variation?.variationProductCode]
+      return livePrice ? { ...variation, price: livePrice } : variation
+    })
+  }, [productVariations, liveVariationPrices])
+
+  const getModifiedOptionData = (options: any) => applyVariationData(options, pricedVariations)
 
   const { isReady: isRouterReady } = useRouter()
 

@@ -22,6 +22,7 @@ jest.mock('@/hooks', () => {
     }),
     useGetProductInventory: () => ({ data: undefined }),
     useGetProductPrice: () => ({ data: undefined }),
+    useGetVariationPrices: () => ({ data: undefined }),
     useConfigureProduct: () => ({ configureProduct: { mutateAsync: jest.fn() } }),
   }
 })
