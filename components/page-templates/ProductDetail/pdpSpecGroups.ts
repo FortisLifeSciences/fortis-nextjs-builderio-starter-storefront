@@ -61,7 +61,7 @@ export const DEFAULT_SPEC_GROUPS: SpecGroupConfig[] = [
       { fqn: 'tenant~gene-name' },
       { fqn: 'tenant~uniprot-id', render: 'link', href: uniprotUrl, external: true },
       { fqn: 'tenant~protein-name' },
-      { fqn: 'tenant~gene-aliases', render: 'list', separator: ';' },
+      { fqn: 'tenant~gene-aliases', render: 'list', separator: ';', href: siteSearchUrl },
     ],
   },
   {

@@ -987,7 +987,16 @@ const PdpTemplate = (props: PdpTemplateProps) => {
                       </a>
                     ) : row.config.render === 'list' ? (
                       <div className={`${styles.specValue} ${styles.specRowAlt}`}>
-                        {row.items.join('  •  ')}
+                        <span>
+                          {row.config.href
+                            ? row.items.map((item, index) => (
+                                <React.Fragment key={`${item}-${index}`}>
+                                  {index > 0 ? '  •  ' : null}
+                                  <a href={row.config.href?.(item)}>{item}</a>
+                                </React.Fragment>
+                              ))
+                            : row.items.join('  •  ')}
+                        </span>
                       </div>
                     ) : row.config.render === 'html' || hasMarkup(row.value) ? (
                       <div
