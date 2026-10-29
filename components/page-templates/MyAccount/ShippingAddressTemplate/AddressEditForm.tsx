@@ -208,10 +208,21 @@ const AddressEditForm = (props: AddressEditFormProps) => {
     }
   ) => (
     <>
-      <Typography component="label" htmlFor={name} sx={{ ...styles.fieldLabel }}>
+      <Typography
+        component="label"
+        htmlFor={name}
+        sx={{
+          ...styles.fieldLabel,
+          ...(errors?.[name] && { color: 'error.main' }),
+        }}
+      >
         {label}
         {options?.required && (
-          <Box component="span" aria-hidden="true" sx={{ color: 'text.secondary', ml: 0.5 }}>
+          <Box
+            component="span"
+            aria-hidden="true"
+            sx={{ color: errors?.[name] ? 'error.main' : 'text.secondary', ml: 0.5 }}
+          >
             *
           </Box>
         )}
@@ -229,7 +240,17 @@ const AddressEditForm = (props: AddressEditFormProps) => {
             SelectProps={{ MenuProps: accountSelectMenuProps }}
             error={Boolean(errors?.[name])}
             helperText={errors?.[name]?.message}
-            sx={{ ...styles.input }}
+            sx={{
+              ...styles.input,
+              backgroundColor: 'transparent',
+              '& .MuiOutlinedInput-root': { backgroundColor: '#fff' },
+              '& .MuiFormHelperText-root': {
+                backgroundColor: 'transparent',
+                margin: '4px 0 0',
+                fontFamily: 'Poppins',
+                fontSize: '12px',
+              },
+            }}
             inputProps={{
               maxLength: options?.maxLength,
               'aria-label': label,
