@@ -616,6 +616,8 @@
   "account-name": "Account Name",
   "add-item-to-quote": "Add Item to Quote",
   "list-added-to-cart": "List added to cart",
+  "list-is-empty-cannot-add-to-cart": "This list is empty. Add items to it before adding to cart.",
+  "something-went-wrong": "Something went wrong. Please try again.",
   "summary": "Summary",
   "special-instructions": "Special Instructions",
   "duty-total": "Duty Total",
