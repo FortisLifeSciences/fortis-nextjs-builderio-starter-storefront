@@ -14,6 +14,7 @@ import {
   isCardNumberValid,
   isCardTypeValid,
   getCreditCardLogo,
+  getCvvLength,
 } from '@/lib/helpers/credit-card'
 import type { CardForm } from '@/lib/types'
 
@@ -71,7 +72,16 @@ const useCardSchema = (showCvv: boolean) => {
       .test('expiry-date', t('invalid-expiry-date'), (value) => validateExpiryDate(value)),
     cvv: yup.string().when('$isEdit', (isEdit, schema) => {
       if (!isEdit && showCvv) {
-        return schema.required(t('cvv-is-required')).matches(/^\d{3,4}$/g, t('invalid-cvv'))
+        return schema
+          .required(t('cvv-is-required'))
+          .matches(/^\d{3,4}$/g, t('invalid-cvv'))
+          .test('cvv-length', function (this: yup.TestContext, value?: string) {
+            const expectedLength = getCvvLength(this.parent.cardNumber)
+            if (!value || !expectedLength || value.length === expectedLength) return true
+            return this.createError({
+              message: t('invalid-cvv-length', { count: expectedLength }),
+            })
+          })
       }
     }),
   })
@@ -94,6 +104,8 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
     formState: { errors, isValid },
     control,
     handleSubmit,
+    getValues,
+    trigger,
   } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
@@ -149,10 +161,13 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                   required={true}
                   sx={cardInputSx}
                   onChange={(_name, value) => {
-                    const sanitizedValue = value.replace(/\s/g, '')
+                    const sanitizedValue = value.replace(/\D/g, '').substring(0, 19)
                     handleCardType(field, sanitizedValue)
                   }}
-                  onBlur={field.onBlur}
+                  onBlur={() => {
+                    field.onBlur()
+                    if (getValues('cvv')) trigger('cvv')
+                  }}
                   error={!!errors?.cardNumber}
                   helperText={errors?.cardNumber?.message as unknown as string}
                   {...(showCardTypeIcon && {
@@ -163,7 +178,6 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                     ),
                   })}
                   {...(cardValue && { disabled: true })}
-                  inputProps={{ maxLength: 16 }}
                 />
               )}
             />
