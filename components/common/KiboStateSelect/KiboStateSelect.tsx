@@ -105,6 +105,7 @@ const KiboStateSelect = (props: KiboStateSelectProps) => {
         renderValue={() => selectedLabel || placeholder || ''}
         MenuProps={{
           autoFocus: false,
+          disableScrollLock: true,
           // Select's own Menu always needs to own `onClose` to actually close (it builds the
           // menu as `{ onClose: <its real close handler>, ...MenuProps }`, so a custom
           // `onClose` here would silently replace it, not add to it, and the dropdown would
@@ -160,8 +161,8 @@ const KiboStateSelect = (props: KiboStateSelectProps) => {
             py: 0.75,
             borderBottom: '1px solid #eee',
           }}
-          // Keep typing/clicking in the search box from reaching the Select's own keyboard
-          // handling (which would otherwise close the menu or jump-select on each keystroke).
+          onClickCapture={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
         >
