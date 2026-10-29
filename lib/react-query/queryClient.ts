@@ -31,11 +31,24 @@ const parseGraphQLError = (errorString: any) => {
   }
 }
 
+const DEFAULT_QUERY_RETRY_COUNT = 3
+const SESSION_EXPIRED_CODE = 'SESSION_EXPIRED'
+const SESSION_EXPIRED_EVENT = 'kibo:session-expired'
+
+const isSessionExpiredError = (error: any) =>
+  (error?.response?.code ?? parseGraphQLError(error)?.response?.code) === SESSION_EXPIRED_CODE
+
 const queryClientHandler = (error: any, showSnackbar: any) => {
+  const parsedError = parseGraphQLError(error)
+
+  if (isSessionExpiredError(error)) {
+    if (typeof window !== 'undefined') window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT))
+    return
+  }
+
   if (!showSnackbar) return
   const status = 'error'
 
-  const parsedError = parseGraphQLError(error)
   const statusCode = error?.response?.status
     ? error?.response?.status
     : parsedError?.response?.status
@@ -108,7 +121,16 @@ export const generateQueryClient = (showSnackbar?: any): QueryClient => {
     onError: (error) => queryClientHandler(error, showSnackbar),
   })
 
-  return new QueryClient({ mutationCache, queryCache })
+  return new QueryClient({
+    mutationCache,
+    queryCache,
+    defaultOptions: {
+      queries: {
+        retry: (failureCount, error) =>
+          !isSessionExpiredError(error) && failureCount < DEFAULT_QUERY_RETRY_COUNT,
+      },
+    },
+  })
 }
 
 export const queryClient = generateQueryClient()

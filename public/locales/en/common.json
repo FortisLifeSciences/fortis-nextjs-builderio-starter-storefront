@@ -82,6 +82,7 @@
   "shop-all": "Shop All",
   "advertisement": "Advertisement",
   "login-to-your-account": "or Login to Your Account",
+  "session-expired-login": "Your session has expired. Please log in again to continue. Your cart has been saved.",
   "create-an-account": "Create an Account",
   "already-have-an-account": "Already have an account? ",
   "do-not-have-an-account": "Don’t have an account?",
