@@ -15,7 +15,7 @@ import * as yup from 'yup'
 
 import { ChoiceCard, ShippingMethod } from '@/components/checkout'
 import { checkoutColors } from '@/components/checkout/checkoutStyles'
-import { KiboPhoneInput, KiboSelect, KiboTextBox } from '@/components/common'
+import { KiboPhoneInput, KiboSelect, KiboStateSelect, KiboTextBox } from '@/components/common'
 import { toE164PhoneNumber } from '@/components/common/KiboPhoneInput/KiboPhoneInput'
 import { useUpdateOrderShippingInfo, useGetShippingMethods } from '@/hooks'
 import { AddressType, CountryCode, DefaultId } from '@/lib/constants'
@@ -46,11 +46,6 @@ interface ContactShippingFormData {
 }
 
 interface Country {
-  name: string
-  code: string
-}
-
-interface Province {
   name: string
   code: string
 }
@@ -402,6 +397,12 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
     return shippingMethodSaveQueueRef.current
   }
 
+  // A shipping method is only choosable (and thus only required) when the order actually has
+  // ship items - a pickup-only order has nothing to select and shouldn't be blocked on it.
+  const needsShippingMethod = shipItems.length > 0
+  const hasShippingMethod = !needsShippingMethod || !!checkoutShippingMethodCode
+  const canContinue = isValid && hasShippingMethod
+
   const handleContinue = async () => {
     if (isValidatingShipping) return
     setIsValidatingShipping(true)
@@ -426,10 +427,6 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
           : (['firstName', 'lastNameOrSurname', 'workEmail', 'phoneNumbers.home'] as const)
       const isFormValid = await trigger(fieldsToValidate as any)
 
-      // A shipping method is only choosable (and thus only required) when the order actually
-      // has ship items - a pickup-only order has nothing to select and shouldn't be blocked on it.
-      const needsShippingMethod = shipItems.length > 0
-      const hasShippingMethod = !needsShippingMethod || !!checkoutShippingMethodCode
       setShippingMethodError(hasShippingMethod ? '' : t('please-select-shipping-method'))
 
       if (!isFormValid) {
@@ -674,22 +671,17 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                 name="address.stateOrProvince"
                 control={control}
                 render={({ field }) => (
-                  <KiboSelect
+                  <KiboStateSelect
                     name="state-or-province"
                     label={t('state-or-province')}
                     value={field.value}
+                    options={provinces}
                     error={!!errors?.address?.stateOrProvince}
                     helperText={errors?.address?.stateOrProvince?.message}
                     onChange={(_name: string, value: string) => field.onChange(value)}
                     onBlur={field.onBlur}
                     required
-                  >
-                    {provinces?.map((province: Province) => (
-                      <MenuItem key={province.code} value={province.code}>
-                        {province.name}
-                      </MenuItem>
-                    ))}
-                  </KiboSelect>
+                  />
                 )}
               />
             </Grid>
@@ -776,6 +768,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
           color="primary"
           loading={isValidatingShipping}
           onClick={handleContinue}
+          aria-disabled={!canContinue}
           sx={{
             borderRadius: '0px 26px',
             padding: '12px 30px',
@@ -787,6 +780,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
             letterSpacing: 'normal',
             textTransform: 'capitalize',
             cursor: 'pointer',
+            opacity: canContinue ? 1 : 0.5,
             '&.Mui-disabled': { cursor: 'not-allowed' },
           }}
         >

@@ -2,8 +2,9 @@ import { InputLabel, MenuItem, OutlinedInput, SxProps, Theme, alpha } from '@mui
 import { FormControl, FormHelperText, Select } from '@mui/material'
 import { styled } from '@mui/material/styles'
 
-// Define a styled OutlinedInput to incorporate KiboInput's styling
-const StyledOutlinedInput = styled(OutlinedInput)(({ theme, error }) => ({
+// Define a styled OutlinedInput to incorporate KiboInput's styling - exported so other
+// dropdown-shaped inputs (e.g. KiboStateSelect) can stay pixel-identical to this one.
+export const StyledOutlinedInput = styled(OutlinedInput)(({ theme, error }) => ({
   // Don't pad the OutlinedInput root - `.MuiSelect-select` inside it already carries its own
   // default padding, and the two were stacking (14px root + 14px inner ≈ 28px), which is the
   // oversized text-to-border gap. Padding belongs on `.MuiSelect-select` alone.
@@ -43,6 +44,7 @@ export interface KiboSelectProps {
 const ITEM_HEIGHT = 48
 const ITEM_PADDING_TOP = 8
 const MenuProps = {
+  disableScrollLock: true,
   PaperProps: {
     style: {
       maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,

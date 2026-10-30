@@ -139,6 +139,11 @@ const PromoCodeBadge = (props: PromoCodeBadgeProps) => {
                   fontSize: '15px',
                   color: 'primary.main',
                   whiteSpace: 'nowrap',
+                  // handleApplyCouponCode already no-ops when the input is empty - reflect that
+                  // visually instead of looking clickable and silently doing nothing.
+                  opacity: promo ? 1 : 0.4,
+                  cursor: promo ? 'pointer' : 'default',
+                  pointerEvents: promo ? 'auto' : 'none',
                 }}
                 data-testid="promo-button"
               >
@@ -146,7 +151,7 @@ const PromoCodeBadge = (props: PromoCodeBadgeProps) => {
               </Typography>
             )
           }
-          onIconClick={handleApplyCouponCode}
+          onIconClick={promo ? handleApplyCouponCode : undefined}
         />
       )}
       {!!appliedCoupons?.length && (

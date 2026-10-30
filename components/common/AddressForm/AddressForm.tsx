@@ -11,7 +11,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { isValidPhoneNumber } from 'react-phone-number-input'
 import * as yup from 'yup'
 
-import { KiboPhoneInput, KiboSelect, KiboTextBox } from '@/components/common'
+import { KiboPhoneInput, KiboSelect, KiboStateSelect, KiboTextBox } from '@/components/common'
 import { CountryCode } from '@/lib/constants'
 import type { Address, ContactForm } from '@/lib/types'
 
@@ -31,11 +31,6 @@ interface AddressFormProps {
 }
 
 interface Country {
-  name: string
-  code: string
-}
-
-interface Province {
   name: string
   code: string
 }
@@ -134,15 +129,6 @@ const AddressForm = (props: AddressFormProps) => {
       )
     })
   }
-
-  const generateProvincesOptions = () =>
-    provinces?.map((province: Province) => {
-      return (
-        <MenuItem key={province.name} value={province.code}>
-          {province.name}
-        </MenuItem>
-      )
-    })
 
   const onValid = async (formData: ContactForm) =>
     onSaveAddress({ contact: formData, isDataUpdated: true })
@@ -369,18 +355,17 @@ const AddressForm = (props: AddressFormProps) => {
             defaultValue={contact?.address?.stateOrProvince}
             render={({ field }) => (
               <Box>
-                <KiboSelect
+                <KiboStateSelect
                   name="state-or-province"
                   label={t('state-or-province')}
                   value={field.value}
+                  options={provinces}
                   error={!!errors?.address?.stateOrProvince}
                   helperText={errors?.address?.stateOrProvince?.message}
                   onChange={(_name: string, value: string) => field.onChange(value)}
                   onBlur={field.onBlur}
                   required={true}
-                >
-                  {generateProvincesOptions()}
-                </KiboSelect>
+                />
               </Box>
             )}
           />

@@ -37,7 +37,13 @@ import {
   NEW_CARD_OPTION,
   isSavedCardExpired,
 } from '@/components/checkout/SavedCardPicker/SavedCardPicker'
-import { AddressForm, KiboPhoneInput, KiboSelect, KiboTextBox } from '@/components/common'
+import {
+  AddressForm,
+  KiboPhoneInput,
+  KiboSelect,
+  KiboStateSelect,
+  KiboTextBox,
+} from '@/components/common'
 import { toE164PhoneNumber } from '@/components/common/KiboPhoneInput/KiboPhoneInput'
 import { useAuthContext } from '@/context'
 import { useUpdateOrder } from '@/hooks'
@@ -511,6 +517,57 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     return true
   }
 
+  // Mirrors validateBeforePlacingOrder's checks (read-only, no side effects) so the button can
+  // show it's not ready before the shopper clicks - clicking still runs the real validation and
+  // surfaces the specific reason via placeOrderError, so an incomplete click is never silent.
+  const canPlaceOrder = useMemo(() => {
+    if (!agreeWithTerms) return false
+    if (isPurchaseOrder) {
+      if (!agreePOAuthorization) return false
+      if (!poNumber.trim()) return false
+      if (!authorizerName.trim()) return false
+      if (!isValidPhoneNumber(authorizerPhone)) return false
+      if (
+        !billingContactSameAsContact &&
+        (!billingContactOverride.firstName ||
+          !billingContactOverride.lastNameOrSurname ||
+          !billingContactOverride.email)
+      ) {
+        return false
+      }
+      if (
+        !billingAddressSameAsShipping &&
+        (!billingAddressOverride.address1 ||
+          !billingAddressOverride.cityOrTown ||
+          !billingAddressOverride.postalOrZipCode ||
+          !billingAddressOverride.countryCode)
+      ) {
+        return false
+      }
+      return true
+    }
+    if (selectedSavedCard) return /^\d{3,4}$/.test(cvv)
+    if (!isCardFormValid) return false
+    if (!billingSameAsShipping && !isBillingFormValid) return false
+    return true
+  }, [
+    agreeWithTerms,
+    isPurchaseOrder,
+    agreePOAuthorization,
+    poNumber,
+    authorizerName,
+    authorizerPhone,
+    billingContactSameAsContact,
+    billingContactOverride,
+    billingAddressSameAsShipping,
+    billingAddressOverride,
+    selectedSavedCard,
+    cvv,
+    isCardFormValid,
+    billingSameAsShipping,
+    isBillingFormValid,
+  ])
+
   const handlePlaceOrder = async () => {
     if (isPlacingOrder || !validateBeforePlacingOrder()) return
 
@@ -913,23 +970,18 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                       </KiboSelect>
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <KiboSelect
+                      <KiboStateSelect
                         name="billing-state-or-province"
                         label={t('state-or-province')}
                         value={billingAddressOverride.stateOrProvince}
+                        options={provinces}
                         onChange={(_name, value) =>
                           setBillingAddressOverride((prev) => ({
                             ...prev,
                             stateOrProvince: value,
                           }))
                         }
-                      >
-                        {provinces?.map((province: { name: string; code: string }) => (
-                          <MenuItem key={province.code} value={province.code}>
-                            {province.name}
-                          </MenuItem>
-                        ))}
-                      </KiboSelect>
+                      />
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <KiboTextBox
@@ -1152,7 +1204,8 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
               color="primary"
               loading={isPlacingOrder}
               onClick={handlePlaceOrder}
-              sx={{ ...checkoutPrimaryButtonSx }}
+              aria-disabled={!canPlaceOrder}
+              sx={{ ...checkoutPrimaryButtonSx, opacity: canPlaceOrder ? 1 : 0.5 }}
             >
               {t('Place Order')}
             </LoadingButton>
