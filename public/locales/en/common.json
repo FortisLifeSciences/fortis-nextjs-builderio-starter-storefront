@@ -354,6 +354,7 @@
   "cvv-code": "CVV Code",
   "cvv-is-required": "CVV is required",
   "invalid-cvv": "Invalid: CVV must be 3 or 4 digits",
+  "invalid-cvv-length": "CVV must be {{count}} digits for this card",
   "billing-address-same-as-shipping": "Use my shipping address",
   "save-billing-address": "Save billing address",
   "terms-conditions": "I agree to Terms and conditions",
