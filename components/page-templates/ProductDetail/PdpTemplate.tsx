@@ -219,6 +219,11 @@ const PdpTemplate = (props: PdpTemplateProps) => {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [validationOpen, setValidationOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
+  const [relatedExpanded, setRelatedExpanded] = useState(false)
+  const [relatedHeights, setRelatedHeights] = useState<{ collapsed: number; full: number } | null>(
+    null
+  )
+  const relatedGridRef = useRef<HTMLDivElement>(null)
 
   const {
     updatedProduct,
@@ -284,6 +289,27 @@ const PdpTemplate = (props: PdpTemplateProps) => {
   useEffect(() => {
     setIsMounted(true)
   }, [])
+
+  useEffect(() => {
+    const grid = relatedGridRef.current
+    if (!grid) return
+
+    const measure = () => {
+      const cards = Array.from(grid.children) as HTMLElement[]
+      const first = cards[0]
+      const nextRow = first && cards.find((card) => card.offsetTop > first.offsetTop)
+      setRelatedHeights(
+        nextRow
+          ? { collapsed: nextRow.offsetTop - first.offsetTop + 56, full: grid.scrollHeight }
+          : null
+      )
+    }
+
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(grid)
+    return () => observer.disconnect()
+  }, [relatedProducts])
 
   const handleAddToCart = async () => {
     try {
@@ -1129,7 +1155,19 @@ const PdpTemplate = (props: PdpTemplateProps) => {
       relatedProducts && relatedProducts.length > 0 ? (
         <section className={styles.section}>
           <h2 className={styles.heading}>Related Products</h2>
-          <div className={styles.relatedGrid}>
+          <div
+            ref={relatedGridRef}
+            className={`${styles.relatedGrid} ${relatedHeights ? styles.relatedClamp : ''} ${
+              relatedHeights && relatedExpanded ? styles.relatedClampExpanded : ''
+            }`}
+            style={
+              relatedHeights
+                ? {
+                    maxHeight: relatedExpanded ? relatedHeights.full : relatedHeights.collapsed,
+                  }
+                : undefined
+            }
+          >
             {relatedProducts.map((data: any, index: number) => {
               return (
                 <article className={styles.relatedCard} key={data?.productCode ?? index}>
@@ -1151,6 +1189,16 @@ const PdpTemplate = (props: PdpTemplateProps) => {
               )
             })}
           </div>
+          {relatedHeights ? (
+            <button
+              type="button"
+              className={`${styles.seeMore} ${relatedExpanded ? styles.seeMoreExpanded : ''}`}
+              onClick={() => setRelatedExpanded(!relatedExpanded)}
+            >
+              <span>{relatedExpanded ? 'See less' : 'See more'}</span>
+              <Arrow />
+            </button>
+          ) : null}
         </section>
       ) : null,
     services:
