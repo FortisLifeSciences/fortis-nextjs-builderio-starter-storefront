@@ -30,18 +30,25 @@ const StyledCardDiv = styled('div')(() => ({
 
 const useCardSchema = () => {
   const { t } = useTranslation('common')
+  const nameSchema = yup
+    .string()
+    .max(50, t('this-field-must-be-50-characters-or-fewer'))
+    .matches(/^[A-Za-zÀ-ɏ\s'-]+$/, t('this-field-must-only-contain-letters'))
+
   return yup.object({
     firstName: yup.string().when(['$isEmailForm', '$isPasswordForm'], {
       is: (isEmailForm: boolean, isPasswordForm: boolean) => !isEmailForm && !isPasswordForm,
-      then: yup.string().required(t('this-field-is-required')),
+      then: nameSchema.required(t('this-field-is-required')),
     }),
     lastName: yup.string().when(['$isEmailForm', '$isPasswordForm'], {
       is: (isEmailForm: boolean, isPasswordForm: boolean) => !isEmailForm && !isPasswordForm,
-      then: yup.string().required(t('this-field-is-required')),
+      then: nameSchema.required(t('this-field-is-required')),
     }),
     emailAddress: yup.string().when('$isEmailForm', (isEmailForm, schema) => {
       if (isEmailForm) {
-        return schema.required(t('this-field-is-required'))
+        return schema
+          .required(t('this-field-is-required'))
+          .email(t('please-enter-a-valid-email-address'))
       }
     }),
     currentPassword: yup.string().when('$isPasswordForm', (isPasswordForm, schema) => {
@@ -51,9 +58,11 @@ const useCardSchema = () => {
     }),
     newPassword: yup.string().when('$isPasswordForm', (isPasswordForm, schema) => {
       if (isPasswordForm) {
-        return schema.required(t('this-field-is-required')).test((value = '') => {
-          return isPasswordValid(value)
-        })
+        return schema
+          .required(t('this-field-is-required'))
+          .test('password-valid', t('password-does-not-meet-requirements'), (value = '') => {
+            return isPasswordValid(value)
+          })
       }
     }),
     confirmPassword: yup.string().when('$isPasswordForm', (isPasswordForm, schema) => {
