@@ -331,6 +331,8 @@ const OrderConfirmation = ({ order }: { order: CrOrder }) => {
           {shipItems?.map((item: Maybe<CrOrderItem>) => {
             const product = item?.product as CrProduct
             const itemDeliveryDate = orderGetters.getExpectedDeliveryDate([item] as CrOrderItem[])
+            const { regular, special } = productGetters.getPrice(product)
+            const unitPrice = special && special < regular ? special : regular
             return (
               <Stack key={item?.id} gap={0.5}>
                 <Stack direction="row" justifyContent="space-between" gap={2}>
@@ -338,7 +340,7 @@ const OrderConfirmation = ({ order }: { order: CrOrder }) => {
                     {productGetters.getName(product)}
                   </Typography>
                   <Typography sx={{ fontWeight: 600, fontSize: '15px', color: colors.subtitle }}>
-                    {t('currency', { val: productGetters.getPrice(product).regular })}
+                    {t('currency', { val: unitPrice })}
                   </Typography>
                 </Stack>
                 <Typography sx={{ fontSize: '12px', color: colors.placeholder }}>
