@@ -3,7 +3,7 @@ import React, { ReactNode } from 'react'
 import { Typography, Box, Divider } from '@mui/material'
 import { useTranslation } from 'next-i18next'
 
-import { Price, OrderPriceList } from '@/components/common'
+import { KiboSkeleton, Price, OrderPriceList } from '@/components/common'
 import { checkoutGetters, orderGetters } from '@/lib/getters'
 
 import type { Checkout, CrCart, CrOrder } from '@/lib/gql/types'
@@ -17,6 +17,9 @@ export interface OrderPriceProps<T extends CrCart | CrOrder | Checkout> {
   orderDetails: any
   isShippingTaxIncluded?: boolean
   promoComponent?: ReactNode
+  // While true, every row (and the total) shows a placeholder instead of its figure, rather
+  // than flashing stale/zero amounts while the order total is still being fetched/recalculated.
+  isLoading?: boolean
 }
 
 const styles = {
@@ -40,6 +43,7 @@ const OrderPrice = <T extends CrCart | CrOrder | Checkout>(props: OrderPriceProp
     promoComponent,
     isShippingTaxIncluded = true,
     orderDetails,
+    isLoading,
   } = props
 
   const discountValue = orderGetters.getTotalDiscount(orderDetails)
@@ -81,6 +85,7 @@ const OrderPrice = <T extends CrCart | CrOrder | Checkout>(props: OrderPriceProp
               subTotal={subTotal}
               discountedSubtotal={subTotal}
               taxTotal={itemTaxTotal}
+              isLoading={isLoading}
             />
             {orderDetails?.items
               ?.filter((item: any) => (item?.productDiscounts?.length ?? 0) > 0)
@@ -114,18 +119,21 @@ const OrderPrice = <T extends CrCart | CrOrder | Checkout>(props: OrderPriceProp
               total={shippingTotal}
               subTotal={shippingSubTotal}
               taxTotal={shippingTaxTotal}
+              isLoading={isLoading}
             />
             <OrderPriceList
               title={handlingLabel as string}
               total={handlingTotal}
               subTotal={handlingSubTotal}
               taxTotal={handlingTaxTotal}
+              isLoading={isLoading}
             />
             <OrderPriceList
               title={taxLabel as string}
               total={handlingTotal}
               subTotal={taxTotal}
               taxTotal={taxTotal}
+              isLoading={isLoading}
             />
           </>
         )}
@@ -158,30 +166,38 @@ const OrderPrice = <T extends CrCart | CrOrder | Checkout>(props: OrderPriceProp
       <Divider sx={{ margin: '12px 0', borderColor: '#C4C4C4' }} />
 
       <Box sx={{ ...styles.priceTotalRow }}>
-        <Typography
-          component="h4"
-          sx={{
-            fontFamily: 'Poppins',
-            fontWeight: 600,
-            fontSize: '15px',
-            lineHeight: '150%',
-            letterSpacing: '-0.005em',
-            color: '#070707',
-          }}
-        >
-          {totalLabel}
-        </Typography>
-        <Price
-          fontWeight="600"
-          color="#070707"
-          sx={{
-            fontFamily: 'Poppins',
-            fontSize: '17px',
-            lineHeight: '150%',
-            letterSpacing: '-0.005em',
-          }}
-          price={t('currency', { val: total })}
-        />
+        {isLoading ? (
+          <KiboSkeleton variant="text" width={60} height={26} />
+        ) : (
+          <Typography
+            component="h4"
+            sx={{
+              fontFamily: 'Poppins',
+              fontWeight: 600,
+              fontSize: '15px',
+              lineHeight: '150%',
+              letterSpacing: '-0.005em',
+              color: '#070707',
+            }}
+          >
+            {totalLabel}
+          </Typography>
+        )}
+        {isLoading ? (
+          <KiboSkeleton variant="text" width={70} height={26} />
+        ) : (
+          <Price
+            fontWeight="600"
+            color="#070707"
+            sx={{
+              fontFamily: 'Poppins',
+              fontSize: '17px',
+              lineHeight: '150%',
+              letterSpacing: '-0.005em',
+            }}
+            price={t('currency', { val: total })}
+          />
+        )}
       </Box>
     </Box>
   )

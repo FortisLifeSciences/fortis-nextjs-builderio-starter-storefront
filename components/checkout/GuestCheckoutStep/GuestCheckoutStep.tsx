@@ -65,7 +65,6 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
   const router = useRouter()
   const accountResultRef = useRef<AccountAtCheckoutResult>()
 
-
   // Payment is the last step of guest checkout (no separate Review step) - it places
   // the order itself, so its state lives here rather than behind the shared step context.
   const [phase, setPhase] = useState<'shipping' | 'payment'>('shipping')
@@ -488,7 +487,7 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
                 color="primary"
                 loading={isPlacingOrder}
                 onClick={handlePlaceOrder}
-                aria-disabled={!canPlaceOrder}
+                disabled={!canPlaceOrder}
                 sx={{ ...checkoutPrimaryButtonSx, opacity: canPlaceOrder ? 1 : 0.5 }}
               >
                 {t('Place Order')}

@@ -40,7 +40,11 @@ const KiboInput = styled(InputBase)(({ theme, error }) => ({
   },
 }))
 
-const KiboTextBox = (props: KiboTextBoxProps) => {
+// Forwards its ref to the actual focusable <input> (not just the wrapping FormControl) - react
+// -hook-form's Controller spreads `field.ref` onto this component so RHF's setFocus()/validation
+// -triggered focus can find a real DOM node to call .focus() on. Without forwardRef here, React
+// silently drops that ref before it ever reaches this component, and setFocus becomes a no-op.
+const KiboTextBox = React.forwardRef<HTMLInputElement, KiboTextBoxProps>((props, ref) => {
   const {
     label,
     required = false,
@@ -84,6 +88,7 @@ const KiboTextBox = (props: KiboTextBoxProps) => {
         {label}
       </InputLabel>
       <KiboInput
+        ref={ref}
         sx={{
           borderColor: error ? 'error.main' : '#D3D7D9',
           borderWidth: '1px',
@@ -143,6 +148,15 @@ const KiboTextBox = (props: KiboTextBoxProps) => {
       )}
     </FormControl>
   )
-}
+})
 
-export default KiboTextBox
+KiboTextBox.displayName = 'KiboTextBox'
+
+// Exporting the raw forwardRef value makes TS resolve consumers' JSX props through
+// `ForwardRefExoticComponent`, which drops contextual typing for inline callback props like
+// `onChange={(name, value) => ...}` - every call site then has to annotate the params itself
+// (TS7006 implicit-any, repo-wide). Casting to a plain function-component signature restores
+// normal contextual typing while the underlying value (and its ref forwarding) is unchanged.
+export default KiboTextBox as unknown as (
+  props: KiboTextBoxProps & { ref?: React.Ref<HTMLInputElement> }
+) => React.ReactElement | null

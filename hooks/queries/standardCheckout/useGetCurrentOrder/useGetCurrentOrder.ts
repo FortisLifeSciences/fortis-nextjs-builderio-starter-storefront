@@ -21,6 +21,10 @@ export interface UseCheckoutResponse {
   data: CrOrder | undefined
   isLoading: boolean
   isSuccess: boolean
+  // True while a fetch (initial or background refetch) is in flight, unlike `isLoading` -
+  // `initialData` means `isLoading` is false from the first render, so this is what callers
+  // need to show a loading state for a refetch after the SSR-seeded data is already showing.
+  isFetching: boolean
 }
 
 const getCheckout = async (checkoutId?: string | null) => {
@@ -62,6 +66,7 @@ export const useGetCurrentOrder = ({
     data = [],
     isLoading,
     isSuccess,
+    isFetching,
   } = useQuery({
     queryKey: checkoutKeys.detail(id),
     queryFn: () => getCheckout(checkoutId),
@@ -69,5 +74,5 @@ export const useGetCurrentOrder = ({
     enabled: !isMultiship,
   })
 
-  return { data, isLoading, isSuccess }
+  return { data, isLoading, isSuccess, isFetching }
 }

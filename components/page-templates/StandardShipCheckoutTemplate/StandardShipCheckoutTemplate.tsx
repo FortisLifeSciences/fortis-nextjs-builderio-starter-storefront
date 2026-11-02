@@ -48,7 +48,7 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
   const { publicRuntimeConfig } = getConfig()
   const allowInvalidAddresses = publicRuntimeConfig.allowInvalidAddresses
 
-  const { data: order } = useGetCurrentOrder({
+  const { data: order, isFetching: isOrderFetching } = useGetCurrentOrder({
     checkoutId: checkoutId as string,
     isMultiship: isMultiShipEnabled,
     initialCheckout,
@@ -205,6 +205,7 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
         handleRemoveCouponCode={handleRemoveCouponCode}
         promoError={promoError}
         builderContent={builderContent}
+        isOrderLoading={isOrderFetching}
       >
         {isCheckoutVariantLoading ? (
           // isAuthenticated starts false on every load and only flips once the session

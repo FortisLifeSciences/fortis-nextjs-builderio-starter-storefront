@@ -27,6 +27,9 @@ interface CheckoutUITemplateProps<T> {
   handleRemoveCouponCode: (couponCode: string) => void
   children?: React.ReactNode
   builderContent?: any
+  // True while the order/checkout data itself is being (re)fetched - distinct from
+  // isSyncingWithCart below, which only tracks active mutations.
+  isOrderLoading?: boolean
 }
 const buttonStyle = {
   height: '48px',
@@ -98,6 +101,7 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
     isMultiShipEnabled = false,
     children,
     builderContent,
+    isOrderLoading = false,
   } = props
   const isSyncingWithCart = useIsMutating({ mutationKey: checkoutSyncKeys.all }) > 0
 
@@ -229,7 +233,7 @@ const CheckoutUITemplate = <T extends CrOrder | Checkout>(props: CheckoutUITempl
     shippingLabel: t('go-to-shipping'),
     backLabel: t('go-back'),
     showItems: true,
-    isLoading: isSyncingWithCart,
+    isLoading: isSyncingWithCart || isOrderLoading,
     editHref: '/cart',
     promoComponent: (
       <PromoCodeBadge

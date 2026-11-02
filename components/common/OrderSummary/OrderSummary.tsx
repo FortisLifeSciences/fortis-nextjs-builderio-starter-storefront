@@ -1,15 +1,7 @@
 /** @format */
 import { Fragment, ReactNode } from 'react'
 
-import {
-  Card,
-  Typography,
-  Box,
-  CardContent,
-  CircularProgress,
-  Link as MuiLink,
-  Stack,
-} from '@mui/material'
+import { Card, Typography, Box, CardContent, Link as MuiLink, Stack } from '@mui/material'
 import { useTranslation } from 'next-i18next'
 
 import { OrderPriceProps } from '../OrderPrice/OrderPrice'
@@ -170,6 +162,7 @@ const OrderSummary = <T extends CrCart | CrOrder | Checkout>(props: OrderSummary
     promoComponent,
     isShippingTaxIncluded,
     orderDetails,
+    isLoading,
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -178,6 +171,7 @@ const OrderSummary = <T extends CrCart | CrOrder | Checkout>(props: OrderSummary
 
   return (
     <Card
+      data-testid="order-summary-card"
       aria-busy={isLoading}
       sx={{
         position: 'relative',
@@ -238,22 +232,6 @@ const OrderSummary = <T extends CrCart | CrOrder | Checkout>(props: OrderSummary
         <CardContent>
           <Box textAlign="center">{props.children}</Box>
         </CardContent>
-      )}
-      {isLoading && (
-        <Box
-          data-testid="order-summary-loading"
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            bgcolor: 'rgba(255, 255, 255, 0.7)',
-            zIndex: 1,
-          }}
-        >
-          <CircularProgress />
-        </Box>
       )}
     </Card>
   )
