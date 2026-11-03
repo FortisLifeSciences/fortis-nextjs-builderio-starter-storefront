@@ -12,6 +12,7 @@ import { useAuthContext, useSnackbarContext } from '@/context'
 import {
   useAddToWishlistItem,
   useCreateWishlist,
+  useDeleteWishlist,
   useDeleteWishlistItemById,
   useProductCardActions,
   useUpdateWishlistItemMutation,
@@ -37,6 +38,7 @@ const CreateList = (props: CreateListProps) => {
   const { t } = useTranslation('common')
   const { user } = useAuthContext()
   const { createWishlist } = useCreateWishlist()
+  const { deleteWishlist } = useDeleteWishlist()
   const { updateWishlist, updateWishlistItemQuantity } = useUpdateWishlistItemMutation({
     isCreateList: true,
   })
@@ -76,9 +78,9 @@ const CreateList = (props: CreateListProps) => {
       quantity: payload.quantity,
     })
   }
-  const handleEmptyCartAndAddListToCart = () => {
-    handleDeleteCurrentCart()
-    handleAddListToCart()
+  const handleEmptyCartAndAddListToCart = async () => {
+    await handleDeleteCurrentCart()
+    await handleAddListToCart()
   }
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -243,7 +245,14 @@ const CreateList = (props: CreateListProps) => {
           variant="text"
           type="button"
           sx={{ ...accountTextButton }}
-          onClick={() => {
+          onClick={async () => {
+            if (newListState?.id) {
+              try {
+                await deleteWishlist.mutateAsync(newListState.id)
+              } catch (e) {
+                console.error(e)
+              }
+            }
             onCreateFormToggle(false)
           }}
         >
