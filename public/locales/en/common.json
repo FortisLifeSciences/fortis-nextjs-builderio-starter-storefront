@@ -317,6 +317,7 @@
   "wallet": "Wallet",
   "shipping-preferences": "Shipping Preferences",
   "this-field-is-required": "This field is required",
+  "enter-valid-characters": "Please remove special characters",
   "this-field-is-number": "Must be only digits",
   "this-field-is-min-max-length": "Must be exactly 9 digits",
   "this-field-is-min-max-length-6": "Must be exactly 6 alpha-numeric characters",
