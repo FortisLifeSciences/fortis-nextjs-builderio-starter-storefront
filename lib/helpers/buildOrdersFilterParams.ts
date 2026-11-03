@@ -65,7 +65,7 @@ export const buildOrdersFilterParams = (params: {
   }
   const searchTerm = params.searchTerm?.replace(/[^\w\s.-]/g, '').trim()
   if (searchTerm) {
-    const productCodeFilter = `items.productCode cont '${searchTerm}'`
+    const productCodeFilter = `(items.productCode cont '${searchTerm}' or items.variationProductCode cont '${searchTerm}')`
     const searchFilter = /^\d+$/.test(searchTerm)
       ? `(orderNumber eq ${searchTerm} or ${productCodeFilter})`
       : productCodeFilter
