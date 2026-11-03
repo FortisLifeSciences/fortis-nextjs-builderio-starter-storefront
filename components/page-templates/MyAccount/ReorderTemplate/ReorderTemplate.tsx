@@ -535,7 +535,7 @@ const ReorderTemplate = () => {
         {isSuggestionsOpen && (
           <Paper elevation={3} sx={{ ...styles.suggestions }}>
             <List dense disablePadding>
-              {!isSearching && !algoliaHits.length && (
+              {!isSearching && !algoliaHits.filter((hit) => Boolean(hit.catalogNumber)).length && (
                 <ListItem>
                   <ListItemText
                     primary={t('no-results-found')}
@@ -543,16 +543,18 @@ const ReorderTemplate = () => {
                   />
                 </ListItem>
               )}
-              {algoliaHits.map((hit) => (
-                <ListItemButton key={hit.objectID} onClick={() => handleSelectSearchHit(hit)}>
-                  <ListItemText
-                    primary={hit.productName}
-                    secondary={hit.catalogNumber}
-                    primaryTypographyProps={{ variant: 'body2' }}
-                    secondaryTypographyProps={{ variant: 'caption' }}
-                  />
-                </ListItemButton>
-              ))}
+              {algoliaHits
+                .filter((hit) => Boolean(hit.catalogNumber))
+                .map((hit) => (
+                  <ListItemButton key={hit.objectID} onClick={() => handleSelectSearchHit(hit)}>
+                    <ListItemText
+                      primary={hit.productName}
+                      secondary={hit.catalogNumber}
+                      primaryTypographyProps={{ variant: 'body2' }}
+                      secondaryTypographyProps={{ variant: 'caption' }}
+                    />
+                  </ListItemButton>
+                ))}
             </List>
           </Paper>
         )}
