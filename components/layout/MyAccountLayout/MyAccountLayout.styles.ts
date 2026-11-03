@@ -31,11 +31,13 @@ export const MyAccountLayoutStyles = {
     fontWeight: 700,
     color: 'text.primary',
     lineHeight: 1.3,
+    overflowWrap: 'anywhere',
   },
   userOrganization: {
     ...accountType.label,
     color: 'text.secondary',
     marginTop: '0.125rem',
+    overflowWrap: 'anywhere',
   },
   groupLabel: {
     ...accountType.groupLabel,
