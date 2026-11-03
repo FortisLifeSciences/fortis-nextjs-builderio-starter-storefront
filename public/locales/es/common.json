@@ -126,6 +126,7 @@
   "product": "Producto",
   "quantity": "Cantidad",
   "this-field-is-required": "Este campo es obligatorio",
+  "enter-valid-characters": "Elimine los caracteres especiales",
   "zip-code": "Código postal",
   "no-results-found": "No se encontraron resultados",
   "lists": "Listas",
