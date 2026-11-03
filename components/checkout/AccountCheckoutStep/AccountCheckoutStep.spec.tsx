@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { QueryClient } from '@tanstack/react-query'
-import { screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import AccountCheckoutStep from './AccountCheckoutStep'
@@ -198,6 +198,28 @@ describe('[component] AccountCheckoutStep', () => {
 
     expect(screen.getByText('po-number')).toBeVisible()
     expect(screen.queryByText('payment-information')).not.toBeInTheDocument()
+  })
+
+  it('requires a valid state and ZIP for a separate PO billing address', async () => {
+    const { user, onAddPayment } = setup({
+      user: b2bUser,
+      customerPurchaseOrderAccount: { isEnabled: true } as CustomerPurchaseOrderAccount,
+    })
+
+    await user.click(screen.getByText('purchase-order'))
+    await user.type(screen.getByRole('textbox', { name: 'po-number' }), 'PO-123')
+    await user.click(screen.getByRole('checkbox', { name: 'poAuthorization' }))
+    await user.click(screen.getByRole('checkbox', { name: 'same-as-shipping' }))
+    await user.type(screen.getByRole('textbox', { name: 'company-or-organization' }), 'Acme Labs')
+    await user.type(screen.getByRole('textbox', { name: 'street-address-1' }), '1 Main Street')
+    await user.type(screen.getByRole('textbox', { name: 'city-or-town' }), 'Boston')
+    fireEvent.blur(screen.getByRole('combobox', { name: 'state-or-province' }))
+    await user.type(screen.getByRole('textbox', { name: 'postal-or-zip-code' }), '1234A')
+    await agreeToTermsAndPlaceOrder(user)
+
+    expect(screen.getByText('enter-valid-zip-code')).toBeVisible()
+    expect(screen.getByText('this-field-is-required')).toBeVisible()
+    expect(onAddPayment).not.toHaveBeenCalled()
   })
 
   it('lists saved cards, disables expired ones and preselects the default card', () => {

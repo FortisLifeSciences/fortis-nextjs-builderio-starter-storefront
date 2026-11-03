@@ -373,6 +373,9 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   const [billingAddressOverride, setBillingAddressOverride] = useState<BillingAddressOverride>(
     emptyBillingAddressOverride
   )
+  const [billingAddressTouched, setBillingAddressTouched] = useState<
+    Partial<Record<keyof BillingAddressOverride, boolean>>
+  >({})
   const [instructionsValue, setInstructionsValue] = useState('')
   const [agreeWithTerms, setAgreeWithTerms] = useState(false)
   const [agreePOAuthorization, setAgreePOAuthorization] = useState(false)
@@ -420,6 +423,31 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     if (!value) return t('this-field-is-required')
     return isValidPhoneNumber(value) ? '' : t('enter-valid-phone-number')
   }
+  const getRequiredFieldError = (value: string) =>
+    value?.trim() ? '' : t('this-field-is-required')
+  const getPostalCodeError = (value: string) => {
+    const zip = value?.trim() ?? ''
+    if (!zip) return t('this-field-is-required')
+    return US_ZIP_REGEX.test(zip) ? '' : t('enter-valid-zip-code')
+  }
+  const billingAddressErrors = {
+    companyOrOrganization: getRequiredFieldError(billingAddressOverride.companyOrOrganization),
+    address1: getRequiredFieldError(billingAddressOverride.address1),
+    cityOrTown: getRequiredFieldError(billingAddressOverride.cityOrTown),
+    postalOrZipCode: getPostalCodeError(billingAddressOverride.postalOrZipCode),
+    countryCode: getRequiredFieldError(billingAddressOverride.countryCode),
+    stateOrProvince: getRequiredFieldError(billingAddressOverride.stateOrProvince),
+  }
+  const isBillingAddressInvalid =
+    !billingAddressSameAsShipping &&
+    (!!billingAddressErrors.companyOrOrganization ||
+      !!billingAddressErrors.address1 ||
+      !!billingAddressErrors.cityOrTown ||
+      !!billingAddressErrors.stateOrProvince ||
+      !!billingAddressErrors.postalOrZipCode ||
+      !!billingAddressErrors.countryCode)
+  const markBillingAddressTouched = (field: keyof BillingAddressOverride) =>
+    setBillingAddressTouched((prev) => ({ ...prev, [field]: true }))
 
   const handlePOAuthorizationChange = (checked: boolean) => {
     setAgreePOAuthorization(checked)
@@ -619,12 +647,18 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
           (!billingContactOverride.firstName ||
             !billingContactOverride.lastNameOrSurname ||
             !billingContactOverride.email)) ||
-        (!billingAddressSameAsShipping &&
-          (!billingAddressOverride.address1 ||
-            !billingAddressOverride.cityOrTown ||
-            !billingAddressOverride.postalOrZipCode ||
-            !billingAddressOverride.countryCode))
+        isBillingAddressInvalid
       ) {
+        if (isBillingAddressInvalid) {
+          setBillingAddressTouched({
+            companyOrOrganization: true,
+            address1: true,
+            cityOrTown: true,
+            stateOrProvince: true,
+            postalOrZipCode: true,
+            countryCode: true,
+          })
+        }
         setPlaceOrderError(t('please-complete-billing-information'))
         return false
       }
@@ -674,15 +708,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       ) {
         return false
       }
-      if (
-        !billingAddressSameAsShipping &&
-        (!billingAddressOverride.address1 ||
-          !billingAddressOverride.cityOrTown ||
-          !billingAddressOverride.postalOrZipCode ||
-          !billingAddressOverride.countryCode)
-      ) {
-        return false
-      }
+      if (isBillingAddressInvalid) return false
       return true
     }
     if (selectedSavedCard) return isSavedCardCvvValid
@@ -847,6 +873,9 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                 setPoNumber(value)
                 setPoNumberError('')
               }}
+              onBlur={() => {
+                if (!poNumber.trim()) setPoNumberError(t('this-field-is-required'))
+              }}
             />
             <FormControlLabel
               control={
@@ -878,6 +907,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                   setAuthorizerName(value)
                   setAuthorizerNameError(getAuthorizerNameError(value))
                 }}
+                onBlur={() => setAuthorizerNameError(getAuthorizerNameError(authorizerName))}
               />
               <KiboPhoneInput
                 value={authorizerPhone}
@@ -890,6 +920,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                   setAuthorizerPhone(value)
                   setAuthorizerPhoneError(getAuthorizerPhoneError(value))
                 }}
+                onBlur={() => setAuthorizerPhoneError(getAuthorizerPhoneError(authorizerPhone))}
               />
             </Stack>
             <KiboTextBox
@@ -1025,7 +1056,15 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         checked={billingAddressSameAsShipping}
                         onChange={(_e, checked) => {
                           setBillingAddressSameAsShipping(checked)
-                          if (checked) setPlaceOrderError('')
+                          if (checked) {
+                            setPlaceOrderError('')
+                            setBillingAddressTouched({})
+                          } else {
+                            setBillingAddressOverride((prev) => ({
+                              ...prev,
+                              countryCode: prev.countryCode || countries?.[0]?.code || '',
+                            }))
+                          }
                         }}
                         inputProps={{ 'aria-label': t('same-as-shipping') }}
                       />
@@ -1071,12 +1110,22 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         value={billingAddressOverride.companyOrOrganization}
                         label={t('company-or-organization')}
                         required
+                        error={
+                          billingAddressTouched.companyOrOrganization &&
+                          !!billingAddressErrors.companyOrOrganization
+                        }
+                        helperText={
+                          billingAddressTouched.companyOrOrganization
+                            ? billingAddressErrors.companyOrOrganization
+                            : ''
+                        }
                         onChange={(_name, value) =>
                           setBillingAddressOverride((prev) => ({
                             ...prev,
                             companyOrOrganization: value,
                           }))
                         }
+                        onBlur={() => markBillingAddressTouched('companyOrOrganization')}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -1084,9 +1133,14 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         value={billingAddressOverride.address1}
                         label={t('street-address-1')}
                         required
+                        error={billingAddressTouched.address1 && !!billingAddressErrors.address1}
+                        helperText={
+                          billingAddressTouched.address1 ? billingAddressErrors.address1 : ''
+                        }
                         onChange={(_name, value) =>
                           setBillingAddressOverride((prev) => ({ ...prev, address1: value }))
                         }
+                        onBlur={() => markBillingAddressTouched('address1')}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -1104,9 +1158,16 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         label={t('country-code')}
                         value={billingAddressOverride.countryCode}
                         required
+                        error={
+                          billingAddressTouched.countryCode && !!billingAddressErrors.countryCode
+                        }
+                        helperText={
+                          billingAddressTouched.countryCode ? billingAddressErrors.countryCode : ''
+                        }
                         onChange={(_name, value) =>
                           setBillingAddressOverride((prev) => ({ ...prev, countryCode: value }))
                         }
+                        onBlur={() => markBillingAddressTouched('countryCode')}
                       >
                         {countries?.map((country: { name: string; code: string }) => (
                           <MenuItem key={country.code} value={country.code}>
@@ -1122,12 +1183,22 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         value={billingAddressOverride.stateOrProvince}
                         options={provinces}
                         required
+                        error={
+                          billingAddressTouched.stateOrProvince &&
+                          !!billingAddressErrors.stateOrProvince
+                        }
+                        helperText={
+                          billingAddressTouched.stateOrProvince
+                            ? billingAddressErrors.stateOrProvince
+                            : ''
+                        }
                         onChange={(_name, value) =>
                           setBillingAddressOverride((prev) => ({
                             ...prev,
                             stateOrProvince: value,
                           }))
                         }
+                        onBlur={() => markBillingAddressTouched('stateOrProvince')}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -1135,9 +1206,16 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         value={billingAddressOverride.cityOrTown}
                         label={t('city-or-town')}
                         required
+                        error={
+                          billingAddressTouched.cityOrTown && !!billingAddressErrors.cityOrTown
+                        }
+                        helperText={
+                          billingAddressTouched.cityOrTown ? billingAddressErrors.cityOrTown : ''
+                        }
                         onChange={(_name, value) =>
                           setBillingAddressOverride((prev) => ({ ...prev, cityOrTown: value }))
                         }
+                        onBlur={() => markBillingAddressTouched('cityOrTown')}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -1145,12 +1223,23 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         value={billingAddressOverride.postalOrZipCode}
                         label={t('postal-or-zip-code')}
                         required
+                        error={
+                          billingAddressTouched.postalOrZipCode &&
+                          !!billingAddressErrors.postalOrZipCode
+                        }
+                        helperText={
+                          billingAddressTouched.postalOrZipCode
+                            ? billingAddressErrors.postalOrZipCode
+                            : ''
+                        }
+                        inputProps={{ maxLength: 10 }}
                         onChange={(_name, value) =>
                           setBillingAddressOverride((prev) => ({
                             ...prev,
-                            postalOrZipCode: value,
+                            postalOrZipCode: value.replace(/[^0-9-]/g, ''),
                           }))
                         }
+                        onBlur={() => markBillingAddressTouched('postalOrZipCode')}
                       />
                     </Grid>
                   </Grid>
