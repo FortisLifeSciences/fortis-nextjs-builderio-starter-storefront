@@ -30,6 +30,12 @@ const StyledCardDiv = styled('div')(() => ({
 
 const useCardSchema = () => {
   const { t } = useTranslation('common')
+  const nameSchema = yup
+    .string()
+    .max(50, t('this-field-must-be-50-characters-or-fewer'))
+    .matches(/^[A-Za-zÀ-ɏ\s'-]+$/, t('this-field-must-only-contain-letters'))
+    .test('not-blank', t('this-field-is-required'), (value) => !!value?.trim())
+
   return yup.object({
     firstName: yup.string().when(['$isEmailForm', '$isPasswordForm'], {
       is: (isEmailForm: boolean, isPasswordForm: boolean) => !isEmailForm && !isPasswordForm,
