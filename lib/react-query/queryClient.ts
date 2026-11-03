@@ -101,6 +101,11 @@ const queryClientHandler = (error: any, showSnackbar: any) => {
     'Validation Error: Unable to adjust payments to match order total.'
   ) {
     showSnackbar('Error on payment. Please check billing details and try again.', status)
+  } else if (
+    parsedError?.response?.message?.includes('Password must be different from the previous')
+  ) {
+    showSnackbar(parsedError.response.message, status)
+    return
   }
 
   if (error instanceof SyntaxError && error.message.includes('Unexpected token')) {
