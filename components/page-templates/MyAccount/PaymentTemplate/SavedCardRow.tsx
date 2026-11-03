@@ -69,7 +69,13 @@ const SavedCardRow = (props: SavedCardRowProps) => {
   const cardNumberPart = cardGetters.getCardNumberPart(cardInfo)
   const isPrimary = cardGetters.getIsDefaultPayMethod(cardInfo)
   const isExpiringSoon = cardGetters.getIsExpiringSoon(cardInfo)
-  const billingName = billingAddressInfo?.contact?.companyOrOrganization
+  const billingContact = billingAddressInfo?.contact
+  const billingName =
+    billingContact?.companyOrOrganization?.trim() ||
+    [billingContact?.firstName, billingContact?.lastNameOrSurname]
+      .map((name) => name?.trim())
+      .filter(Boolean)
+      .join(' ')
 
   return (
     <Box sx={{ ...styles.row }}>

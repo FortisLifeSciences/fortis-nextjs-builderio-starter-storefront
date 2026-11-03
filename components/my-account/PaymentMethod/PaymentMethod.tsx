@@ -41,6 +41,7 @@ interface PaymentMethodProps {
   contacts: CustomerContactCollection
   displayMode?: 'Edit' | 'AddNew'
   isAddressFormInDialog?: boolean
+  initialCard?: PaymentAndBilling
   onSave: (address: BillingAddress, card: CardType, isUpdatingAddress: boolean) => void
   onClose?: () => void
 }
@@ -78,6 +79,25 @@ const initialBillingAddressData: Address = {
 const styles = {
   addPaymentMethodButtonStyle: accountActionButton,
 }
+
+const getCardFormFromSavedCard = (cardAndAddressDetails: PaymentAndBilling): CardForm => ({
+  id: cardGetters.getCardId(cardAndAddressDetails.cardInfo),
+  cardNumber: cardGetters.getCardNumberPart(cardAndAddressDetails.cardInfo),
+  expireMonth: cardGetters.getExpireMonth(cardAndAddressDetails.cardInfo),
+  expireYear: cardGetters.getExpireYear(cardAndAddressDetails.cardInfo),
+  expiryDate: cardGetters.getExpireDate(cardAndAddressDetails.cardInfo),
+  cardType: cardGetters.getCardType(cardAndAddressDetails.cardInfo),
+  isDefaultPayMethod: cardGetters.getIsDefaultPayMethod(cardAndAddressDetails.cardInfo),
+  isDataUpdated: false,
+})
+
+const getBillingAddressFromSavedCard = (cardAndAddressDetails: PaymentAndBilling): Address => ({
+  ...initialBillingAddressData,
+  contact: cardAndAddressDetails.billingAddressInfo?.contact as ContactForm,
+  isAddressValid: true,
+  isDataUpdated: true,
+})
+
 const PaymentMethod = (props: PaymentMethodProps) => {
   const {
     user,
@@ -85,6 +105,7 @@ const PaymentMethod = (props: PaymentMethodProps) => {
     contacts,
     displayMode = DisplayMode.EDIT,
     isAddressFormInDialog = false,
+    initialCard,
     onSave,
     onClose,
   } = props
@@ -106,15 +127,21 @@ const PaymentMethod = (props: PaymentMethodProps) => {
   const { deleteCustomerCard } = useDeleteCustomerCard()
   const { deleteCustomerAddress } = useDeleteCustomerAddress()
 
-  const [cardFormDetails, setCardFormDetails] = useState<CardForm>(initialCardFormData)
-  const [billingFormAddress, setBillingFormAddress] = useState<Address>(initialBillingAddressData)
+  const [cardFormDetails, setCardFormDetails] = useState<CardForm>(() =>
+    initialCard ? getCardFormFromSavedCard(initialCard) : initialCardFormData
+  )
+  const [billingFormAddress, setBillingFormAddress] = useState<Address>(() =>
+    initialCard ? getBillingAddressFromSavedCard(initialCard) : initialBillingAddressData
+  )
   const [validateForm, setValidateForm] = useState<boolean>(false)
   const [isAddingNewPayment, setIsAddingNewPayment] = useState<boolean>(
     displayMode === DisplayMode.ADDNEW
   )
   const [showBillingFormAddress, setShowBillingFormAddress] = useState<boolean>(false)
 
-  const [isDefaultPaymentMethod, setIsDefaultPaymentMethod] = useState<boolean>(false)
+  const [isDefaultPaymentMethod, setIsDefaultPaymentMethod] = useState<boolean>(() =>
+    initialCard ? cardGetters.getIsDefaultPayMethod(initialCard.cardInfo) : false
+  )
 
   const handleCardFormData = (cardData: CardForm) => {
     setCardFormDetails({
@@ -159,23 +186,9 @@ const PaymentMethod = (props: PaymentMethodProps) => {
 
   const handleEdit = (cardAndAddressDetails: PaymentAndBilling) => {
     setIsAddingNewPayment(true)
-    setCardFormDetails({
-      id: cardGetters.getCardId(cardAndAddressDetails.cardInfo),
-      cardNumber: cardGetters.getCardNumberPart(cardAndAddressDetails.cardInfo),
-      expireMonth: cardGetters.getExpireMonth(cardAndAddressDetails.cardInfo),
-      expireYear: cardGetters.getExpireYear(cardAndAddressDetails.cardInfo),
-      expiryDate: cardGetters.getExpireDate(cardAndAddressDetails.cardInfo),
-      cardType: cardGetters.getCardType(cardAndAddressDetails.cardInfo),
-      isDefaultPayMethod: cardGetters.getIsDefaultPayMethod(cardAndAddressDetails.cardInfo),
-      isDataUpdated: false,
-    })
-
-    setBillingFormAddress({
-      ...billingFormAddress,
-      contact: cardAndAddressDetails.billingAddressInfo?.contact as ContactForm,
-      isAddressValid: true,
-      isDataUpdated: true,
-    })
+    setCardFormDetails(getCardFormFromSavedCard(cardAndAddressDetails))
+    setBillingFormAddress(getBillingAddressFromSavedCard(cardAndAddressDetails))
+    setIsDefaultPaymentMethod(cardGetters.getIsDefaultPayMethod(cardAndAddressDetails.cardInfo))
   }
 
   const openDeleteConfirmation = (card: SavedCard) => {
