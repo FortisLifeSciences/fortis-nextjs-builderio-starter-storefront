@@ -163,7 +163,7 @@ export const FortisMegaMenu: React.FC<MegaMenuProps> = ({ scrolled }) => {
                     top: scrolled ? '66px' : '82px',
                     left: '50%',
                     transform: 'translateX(-50%)',
-                    zIndex: 1,
+                    zIndex: 1300,
                     display: 'flex',
                     boxShadow: '3px 3px 10px rgba(0,0,0,0.2)',
                     width: 'min(1200px, calc(100vw - 48px))',

@@ -3,6 +3,7 @@ import { SxProps } from '@mui/system'
 // Full-width outer wrapper
 export const navWrapperStyles: SxProps = {
   width: '100%',
+  position: 'relative',
   backgroundColor: 'transparent',
   transition: 'background-color 0.3s ease-in-out',
 
