@@ -21,7 +21,7 @@ const asText = (value: unknown): string => (typeof value === 'string' ? value : 
 
 const mapHit = (hit: Record<string, unknown>): AlgoliaProductHit => ({
   objectID: asText(hit?.objectID),
-  catalogNumber: asText(hit?.sku) || asText(hit?.plp_catalog_number) || asText(hit?.objectID),
+  catalogNumber: asText(hit?.sku) || asText(hit?.plp_catalog_number),
   productName: asText(hit?.product_name_variant) || asText(hit?.product_name),
   productUrl: asText(hit?.product_url),
   sku: asText(hit?.sku),

@@ -156,9 +156,9 @@ const ViewLists = (props: ViewListsProps) => {
 
     setIsLoading(false)
   }
-  const handleEmptyCartAndAddListToCart = (id: string) => {
-    handleDeleteCurrentCart()
-    handleAddListToCart(id)
+  const handleEmptyCartAndAddListToCart = async (id: string) => {
+    await handleDeleteCurrentCart()
+    await handleAddListToCart(id)
   }
 
   // handle filter for current user list

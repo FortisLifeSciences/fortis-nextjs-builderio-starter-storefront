@@ -95,7 +95,7 @@ const ListProductSearch = (props: ListProductSearchProps) => {
       })) as AlgoliaProductHit[]
   }, [debouncedSearch, pendingCode, hits, searchResult])
 
-  const suggestions = [...hits, ...kiboMatches]
+  const suggestions = [...hits.filter((hit) => Boolean(hit.catalogNumber)), ...kiboMatches]
 
   const resolveProduct = (catalogNumber: string): Product | undefined => {
     const term = catalogNumber.trim().toLowerCase()
