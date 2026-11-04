@@ -691,6 +691,8 @@
   "ups-account-number-hint": "<strong>Where to find:</strong> Your 6-character account number is located in the top-right corner of your UPS invoice, or under the '<strong>Account Profile</strong>' tab when logged into your UPS account online.",
   "fedex-account-number-invalid": "Enter a valid 9-digit FedEx account number. Click the ⓘ icon for help finding it.",
   "ups-account-number-invalid": "Enter a valid 6-character UPS account number. Click the ⓘ icon for help finding it.",
+  "shipping-method-update-failed": "We couldn't save your shipping method selection. Please try again.",
+  "shipping-method-requires-account-number": "Save a valid account number below to select this as your preferred method.",
   "password-reset-successful": "Password Reset Successful",
   "password-reset-successful-paragraph1": "Your password has been successfully reset. You can now",
   "password-reset-successful-paragraph2": "with your new credentials.",
