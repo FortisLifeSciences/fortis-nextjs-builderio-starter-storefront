@@ -268,9 +268,11 @@ const ShippingAddressTemplate = (props: ShippingAddressTemplateProps) => {
         setLastSavedId(addressWithDefaults.contact.id as number)
         setStartIndex(0)
       } else {
-        await createCustomerAddress.mutateAsync(params)
-        setLastSavedId(undefined)
+        const created = await createCustomerAddress.mutateAsync(params)
         setStartIndex(0)
+        if (makeDefault && created?.id) {
+          await handleSetAsDefault(created as CustomerContact)
+        }
       }
 
       resetForm()
@@ -345,12 +347,16 @@ const ShippingAddressTemplate = (props: ShippingAddressTemplateProps) => {
             isDefault={isDefault}
             actions={[
               { id: 'edit', label: String(t('edit')), onClick: () => handleEdit(contact) },
-              {
-                id: 'set-as-default',
-                label: String(t('set-as-default')),
-                onClick: () => handleSetAsDefault(contact),
-                disabled: isDefault,
-              },
+              ...(isDefault
+                ? []
+                : [
+                    {
+                      id: 'set-as-default',
+                      label: String(t('set-as-default')),
+                      onClick: () => handleSetAsDefault(contact),
+                      disabled: isDefault,
+                    },
+                  ]),
               {
                 id: 'duplicate',
                 label: String(t('duplicate')),
