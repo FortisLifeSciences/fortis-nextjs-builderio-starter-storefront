@@ -18,7 +18,7 @@ import { useTranslation } from 'next-i18next'
 import { StandardShippingStepStyle } from './standardShippingStep.style'
 import { ShippingMethod } from '@/components/checkout'
 import { AddressCard, AddressForm, KiboRadio } from '@/components/common'
-import { useCheckoutStepContext, STEP_STATUS, useAuthContext } from '@/context'
+import { useCheckoutStepContext, STEP_STATUS, useAuthContext, useSnackbarContext } from '@/context'
 import {
   useUpdateOrderShippingInfo,
   useGetShippingMethods,
@@ -140,6 +140,7 @@ const StandardShippingStep = (props: ShippingProps) => {
   }, [selectedShippingAddressId, fallbackShippingId])
 
   const { t } = useTranslation('common')
+  const { showSnackbar } = useSnackbarContext()
   const shippingAddressRef = useRef<HTMLDivElement>(null)
 
   const {
@@ -272,8 +273,11 @@ const StandardShippingStep = (props: ShippingProps) => {
         shippingMethodCode,
         shippingMethodName,
       })
+      return true
     } catch (error) {
       console.error(error)
+      showSnackbar(t('shipping-method-update-failed'), 'error')
+      return false
     }
   }
 
