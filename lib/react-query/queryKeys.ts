@@ -87,7 +87,8 @@ export const customerPurchaseOrderAccountKeys = {
 
 export const customerAccountContactsKeys = {
   all: ['customerAccountContacts'] as const,
-  addressById: (accountId: number) => [...customerAccountContactsKeys.all, accountId] as const,
+  addressById: (accountId: number, userId?: string) =>
+    [...customerAccountContactsKeys.all, accountId, userId] as const,
 }
 
 export const locationKeys = {
