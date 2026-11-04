@@ -175,6 +175,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
     fedEx: '',
     ups: '',
   })
+  const appliedPreferredShippingMethodRef = useRef(false)
 
   const fedExSchema = useFedExSchema()
 
@@ -363,8 +364,32 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       ) {
         setUpsAccountShippingMethod(shippingMethod)
       }
+
+      // Apply the customer's saved shipping preference to the order once, only if
+      // no shipping method has been explicitly selected on this checkout yet.
+      if (
+        !appliedPreferredShippingMethodRef.current &&
+        !selectedShippingMethodCode &&
+        shippingMethod?.shippingMethodCode &&
+        ((shippingMethod?.shippingMethodName?.includes('FedEx Account') &&
+          fedExAccountNumber?.length === 9) ||
+          (shippingMethod?.shippingMethodName?.includes('UPS Account') &&
+            upsAccountNumber?.length === 6))
+      ) {
+        appliedPreferredShippingMethodRef.current = true
+        handleShippingMethodSelectChange(
+          shippingMethod.shippingMethodName as string,
+          shippingMethod.shippingMethodCode as string
+        )
+      }
     }
-  }, [customerAccount?.attributes, orderShipmentMethods])
+  }, [
+    customerAccount?.attributes,
+    orderShipmentMethods,
+    selectedShippingMethodCode,
+    fedExAccountNumber,
+    upsAccountNumber,
+  ])
 
   // Prioritize input
   useEffect(() => {
