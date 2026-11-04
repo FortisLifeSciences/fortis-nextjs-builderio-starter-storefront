@@ -571,13 +571,17 @@ const ReorderTemplate = () => {
       {visibleRows.map((row) => {
         const unitPrice = getUnitPrice(row.product)
         const isPriceLoading = Boolean(row.product) && !row.isPriceResolved
-        const isLookingUp =
-          isLoading && activeRowKey === row.key && Boolean(row.catalogNumber.trim())
         const isNotFound =
           isLookupSettled &&
           activeRowKey === row.key &&
+          row.catalogNumber === lookupTerm &&
           Boolean(row.catalogNumber.trim()) &&
           !row.product
+        const isLookingUp =
+          !isNotFound &&
+          (isLoading || lookupTerm !== debouncedLookup) &&
+          activeRowKey === row.key &&
+          Boolean(row.catalogNumber.trim())
 
         return (
           <Grid container key={row.key} sx={{ ...styles.row }}>
