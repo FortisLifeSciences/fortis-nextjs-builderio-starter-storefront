@@ -20,11 +20,12 @@ export default async function getCustomerAddresses(
   if (!cookies?.[authCookieName]) return null
 
   const authTicket = decodeParseCookieValue(cookies[authCookieName])
+  const userClaims = await getUserClaimsFromRequest(req, res)
 
   const variables = {
     accountId: authTicket?.accountId,
+    userId: authTicket?.userId, // Verify the property name
   }
-  const userClaims = await getUserClaimsFromRequest(req, res)
 
   const headers = getAdditionalHeader(req)
   const response = await fetcher({ query, variables }, { userClaims, headers })
