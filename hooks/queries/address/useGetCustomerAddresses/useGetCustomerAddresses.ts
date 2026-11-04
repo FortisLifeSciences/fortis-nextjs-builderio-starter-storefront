@@ -22,12 +22,12 @@ export interface UseCustomerContactsResponse {
 const { publicRuntimeConfig } = getConfig()
 const customerAddressesPageSize = publicRuntimeConfig.customerAddressesPageSize
 
-const loadCustomerAccountContacts = async (accountId: number) => {
+const loadCustomerAccountContacts = async (accountId: number, userId?: string) => {
   const client = makeGraphQLClient()
 
   const response = await client.request({
     document: getUserAddressesQuery,
-    variables: { accountId, pageSize: customerAddressesPageSize },
+    variables: { accountId, userId, pageSize: customerAddressesPageSize },
   })
 
   return response?.customerAccountContacts
@@ -49,16 +49,19 @@ const loadCustomerAccountContacts = async (accountId: number) => {
  * @returns 'response?.customerAccountContacts' which contains all the saved addresses details for the requested user based on accountId
  */
 
-export const useGetCustomerAddresses = (accountId: number): UseCustomerContactsResponse => {
+export const useGetCustomerAddresses = (
+  accountId: number,
+  userId?: string
+): UseCustomerContactsResponse => {
   const {
     data = [],
     isLoading,
     isSuccess,
   } = useQuery({
-    queryKey: customerAccountContactsKeys.addressById(accountId),
-    queryFn: () => loadCustomerAccountContacts(accountId),
+    queryKey: customerAccountContactsKeys.addressById(accountId, userId),
+    queryFn: () => loadCustomerAccountContacts(accountId, userId),
     refetchOnWindowFocus: false,
-    enabled: !!accountId,
+    enabled: !!accountId && !!userId,
   })
 
   return { data, isLoading, isSuccess }

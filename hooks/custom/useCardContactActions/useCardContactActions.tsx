@@ -8,10 +8,10 @@ import {
 } from '@/hooks'
 import { BillingAddress, CardType } from '@/lib/types'
 
-export const useCardContactActions = (userId: number) => {
-  const { data: cards } = useGetCards(userId)
-  const { data: contacts } = useGetCustomerAddresses(userId)
+export const useCardContactActions = (accountId: number, customerUserId?: string) => {
+  const { data: cards } = useGetCards(accountId)
 
+  const { data: contacts } = useGetCustomerAddresses(accountId, customerUserId)
   const { createCustomerCard } = useCreateCustomerCard()
   const { updateCustomerCard } = useUpdateCustomerCard()
   const { createCustomerAddress } = useCreateCustomerAddress()

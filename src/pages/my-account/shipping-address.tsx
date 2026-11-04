@@ -10,7 +10,7 @@ import type { NextPage } from 'next'
 export const getServerSideProps = getMyAccountServerSideProps
 
 const ShippingAddressContent = ({ user }: { user: CustomerAccount }) => {
-  const { contacts } = useCardContactActions(user?.id as number)
+  const { contacts } = useCardContactActions(user?.id as number, user?.userId as string)
 
   return <ShippingAddressTemplate user={user} contacts={contacts} />
 }
