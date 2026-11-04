@@ -176,6 +176,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
     ups: '',
   })
   const appliedPreferredShippingMethodCodeRef = useRef<string | undefined>(undefined)
+  const manualSelectionRef = useRef(false)
 
   const fedExSchema = useFedExSchema()
 
@@ -378,6 +379,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         (isFedExAccountMethod && fedExAccountNumber?.length === 9) ||
         (isUpsAccountMethod && upsAccountNumber?.length === 6)
       if (
+        !manualSelectionRef.current &&
         shippingMethod?.shippingMethodCode &&
         shippingMethod.shippingMethodCode !== appliedPreferredShippingMethodCodeRef.current &&
         (isAccountMethodReady || (!isFedExAccountMethod && !isUpsAccountMethod))
@@ -779,6 +781,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   }
 
   const selectShippingMethod = (method: 'fortis' | 'fedex' | 'ups') => {
+    manualSelectionRef.current = true
     localStorage.setItem('selectedShippingMethod', method)
 
     if (method === 'fortis') {
