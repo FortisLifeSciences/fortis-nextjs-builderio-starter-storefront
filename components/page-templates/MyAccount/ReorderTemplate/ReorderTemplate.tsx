@@ -297,7 +297,12 @@ const ReorderTemplate = () => {
 
   const handleCatalogNumberBlur = (key: string, value: string) => {
     const product = resolveProduct(value)
-    if (product) updateRow(key, { product })
+    if (!product) return
+
+    // Keep an already resolved (priced) product; blur must not overwrite it with the raw search item
+    setRows((current) =>
+      current.map((row) => (row.key === key && !row.product ? { ...row, product } : row))
+    )
   }
 
   const handleSelectSearchHit = (hit: AlgoliaProductHit) => {
@@ -395,7 +400,7 @@ const ReorderTemplate = () => {
                     quantity: clampQuantity(item.quantity, maxQuantity),
                     product: {
                       ...product,
-                      price: priced?.price ?? product.price,
+                      price: hasPrice(priced?.price) ? priced?.price : product.price,
                       options: priced?.options?.length ? priced.options : product.options,
                     } as Product,
                   }
