@@ -206,14 +206,10 @@ const PaymentMethod = (props: PaymentMethodProps) => {
 
     setCardFormDetails(initialCardFormData)
     setBillingFormAddress(initialBillingAddressData)
+    setIsAddingNewPayment(false)
+    setShowBillingFormAddress(false)
 
-    if (displayMode === DisplayMode.EDIT) {
-      setIsAddingNewPayment(false)
-      setShowBillingFormAddress(false)
-    } else {
-      if (showBillingFormAddress) setShowBillingFormAddress(false)
-      if (!showBillingFormAddress) onClose && onClose()
-    }
+    onClose && onClose()
   }
 
   const handleSaveNewPaymentMethod = async (event: { detail: number }) => {
