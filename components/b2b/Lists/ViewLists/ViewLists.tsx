@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from 'react'
+import React, { ChangeEvent, useEffect, useState } from 'react'
 
 import { Search } from '@mui/icons-material'
 import {
@@ -11,8 +11,6 @@ import {
   InputAdornment,
   Pagination,
   Typography,
-  useMediaQuery,
-  useTheme,
 } from '@mui/material'
 import getConfig from 'next/config'
 import { useTranslation } from 'next-i18next'
@@ -24,6 +22,7 @@ import { useAuthContext, useModalContext, useSnackbarContext } from '@/context'
 import {
   PageProps,
   useCreateWishlist,
+  useDebounce,
   useGetWishlist,
   useDeleteWishlist,
   useProductCardActions,
@@ -56,11 +55,30 @@ const ViewLists = (props: ViewListsProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [listData, setListData] = useState<CrWishlist>()
 
-  // screen size declared
-  const theme = useTheme()
-  const mdScreen = useMediaQuery<boolean>(theme.breakpoints.up('md'))
   const { t } = useTranslation('common')
   const { user } = useAuthContext()
+
+  // search and filter states
+  const [searchTerm, setSearchTerm] = useState<string>('')
+  const [showOnlyMyLists, setShowOnlyMyLists] = useState<boolean>(false)
+
+  const debouncedSearchTerm = useDebounce(searchTerm, publicRuntimeConfig.debounceTimeout)
+
+  const wishlistFilter = [
+    publicRuntimeConfig.b2bList.filter,
+    showOnlyMyLists && user?.userId ? `createBy eq ${user?.userId}` : '',
+    debouncedSearchTerm.trim() ? `name cont '${debouncedSearchTerm.trim().replace(/'/g, '')}'` : '',
+  ]
+    .filter(Boolean)
+    .join(' and ')
+
+  useEffect(() => {
+    setPaginationState((currentState) => ({
+      ...currentState,
+      startIndex: publicRuntimeConfig.b2bList.startIndex,
+      filter: wishlistFilter,
+    }))
+  }, [wishlistFilter, publicRuntimeConfig])
 
   // fetching wishlist data
   const response = useGetWishlist(paginationState)
@@ -123,30 +141,34 @@ const ViewLists = (props: ViewListsProps) => {
   // add list to cart
   const handleAddListToCart = async (id: string) => {
     const list = wishlistsResponse?.items?.find((item) => item?.id === id)
+    if (!list?.items?.length) {
+      showSnackbar(t('list-is-empty-cannot-add-to-cart'), 'error')
+      return
+    }
     setIsLoading(true)
     try {
       const response = await onAddListToCart(list?.items as Array<CrWishlistItem>)
       if (response) showSnackbar(t('list-added-to-cart'), 'success')
-      setIsLoading(false)
     } catch (e) {
       console.error(e)
+      showSnackbar(t('something-went-wrong'), 'error')
     }
 
     setIsLoading(false)
   }
-  const handleEmptyCartAndAddListToCart = (id: string) => {
-    handleDeleteCurrentCart()
-    handleAddListToCart(id)
+  const handleEmptyCartAndAddListToCart = async (id: string) => {
+    await handleDeleteCurrentCart()
+    await handleAddListToCart(id)
   }
 
   // handle filter for current user list
   const handleFilterChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setPaginationState({
-      startIndex: publicRuntimeConfig.b2bList.startIndex,
-      pageSize: publicRuntimeConfig.b2bList.pageSize,
-      sortBy: publicRuntimeConfig.b2bList.sortBy,
-      filter: e.currentTarget.checked ? `createBy eq ${user?.userId}` : '',
-    })
+    setShowOnlyMyLists(e.currentTarget.checked)
+  }
+
+  // handle search by list name
+  const handleSearch = (searchText: string) => {
+    setSearchTerm(searchText)
   }
 
   // on changing page number
@@ -178,34 +200,39 @@ const ViewLists = (props: ViewListsProps) => {
 
   return (
     <>
-      <Box sx={{ padding: '10px 10px 10px 0' }}>
+      <Box sx={{ padding: 0 }}>
         <FormControlLabel
           label={t('show-only-my-lists')}
-          control={<Checkbox onChange={handleFilterChange} sx={{ fontSize: '16px' }} />}
+          sx={{
+            marginBottom: '1rem',
+            '& .MuiFormControlLabel-label': { fontSize: '0.9375rem' },
+          }}
+          control={<Checkbox size="small" onChange={handleFilterChange} />}
           data-testid="currentUserFilterCheckbox"
         />
-        {!mdScreen && (
-          <>
-            <FormControl
-              sx={{
-                width: '100%',
-                borderBottom: 'none',
-              }}
-            >
-              <Input
-                placeholder={t('search-by-name')}
-                sx={styles.customInput}
-                startAdornment={
-                  <InputAdornment position="start">
-                    <Search />
-                  </InputAdornment>
-                }
-              />
-            </FormControl>
-          </>
-        )}
+        <FormControl
+          sx={{
+            width: '100%',
+            borderBottom: 'none',
+          }}
+        >
+          <Input
+            value={searchTerm}
+            onChange={(e) => handleSearch(e.target.value)}
+            placeholder={t('search-by-name')}
+            sx={styles.customInput}
+            startAdornment={
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            }
+            data-testid="search-list-input"
+          />
+        </FormControl>
         {wishlistsResponse?.items?.length === 0 ? (
-          <Typography>{t('no-list-found')}</Typography>
+          <Typography sx={{ color: 'text.secondary', padding: '2rem 0' }}>
+            {t('no-list-found')}
+          </Typography>
         ) : (
           <>
             <ListTable
@@ -221,7 +248,7 @@ const ViewLists = (props: ViewListsProps) => {
               count={wishlistsResponse ? wishlistsResponse.pageCount : 1}
               shape={`rounded`}
               size="small"
-              sx={{ marginTop: '15px' }}
+              sx={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}
               onChange={handlePageChange}
               data-testid="pagination"
             />

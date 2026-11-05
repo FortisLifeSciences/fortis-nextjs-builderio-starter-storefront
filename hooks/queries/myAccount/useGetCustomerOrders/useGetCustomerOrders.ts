@@ -13,7 +13,12 @@ import type { OrderCollection } from '@/lib/gql/types'
 interface UseUserOrder {
   orderNumber?: string
   billingEmail?: string
+  searchTerm?: string
   filters?: string | string[]
+  status?: string
+  sortBy?: string
+  startIndex?: number
+  pageSize?: number
   isRefetching: boolean
 }
 
@@ -62,7 +67,17 @@ export const useGetCustomerOrders = (param: UseUserOrder): UseUserOrderType => {
     isSuccess,
     isFetching,
   } = useQuery({
-    queryKey: ordersKeys.all,
+    queryKey: [
+      ...ordersKeys.all,
+      param.filters,
+      param.status,
+      param.sortBy,
+      param.startIndex,
+      param.pageSize,
+      param.orderNumber,
+      param.billingEmail,
+      param.searchTerm,
+    ],
     queryFn: () => {
       if (param.orderNumber === '' && param.billingEmail === '') return []
       return getOrders(param)

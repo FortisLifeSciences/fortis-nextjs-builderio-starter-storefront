@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
 import { yupResolver } from '@hookform/resolvers/yup'
+import AddIcon from '@mui/icons-material/Add'
 import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
 import { styled, FormControl, Box, Stack, Button } from '@mui/material'
@@ -9,6 +10,7 @@ import { useForm, Controller } from 'react-hook-form'
 import * as yup from 'yup'
 
 import { PasswordValidation, KiboTextBox } from '@/components/common'
+import { accountActionButton, accountTextButton } from '@/components/my-account/common'
 import { isPasswordValid } from '@/lib/helpers/validations/validations'
 import { ProfileDetails, UpdateProfileDataParam } from '@/lib/types'
 
@@ -17,6 +19,7 @@ type PasswordFieldType = 'currentPassword' | 'newPassword' | 'confirmPassword'
 export interface ProfileDetailsFormProps extends ProfileDetails {
   isEmailForm?: boolean
   isPasswordForm?: boolean
+  isCompanyEditable?: boolean
   onSaveProfileData: <T extends UpdateProfileDataParam>(profileData: T) => void
   onCancel: () => void
 }
@@ -27,18 +30,26 @@ const StyledCardDiv = styled('div')(() => ({
 
 const useCardSchema = () => {
   const { t } = useTranslation('common')
+  const nameSchema = yup
+    .string()
+    .max(50, t('this-field-must-be-50-characters-or-fewer'))
+    .matches(/^[A-Za-zÀ-ɏ\s'-]+$/, t('this-field-must-only-contain-letters'))
+    .test('not-blank', t('this-field-is-required'), (value) => !!value?.trim())
+
   return yup.object({
     firstName: yup.string().when(['$isEmailForm', '$isPasswordForm'], {
       is: (isEmailForm: boolean, isPasswordForm: boolean) => !isEmailForm && !isPasswordForm,
-      then: yup.string().required(t('this-field-is-required')),
+      then: nameSchema.required(t('this-field-is-required')),
     }),
     lastName: yup.string().when(['$isEmailForm', '$isPasswordForm'], {
       is: (isEmailForm: boolean, isPasswordForm: boolean) => !isEmailForm && !isPasswordForm,
-      then: yup.string().required(t('this-field-is-required')),
+      then: nameSchema.required(t('this-field-is-required')),
     }),
     emailAddress: yup.string().when('$isEmailForm', (isEmailForm, schema) => {
       if (isEmailForm) {
-        return schema.required(t('this-field-is-required'))
+        return schema
+          .required(t('this-field-is-required'))
+          .email(t('please-enter-a-valid-email-address'))
       }
     }),
     currentPassword: yup.string().when('$isPasswordForm', (isPasswordForm, schema) => {
@@ -48,9 +59,11 @@ const useCardSchema = () => {
     }),
     newPassword: yup.string().when('$isPasswordForm', (isPasswordForm, schema) => {
       if (isPasswordForm) {
-        return schema.required(t('this-field-is-required')).test((value = '') => {
-          return isPasswordValid(value)
-        })
+        return schema
+          .required(t('this-field-is-required'))
+          .test('password-valid', t('password-does-not-meet-requirements'), (value = '') => {
+            return isPasswordValid(value)
+          })
       }
     }),
     confirmPassword: yup.string().when('$isPasswordForm', (isPasswordForm, schema) => {
@@ -68,8 +81,10 @@ const ProfileDetailsForm = (props: ProfileDetailsFormProps) => {
     firstName = '',
     lastName = '',
     emailAddress = '',
+    companyOrOrganization = '',
     isEmailForm = false,
     isPasswordForm = false,
+    isCompanyEditable = true,
     onSaveProfileData,
     onCancel,
   } = props
@@ -254,21 +269,40 @@ const ProfileDetailsForm = (props: ProfileDetailsFormProps) => {
                   />
                 )}
               />
+              {isCompanyEditable && (
+                <Controller
+                  name="companyOrOrganization"
+                  control={control}
+                  defaultValue={companyOrOrganization}
+                  render={({ field }) => (
+                    <KiboTextBox
+                      value={field.value || ''}
+                      label={t('company-institution-or-organization')}
+                      onChange={(_name, value) => field.onChange(value)}
+                      onBlur={field.onBlur}
+                      error={!!errors?.companyOrOrganization}
+                      helperText={errors?.companyOrOrganization?.message as string}
+                    />
+                  )}
+                />
+              )}
             </>
           )}
 
-          <Stack gap={2} sx={{ width: { xs: '100%', md: '50%' } }}>
-            <Button variant="contained" color="secondary" onClick={onCancel}>
-              {t('cancel')}
-            </Button>
+          <Stack direction="row" alignItems="center" gap={2} sx={{ marginTop: '1rem' }}>
             <Button
               variant="contained"
               color="primary"
               disableElevation
+              startIcon={<AddIcon />}
+              sx={{ ...accountActionButton }}
               {...((!isValid || !isDirty) && { disabled: true })}
               onClick={() => handleSubmit(onValid)()}
             >
-              {t('save')}
+              {t('save-changes')}
+            </Button>
+            <Button variant="text" sx={{ ...accountTextButton }} onClick={onCancel}>
+              {t('cancel')}
             </Button>
           </Stack>
         </FormControl>

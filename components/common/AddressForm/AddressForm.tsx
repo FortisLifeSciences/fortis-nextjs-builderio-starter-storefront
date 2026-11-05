@@ -11,8 +11,14 @@ import { useForm, Controller } from 'react-hook-form'
 import { isValidPhoneNumber } from 'react-phone-number-input'
 import * as yup from 'yup'
 
-import { KiboPhoneInput, KiboSelect, KiboTextBox } from '@/components/common'
+import { KiboPhoneInput, KiboSelect, KiboStateSelect, KiboTextBox } from '@/components/common'
 import { CountryCode } from '@/lib/constants'
+import {
+  cityNamePattern,
+  organizationNamePattern,
+  personNamePattern,
+  streetAddressPattern,
+} from '@/lib/helpers/validations/validations'
 import type { Address, ContactForm } from '@/lib/types'
 
 interface AddressFormProps {
@@ -35,21 +41,31 @@ interface Country {
   code: string
 }
 
-interface Province {
-  name: string
-  code: string
-}
-
 export const useFormSchema = (internationalPhoneInput = false) => {
   const { t } = useTranslation('common')
+  const requiredText = (pattern: RegExp) =>
+    yup
+      .string()
+      .trim()
+      .required(t('this-field-is-required'))
+      .matches(pattern, t('enter-valid-characters'))
+
   return yup.object().shape({
-    firstName: yup.string().required(t('this-field-is-required')),
-    lastNameOrSurname: yup.string().required(t('this-field-is-required')),
-    companyOrOrganization: yup.string().required(t('this-field-is-required')),
+    firstName: requiredText(personNamePattern),
+    lastNameOrSurname: requiredText(personNamePattern),
+    companyOrOrganization: requiredText(organizationNamePattern),
     address: yup.object().shape({
-      address1: yup.string().required(t('this-field-is-required')),
-      address2: yup.string().nullable(true).notRequired(),
-      cityOrTown: yup.string().required(t('this-field-is-required')),
+      address1: requiredText(streetAddressPattern),
+      address2: yup
+        .string()
+        .trim()
+        .nullable(true)
+        .notRequired()
+        .matches(streetAddressPattern, {
+          message: t('enter-valid-characters'),
+          excludeEmptyString: true,
+        }),
+      cityOrTown: requiredText(cityNamePattern),
       stateOrProvince: yup.string().when('countryCode', {
         is: (value: string) => [CountryCode.US, CountryCode.CA].includes(value),
         then: yup.string().required(t('this-field-is-required')),
@@ -134,15 +150,6 @@ const AddressForm = (props: AddressFormProps) => {
       )
     })
   }
-
-  const generateProvincesOptions = () =>
-    provinces?.map((province: Province) => {
-      return (
-        <MenuItem key={province.name} value={province.code}>
-          {province.name}
-        </MenuItem>
-      )
-    })
 
   const onValid = async (formData: ContactForm) =>
     onSaveAddress({ contact: formData, isDataUpdated: true })
@@ -369,18 +376,17 @@ const AddressForm = (props: AddressFormProps) => {
             defaultValue={contact?.address?.stateOrProvince}
             render={({ field }) => (
               <Box>
-                <KiboSelect
+                <KiboStateSelect
                   name="state-or-province"
                   label={t('state-or-province')}
                   value={field.value}
+                  options={provinces}
                   error={!!errors?.address?.stateOrProvince}
                   helperText={errors?.address?.stateOrProvince?.message}
                   onChange={(_name: string, value: string) => field.onChange(value)}
                   onBlur={field.onBlur}
                   required={true}
-                >
-                  {generateProvincesOptions()}
-                </KiboSelect>
+                />
               </Box>
             )}
           />

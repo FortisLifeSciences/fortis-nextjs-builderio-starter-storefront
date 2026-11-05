@@ -30,4 +30,44 @@ describe('[helpers] buildOrdersFilterParams function', () => {
     expect(buildOrdersFilterParams(orderStatusVariables)).toStrictEqual(buildOrdersFilterInputMock)
     expect(buildOrdersFilterParams(orderHistoryVariables)).toStrictEqual(buildOrdersHistoryMock)
   })
+
+  it('should match order number or partial catalog number when the search term is numeric, ignoring a leading #', () => {
+    expect(
+      buildOrdersFilterParams({ startIndex: 0, pageSize: 20, searchTerm: ' #4236 ' })
+    ).toStrictEqual({
+      startIndex: 0,
+      pageSize: 20,
+      filter: "(orderNumber eq 4236 or items.productCode cont '4236') and status ne Abandoned",
+    })
+  })
+
+  it('should match partial catalog number when the search term is not numeric', () => {
+    expect(
+      buildOrdersFilterParams({ startIndex: 0, pageSize: 20, searchTerm: 'a90-116' })
+    ).toStrictEqual({
+      startIndex: 0,
+      pageSize: 20,
+      filter: "items.productCode cont 'a90-116' and status ne Abandoned",
+    })
+  })
+
+  it('should strip characters that would break the filter', () => {
+    expect(
+      buildOrdersFilterParams({ startIndex: 0, pageSize: 20, searchTerm: "A90')(116" })
+    ).toStrictEqual({
+      startIndex: 0,
+      pageSize: 20,
+      filter: "items.productCode cont 'A90116' and status ne Abandoned",
+    })
+  })
+
+  it('should ignore a search term with no usable characters', () => {
+    expect(
+      buildOrdersFilterParams({ startIndex: 0, pageSize: 20, searchTerm: ' #() ' })
+    ).toStrictEqual({
+      startIndex: 0,
+      pageSize: 20,
+      filter: 'status ne Abandoned',
+    })
+  })
 })

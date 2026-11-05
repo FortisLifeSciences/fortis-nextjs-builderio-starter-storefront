@@ -4,30 +4,28 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { makeGraphQLClient } from '@/lib/gql/client'
-import { deleteWishlistMutation } from '@/lib/gql/mutations'
 import { wishlistKeys } from '@/lib/react-query/queryKeys'
 
-interface DeleteWishlistData {
-  deleteWishlist: boolean
-}
-
-const deleteWishlist = async (wishlistId: string): Promise<DeleteWishlistData> => {
-  const client = makeGraphQLClient()
-  const variables = {
-    wishlistId,
-  }
-
-  const response = await client.request({
-    document: deleteWishlistMutation,
-    variables,
+const deleteWishlist = async (wishlistId: string): Promise<boolean> => {
+  const response = await fetch(`/api/wishlist/delete-wishlist?wishlistId=${wishlistId}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   })
 
-  return response
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(errorData?.message || 'Failed to delete wishlist')
+  }
+
+  const data = await response.json()
+
+  return data?.success
 }
 
 /**
- * [Mutation hook] useDeleteWishlistMutation uses the graphQL mutation
+ * [Mutation hook] useDeleteWishlistMutation uses the Kibo REST API
  *
  * <b>deleteWishlist(wishlistId: string): Wishlist</b>
  *

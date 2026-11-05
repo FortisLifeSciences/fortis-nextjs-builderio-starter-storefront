@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
+import AddIcon from '@mui/icons-material/Add'
 import Delete from '@mui/icons-material/Delete'
 import { Box, Button, Checkbox, FormControlLabel, NoSsr, Stack, Typography } from '@mui/material'
 import getConfig from 'next/config'
@@ -10,6 +10,7 @@ import { CardDetailsForm } from '@/components/checkout'
 import { AddressForm, KiboPagination, AddressCard, KiboRadio } from '@/components/common'
 import PaymentBillingCard from '@/components/common/PaymentBillingCard/PaymentBillingCard'
 import { ConfirmationDialog } from '@/components/dialogs'
+import { accountActionButton, accountTextButton } from '@/components/my-account/common'
 import { useModalContext } from '@/context'
 import { useDeleteCustomerCard, useDeleteCustomerAddress } from '@/hooks'
 import { DisplayMode, AddressType } from '@/lib/constants'
@@ -40,6 +41,7 @@ interface PaymentMethodProps {
   contacts: CustomerContactCollection
   displayMode?: 'Edit' | 'AddNew'
   isAddressFormInDialog?: boolean
+  initialCard?: PaymentAndBilling
   onSave: (address: BillingAddress, card: CardType, isUpdatingAddress: boolean) => void
   onClose?: () => void
 }
@@ -75,27 +77,27 @@ const initialBillingAddressData: Address = {
 }
 
 const styles = {
-  addPaymentMethodButtonStyle: {
-    width: 'auto',
-    maxWidth: '300px',
-    backgroundColor: 'primary.main',
-    color: 'secondary.light',
-    textAlign: 'center',
-    fontFamily: 'Poppins',
-    fontSize: '16px',
-    fontStyle: 'normal',
-    fontWeight: '500',
-    lineHeight: '24px',
-    borderRadius: '0px 26px',
-    border: '1px solid primary.main',
-    padding: '12px 30px',
-    '&:hover': {
-      backgroundColor: 'primary.light',
-      border: '1px solid primary.light',
-    },
-    marginLeft: '20px',
-  },
+  addPaymentMethodButtonStyle: accountActionButton,
 }
+
+const getCardFormFromSavedCard = (cardAndAddressDetails: PaymentAndBilling): CardForm => ({
+  id: cardGetters.getCardId(cardAndAddressDetails.cardInfo),
+  cardNumber: cardGetters.getCardNumberPart(cardAndAddressDetails.cardInfo),
+  expireMonth: cardGetters.getExpireMonth(cardAndAddressDetails.cardInfo),
+  expireYear: cardGetters.getExpireYear(cardAndAddressDetails.cardInfo),
+  expiryDate: cardGetters.getExpireDate(cardAndAddressDetails.cardInfo),
+  cardType: cardGetters.getCardType(cardAndAddressDetails.cardInfo),
+  isDefaultPayMethod: cardGetters.getIsDefaultPayMethod(cardAndAddressDetails.cardInfo),
+  isDataUpdated: false,
+})
+
+const getBillingAddressFromSavedCard = (cardAndAddressDetails: PaymentAndBilling): Address => ({
+  ...initialBillingAddressData,
+  contact: cardAndAddressDetails.billingAddressInfo?.contact as ContactForm,
+  isAddressValid: true,
+  isDataUpdated: true,
+})
+
 const PaymentMethod = (props: PaymentMethodProps) => {
   const {
     user,
@@ -103,6 +105,7 @@ const PaymentMethod = (props: PaymentMethodProps) => {
     contacts,
     displayMode = DisplayMode.EDIT,
     isAddressFormInDialog = false,
+    initialCard,
     onSave,
     onClose,
   } = props
@@ -124,15 +127,21 @@ const PaymentMethod = (props: PaymentMethodProps) => {
   const { deleteCustomerCard } = useDeleteCustomerCard()
   const { deleteCustomerAddress } = useDeleteCustomerAddress()
 
-  const [cardFormDetails, setCardFormDetails] = useState<CardForm>(initialCardFormData)
-  const [billingFormAddress, setBillingFormAddress] = useState<Address>(initialBillingAddressData)
+  const [cardFormDetails, setCardFormDetails] = useState<CardForm>(() =>
+    initialCard ? getCardFormFromSavedCard(initialCard) : initialCardFormData
+  )
+  const [billingFormAddress, setBillingFormAddress] = useState<Address>(() =>
+    initialCard ? getBillingAddressFromSavedCard(initialCard) : initialBillingAddressData
+  )
   const [validateForm, setValidateForm] = useState<boolean>(false)
   const [isAddingNewPayment, setIsAddingNewPayment] = useState<boolean>(
     displayMode === DisplayMode.ADDNEW
   )
   const [showBillingFormAddress, setShowBillingFormAddress] = useState<boolean>(false)
 
-  const [isDefaultPaymentMethod, setIsDefaultPaymentMethod] = useState<boolean>(false)
+  const [isDefaultPaymentMethod, setIsDefaultPaymentMethod] = useState<boolean>(() =>
+    initialCard ? cardGetters.getIsDefaultPayMethod(initialCard.cardInfo) : false
+  )
 
   const handleCardFormData = (cardData: CardForm) => {
     setCardFormDetails({
@@ -177,23 +186,9 @@ const PaymentMethod = (props: PaymentMethodProps) => {
 
   const handleEdit = (cardAndAddressDetails: PaymentAndBilling) => {
     setIsAddingNewPayment(true)
-    setCardFormDetails({
-      id: cardGetters.getCardId(cardAndAddressDetails.cardInfo),
-      cardNumber: cardGetters.getCardNumberPart(cardAndAddressDetails.cardInfo),
-      expireMonth: cardGetters.getExpireMonth(cardAndAddressDetails.cardInfo),
-      expireYear: cardGetters.getExpireYear(cardAndAddressDetails.cardInfo),
-      expiryDate: cardGetters.getExpireDate(cardAndAddressDetails.cardInfo),
-      cardType: cardGetters.getCardType(cardAndAddressDetails.cardInfo),
-      isDefaultPayMethod: cardGetters.getIsDefaultPayMethod(cardAndAddressDetails.cardInfo),
-      isDataUpdated: false,
-    })
-
-    setBillingFormAddress({
-      ...billingFormAddress,
-      contact: cardAndAddressDetails.billingAddressInfo?.contact as ContactForm,
-      isAddressValid: true,
-      isDataUpdated: true,
-    })
+    setCardFormDetails(getCardFormFromSavedCard(cardAndAddressDetails))
+    setBillingFormAddress(getBillingAddressFromSavedCard(cardAndAddressDetails))
+    setIsDefaultPaymentMethod(cardGetters.getIsDefaultPayMethod(cardAndAddressDetails.cardInfo))
   }
 
   const openDeleteConfirmation = (card: SavedCard) => {
@@ -224,14 +219,10 @@ const PaymentMethod = (props: PaymentMethodProps) => {
 
     setCardFormDetails(initialCardFormData)
     setBillingFormAddress(initialBillingAddressData)
+    setIsAddingNewPayment(false)
+    setShowBillingFormAddress(false)
 
-    if (displayMode === DisplayMode.EDIT) {
-      setIsAddingNewPayment(false)
-      setShowBillingFormAddress(false)
-    } else {
-      if (showBillingFormAddress) setShowBillingFormAddress(false)
-      if (!showBillingFormAddress) onClose && onClose()
-    }
+    onClose && onClose()
   }
 
   const handleSaveNewPaymentMethod = async (event: { detail: number }) => {
@@ -404,7 +395,7 @@ const PaymentMethod = (props: PaymentMethodProps) => {
                 color="inherit"
                 sx={{ ...styles.addPaymentMethodButtonStyle }}
                 onClick={() => handleAddNewPaymentMethod()}
-                startIcon={<AddCircleOutlineIcon />}
+                startIcon={<AddIcon />}
               >
                 {t('add-payment-method')}
               </Button>
@@ -466,6 +457,7 @@ const PaymentMethod = (props: PaymentMethodProps) => {
                           postalOrZipCode={address.address?.postalOrZipCode as string}
                           companyOrOrganization={address?.companyOrOrganization as string}
                           countryCode={address.address?.countryCode as string}
+                          variant="body2"
                         />
                       ),
                     }
@@ -489,6 +481,7 @@ const PaymentMethod = (props: PaymentMethodProps) => {
                   validateForm={validateForm}
                   onFormStatusChange={handleBillingFormValidDetails}
                   isAddressFormInDialog={isAddressFormInDialog}
+                  internationalPhoneInput
                 />
               </>
             )}
@@ -498,7 +491,7 @@ const PaymentMethod = (props: PaymentMethodProps) => {
                 sx={{ width: '100%', pl: '0.5rem' }}
                 defaultChecked={cardFormDetails.isDefaultPayMethod}
                 control={<Checkbox defaultChecked={cardFormDetails.isDefaultPayMethod} />}
-                label={`${t('make-this-my-default-payment')}`}
+                label={<Typography variant="body2">{t('make-this-my-default-payment')}</Typography>}
                 onChange={(_, value) => setIsDefaultPaymentMethod(value)}
               />
             )}
@@ -506,10 +499,15 @@ const PaymentMethod = (props: PaymentMethodProps) => {
             <NoSsr>
               {hasPermission(actions.CREATE_CONTACTS) && !showBillingFormAddress && (
                 <Button
-                  variant="contained"
-                  color="secondary"
+                  variant={isAddressFormInDialog ? 'contained' : 'outlined'}
+                  color={isAddressFormInDialog ? 'secondary' : 'primary'}
                   onClick={handleAddNewBillingAddress}
-                  sx={{ maxWidth: '26rem' }}
+                  startIcon={isAddressFormInDialog ? undefined : <AddIcon />}
+                  sx={
+                    isAddressFormInDialog
+                      ? { maxWidth: '26rem' }
+                      : { ...accountActionButton, alignSelf: 'flex-start' }
+                  }
                 >
                   {t('add-new-address')}
                 </Button>
@@ -517,20 +515,43 @@ const PaymentMethod = (props: PaymentMethodProps) => {
             </NoSsr>
           </Stack>
 
-          <Stack pl={1} paddingY={2} gap={2} sx={{ maxWidth: '26.313rem' }}>
-            <Button variant="contained" color="secondary" onClick={cancelAddingNewPaymentMethod}>
-              {t('cancel')}
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              disableElevation
-              {...(isAddPaymentMethodButtonDisabled() && { disabled: true })}
-              onClick={handleSaveNewPaymentMethod}
-            >
-              {t('save-payment-method')}
-            </Button>
-          </Stack>
+          {isAddressFormInDialog ? (
+            <Stack pl={1} paddingY={2} gap={2} sx={{ maxWidth: '26.313rem' }}>
+              <Button variant="contained" color="secondary" onClick={cancelAddingNewPaymentMethod}>
+                {t('cancel')}
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                disableElevation
+                {...(isAddPaymentMethodButtonDisabled() && { disabled: true })}
+                onClick={handleSaveNewPaymentMethod}
+              >
+                {t('save-payment-method')}
+              </Button>
+            </Stack>
+          ) : (
+            <Stack direction="row" alignItems="center" gap={2} paddingY={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                disableElevation
+                startIcon={<AddIcon />}
+                sx={{ ...accountActionButton }}
+                {...(isAddPaymentMethodButtonDisabled() && { disabled: true })}
+                onClick={handleSaveNewPaymentMethod}
+              >
+                {t('save-changes')}
+              </Button>
+              <Button
+                variant="text"
+                sx={{ ...accountTextButton }}
+                onClick={cancelAddingNewPaymentMethod}
+              >
+                {t('cancel')}
+              </Button>
+            </Stack>
+          )}
         </Stack>
       )}
     </Box>
