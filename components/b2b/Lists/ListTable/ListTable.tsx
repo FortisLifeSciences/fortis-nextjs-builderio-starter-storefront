@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-import { ContentCopy, Delete, Edit, MoreVert } from '@mui/icons-material'
+import { AddShoppingCartOutlined, MoreVert, RemoveShoppingCartOutlined } from '@mui/icons-material'
 import {
   Box,
   IconButton,
@@ -21,7 +21,6 @@ import { grey } from '@mui/material/colors'
 import { useTranslation } from 'next-i18next'
 
 import { styles } from '@/components/b2b/Lists/ListTable/ListTable.style'
-import { ResetATC, AddToCart } from '@/components/icons'
 import { useGetB2BUsersEmailAndId } from '@/hooks'
 import formatDate from '@/lib/helpers/formatDate'
 
@@ -41,26 +40,15 @@ interface ListTableMobileOptions {
   onDeleteList: (param: string) => void
   onCopyList: (param: string) => void
   onEditList: (param: string) => void
-  onAddListToCart: (param: string) => void
-  onEmptyCartAndAddListToCart: (param: string) => void
   itemId: string
 }
 
 const ListTableMobileOptions = (props: ListTableMobileOptions) => {
-  const {
-    onDeleteList,
-    onCopyList,
-    onEditList,
-    onAddListToCart,
-    onEmptyCartAndAddListToCart,
-    itemId,
-  } = props
+  const { onDeleteList, onCopyList, onEditList, itemId } = props
   const [anchorEl, setAnchorEL] = useState<HTMLElement | null>(null)
   const { t } = useTranslation('common')
   const options = [
     { name: t('edit'), onClick: onEditList },
-    { name: t('empty-cart-add-list-to-cart'), onClick: onEmptyCartAndAddListToCart },
-    { name: t('add-list-items-to-cart'), onClick: onAddListToCart },
     { name: t('duplicate'), onClick: onCopyList },
     { name: t('delete'), onClick: onDeleteList },
   ]
@@ -81,6 +69,15 @@ const ListTableMobileOptions = (props: ListTableMobileOptions) => {
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={() => setAnchorEL(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        PaperProps={{
+          sx: {
+            borderRadius: '0.5rem',
+            minWidth: '13rem',
+            boxShadow: '0px 4px 16px rgba(0, 0, 0, 0.12)',
+          },
+        }}
         data-testid="menu"
       >
         {options.map((option, i) => (
@@ -90,7 +87,12 @@ const ListTableMobileOptions = (props: ListTableMobileOptions) => {
               option.onClick(itemId)
               setAnchorEL(null)
             }}
-            sx={i !== options.length - 1 ? { borderBottom: `0.5px solid ${grey[300]}` } : {}}
+            sx={{
+              fontSize: '0.875rem',
+              padding: '0.625rem 1rem',
+              ...(option.name === t('delete') ? { color: 'error.main' } : {}),
+              ...(i !== options.length - 1 ? { borderBottom: `1px solid ${grey[200]}` } : {}),
+            }}
           >
             {option.name}
           </MenuItem>
@@ -118,109 +120,90 @@ const ListTable = (props: ListTableProps) => {
 
   return (
     <TableContainer
-      sx={{ opacity: isLoading ? '0.5' : '1', pointerEvents: isLoading ? 'none' : 'auto' }}
+      sx={{
+        ...styles.tableContainer,
+        opacity: isLoading ? '0.5' : '1',
+        pointerEvents: isLoading ? 'none' : 'auto',
+      }}
     >
       <Table sx={{ tableLayout: 'fixed' }}>
         <TableHead>
-          <TableRow sx={{ backgroundColor: grey[100], padding: '10px 0' }}>
-            <TableCell sx={{ padding: '10px 10px', width: mdScreen ? '25%' : '50%' }}>
+          <TableRow sx={{ ...styles.headerRow }}>
+            <TableCell sx={{ ...styles.headerCell, width: mdScreen ? '30%' : '45%' }}>
               {t('list-name')}
             </TableCell>
-            <TableCell sx={{ padding: '10px 10px', width: mdScreen ? '15%' : '30%' }}>
+            <TableCell sx={{ ...styles.headerCell, width: mdScreen ? '18%' : '30%' }}>
               {t('date-created')}
             </TableCell>
             {mdScreen && (
-              <TableCell sx={{ padding: '10px 10px', width: '20%' }}>{t('created-by')}</TableCell>
+              <TableCell sx={{ ...styles.headerCell, width: '32%' }}>{t('created-by')}</TableCell>
             )}
-            <TableCell sx={{ padding: '10px 10px', width: mdScreen ? '25%' : '10%' }}></TableCell>
+            <TableCell sx={{ ...styles.headerCell, width: mdScreen ? '20%' : '25%' }}></TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {rows?.map((item: Maybe<CrWishlist>) => {
             return (
-              <TableRow key={item?.id}>
-                <TableCell sx={{ ...styles.tableCellStyles, width: mdScreen ? '25%' : '50%' }}>
+              <TableRow key={item?.id} sx={{ ...styles.bodyRow }}>
+                <TableCell sx={{ ...styles.tableCellStyles, width: mdScreen ? '30%' : '45%' }}>
                   {mdScreen ? (
                     item?.name
                   ) : (
                     <Box>
                       {item?.name}
                       <br />
-                      <Typography style={{ margin: '5px 0', color: grey[400] }}>
+                      <Typography sx={{ ...styles.mutedText, margin: '0.25rem 0' }}>
                         {userIdAndEmail[item?.auditInfo?.createBy as string]}
                       </Typography>
                     </Box>
                   )}
                 </TableCell>
-                <TableCell sx={{ ...styles.tableCellStyles, width: mdScreen ? '15%' : '30%' }}>
+                <TableCell sx={{ ...styles.tableCellStyles, width: mdScreen ? '18%' : '30%' }}>
                   {formatDate(item?.auditInfo?.createDate)}
                 </TableCell>
                 {mdScreen && (
-                  <TableCell sx={{ ...styles.tableCellStyles, width: '20%' }}>
+                  <TableCell sx={{ ...styles.tableCellStyles, width: '32%' }}>
                     {userIdAndEmail[item?.auditInfo?.createBy as string]}
                   </TableCell>
                 )}
-                <TableCell sx={{ ...styles.tableCellStyles, width: mdScreen ? '25%' : '10%' }}>
-                  {mdScreen ? (
-                    <Box sx={{ justifyContent: 'flex-end', display: 'flex' }}>
-                      <Tooltip
-                        title={
-                          <Typography variant="body2">
-                            {t('empty-cart-add-list-to-cart')}
-                          </Typography>
-                        }
-                      >
-                        <IconButton
-                          data-testid="resetAndAddToCartBtn"
-                          onClick={() => onEmptyCartAndAddListToCart(item?.id as string)}
-                        >
-                          <ResetATC />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title={<Typography variant="body2">{t('add-to-cart')}</Typography>}>
-                        <IconButton
-                          color="inherit"
-                          onClick={() => onAddListToCart(item?.id as string)}
-                          data-testid="addToCartBtn"
-                        >
-                          <AddToCart />
-                        </IconButton>
-                      </Tooltip>
-
+                <TableCell sx={{ ...styles.tableCellStyles, width: mdScreen ? '20%' : '25%' }}>
+                  <Box
+                    sx={{
+                      justifyContent: 'flex-end',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                    }}
+                  >
+                    <Tooltip title={t('empty-cart-add-list-to-cart')}>
                       <IconButton
-                        color="inherit"
-                        onClick={() => onEditList(item?.id as string)}
-                        data-testid="editBtn"
+                        size="small"
+                        sx={{ ...styles.rowActionIcon }}
+                        onClick={() => onEmptyCartAndAddListToCart(item?.id as string)}
+                        aria-label={String(t('empty-cart-add-list-to-cart'))}
+                        data-testid="resetAndAddToCartBtn"
                       >
-                        <Edit />
+                        <RemoveShoppingCartOutlined fontSize="small" />
                       </IconButton>
+                    </Tooltip>
+                    <Tooltip title={t('add-to-cart')}>
                       <IconButton
-                        color="inherit"
-                        onClick={() => onCopyList(item?.id as string)}
-                        data-testid="copyBtn"
+                        size="small"
+                        sx={{ ...styles.rowActionIcon }}
+                        onClick={() => onAddListToCart(item?.id as string)}
+                        aria-label={String(t('add-to-cart'))}
+                        data-testid="addToCartBtn"
                       >
-                        <ContentCopy />
+                        <AddShoppingCartOutlined fontSize="small" />
                       </IconButton>
-                      <IconButton
-                        color="inherit"
-                        onClick={() => onDeleteList(item?.id as string)}
-                        data-testid="deleteBtn"
-                      >
-                        <Delete />
-                      </IconButton>
-                    </Box>
-                  ) : (
-                    <>
-                      <ListTableMobileOptions
-                        onDeleteList={onDeleteList}
-                        onCopyList={onCopyList}
-                        onEditList={onEditList}
-                        onAddListToCart={onAddListToCart}
-                        onEmptyCartAndAddListToCart={onEmptyCartAndAddListToCart}
-                        itemId={item?.id as string}
-                      />
-                    </>
-                  )}
+                    </Tooltip>
+                    <ListTableMobileOptions
+                      onDeleteList={onDeleteList}
+                      onCopyList={onCopyList}
+                      onEditList={onEditList}
+                      itemId={item?.id as string}
+                    />
+                  </Box>
                 </TableCell>
               </TableRow>
             )

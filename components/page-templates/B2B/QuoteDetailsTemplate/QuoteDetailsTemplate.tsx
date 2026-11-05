@@ -389,7 +389,7 @@ const QuoteDetailsTemplate = (props: QuoteDetailsTemplateProps) => {
 
       if (isAddressSavedToAccount) {
         const customerSavedAddress = await handleSaveAddressToAccount(contact)
-        const { accountId: _, types: __, ...customerContact } = customerSavedAddress
+        const { accountId: _, types: __, label: ___, ...customerContact } = customerSavedAddress
         await updateQuoteFulfillmentInfo.mutateAsync({
           quote,
           quoteId,
@@ -578,7 +578,7 @@ const QuoteDetailsTemplate = (props: QuoteDetailsTemplateProps) => {
         updateMode,
       })
       if (response?.invalidCoupons?.length) {
-        setPromoError(`<strong>${couponCode}</strong> ${response?.invalidCoupons[0]?.reason}`)
+        setPromoError(`<strong>${couponCode}</strong> ${t('invalidPromoError')}`)
       }
     } catch (err) {
       console.error(err)

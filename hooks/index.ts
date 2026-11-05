@@ -76,6 +76,8 @@ export * from './custom/useCartActions/useCartActions'
 export * from './custom/useB2BAccountRequest/useB2BAccountRequest'
 export * from './custom/useB2BQuote/useB2BQuote'
 export * from './custom/useGetB2BUsersEmailAndId/useGetB2BUsersEmailAndId'
+export * from './custom/useCustomerAttribute/useCustomerAttribute'
+export * from './custom/useAlgoliaProductSearch/useAlgoliaProductSearch'
 
 // Mutations
 
