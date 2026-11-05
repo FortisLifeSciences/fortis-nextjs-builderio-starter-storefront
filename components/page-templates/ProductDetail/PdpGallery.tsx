@@ -14,6 +14,11 @@ export interface PdpImage {
   description?: string | null
 }
 
+const cleanText = (value: unknown) => {
+  const text = value == null ? '' : String(value).trim()
+  return ['', 'null', 'undefined'].includes(text.toLowerCase()) ? null : text
+}
+
 export const mergeGalleryImages = (
   digitalAssets: any,
   kiboImages?: ProductImage[] | null
@@ -31,6 +36,8 @@ export const mergeGalleryImages = (
       const match = map.get(asset.cmsid)
       return {
         ...asset,
+        title: cleanText(asset.imagetitle ?? asset.title),
+        description: cleanText(asset.imagecaption ?? asset.description),
         ...(match ? { imageUrl: match.imageUrl, altText: match.altText } : {}),
       }
     })
