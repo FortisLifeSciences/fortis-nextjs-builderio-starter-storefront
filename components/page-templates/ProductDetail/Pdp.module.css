@@ -595,12 +595,12 @@
 .buyPanel {
   position: relative;
   border-top: 1px solid var(--line);
-  padding: 13px 20px 20px;
+  padding: 13px 16px 20px;
   margin-top: 12px;
 }
 
 .page[data-brand='arista'] .buyPanel {
-  padding-top: 18px;
+  padding: 18px 18px 20px;
 }
 
 .buyNote {
@@ -761,7 +761,7 @@
 
 .optionPicker {
   position: relative;
-  margin: 20px 4px 0;
+  margin: 20px 0 0;
   z-index: 18;
 }
 
@@ -2044,16 +2044,6 @@
   .heroFact strong {
     margin-top: 0;
     font-size: 13px;
-  }
-
-  .buyPanel {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-
-  .optionPicker {
-    margin-left: 0;
-    margin-right: 0;
   }
 
   .relatedGrid {
