@@ -660,7 +660,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       return true
     }
     if (selectedSavedCard) return /^\d{3,4}$/.test(cvv)
-    if (!isCardFormValid) return false
+    if (isCardholderNameMissing || !isCardFormValid) return false
     if (!billingSameAsShipping && !isBillingFormValid) return false
     return true
   }, [
@@ -676,6 +676,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     billingAddressOverride,
     selectedSavedCard,
     cvv,
+    isCardholderNameMissing,
     isCardFormValid,
     billingSameAsShipping,
     isBillingFormValid,
