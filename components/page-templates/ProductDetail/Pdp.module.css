@@ -2082,16 +2082,6 @@
     font-size: 13px;
   }
 
-  .buyPanel {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-
-  .optionPicker {
-    margin-left: 0;
-    margin-right: 0;
-  }
-
   .relatedGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
