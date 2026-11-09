@@ -107,7 +107,8 @@ const PaymentTemplate = (props: PaymentTemplateProps) => {
   const handleSetAsPrimary = async (paymentAndBilling: PaymentAndBilling) => {
     const { cardInfo, billingAddressInfo } = paymentAndBilling
     const cardId = cardGetters.getCardId(cardInfo)
-    const contactId = cardInfo?.contactId ?? billingAddressInfo?.contact?.id
+    const rawCard = cards?.items?.find((card) => card?.id === cardId)
+    const contactId = rawCard?.contactId ?? cardInfo?.contactId ?? billingAddressInfo?.contact?.id
 
     if (!contactId) {
       console.error('Error: set primary card - billing contact not found for card', cardId)
