@@ -421,7 +421,10 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
 
   useEffect(() => {
     if (!isValid || contactSignature === lastSavedContactSignatureRef.current) return
-    handleSubmit((formData) => onValidContact(formData, contactSignature))()
+    contactSaveQueueRef.current = contactSaveQueueRef.current.then(
+      () =>
+        handleSubmit((formData) => onValidContact(formData, contactSignature))() as Promise<void>
+    )
   }, [isValid, contactSignature])
 
   useEffect(() => {
