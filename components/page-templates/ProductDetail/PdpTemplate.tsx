@@ -1260,6 +1260,11 @@ const PdpTemplate = (props: PdpTemplateProps) => {
         ) : null}
 
         <div className={styles.heroGrid}>
+          <aside className={styles.rail}>
+            <div className={styles.mediaCard}>{mediaCardInner}</div>
+            {brandCard}
+          </aside>
+
           <div className={styles.heroCopy}>
             {brandName ? <div className={styles.eyebrow}>{brandName}</div> : null}
             <div className={styles.titleLine}>
@@ -1339,11 +1344,6 @@ const PdpTemplate = (props: PdpTemplateProps) => {
               <React.Fragment key={id}>{sectionNodes[id]}</React.Fragment>
             ))}
           </div>
-
-          <aside className={styles.rail}>
-            <div className={styles.mediaCard}>{mediaCardInner}</div>
-            {brandCard}
-          </aside>
         </div>
 
         {brandConfig.belowSections.map((id) => (
@@ -1360,7 +1360,7 @@ const PdpTemplate = (props: PdpTemplateProps) => {
             aria-expanded={drawerOpen}
             tabIndex={drawerOpen ? 0 : -1}
           >
-            <span className={styles.mobileSupportLabel}>See Support</span>
+            <span className={styles.mobileSupportLabel}>See more</span>
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M6 15l6-6 6 6" />
             </svg>
@@ -1385,7 +1385,7 @@ const PdpTemplate = (props: PdpTemplateProps) => {
             onClick={() => setDrawerOpen(!drawerOpen)}
             aria-expanded={drawerOpen}
           >
-            <span className={styles.mobileSupportLabel}>See Support</span>
+            <span className={styles.mobileSupportLabel}>See more</span>
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M6 15l6-6 6 6" />
             </svg>

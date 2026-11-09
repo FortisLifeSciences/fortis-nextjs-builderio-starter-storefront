@@ -89,10 +89,7 @@
 /* ---------- hero ---------- */
 
 .heroGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--rail);
-  gap: var(--gap);
-  align-items: start;
+  display: flow-root;
   min-width: 0;
   max-width: 100%;
 }
@@ -367,11 +364,13 @@
 /* ---------- rail / media card ---------- */
 
 .rail {
+  float: right;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  width: 100%;
+  width: var(--rail);
   min-width: 0;
+  margin: 0 0 var(--gap) var(--gap);
 }
 
 .mediaCard {
@@ -596,12 +595,12 @@
 .buyPanel {
   position: relative;
   border-top: 1px solid var(--line);
-  padding: 13px 20px 20px;
+  padding: 13px 16px 20px;
   margin-top: 12px;
 }
 
 .page[data-brand='arista'] .buyPanel {
-  padding-top: 18px;
+  padding: 18px 18px 20px;
 }
 
 .buyNote {
@@ -762,7 +761,7 @@
 
 .optionPicker {
   position: relative;
-  margin: 20px 4px 0;
+  margin: 20px 0 0;
   z-index: 18;
 }
 
@@ -1060,7 +1059,6 @@
 /* ---------- specifications ---------- */
 
 .specTable {
-  width: 100%;
   max-width: 920px;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -1244,7 +1242,6 @@
 /* ---------- applications table ---------- */
 
 .applicationTable {
-  width: 100%;
   max-width: 920px;
   margin-top: 12px;
   display: grid;
@@ -2089,44 +2086,6 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 14px;
   }
-
-  .resourceCard {
-    min-height: 86px;
-    padding: 14px 16px;
-    display: grid;
-    grid-template-columns: 44px minmax(0, 1fr);
-    grid-template-rows: auto auto;
-    column-gap: 14px;
-    row-gap: 4px;
-    align-items: center;
-    text-align: left;
-  }
-
-  .resourceIcon {
-    grid-column: 1;
-    grid-row: 1 / span 2;
-    width: 36px;
-    height: 36px;
-    margin: 0;
-  }
-
-  .resourceCard h3 {
-    grid-column: 2;
-    grid-row: 1;
-    margin: 0;
-    font-size: 13px;
-    align-self: end;
-  }
-
-  .resourceCard a {
-    grid-column: 2;
-    grid-row: 2;
-    margin: 0;
-    padding-top: 0;
-    font-size: 12px;
-    justify-self: start;
-    align-self: start;
-  }
 }
 
 @media (max-width: 680px) {
@@ -2136,12 +2095,15 @@
 
   .page {
     padding-top: 20px;
-    padding-bottom: 190px;
+    padding-bottom: 40px;
   }
 
-  .heroGrid {
-    grid-template-columns: 1fr;
-    gap: 0;
+  :global(body):has(.mobilePurchase) {
+    padding-bottom: calc(160px + env(safe-area-inset-bottom));
+  }
+
+  :global(body):has(.mobileBarWithSample) {
+    padding-bottom: calc(218px + env(safe-area-inset-bottom));
   }
 
   .rail {
@@ -2270,8 +2232,22 @@
     font-size: 11px;
   }
 
+  .applicationTable {
+    grid-template-columns: min-content minmax(0, 1fr);
+  }
+
+  .applicationLabel {
+    padding: 10px;
+    white-space: normal;
+  }
+
+  .applicationValue {
+    padding: 10px 0 10px 12px;
+  }
+
   .resourcesGrid {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .relatedGrid {
