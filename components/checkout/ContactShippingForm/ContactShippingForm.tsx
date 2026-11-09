@@ -170,6 +170,10 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   // Signature of the contact fields last successfully saved - lets a re-selected saved address
   // (valid before and after, so `isValid` never flips) still trigger a fresh save.
   const lastSavedContactSignatureRef = useRef<string | null>(null)
+  // Serializes contact/address auto-saves so overlapping edits (e.g. quickly retyping the zip)
+  // can't resolve out of order and leave a stale value saved on the order - same pattern as
+  // shippingMethodSaveQueueRef below.
+  const contactSaveQueueRef = useRef<Promise<void>>(Promise.resolve())
   const shippingMethodSaveQueueRef = useRef<Promise<boolean>>(Promise.resolve(true))
   const shippingMethodSectionRef = useRef<HTMLDivElement>(null)
 
@@ -359,7 +363,10 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
 
   useEffect(() => {
     if (!isValid || contactSignature === lastSavedContactSignatureRef.current) return
-    handleSubmit((formData) => onValidContact(formData, contactSignature))()
+    contactSaveQueueRef.current = contactSaveQueueRef.current.then(
+      () =>
+        handleSubmit((formData) => onValidContact(formData, contactSignature))() as Promise<void>
+    )
   }, [isValid, contactSignature])
 
   useEffect(() => {
