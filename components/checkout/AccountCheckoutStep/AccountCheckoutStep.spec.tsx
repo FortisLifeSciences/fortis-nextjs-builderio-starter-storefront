@@ -248,12 +248,14 @@ describe('[component] AccountCheckoutStep', () => {
     const { user, onAddPayment } = setup()
 
     await user.click(screen.getByRole('button', { name: 'fill-card' }))
-    await agreeToTermsAndPlaceOrder(user)
+    await user.click(screen.getByRole('checkbox', { name: 'termsConditions' }))
 
-    expect(screen.getByText('cardholder-name-required')).toBeVisible()
-    expect(screen.getByText('please-complete-card-details')).toBeVisible()
-    expect(screen.queryByText('please-agree-to-terms')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Place Order' })).toBeDisabled()
     expect(onAddPayment).not.toHaveBeenCalled()
+
+    await user.type(screen.getByRole('textbox', { name: 'cardholder-name' }), 'Jane Doe')
+
+    expect(screen.getByRole('button', { name: 'Place Order' })).toBeEnabled()
   })
 
   it('requires the CVV before paying with a saved card', async () => {

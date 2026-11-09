@@ -127,10 +127,16 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
   // reason via placeOrderError, so an incomplete click is never silent.
   const canPlaceOrder = useMemo(() => {
     if (!agreeWithTerms) return false
-    if (!isCardFormValid) return false
+    if (isCardholderNameMissing || !isCardFormValid) return false
     if (!billingSameAsShipping && !isBillingFormValid) return false
     return true
-  }, [agreeWithTerms, isCardFormValid, billingSameAsShipping, isBillingFormValid])
+  }, [
+    agreeWithTerms,
+    isCardholderNameMissing,
+    isCardFormValid,
+    billingSameAsShipping,
+    isBillingFormValid,
+  ])
 
   const handlePlaceOrder = async () => {
     if (isPlacingOrder) return
