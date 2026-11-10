@@ -420,11 +420,12 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   }
 
   useEffect(() => {
-    if (!isValid || contactSignature === lastSavedContactSignatureRef.current) return
-    contactSaveQueueRef.current = contactSaveQueueRef.current.then(
-      () =>
-        handleSubmit((formData) => onValidContact(formData, contactSignature))() as Promise<void>
-    )
+    if (contactSignature === lastSavedContactSignatureRef.current) return
+    contactSaveQueueRef.current = contactSaveQueueRef.current.then(async () => {
+      const isCurrentlyValid = await trigger()
+      if (!isCurrentlyValid) return
+      await handleSubmit((formData) => onValidContact(formData, contactSignature))()
+    })
   }, [isValid, contactSignature])
 
   useEffect(() => {
@@ -440,7 +441,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
       try {
         await updateOrderShippingInfo.mutateAsync({
           checkout,
-          contact: undefined,
+          contact: buildContact(getValues()),
           email: checkout?.email as string,
           shippingMethodCode,
           shippingMethodName,
@@ -465,7 +466,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   // server - while that save is in flight (e.g. right after switching methods), it still holds
   // the previous method's code, which would otherwise let Continue through on a stale value.
   const isSavingShippingInfo = updateOrderShippingInfo.isPending
-  const canContinue = isValid && hasShippingMethod && !isSavingShippingInfo
+  const canContinue = isValid && !contactSaveError && hasShippingMethod && !isSavingShippingInfo
 
   const handleContinue = async () => {
     if (isValidatingShipping || isSavingShippingInfo) return
@@ -825,6 +826,12 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
             </Typography>
           )}
         </Stack>
+      )}
+
+      {!isValid && isDirty && (
+        <Typography sx={{ fontSize: '13px', color: 'error.main' }}>
+          {t('address-changes-not-saved')}
+        </Typography>
       )}
 
       <Box>
