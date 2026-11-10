@@ -378,11 +378,12 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   }
 
   useEffect(() => {
-    if (!isValid || contactSignature === lastSavedContactSignatureRef.current) return
-    contactSaveQueueRef.current = contactSaveQueueRef.current.then(
-      () =>
-        handleSubmit((formData) => onValidContact(formData, contactSignature))() as Promise<void>
-    )
+    if (contactSignature === lastSavedContactSignatureRef.current) return
+    contactSaveQueueRef.current = contactSaveQueueRef.current.then(async () => {
+      const isCurrentlyValid = await trigger()
+      if (!isCurrentlyValid) return
+      await handleSubmit((formData) => onValidContact(formData, contactSignature))()
+    })
   }, [isValid, contactSignature])
 
   useEffect(() => {
@@ -398,7 +399,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
       try {
         await updateOrderShippingInfo.mutateAsync({
           checkout,
-          contact: undefined,
+          contact: buildContact(getValues()),
           email: checkout?.email as string,
           shippingMethodCode,
           shippingMethodName,
@@ -419,7 +420,11 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   // ship items - a pickup-only order has nothing to select and shouldn't be blocked on it.
   const needsShippingMethod = shipItems.length > 0
   const hasShippingMethod = !needsShippingMethod || !!checkoutShippingMethodCode
-  const canContinue = isValid && hasShippingMethod
+  // `checkoutShippingMethodCode` only updates once the shipping-info save round-trips to the
+  // server - while that save is in flight (e.g. right after switching methods), it still holds
+  // the previous method's code, which would otherwise let Continue through on a stale value.
+  const isSavingShippingInfo = updateOrderShippingInfo.isPending
+  const canContinue = isValid && !contactSaveError && hasShippingMethod && !isSavingShippingInfo
 
   const handleContinue = async () => {
     if (isValidatingShipping) return
@@ -447,7 +452,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
 
       setShippingMethodError(hasShippingMethod ? '' : t('please-select-shipping-method'))
 
-      if (!isFormValid) {
+      if (!isFormValid || contactSaveError) {
         for (const name of fieldsToValidate) {
           // eslint-disable-next-line no-await-in-loop
           const fieldIsValid = await trigger(name as any)
@@ -778,6 +783,12 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
             </Typography>
           )}
         </Stack>
+      )}
+
+      {!isValid && isDirty && (
+        <Typography sx={{ fontSize: '13px', color: 'error.main' }}>
+          {t('address-changes-not-saved')}
+        </Typography>
       )}
 
       <Box>
