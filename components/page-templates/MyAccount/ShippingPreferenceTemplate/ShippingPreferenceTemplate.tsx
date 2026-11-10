@@ -223,7 +223,16 @@ const ShippingPreferenceTemplate = (props: ShippingPreferenceTemplateProps) => {
                 }}
               />
               {method.disabled && (
-                <Typography sx={{ ...styles.calloutText, mt: '-0.5rem', mb: '0.75rem', ml: 2 }}>
+                <Typography
+                  sx={{
+                    ...styles.calloutText,
+                    mt: '-0.5rem',
+                    mb: '0.75rem',
+                    ml: 2,
+                    fontSize: '13px',
+                    color: 'error.main',
+                  }}
+                >
                   {t('shipping-method-requires-account-number')}
                 </Typography>
               )}

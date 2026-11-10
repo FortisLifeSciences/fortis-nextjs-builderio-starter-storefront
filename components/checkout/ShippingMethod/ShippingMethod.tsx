@@ -275,6 +275,11 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       requestedShippingMethodCodeRef.current = undefined
     }
 
+    const hasSavedShippingPreference = !!find(customerAccount?.attributes, {
+      fullyQualifiedName: 'tenant~shipping-method',
+    })
+    if (!manualSelectionRef.current && hasSavedShippingPreference) return
+
     const fedExShippings = getFedExShippingMethods()
     const upsShippings = getUPSShippingMethods()
     const fortisShippings = getFortisShippingMethods()
@@ -331,7 +336,13 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       setIsUpsMethodSelected(true)
       setIsOtherShippingMethod(false)
     }
-  }, [selectedShippingMethodCode, fedExAccountNumber, upsAccountNumber, t])
+  }, [
+    selectedShippingMethodCode,
+    fedExAccountNumber,
+    upsAccountNumber,
+    customerAccount?.attributes,
+    t,
+  ])
 
   useEffect(() => {
     if (customerAccount?.attributes?.length) {
@@ -389,6 +400,9 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
           shippingMethod.shippingMethodName as string,
           shippingMethod.shippingMethodCode as string
         )
+        setIsFedExMethodSelected(!!isFedExAccountMethod)
+        setIsUpsMethodSelected(!!isUpsAccountMethod)
+        setIsOtherShippingMethod(!isFedExAccountMethod && !isUpsAccountMethod)
       }
     }
   }, [
