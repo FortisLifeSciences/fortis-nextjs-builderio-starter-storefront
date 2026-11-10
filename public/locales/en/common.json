@@ -408,6 +408,7 @@
   "please-select-a-reason-for-your-return": "Please select a reason for your return",
   "please-select-shipping-method": "Please select a shipping method",
   "unable-to-save-shipping-address": "We couldn't save this shipping address. Please check that the city, state and zip code match, then try again.",
+  "address-changes-not-saved": "Your address changes won't be saved until all fields above are valid.",
   "loading-shipping-methods": "Loading shipping methods...",
   "no-shipping-methods-available": "No shipping methods are available for this address. Please check the address or try a different one.",
   "no-shipping-address-on-file": "No shipping address on file for this order.",

@@ -15,7 +15,13 @@ import * as yup from 'yup'
 
 import { ChoiceCard, ShippingMethod } from '@/components/checkout'
 import { checkoutColors } from '@/components/checkout/checkoutStyles'
-import { KiboPhoneInput, KiboSelect, KiboStateSelect,KiboSkeleton, KiboTextBox } from '@/components/common'
+import {
+  KiboPhoneInput,
+  KiboSelect,
+  KiboStateSelect,
+  KiboSkeleton,
+  KiboTextBox,
+} from '@/components/common'
 import { toE164PhoneNumber } from '@/components/common/KiboPhoneInput/KiboPhoneInput'
 import { useUpdateOrderShippingInfo, useGetShippingMethods } from '@/hooks'
 import { AddressType, CountryCode, DefaultId } from '@/lib/constants'
@@ -362,11 +368,12 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   }
 
   useEffect(() => {
-    if (!isValid || contactSignature === lastSavedContactSignatureRef.current) return
-    contactSaveQueueRef.current = contactSaveQueueRef.current.then(
-      () =>
-        handleSubmit((formData) => onValidContact(formData, contactSignature))() as Promise<void>
-    )
+    if (contactSignature === lastSavedContactSignatureRef.current) return
+    contactSaveQueueRef.current = contactSaveQueueRef.current.then(async () => {
+      const isCurrentlyValid = await trigger()
+      if (!isCurrentlyValid) return
+      await handleSubmit((formData) => onValidContact(formData, contactSignature))()
+    })
   }, [isValid, contactSignature])
 
   useEffect(() => {
@@ -382,7 +389,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
       try {
         await updateOrderShippingInfo.mutateAsync({
           checkout,
-          contact: undefined,
+          contact: buildContact(getValues()),
           email: checkout?.email as string,
           shippingMethodCode,
           shippingMethodName,
@@ -404,7 +411,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   // server - while that save is in flight (e.g. right after switching methods), it still holds
   // the previous method's code, which would otherwise let Continue through on a stale value.
   const isSavingShippingInfo = updateOrderShippingInfo.isPending
-  const canContinue = isValid && hasShippingMethod && !isSavingShippingInfo
+  const canContinue = isValid && !contactSaveError && hasShippingMethod && !isSavingShippingInfo
 
   const handleContinue = async () => {
     // A shipping-info save still in flight means `checkoutShippingMethodCode` (and therefore
@@ -435,7 +442,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
 
       setShippingMethodError(hasShippingMethod ? '' : t('please-select-shipping-method'))
 
-      if (!isFormValid) {
+      if (!isFormValid || contactSaveError) {
         for (const name of fieldsToValidate) {
           // eslint-disable-next-line no-await-in-loop
           const fieldIsValid = await trigger(name as any)
@@ -768,6 +775,12 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
             </Typography>
           )}
         </Stack>
+      )}
+
+      {!isValid && isDirty && (
+        <Typography sx={{ fontSize: '13px', color: 'error.main' }}>
+          {t('address-changes-not-saved')}
+        </Typography>
       )}
 
       <Box>
