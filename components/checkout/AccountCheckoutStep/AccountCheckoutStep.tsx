@@ -47,7 +47,7 @@ import {
 } from '@/components/common'
 import { toE164PhoneNumber } from '@/components/common/KiboPhoneInput/KiboPhoneInput'
 import { useAuthContext } from '@/context'
-import { useUpdateOrder } from '@/hooks'
+import { useGetCurrentCustomer, useUpdateOrder } from '@/hooks'
 import { AccountType, CurrencyCode, PaymentType, PaymentWorkflow } from '@/lib/constants'
 import { cardGetters, orderGetters, userGetters } from '@/lib/getters'
 import {
@@ -180,6 +180,18 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   const { user } = useAuthContext()
   const { updateOrder } = useUpdateOrder()
   const queryClient = useQueryClient()
+  const { data: customerAccountForShippingPreference } = useGetCurrentCustomer()
+  const shippingPreferenceAttr = customerAccountForShippingPreference?.attributes?.find(
+    (attr) => attr?.fullyQualifiedName === 'tenant~shipping-method'
+  )
+  const shippingPreferenceValue = shippingPreferenceAttr?.values?.[0] || ''
+  const preferredShippingMethodLabel = shippingPreferenceValue.includes('FedEx Account')
+    ? 'FedEx Account'
+    : shippingPreferenceValue.includes('UPS Account')
+    ? 'UPS Account'
+    : shippingPreferenceValue
+    ? String(t('fortis-overnight-shipping'))
+    : undefined
 
   const isB2BUser = user?.accountType?.toLowerCase() === AccountType.B2B.toLowerCase()
   const isPOEnabled = !!customerPurchaseOrderAccount?.isEnabled
@@ -870,7 +882,11 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       )}
 
       {isShippingLocked ? (
-        <ContactShippingSummary checkout={checkout} onEdit={() => setPhase('shipping')} />
+        <ContactShippingSummary
+          checkout={checkout}
+          onEdit={() => setPhase('shipping')}
+          preferredShippingMethodLabel={preferredShippingMethodLabel}
+        />
       ) : (
         <ContactShippingForm
           checkout={checkout}
