@@ -58,10 +58,8 @@ import {
 } from '@/lib/helpers'
 import {
   CARDHOLDER_NAME_MAX_LENGTH,
-  isCardholderNameValid,
-} from '@/lib/helpers/validations/validations'
-import {
   cityNamePattern,
+  isCardholderNameValid,
   organizationNamePattern,
   personNamePattern,
   streetAddressPattern,
