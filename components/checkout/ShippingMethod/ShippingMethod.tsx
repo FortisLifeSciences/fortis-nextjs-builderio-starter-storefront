@@ -175,6 +175,8 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
     fedEx: '',
     ups: '',
   })
+  const appliedPreferredShippingMethodCodeRef = useRef<string | undefined>(undefined)
+  const manualSelectionRef = useRef(false)
 
   const fedExSchema = useFedExSchema()
 
@@ -273,6 +275,11 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       requestedShippingMethodCodeRef.current = undefined
     }
 
+    const hasSavedShippingPreference = !!find(customerAccount?.attributes, {
+      fullyQualifiedName: 'tenant~shipping-method',
+    })
+    if (!manualSelectionRef.current && hasSavedShippingPreference) return
+
     const fedExShippings = getFedExShippingMethods()
     const upsShippings = getUPSShippingMethods()
     const fortisShippings = getFortisShippingMethods()
@@ -329,7 +336,13 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       setIsUpsMethodSelected(true)
       setIsOtherShippingMethod(false)
     }
-  }, [selectedShippingMethodCode, fedExAccountNumber, upsAccountNumber, t])
+  }, [
+    selectedShippingMethodCode,
+    fedExAccountNumber,
+    upsAccountNumber,
+    customerAccount?.attributes,
+    t,
+  ])
 
   useEffect(() => {
     if (customerAccount?.attributes?.length) {
@@ -341,16 +354,23 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         setUpsAccountNumber(upsAccountNumberInput)
       }
 
-      // Get FedEx account shipping method name
-
       const customerShippingMethodAttr = find(customerAccount?.attributes, {
         fullyQualifiedName: 'tenant~shipping-method',
       })
       const shippingMethodName = customerShippingMethodAttr?.values?.length
         ? customerShippingMethodAttr.values[0]
         : ''
-      const shippingMethod = find(orderShipmentMethods, (shipMethod) =>
-        shippingMethodName?.includes(shipMethod?.shippingMethodName)
+      const fortisMethods = getFortisShippingMethods()
+      const shippingMethod = (
+        shippingMethodName.includes('FedEx Account')
+          ? getFedExShippingMethods()?.[0]
+          : shippingMethodName.includes('UPS Account')
+          ? getUPSShippingMethods()?.[0]
+          : shippingMethodName
+          ? find(fortisMethods, (shipMethod) =>
+              shipMethod?.shippingMethodName?.toLowerCase().includes('overnight')
+            ) || fortisMethods?.[0]
+          : undefined
       ) as CrShippingRate
       if (
         shippingMethod?.shippingMethodName &&
@@ -363,8 +383,35 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       ) {
         setUpsAccountShippingMethod(shippingMethod)
       }
+
+      const isFedExAccountMethod = shippingMethod?.shippingMethodName?.includes('FedEx Account')
+      const isUpsAccountMethod = shippingMethod?.shippingMethodName?.includes('UPS Account')
+      const isAccountMethodReady =
+        (isFedExAccountMethod && fedExAccountNumber?.length === 9) ||
+        (isUpsAccountMethod && upsAccountNumber?.length === 6)
+      if (
+        !manualSelectionRef.current &&
+        shippingMethod?.shippingMethodCode &&
+        shippingMethod.shippingMethodCode !== appliedPreferredShippingMethodCodeRef.current &&
+        (isAccountMethodReady || (!isFedExAccountMethod && !isUpsAccountMethod))
+      ) {
+        appliedPreferredShippingMethodCodeRef.current = shippingMethod.shippingMethodCode
+        handleShippingMethodSelectChange(
+          shippingMethod.shippingMethodName as string,
+          shippingMethod.shippingMethodCode as string
+        )
+        setIsFedExMethodSelected(!!isFedExAccountMethod)
+        setIsUpsMethodSelected(!!isUpsAccountMethod)
+        setIsOtherShippingMethod(!isFedExAccountMethod && !isUpsAccountMethod)
+      }
     }
-  }, [customerAccount?.attributes, orderShipmentMethods])
+  }, [
+    customerAccount?.attributes,
+    orderShipmentMethods,
+    selectedShippingMethodCode,
+    fedExAccountNumber,
+    upsAccountNumber,
+  ])
 
   // Prioritize input
   useEffect(() => {
@@ -748,6 +795,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   }
 
   const selectShippingMethod = (method: 'fortis' | 'fedex' | 'ups') => {
+    manualSelectionRef.current = true
     localStorage.setItem('selectedShippingMethod', method)
 
     if (method === 'fortis') {

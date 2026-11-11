@@ -1,7 +1,6 @@
-import React, { FormEvent, useEffect, useState } from 'react'
+import React, { FormEvent, useState } from 'react'
 
 import { Button, Grid, Box, Typography, Stack } from '@mui/material'
-import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
 import { ListItem, ListProductSearch } from '@/components/b2b'
@@ -9,14 +8,7 @@ import { listFormStyles } from '@/components/b2b/Lists/listFormStyles'
 import { KiboTextBox } from '@/components/common'
 import { accountActionButton, accountTextButton } from '@/components/my-account/common'
 import { useAuthContext, useSnackbarContext } from '@/context'
-import {
-  useAddToWishlistItem,
-  useCreateWishlist,
-  useDeleteWishlistItemById,
-  useProductCardActions,
-  useUpdateWishlistItemMutation,
-  useGetCustomerWishlist,
-} from '@/hooks'
+import { useCreateWishlist, useProductCardActions } from '@/hooks'
 import { productGetters } from '@/lib/getters'
 
 import { CrWishlistItem, Product } from '@/lib/gql/types'
@@ -26,120 +18,113 @@ export interface CreateListProps {
   onAddListToCart: (items: any) => any
 }
 
+const buildDraftItem = (product: Product): CrWishlistItem => {
+  const options = (product?.options ?? [])
+    .map((option: any) => {
+      const selected = option?.values?.find((value: any) => value?.isSelected)
+      return {
+        name: option?.attributeDetail?.name,
+        value: selected?.value || selected?.stringValue || selected?.shopperEnteredValue,
+        attributeFQN: option?.attributeFQN,
+      }
+    })
+    .filter((option: any) => option?.value !== undefined && option?.value !== null)
+
+  const productCode = productGetters.getProductId(product)
+  const variationProductCode = productGetters.getVariationProductCode(product)
+
+  return {
+    id: `${productCode}-${variationProductCode || ''}`,
+    quantity: 1,
+    product: {
+      productCode,
+      variationProductCode,
+      name: productGetters.getName(product),
+      price: product?.price,
+      options,
+      isPackagedStandAlone: product?.isPackagedStandAlone || false,
+    },
+  } as CrWishlistItem
+}
+
+const toWishlistItemInput = (item: CrWishlistItem) => ({
+  quantity: item.quantity,
+  product: {
+    productCode: item.product?.productCode,
+    variationProductCode: item.product?.variationProductCode,
+    options: item.product?.options,
+    isPackagedStandAlone: item.product?.isPackagedStandAlone || false,
+  },
+})
+
 const CreateList = (props: CreateListProps) => {
   const { onCreateFormToggle, onAddListToCart } = props
 
-  const [newListState, setNewListState] = useState<any>({})
   const [listName, setListName] = useState('')
+  const [draftItems, setDraftItems] = useState<CrWishlistItem[]>([])
   const { handleDeleteCurrentCart } = useProductCardActions()
 
-  const router = useRouter()
   const { t } = useTranslation('common')
   const { user } = useAuthContext()
   const { createWishlist } = useCreateWishlist()
-  const { updateWishlist, updateWishlistItemQuantity } = useUpdateWishlistItemMutation({
-    isCreateList: true,
-  })
-  const { addToWishlist } = useAddToWishlistItem()
   const { showSnackbar } = useSnackbarContext()
-  const { deleteWishlistItemById } = useDeleteWishlistItemById({ isCreateList: true })
-  const response = useGetCustomerWishlist({
-    customerAccountId: user?.id as number,
-    wishlistName: newListState?.name,
-  })
 
   const handleAddListToCart = async () => {
-    const response = await onAddListToCart(newListState?.items)
+    const response = await onAddListToCart(draftItems)
     if (response) {
       showSnackbar(t('list-added-to-cart'), 'success')
       onCreateFormToggle(false)
     }
   }
 
-  const onUpdateListData = async (product: any, payload: any) => {
-    await addToWishlist.mutateAsync({
-      customerAccountId: user?.id as number,
-      product: {
-        options: product?.options?.map((option: any) => {
-          const selected = option?.values?.find((value: any) => value?.isSelected)
-          return {
-            name: option?.attributeDetail?.name,
-            value: selected?.value || selected?.stringValue || selected?.shopperEnteredValue,
-            attributeFQN: option?.attributeFQN,
-          }
-        }),
-        productCode: productGetters.getProductId(product),
-        variationProductCode: productGetters.getVariationProductCode(product),
-        isPackagedStandAlone: product?.isPackagedStandAlone,
-      },
-      currentWishlist: newListState,
-      quantity: payload.quantity,
+  const handleEmptyCartAndAddListToCart = async () => {
+    await handleDeleteCurrentCart()
+    await handleAddListToCart()
+  }
+
+  const handleAddProduct = (product: Product) => {
+    const newItem = buildDraftItem(product)
+
+    setDraftItems((current) => {
+      const existingIndex = current.findIndex((item) => item.id === newItem.id)
+      if (existingIndex === -1) return [...current, newItem]
+
+      const updated = [...current]
+      updated[existingIndex] = {
+        ...updated[existingIndex],
+        quantity: (updated[existingIndex].quantity || 1) + 1,
+      }
+      return updated
     })
   }
-  const handleEmptyCartAndAddListToCart = () => {
-    handleDeleteCurrentCart()
-    handleAddListToCart()
+
+  const handleDeleteItem = (id: string) => {
+    setDraftItems((current) => current.filter((item) => item.id !== id))
   }
+
+  const handleChangeQuantity = (id: string, quantity: number) => {
+    setDraftItems((current) =>
+      current.map((item) => (item.id === id ? { ...item, quantity } : item))
+    )
+  }
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    onCreateFormToggle(false)
-  }
+    const trimmedName = listName.trim()
+    if (!trimmedName) return
 
-  const handleAddProduct = async (product?: any) => {
-    await addToWishlist.mutateAsync({
-      product,
-      customerAccountId: user?.id as number,
-      currentWishlist: newListState,
-    })
-  }
-
-  const handleCreateListAndUpdateWishlistName = async () => {
-    setListName(listName || newListState?.name)
-    if (!newListState?.name && listName) {
-      try {
-        const listData = await createWishlist.mutateAsync({
-          customerAccountId: user?.id,
-          name: listName,
-        })
-        if (listData) {
-          setNewListState(listData)
-        }
-      } catch (e) {
-        console.error(e)
-      }
-    } else if (listName) {
-      try {
-        const listData = await updateWishlist.mutateAsync({
-          wishlistId: newListState?.id,
-          wishlistInput: { name: listName },
-        })
-        if (listData) {
-          setNewListState(listData?.updateWishlist)
-        }
-      } catch (e) {
-        console.error(e)
-      }
+    try {
+      await createWishlist.mutateAsync({
+        customerAccountId: user?.id,
+        name: trimmedName,
+        items: draftItems.map(toWishlistItemInput) as any,
+      })
+      onCreateFormToggle(false)
+    } catch (e) {
+      console.error(e)
+      showSnackbar(t('something-went-wrong'), 'error')
     }
   }
-
-  const handleDeleteItem = async (id: string) => {
-    await deleteWishlistItemById.mutateAsync({
-      wishlistId: newListState?.id,
-      wishlistItemId: id,
-    })
-  }
-
-  const handleChangeQuantity = async (id: string, quantity: number) => {
-    await updateWishlistItemQuantity.mutateAsync({
-      quantity,
-      wishlistId: newListState?.id,
-      wishlistItemId: id,
-    })
-  }
-
-  useEffect(() => {
-    setNewListState(response?.data)
-  }, [JSON.stringify(response?.data)])
 
   return (
     <>
@@ -151,20 +136,19 @@ const CreateList = (props: CreateListProps) => {
               name="listName"
               value={listName}
               onChange={(_, value) => setListName(value)}
-              onBlur={handleCreateListAndUpdateWishlistName}
               label={t('list-name')}
               sx={{ ...listFormStyles.textBox }}
             />
           </Box>
         </form>
 
-        {listName && (
+        {listName.trim() && (
           <Box sx={{ maxWidth: '26rem', marginTop: '1.25rem' }}>
             <ListProductSearch onAddProduct={handleAddProduct} />
           </Box>
         )}
 
-        {!newListState?.name && (
+        {!listName.trim() && (
           <Typography sx={{ ...listFormStyles.hint }}>
             {t('add-list-name-to-search-products')}
           </Typography>
@@ -180,7 +164,7 @@ const CreateList = (props: CreateListProps) => {
           <Typography component="h2" sx={{ ...listFormStyles.sectionTitle, marginBottom: 0 }}>
             {t('list-items')}
           </Typography>
-          {newListState?.items?.length > 0 && (
+          {draftItems.length > 0 && (
             <Stack direction="row" gap={1}>
               <Button
                 variant="text"
@@ -200,7 +184,7 @@ const CreateList = (props: CreateListProps) => {
           )}
         </Stack>
 
-        {Boolean(newListState?.items?.length) && (
+        {Boolean(draftItems.length) && (
           <Grid container sx={{ ...listFormStyles.itemsHeaderRow }}>
             <Grid item xs={3} sm={2}>
               {t('qty')}
@@ -214,12 +198,12 @@ const CreateList = (props: CreateListProps) => {
           </Grid>
         )}
 
-        {!newListState?.items?.length ? (
+        {!draftItems.length ? (
           <Typography sx={{ ...listFormStyles.hint }}>{t('no-item-in-list-text')}</Typography>
         ) : (
-          newListState?.items?.map((item: CrWishlistItem, index: any) => (
+          draftItems.map((item: CrWishlistItem, index: any) => (
             <ListItem
-              key={(item.product?.productCode as string) + index}
+              key={(item.id as string) + index}
               item={item}
               onDeleteItem={handleDeleteItem}
               onChangeQuantity={handleChangeQuantity}
@@ -235,7 +219,7 @@ const CreateList = (props: CreateListProps) => {
           form="wishlist-form"
           disableElevation
           sx={{ ...accountActionButton }}
-          disabled={!newListState?.name}
+          disabled={!listName.trim()}
         >
           {t('save-and-close')}
         </Button>
@@ -243,9 +227,7 @@ const CreateList = (props: CreateListProps) => {
           variant="text"
           type="button"
           sx={{ ...accountTextButton }}
-          onClick={() => {
-            onCreateFormToggle(false)
-          }}
+          onClick={() => onCreateFormToggle(false)}
         >
           {t('cancel')}
         </Button>

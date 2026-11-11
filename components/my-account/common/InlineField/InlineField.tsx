@@ -38,6 +38,8 @@ const styles = {
   value: {
     ...accountType.body,
     color: 'text.primary',
+    minWidth: 0,
+    overflowWrap: 'anywhere',
   },
 }
 

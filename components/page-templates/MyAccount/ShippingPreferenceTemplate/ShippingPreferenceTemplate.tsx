@@ -13,11 +13,13 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'next-i18next'
 
 import { AccountPageHeader, AccountSectionCard, accountType } from '@/components/my-account/common'
 import { useSnackbarContext } from '@/context'
 import { useCustomerAttribute } from '@/hooks'
+import { loginKeys } from '@/lib/react-query/queryKeys'
 
 import type { CustomerAccount } from '@/lib/gql/types'
 
@@ -111,6 +113,7 @@ const ShippingPreferenceTemplate = (props: ShippingPreferenceTemplateProps) => {
   const { user } = props
   const { t } = useTranslation('common')
   const { showSnackbar } = useSnackbarContext()
+  const queryClient = useQueryClient()
 
   const attributeParams = { userId: user?.userId, accountId: user?.id }
 
@@ -138,17 +141,35 @@ const ShippingPreferenceTemplate = (props: ShippingPreferenceTemplateProps) => {
 
   const selectedMethod = getPreferredShippingMethod(shippingMethod.value)
 
+  const isFedexAccountReady = fedex.value?.length === FEDEX_ACCOUNT_LENGTH
+  const isUpsAccountReady = ups.value?.length === UPS_ACCOUNT_LENGTH
+
   const shippingMethods = [
     { value: PreferredShippingMethod.FortisOvernight, label: t('fortis-overnight-shipping') },
-    { value: PreferredShippingMethod.Fedex, label: t('use-your-fedex-account') },
-    { value: PreferredShippingMethod.Ups, label: t('use-your-ups-account') },
+    {
+      value: PreferredShippingMethod.Fedex,
+      label: t('use-your-fedex-account'),
+      disabled: !isFedexAccountReady,
+    },
+    {
+      value: PreferredShippingMethod.Ups,
+      label: t('use-your-ups-account'),
+      disabled: !isUpsAccountReady,
+    },
   ]
 
   const sanitizeAccountNumber = (value: string, maxLength: number) =>
     value.replace(/[^0-9]/g, '').slice(0, maxLength)
 
   const handleMethodChange = async (method: PreferredShippingMethod) => {
+    if (
+      (method === PreferredShippingMethod.Fedex && !isFedexAccountReady) ||
+      (method === PreferredShippingMethod.Ups && !isUpsAccountReady)
+    ) {
+      return
+    }
     const isSaved = await shippingMethod.saveAttribute(SHIPPING_METHOD_ATTRIBUTE_VALUE[method])
+    if (isSaved) queryClient.invalidateQueries({ queryKey: loginKeys.user })
     showSnackbar(
       String(isSaved ? t('shipping-preference-saved') : t('something-went-wrong')),
       isSaved ? 'success' : 'error'
@@ -170,6 +191,7 @@ const ShippingPreferenceTemplate = (props: ShippingPreferenceTemplateProps) => {
     setError('')
 
     const isSaved = await save(draft)
+    if (isSaved) queryClient.invalidateQueries({ queryKey: loginKeys.user })
     showSnackbar(
       String(isSaved ? t('shipping-account-saved') : t('something-went-wrong')),
       isSaved ? 'success' : 'error'
@@ -189,17 +211,32 @@ const ShippingPreferenceTemplate = (props: ShippingPreferenceTemplateProps) => {
           onChange={(event) => handleMethodChange(event.target.value as PreferredShippingMethod)}
         >
           {shippingMethods.map((method) => (
-            <FormControlLabel
-              key={method.value}
-              value={method.value}
-              control={<Radio />}
-              label={method.label}
-              disabled={shippingMethod.isSaving}
-              sx={{
-                ...styles.methodOption,
-                ...(selectedMethod === method.value ? styles.methodOptionSelected : {}),
-              }}
-            />
+            <Box key={method.value}>
+              <FormControlLabel
+                value={method.value}
+                control={<Radio />}
+                label={method.label}
+                disabled={shippingMethod.isSaving || method.disabled}
+                sx={{
+                  ...styles.methodOption,
+                  ...(selectedMethod === method.value ? styles.methodOptionSelected : {}),
+                }}
+              />
+              {method.disabled && (
+                <Typography
+                  sx={{
+                    ...styles.calloutText,
+                    mt: '-0.5rem',
+                    mb: '0.75rem',
+                    ml: 2,
+                    fontSize: '13px',
+                    color: 'error.main',
+                  }}
+                >
+                  {t('shipping-method-requires-account-number')}
+                </Typography>
+              )}
+            </Box>
           ))}
         </RadioGroup>
       </AccountSectionCard>

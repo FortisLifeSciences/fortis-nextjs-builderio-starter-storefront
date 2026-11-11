@@ -59,6 +59,22 @@ const PaymentTemplate = (props: PaymentTemplateProps) => {
   const { updateCustomerCard } = useUpdateCustomerCard()
 
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [editingCard, setEditingCard] = useState<PaymentAndBilling>()
+
+  const openAddCardForm = () => {
+    setEditingCard(undefined)
+    setIsFormOpen(true)
+  }
+
+  const openEditCardForm = (paymentAndBilling: PaymentAndBilling) => {
+    setEditingCard(paymentAndBilling)
+    setIsFormOpen(true)
+  }
+
+  const closeCardForm = () => {
+    setIsFormOpen(false)
+    setEditingCard(undefined)
+  }
 
   const savedCardsAndContacts = userGetters.getSavedCardsAndBillingDetails(cards, contacts)
 
@@ -91,7 +107,8 @@ const PaymentTemplate = (props: PaymentTemplateProps) => {
   const handleSetAsPrimary = async (paymentAndBilling: PaymentAndBilling) => {
     const { cardInfo, billingAddressInfo } = paymentAndBilling
     const cardId = cardGetters.getCardId(cardInfo)
-    const contactId = cardInfo?.contactId ?? billingAddressInfo?.contact?.id
+    const rawCard = cards?.items?.find((card) => card?.id === cardId)
+    const contactId = rawCard?.contactId ?? cardInfo?.contactId ?? billingAddressInfo?.contact?.id
 
     if (!contactId) {
       console.error('Error: set primary card - billing contact not found for card', cardId)
@@ -119,7 +136,7 @@ const PaymentTemplate = (props: PaymentTemplateProps) => {
 
   const handleSave = (address: BillingAddress, card: CardType, isUpdatingAddress: boolean) => {
     onSave(address, card, isUpdatingAddress)
-    setIsFormOpen(false)
+    closeCardForm()
   }
 
   const canEdit = hasPermission(actions.EDIT_PAYMENTS)
@@ -138,7 +155,7 @@ const PaymentTemplate = (props: PaymentTemplateProps) => {
               color="primary"
               startIcon={<AddIcon />}
               sx={{ ...styles.addButton }}
-              onClick={() => setIsFormOpen(true)}
+              onClick={openAddCardForm}
             >
               {t('add-new-card')}
             </Button>
@@ -164,6 +181,12 @@ const PaymentTemplate = (props: PaymentTemplateProps) => {
                   paymentAndBilling={each}
                   actions={[
                     {
+                      id: 'edit',
+                      label: String(t('edit')),
+                      onClick: () => openEditCardForm(each),
+                      disabled: !canEdit,
+                    },
+                    {
                       id: 'set-as-primary',
                       label: String(t('set-as-primary')),
                       onClick: () => handleSetAsPrimary(each),
@@ -186,12 +209,14 @@ const PaymentTemplate = (props: PaymentTemplateProps) => {
                     {t('card-details')}
                   </Typography>
                   <PaymentMethod
+                    key={cardGetters.getCardId(editingCard?.cardInfo) || 'new-card'}
                     user={user}
                     cards={cards}
                     contacts={contacts}
                     displayMode={DisplayMode.ADDNEW}
+                    initialCard={editingCard}
                     onSave={handleSave}
-                    onClose={() => setIsFormOpen(false)}
+                    onClose={closeCardForm}
                   />
                 </Box>
               )}

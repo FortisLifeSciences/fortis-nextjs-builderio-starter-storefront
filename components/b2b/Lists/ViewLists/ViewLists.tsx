@@ -141,20 +141,24 @@ const ViewLists = (props: ViewListsProps) => {
   // add list to cart
   const handleAddListToCart = async (id: string) => {
     const list = wishlistsResponse?.items?.find((item) => item?.id === id)
+    if (!list?.items?.length) {
+      showSnackbar(t('list-is-empty-cannot-add-to-cart'), 'error')
+      return
+    }
     setIsLoading(true)
     try {
       const response = await onAddListToCart(list?.items as Array<CrWishlistItem>)
       if (response) showSnackbar(t('list-added-to-cart'), 'success')
-      setIsLoading(false)
     } catch (e) {
       console.error(e)
+      showSnackbar(t('something-went-wrong'), 'error')
     }
 
     setIsLoading(false)
   }
-  const handleEmptyCartAndAddListToCart = (id: string) => {
-    handleDeleteCurrentCart()
-    handleAddListToCart(id)
+  const handleEmptyCartAndAddListToCart = async (id: string) => {
+    await handleDeleteCurrentCart()
+    await handleAddListToCart(id)
   }
 
   // handle filter for current user list

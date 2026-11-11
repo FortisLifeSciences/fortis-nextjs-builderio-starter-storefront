@@ -79,6 +79,10 @@ const toContactInput = (contact: CustomerContact) => ({
   },
 })
 
+const getCreatedOrder = (contact?: CustomerContact) =>
+  contact?.auditInfo?.createDate
+    ? new Date(contact.auditInfo.createDate).getTime()
+    : Number(contact?.id ?? 0)
 const ShippingAddressTemplate = (props: ShippingAddressTemplateProps) => {
   const { user, contacts } = props
   const { t } = useTranslation('common')
@@ -97,8 +101,18 @@ const ShippingAddressTemplate = (props: ShippingAddressTemplateProps) => {
   const { deleteCustomerAddress } = useDeleteCustomerAddress()
   const { validateCustomerAddress } = useValidateCustomerAddress()
 
-  const shippingAddresses =
-    userGetters.getUserShippingAddress(contacts?.items as CustomerContact[]) ?? []
+  const [lastSavedId, setLastSavedId] = useState<number | undefined>()
+
+  const shippingAddresses = [
+    ...(userGetters.getUserShippingAddress(contacts?.items as CustomerContact[]) ?? []),
+  ].sort((a, b) => {
+    const primaryDiff = Number(isPrimaryShippingContact(b)) - Number(isPrimaryShippingContact(a))
+    if (primaryDiff !== 0) return primaryDiff
+    const recentDiff = Number(b?.id === lastSavedId) - Number(a?.id === lastSavedId)
+    if (recentDiff !== 0) return recentDiff
+
+    return getCreatedOrder(b) - getCreatedOrder(a)
+  })
 
   const [startIndex, setStartIndex] = useState<number>(0)
   const [editingContact, setEditingContact] = useState<CustomerContact | undefined>()
@@ -251,8 +265,14 @@ const ShippingAddressTemplate = (props: ShippingAddressTemplateProps) => {
           ...params,
           userId: user?.userId as string,
         } as UpdateCustomerAccountContactDetailsParams)
+        setLastSavedId(addressWithDefaults.contact.id as number)
+        setStartIndex(0)
       } else {
-        await createCustomerAddress.mutateAsync(params)
+        const created = await createCustomerAddress.mutateAsync(params)
+        setStartIndex(0)
+        if (makeDefault && created?.id) {
+          await handleSetAsDefault(created as CustomerContact)
+        }
       }
 
       resetForm()
@@ -327,12 +347,16 @@ const ShippingAddressTemplate = (props: ShippingAddressTemplateProps) => {
             isDefault={isDefault}
             actions={[
               { id: 'edit', label: String(t('edit')), onClick: () => handleEdit(contact) },
-              {
-                id: 'set-as-default',
-                label: String(t('set-as-default')),
-                onClick: () => handleSetAsDefault(contact),
-                disabled: isDefault,
-              },
+              ...(isDefault
+                ? []
+                : [
+                    {
+                      id: 'set-as-default',
+                      label: String(t('set-as-default')),
+                      onClick: () => handleSetAsDefault(contact),
+                      disabled: isDefault,
+                    },
+                  ]),
               {
                 id: 'duplicate',
                 label: String(t('duplicate')),

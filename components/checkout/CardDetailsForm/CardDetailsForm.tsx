@@ -69,7 +69,7 @@ const useCardSchema = (showCvv: boolean) => {
     expiryDate: yup
       .string()
       .required(t('expiry-date-required'))
-      .matches(/^(0?[1-9]|1[0-2])[/]\d{4}$/g, t('invalid-expiry-date-format'))
+      .matches(/^(0?[1-9]|1[0-2])[/]\d{4}$/g, t('invalid-expiry-date'))
       .test('expiry-date', t('invalid-expiry-date'), (value) => validateExpiryDate(value)),
     cvv: yup.string().when('$isEdit', (isEdit, schema) => {
       if (!isEdit && showCvv) {
@@ -272,7 +272,11 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                           const sanitizedValue = value.replace(/\D/g, '').substring(0, 4)
                           field.onChange(sanitizedValue)
                         }}
-                        onBlur={field.onBlur}
+                        onBlur={() => {
+                          const value = field.value || ''
+                          if (value && !/^\d{3,4}$/.test(value)) field.onChange('')
+                          field.onBlur()
+                        }}
                         error={!!errors?.cvv}
                         inputProps={{ maxLength: 4 }}
                         helperText={errors?.cvv?.message as unknown as string}

@@ -47,7 +47,7 @@ import {
 } from '@/components/common'
 import { toE164PhoneNumber } from '@/components/common/KiboPhoneInput/KiboPhoneInput'
 import { useAuthContext } from '@/context'
-import { useUpdateOrder } from '@/hooks'
+import { useGetCurrentCustomer, useUpdateOrder } from '@/hooks'
 import { AccountType, CurrencyCode, PaymentType, PaymentWorkflow } from '@/lib/constants'
 import { cardGetters, orderGetters, userGetters } from '@/lib/getters'
 import {
@@ -136,6 +136,7 @@ const sameAsShippingLabelSx = {
   },
 }
 
+const US_ZIP_REGEX = /^\d{5}(-\d{4})?$/
 const ContactAddressSummary = ({ contact }: { contact?: Maybe<CrContact> }) => {
   const address = contact?.address
   return (
@@ -183,6 +184,18 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   const { user } = useAuthContext()
   const { updateOrder } = useUpdateOrder()
   const queryClient = useQueryClient()
+  const { data: customerAccountForShippingPreference } = useGetCurrentCustomer()
+  const shippingPreferenceAttr = customerAccountForShippingPreference?.attributes?.find(
+    (attr) => attr?.fullyQualifiedName === 'tenant~shipping-method'
+  )
+  const shippingPreferenceValue = shippingPreferenceAttr?.values?.[0] || ''
+  const preferredShippingMethodLabel = shippingPreferenceValue.includes('FedEx Account')
+    ? 'FedEx Account'
+    : shippingPreferenceValue.includes('UPS Account')
+    ? 'UPS Account'
+    : shippingPreferenceValue
+    ? String(t('fortis-overnight-shipping'))
+    : undefined
 
   const isB2BUser = user?.accountType?.toLowerCase() === AccountType.B2B.toLowerCase()
   const isPOEnabled = !!customerPurchaseOrderAccount?.isEnabled
@@ -337,6 +350,11 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     return isValidPhoneNumber(value) ? '' : t('enter-valid-phone-number')
   }
 
+  const getPostalCodeError = (value: string) => {
+    const zip = value?.trim() ?? ''
+    if (!zip) return t('this-field-is-required')
+    return US_ZIP_REGEX.test(zip) ? '' : t('enter-valid-zip-code')
+  }
   const billingContactErrors = {
     firstName: getRequiredFieldError(billingContactOverride.firstName),
     lastNameOrSurname: getRequiredFieldError(billingContactOverride.lastNameOrSurname),
@@ -347,8 +365,10 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     companyOrOrganization: getRequiredFieldError(billingAddressOverride.companyOrOrganization),
     address1: getRequiredFieldError(billingAddressOverride.address1),
     cityOrTown: getRequiredFieldError(billingAddressOverride.cityOrTown),
-    postalOrZipCode: getRequiredFieldError(billingAddressOverride.postalOrZipCode),
+    postalOrZipCode: getPostalCodeError(billingAddressOverride.postalOrZipCode),
+
     countryCode: getRequiredFieldError(billingAddressOverride.countryCode),
+    stateOrProvince: getRequiredFieldError(billingAddressOverride.stateOrProvince),
   }
   const markBillingContactTouched = (field: keyof BillingContactOverride) =>
     setBillingContactTouched((prev) => ({ ...prev, [field]: true }))
@@ -571,6 +591,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
         (!!billingAddressErrors.companyOrOrganization ||
           !!billingAddressErrors.address1 ||
           !!billingAddressErrors.cityOrTown ||
+          !!billingAddressErrors.stateOrProvince ||
           !!billingAddressErrors.postalOrZipCode ||
           !!billingAddressErrors.countryCode)
       if (isBillingContactInvalid || isBillingAddressInvalid) {
@@ -589,6 +610,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
             companyOrOrganization: true,
             address1: true,
             cityOrTown: true,
+            stateOrProvince: true,
             postalOrZipCode: true,
             countryCode: true,
           })
@@ -636,6 +658,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
         (!!billingAddressErrors.companyOrOrganization ||
           !!billingAddressErrors.address1 ||
           !!billingAddressErrors.cityOrTown ||
+          !!billingAddressErrors.stateOrProvince ||
           !!billingAddressErrors.postalOrZipCode ||
           !!billingAddressErrors.countryCode)
       ) {
@@ -806,6 +829,9 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                 setPoNumber(value)
                 setPoNumberError('')
               }}
+              onBlur={() => {
+                if (!poNumber.trim()) setPoNumberError(t('this-field-is-required'))
+              }}
             />
             <FormControlLabel
               control={
@@ -837,6 +863,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                   setAuthorizerName(value)
                   setAuthorizerNameError(getAuthorizerNameError(value))
                 }}
+                onBlur={() => setAuthorizerNameError(getAuthorizerNameError(authorizerName))}
               />
               <KiboPhoneInput
                 value={authorizerPhone}
@@ -849,6 +876,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                   setAuthorizerPhone(value)
                   setAuthorizerPhoneError(getAuthorizerPhoneError(value))
                 }}
+                onBlur={() => setAuthorizerPhoneError(getAuthorizerPhoneError(authorizerPhone))}
               />
             </Stack>
             <KiboTextBox
@@ -861,7 +889,11 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       )}
 
       {isShippingLocked ? (
-        <ContactShippingSummary checkout={checkout} onEdit={() => setPhase('shipping')} />
+        <ContactShippingSummary
+          checkout={checkout}
+          onEdit={() => setPhase('shipping')}
+          preferredShippingMethodLabel={preferredShippingMethodLabel}
+        />
       ) : (
         <ContactShippingForm
           checkout={checkout}
@@ -1134,12 +1166,22 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         value={billingAddressOverride.stateOrProvince}
                         options={provinces}
                         required
+                        error={
+                          billingAddressTouched.stateOrProvince &&
+                          !!billingAddressErrors.stateOrProvince
+                        }
+                        helperText={
+                          billingAddressTouched.stateOrProvince
+                            ? billingAddressErrors.stateOrProvince
+                            : ''
+                        }
                         onChange={(_name, value) =>
                           setBillingAddressOverride((prev) => ({
                             ...prev,
                             stateOrProvince: value,
                           }))
                         }
+                        onBlur={() => markBillingAddressTouched('stateOrProvince')}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -1173,10 +1215,11 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                             ? billingAddressErrors.postalOrZipCode
                             : ''
                         }
+                        inputProps={{ maxLength: 10 }}
                         onChange={(_name, value) =>
                           setBillingAddressOverride((prev) => ({
                             ...prev,
-                            postalOrZipCode: value,
+                            postalOrZipCode: value.replace(/[^0-9-]/g, ''),
                           }))
                         }
                         onBlur={() => markBillingAddressTouched('postalOrZipCode')}
@@ -1404,7 +1447,6 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
               color="primary"
               loading={isPlacingOrder}
               onClick={handlePlaceOrder}
-              disabled={!canPlaceOrder}
               sx={{ ...checkoutPrimaryButtonSx, opacity: canPlaceOrder ? 1 : 0.5 }}
             >
               {t('Place Order')}

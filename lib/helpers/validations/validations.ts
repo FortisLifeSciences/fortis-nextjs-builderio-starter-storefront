@@ -35,3 +35,17 @@ export const isPasswordValid = (password: string) => {
     isHavingAtLeastOneSpecialCharacter
   )
 }
+
+export const personNamePattern = new RegExp("^[\\p{L}\\p{M}][\\p{L}\\p{M} '’.-]*$", 'u')
+
+export const organizationNamePattern = new RegExp(
+  "^[\\p{L}\\p{M}\\p{N}][\\p{L}\\p{M}\\p{N} &'\u2019.,()/-]*$",
+  'u'
+)
+
+export const streetAddressPattern = new RegExp(
+  "^[\\p{L}\\p{M}\\p{N}#][\\p{L}\\p{M}\\p{N} #&'\u2019.,()/-]*$",
+  'u'
+)
+
+export const cityNamePattern = new RegExp("^[\\p{L}\\p{M}][\\p{L}\\p{M} '’.-]*$", 'u')

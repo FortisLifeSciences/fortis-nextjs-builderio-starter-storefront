@@ -135,7 +135,10 @@ const ProductInventoryMessages = ({
         restockDate = null
       }
 
-      let USShippingCutOffTime, CAShippingCutOffTime, nonShippingDates, deliveryDate
+      let USShippingCutOffTime: string | undefined,
+        CAShippingCutOffTime: string | undefined,
+        nonShippingDates = '',
+        deliveryDate
       const buffer = 0
 
       // console.log(
@@ -163,15 +166,40 @@ const ProductInventoryMessages = ({
         scenario = 1009
         return { inventoryMessage, cartDisplayStatus, scenario }
       }
+      // Default automated "order within X hours... shipment by {date}" message, used whenever
+      // no Akeneo variant/parent-level availability message is configured for the scenario.
+      const getDefaultShippingMessage = () => {
+        USShippingCutOffTime = inventorySettings?.USShippingCutOffTime
+        CAShippingCutOffTime = inventorySettings?.CAShippingCutOffTime
+        if (selectCountryCode === 'United States') {
+          nonShippingDates = inventorySettings?.nonShippingDates || ''
+        }
+        const countDown = getCountdown(
+          selectCountryCode,
+          USShippingCutOffTime,
+          CAShippingCutOffTime
+        )
+        deliveryDate = getDeliveryDate(
+          selectCountryCode,
+          USShippingCutOffTime || '',
+          CAShippingCutOffTime || '',
+          nonShippingDates,
+          null,
+          buffer
+        )
+        return inventoryMessagesObj?.normalAvailability
+          ?.replace('{CountDown}', countDown)
+          ?.replace('{DeliveryDate}', deliveryDate)
+      }
+
       if (skuStatusArr && skuStatus?.toLowerCase() === 'active') {
         //for scenarion 3 on Backorder Restock Unknown
         if (
           stockBehaviour?.toLowerCase() === 'acceptbackorder' &&
-          availabilityMessage !== null &&
           stockAvailable < minimumStock &&
           restockDate === null
         ) {
-          inventoryMessage = availabilityMessage
+          inventoryMessage = availabilityMessage || getDefaultShippingMessage()
           cartDisplayStatus = true
           scenario = 1005
           return { inventoryMessage, cartDisplayStatus, scenario }
@@ -179,22 +207,17 @@ const ProductInventoryMessages = ({
         //for scenarion 6 no Inventory No Backorder
         if (
           stockBehaviour?.toLowerCase() === 'denybackorder' &&
-          availabilityMessage !== null &&
           stockAvailable < minimumStock &&
           restockDate === null
         ) {
-          inventoryMessage = availabilityMessage
+          inventoryMessage = availabilityMessage || getDefaultShippingMessage()
           cartDisplayStatus = false
           scenario = 6
           return { inventoryMessage, cartDisplayStatus, scenario }
         }
         //for scenario 5 Lead Time Required
-        if (
-          stockBehaviour?.toLowerCase() === 'madetoorder' &&
-          availabilityMessage !== null &&
-          restockDate === null
-        ) {
-          inventoryMessage = availabilityMessage
+        if (stockBehaviour?.toLowerCase() === 'madetoorder' && restockDate === null) {
+          inventoryMessage = availabilityMessage || getDefaultShippingMessage()
           cartDisplayStatus = true
           scenario = 5
           return { inventoryMessage, cartDisplayStatus, scenario }
@@ -257,37 +280,7 @@ const ProductInventoryMessages = ({
           stockAvailable >= minimumStock &&
           restockDate === null
         ) {
-          //selectCountryCode = product.get('selectedCountry');
-          //console.log("selectCountryCode inside inventory:"+selectCountryCode);
-          USShippingCutOffTime = inventorySettings?.USShippingCutOffTime
-          CAShippingCutOffTime = inventorySettings?.CAShippingCutOffTime
-          if (selectCountryCode === 'United States') {
-            nonShippingDates = inventorySettings?.nonShippingDates
-          } /*else if(selectCountryCode==='Canada'){
-                        nonShippingDates = Hypr.getThemeSetting("nonShippingDatesCanada");
-                    }*/
-          //for count down time
-          const countDown = getCountdown(
-            selectCountryCode,
-            USShippingCutOffTime,
-            CAShippingCutOffTime
-          )
-          //console.log("countdown:"+countDown);
-          //for delivery date
-          deliveryDate = getDeliveryDate(
-            selectCountryCode,
-            USShippingCutOffTime,
-            CAShippingCutOffTime,
-            nonShippingDates,
-            null,
-            buffer
-          )
-          //console.log("deliverydate:"+deliveryDate);
-          inventoryMessage = availabilityMessage
-            ? availabilityMessage
-            : inventoryMessages?.normalAvailability
-                ?.replace('{CountDown}', countDown)
-                ?.replace('{DeliveryDate}', deliveryDate)
+          inventoryMessage = availabilityMessage || getDefaultShippingMessage()
           cartDisplayStatus = true
           scenario = 1
           return { inventoryMessage, cartDisplayStatus, scenario }
