@@ -14,6 +14,12 @@ export const validatePassword = (password: string) => {
   }
 }
 
+export const CARDHOLDER_NAME_MAX_LENGTH = 50
+
+// Must contain at least one letter - rejects names made up of only digits/special characters,
+// while still allowing accented characters, spaces, hyphens and apostrophes.
+export const isCardholderNameValid = (value: string) => /[A-Za-zÀ-ɏ]/.test(value.trim())
+
 export const isPasswordValid = (password: string) => {
   const {
     isHavingAtLeastEightCharacters,
