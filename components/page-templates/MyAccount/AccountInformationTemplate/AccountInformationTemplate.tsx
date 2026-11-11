@@ -13,12 +13,16 @@ import {
   useUpdateCustomerProfile,
   useChangePassword,
   useUpdateCustomerB2bUserMutation,
+  useUpdateCustomerB2bAccountMutation,
 } from '@/hooks'
 import { userGetters } from '@/lib/getters'
-import { buildUpdateCustomerB2bUserParams } from '@/lib/helpers'
+import {
+  buildUpdateCustomerB2bUserParams,
+  buildUpdateCustomerB2bAccountParams,
+} from '@/lib/helpers'
 import { UpdateProfileDataParam, PasswordTypes } from '@/lib/types'
 
-import type { B2BUser, CustomerAccount } from '@/lib/gql/types'
+import type { B2BAccount, B2BUser, CustomerAccount } from '@/lib/gql/types'
 
 interface AccountInformationTemplateProps {
   user: CustomerAccount
@@ -59,6 +63,7 @@ const AccountInformationTemplate = (props: AccountInformationTemplateProps) => {
   const { updateUserData } = useUpdateCustomerProfile()
   const { changePassword } = useChangePassword()
   const { updateCustomerB2bUser } = useUpdateCustomerB2bUserMutation()
+  const { updateCustomerB2bAccount } = useUpdateCustomerB2bAccountMutation()
 
   const [editingSection, setEditingSection] = useState<EditableSection | null>(null)
 
@@ -103,6 +108,20 @@ const AccountInformationTemplate = (props: AccountInformationTemplateProps) => {
 
     try {
       await updateCustomerB2bUser.mutateAsync({ ...variables })
+
+      if (profileFormData.companyOrOrganization !== undefined) {
+        const accountParams: any = buildUpdateCustomerB2bAccountParams(
+          {
+            companyOrOrganization: profileFormData.companyOrOrganization,
+            taxId: user.taxId as string | undefined,
+            firstName,
+            lastName,
+            emailAddress,
+          },
+          { id } as B2BAccount
+        )
+        await updateCustomerB2bAccount.mutateAsync(accountParams)
+      }
     } catch (err) {
       console.error(err)
     }
@@ -158,7 +177,7 @@ const AccountInformationTemplate = (props: AccountInformationTemplateProps) => {
             lastName={lastName}
             emailAddress={emailAddress}
             companyOrOrganization={companyOrOrganization}
-            isCompanyEditable={!isB2BUser}
+            isCompanyEditable
             onSaveProfileData={(data) =>
               isB2BUser ? handleUpdateB2BProfileData(data) : handleUpdateProfileData(data)
             }
@@ -179,7 +198,7 @@ const AccountInformationTemplate = (props: AccountInformationTemplateProps) => {
             <InlineField
               label={String(t('company-institution-or-organization'))}
               value={companyOrOrganization}
-              action={isB2BUser ? undefined : editButton(EditableSection.ContactDetails)}
+              action={editButton(EditableSection.ContactDetails)}
               last
             />
           </>
