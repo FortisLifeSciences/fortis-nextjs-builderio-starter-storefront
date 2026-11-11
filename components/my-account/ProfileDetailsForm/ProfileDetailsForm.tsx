@@ -122,6 +122,9 @@ const ProfileDetailsForm = (props: ProfileDetailsFormProps) => {
       return {
         firstName: formData.firstName,
         lastName: formData.lastName,
+        ...(formData.companyOrOrganization !== undefined && {
+          companyOrOrganization: formData.companyOrOrganization,
+        }),
       }
     }
 
