@@ -38,6 +38,10 @@ import { orderGetters } from '@/lib/getters'
 import { makeGraphQLClient } from '@/lib/gql/client'
 import { getCartQuery } from '@/lib/gql/queries'
 import { buildCardPaymentActionForCheckoutParams, tokenizeCreditCardPayment } from '@/lib/helpers'
+import {
+  CARDHOLDER_NAME_MAX_LENGTH,
+  isCardholderNameValid,
+} from '@/lib/helpers/validations/validations'
 import type { CardForm, CardTypeForCheckout, TokenizedCard } from '@/lib/types'
 
 import type { AccountAtCheckoutResult } from '@/hooks'
@@ -71,6 +75,7 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
   const [cardFormData, setCardFormData] = useState<CardForm>({})
   const [isCardFormValid, setIsCardFormValid] = useState(false)
   const [cardholderName, setCardholderName] = useState('')
+  const [isCardholderNameTouched, setIsCardholderNameTouched] = useState(false)
   const [billingSameAsShipping, setBillingSameAsShipping] = useState(true)
   const [billingContactForm, setBillingContactForm] = useState<CrContact | undefined>()
   const [isBillingFormValid, setIsBillingFormValid] = useState(false)
@@ -85,9 +90,11 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
   const [wantsAccount, setWantsAccount] = useState(false)
 
   const isCardholderNameMissing = !cardholderName.trim()
+  const isCardholderNameInvalid = !isCardholderNameMissing && !isCardholderNameValid(cardholderName)
   const placeOrderIssues = [
     !agreeWithTerms && t('please-agree-to-terms'),
-    (isCardholderNameMissing || !isCardFormValid) && t('please-complete-card-details'),
+    (isCardholderNameMissing || isCardholderNameInvalid || !isCardFormValid) &&
+      t('please-complete-card-details'),
     !billingSameAsShipping && !isBillingFormValid && t('please-complete-billing-information'),
   ].filter(Boolean) as string[]
 
@@ -127,12 +134,13 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
   // reason via placeOrderError, so an incomplete click is never silent.
   const canPlaceOrder = useMemo(() => {
     if (!agreeWithTerms) return false
-    if (isCardholderNameMissing || !isCardFormValid) return false
+    if (isCardholderNameMissing || isCardholderNameInvalid || !isCardFormValid) return false
     if (!billingSameAsShipping && !isBillingFormValid) return false
     return true
   }, [
     agreeWithTerms,
     isCardholderNameMissing,
+    isCardholderNameInvalid,
     isCardFormValid,
     billingSameAsShipping,
     isBillingFormValid,
@@ -307,13 +315,22 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
                 value={cardholderName}
                 label={t('cardholder-name')}
                 required
-                error={showPlaceOrderIssues && isCardholderNameMissing}
+                error={
+                  (showPlaceOrderIssues || isCardholderNameTouched) &&
+                  (isCardholderNameMissing || isCardholderNameInvalid)
+                }
                 helperText={
-                  showPlaceOrderIssues && isCardholderNameMissing
+                  (showPlaceOrderIssues || isCardholderNameTouched) && isCardholderNameMissing
                     ? t('cardholder-name-required')
+                    : (showPlaceOrderIssues || isCardholderNameTouched) && isCardholderNameInvalid
+                    ? t('cardholder-name-invalid')
                     : ''
                 }
-                onChange={(_name, value) => setCardholderName(value)}
+                inputProps={{ maxLength: CARDHOLDER_NAME_MAX_LENGTH }}
+                onChange={(_name, value) =>
+                  setCardholderName(value.slice(0, CARDHOLDER_NAME_MAX_LENGTH))
+                }
+                onBlur={() => setIsCardholderNameTouched(true)}
               />
               <CardDetailsForm
                 validateForm={false}

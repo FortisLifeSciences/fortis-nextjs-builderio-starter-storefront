@@ -55,6 +55,10 @@ import {
   buildPurchaseOrderPaymentActionForCheckoutParams,
   tokenizeCreditCardPayment,
 } from '@/lib/helpers'
+import {
+  CARDHOLDER_NAME_MAX_LENGTH,
+  isCardholderNameValid,
+} from '@/lib/helpers/validations/validations'
 import { checkoutKeys } from '@/lib/react-query/queryKeys'
 import type {
   CardForm,
@@ -243,6 +247,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   const [cardFormData, setCardFormData] = useState<CardForm>({})
   const [isCardFormValid, setIsCardFormValid] = useState(false)
   const [cardholderName, setCardholderName] = useState('')
+  const [isCardholderNameTouched, setIsCardholderNameTouched] = useState(false)
   const [saveCard, setSaveCard] = useState(false)
   const [billingSameAsShipping, setBillingSameAsShipping] = useState(true)
   const [billingContactForm, setBillingContactForm] = useState<CrContact | undefined>()
@@ -507,6 +512,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   }
 
   const isCardholderNameMissing = !cardholderName.trim()
+  const isCardholderNameInvalid = !isCardholderNameMissing && !isCardholderNameValid(cardholderName)
   const isSavedCardCvvValid = /^\d{3,4}$/.test(cvv)
 
   const getPlaceOrderIssues = () => {
@@ -515,7 +521,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     if (selectedSavedCard) {
       if (!isSavedCardCvvValid) issues.push(t('please-complete-card-details'))
     } else {
-      if (isCardholderNameMissing || !isCardFormValid) {
+      if (isCardholderNameMissing || isCardholderNameInvalid || !isCardFormValid) {
         issues.push(t('please-complete-card-details'))
       }
       if (!billingSameAsShipping && !isBillingFormValid) {
@@ -638,7 +644,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       return true
     }
     if (selectedSavedCard) return /^\d{3,4}$/.test(cvv)
-    if (isCardholderNameMissing || !isCardFormValid) return false
+    if (isCardholderNameMissing || isCardholderNameInvalid || !isCardFormValid) return false
     if (!billingSameAsShipping && !isBillingFormValid) return false
     return true
   }, [
@@ -655,6 +661,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     selectedSavedCard,
     cvv,
     isCardholderNameMissing,
+    isCardholderNameInvalid,
     isCardFormValid,
     billingSameAsShipping,
     isBillingFormValid,
@@ -1225,13 +1232,23 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                       value={cardholderName}
                       label={t('cardholder-name')}
                       required
-                      error={showPlaceOrderIssues && isCardholderNameMissing}
+                      error={
+                        (showPlaceOrderIssues || isCardholderNameTouched) &&
+                        (isCardholderNameMissing || isCardholderNameInvalid)
+                      }
                       helperText={
-                        showPlaceOrderIssues && isCardholderNameMissing
+                        (showPlaceOrderIssues || isCardholderNameTouched) && isCardholderNameMissing
                           ? t('cardholder-name-required')
+                          : (showPlaceOrderIssues || isCardholderNameTouched) &&
+                            isCardholderNameInvalid
+                          ? t('cardholder-name-invalid')
                           : ''
                       }
-                      onChange={(_name, value) => setCardholderName(value)}
+                      inputProps={{ maxLength: CARDHOLDER_NAME_MAX_LENGTH }}
+                      onChange={(_name, value) =>
+                        setCardholderName(value.slice(0, CARDHOLDER_NAME_MAX_LENGTH))
+                      }
+                      onBlur={() => setIsCardholderNameTouched(true)}
                     />
                     <CardDetailsForm
                       validateForm={false}

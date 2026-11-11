@@ -489,6 +489,7 @@
   "lastname-error": "Please enter a last name",
   "cardholder-name": "Cardholder Name",
   "cardholder-name-required": "Cardholder name is required",
+  "cardholder-name-invalid": "Please enter a valid cardholder name",
   "billing-contact": "Billing Contact",
   "active": "Active",
   "in-active": "In Active",
