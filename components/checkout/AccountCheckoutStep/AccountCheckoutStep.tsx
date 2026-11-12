@@ -113,7 +113,7 @@ const emptyBillingAddressOverride: BillingAddressOverride = {
   companyOrOrganization: '',
   address1: '',
   address2: '',
-  countryCode: '',
+  countryCode: 'US',
   stateOrProvince: '',
   cityOrTown: '',
   postalOrZipCode: '',
