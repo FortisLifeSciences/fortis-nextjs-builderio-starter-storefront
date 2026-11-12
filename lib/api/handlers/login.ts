@@ -1,8 +1,8 @@
 import getConfig from 'next/config'
 
 import { fetcher, getAdditionalHeader } from '../util'
-import { apiAuthClient } from '../util/api-auth-client'
 import getUserClaimsFromRequest from '../util/getUserClaimsFromRequest'
+import { deleteCurrentCartMutation } from '@/lib/gql/mutations'
 import { fromBitVectorSetArray } from '@/lib/helpers'
 import { decodeParseCookieValue } from '@/lib/helpers/cookieHelper'
 import { NextApiRequestWithLogger } from '@/lib/types'
@@ -47,16 +47,36 @@ const getGuestCart = async (
   return { id: cart.id, itemIds: cart.itemIds }
 }
 
-const retireGuestCart = async (guestCart: GuestCart, userClaims: string, headers: any) => {
-  const userCart = await getCurrentCart(userClaims, headers)
-  const isMerged = guestCart.itemIds.every((itemId) => userCart.itemIds.includes(itemId))
-  if (!isMerged || userCart.id === guestCart.id) return false
-  const authToken = await apiAuthClient.getAccessToken()
-  const response = await fetch(
-    `https://${process.env.KIBO_API_HOST}/api/commerce/carts/${guestCart.id}`,
-    { method: 'DELETE', headers: { authorization: `Bearer ${authToken}` } }
+const MERGE_CHECK_ATTEMPTS = 3
+const MERGE_CHECK_DELAY_MS = 500
+
+type RetireResult = 'deleted' | 'transferred' | 'not-merged' | 'delete-failed'
+
+const waitForMergedAccountCart = async (guestCart: GuestCart, userClaims: string, headers: any) => {
+  for (let attempt = 1; attempt <= MERGE_CHECK_ATTEMPTS; attempt++) {
+    const userCart = await getCurrentCart(userClaims, headers)
+    if (userCart.id === guestCart.id) return 'transferred'
+    if (guestCart.itemIds.every((itemId) => userCart.itemIds.includes(itemId))) return 'merged'
+    if (attempt < MERGE_CHECK_ATTEMPTS) {
+      await new Promise((resolve) => setTimeout(resolve, MERGE_CHECK_DELAY_MS))
+    }
+  }
+  return 'not-merged'
+}
+
+const retireGuestCart = async (
+  guestCart: GuestCart,
+  guestClaims: string,
+  userClaims: string,
+  headers: any
+): Promise<RetireResult> => {
+  const mergeState = await waitForMergedAccountCart(guestCart, userClaims, headers)
+  if (mergeState !== 'merged') return mergeState
+  const response = await fetcher(
+    { query: deleteCurrentCartMutation },
+    { userClaims: guestClaims, headers }
   )
-  return response.ok
+  return response?.data?.deleteCurrentCart ? 'deleted' : 'delete-failed'
 }
 
 export default async function loginHandler(req: NextApiRequestWithLogger, res: NextApiResponse) {
@@ -64,11 +84,13 @@ export default async function loginHandler(req: NextApiRequestWithLogger, res: N
     const { query, variables } = req.body
     const userClaims = await getUserClaimsFromRequest(req, res)
     const headers = getAdditionalHeader(req)
-    const guestCart = await getGuestCart(req, userClaims, headers).catch((error) => {
-      req.logger.error('Unable to read guest cart before login', { message: error?.message })
-      return undefined
-    })
-    const response = await fetcher({ query, variables }, { userClaims, headers })
+    const [guestCart, response] = await Promise.all([
+      getGuestCart(req, userClaims, headers).catch((error) => {
+        req.logger.warn('Unable to read guest cart before login', { message: error?.message })
+        return undefined
+      }),
+      fetcher({ query, variables }, { userClaims, headers }),
+    ])
     if (response?.errors) {
       throw {
         message: response?.errors[0]?.extensions?.response?.body?.message,
@@ -95,16 +117,17 @@ export default async function loginHandler(req: NextApiRequestWithLogger, res: N
     }
     const encodedValue = Buffer.from(JSON.stringify(cookieValue)).toString('base64')
     // set cookie
-    if (userId && guestCart && account?.accessToken) {
+    if (userId && guestCart && userClaims && account?.accessToken) {
       try {
-        const isRetired = await retireGuestCart(guestCart, account.accessToken, headers)
-        if (!isRetired) {
-          req.logger.error('Guest cart was not merged into the account cart; left in place', {
+        const result = await retireGuestCart(guestCart, userClaims, account.accessToken, headers)
+        if (result === 'not-merged' || result === 'delete-failed') {
+          req.logger.warn('Guest cart left in place after login', {
             guestCartId: guestCart.id,
+            reason: result,
           })
         }
       } catch (error: any) {
-        req.logger.error('Unable to retire guest cart after login', { message: error?.message })
+        req.logger.warn('Unable to retire guest cart after login', { message: error?.message })
       }
     }
     if (userId) {
