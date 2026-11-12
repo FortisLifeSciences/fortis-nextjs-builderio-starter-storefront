@@ -53,6 +53,7 @@ import { cardGetters, orderGetters, userGetters } from '@/lib/getters'
 import {
   buildCardPaymentActionForCheckoutParams,
   buildPurchaseOrderPaymentActionForCheckoutParams,
+  getCvvLengthForCardType,
   tokenizeCreditCardPayment,
 } from '@/lib/helpers'
 import { checkoutKeys } from '@/lib/react-query/queryKeys'
@@ -515,7 +516,8 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   }
 
   const isCardholderNameMissing = !cardholderName.trim()
-  const isSavedCardCvvValid = /^\d{3,4}$/.test(cvv)
+  const savedCardCvvLength = getCvvLengthForCardType(selectedSavedCard?.cardInfo?.cardType)
+  const isSavedCardCvvValid = new RegExp(`^\\d{${savedCardCvvLength}}$`).test(cvv)
 
   const getPlaceOrderIssues = () => {
     if (isPurchaseOrder) return []
@@ -607,7 +609,10 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       setShowPlaceOrderIssues(true)
       setPlaceOrderError('')
       if (selectedSavedCard) {
-        if (!isSavedCardCvvValid) setCvvError(cvv ? t('invalid-cvv') : t('cvv-is-required'))
+        if (!isSavedCardCvvValid) {
+          setCvvError(cvv ? t('invalid-cvv') : t('cvv-is-required'))
+          if (cvv) setCvv('')
+        }
       } else {
         setCardValidationRequest((count) => count + 1)
       }
@@ -648,7 +653,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       }
       return true
     }
-    if (selectedSavedCard) return /^\d{3,4}$/.test(cvv)
+    if (selectedSavedCard) return isSavedCardCvvValid
     if (isCardholderNameMissing || !isCardFormValid) return false
     if (!billingSameAsShipping && !isBillingFormValid) return false
     return true
@@ -1240,8 +1245,9 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                     required
                     error={!!cvvError}
                     helperText={cvvError}
+                    inputProps={{ maxLength: savedCardCvvLength }}
                     onChange={(_name, value) => {
-                      setCvv(value.replace(/\D/g, '').slice(0, 4))
+                      setCvv(value.replace(/\D/g, '').slice(0, savedCardCvvLength))
                       setCvvError('')
                       setPlaceOrderError('')
                     }}
