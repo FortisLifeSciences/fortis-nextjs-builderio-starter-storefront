@@ -524,15 +524,17 @@ const StandardShippingStep = (props: ShippingProps) => {
             </NoSsr>
           </Stack>
           {shippingMethods.length > 0 && (
-            <ShippingMethod
-              shipItems={shipItems}
-              pickupItems={pickupItems}
-              orderShipmentMethods={[...shippingMethods]}
-              selectedShippingMethodCode={checkoutShippingMethodCode}
-              onShippingMethodChange={handleSaveShippingMethod}
-              onStoreLocatorClick={handleStoreLocatorClick}
-              checkout={checkout}
-            />
+            <Box sx={{ mt: 3 }}>
+              <ShippingMethod
+                shipItems={shipItems}
+                pickupItems={pickupItems}
+                orderShipmentMethods={[...shippingMethods]}
+                selectedShippingMethodCode={checkoutShippingMethodCode}
+                onShippingMethodChange={handleSaveShippingMethod}
+                onStoreLocatorClick={handleStoreLocatorClick}
+                checkout={checkout}
+              />
+            </Box>
           )}
         </>
       )}
