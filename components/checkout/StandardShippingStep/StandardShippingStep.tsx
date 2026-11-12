@@ -58,6 +58,11 @@ const StandardShippingStep = (props: ShippingProps) => {
   const { user } = useAuthContext()
   const checkoutShippingContact = orderGetters.getShippingContact(checkout)
   const checkoutShippingMethodCode = orderGetters.getShippingMethodCode(checkout)
+  const checkoutShippingMethodName = orderGetters.getShippingMethodName(checkout)
+  const [lastSavedShippingMethod, setLastSavedShippingMethod] = useState<{
+    code?: string
+    name?: string
+  }>({ code: checkoutShippingMethodCode, name: checkoutShippingMethodName })
   // getting shipping address from all addresses returned from server
   const userShippingAddress = isAuthenticated
     ? userGetters.getUserShippingAddress(addresses?.items as CustomerContact[])
@@ -195,10 +200,20 @@ const StandardShippingStep = (props: ShippingProps) => {
       if (isAddressSavedToAccount) {
         const customerSavedAddress = await handleSaveAddressToAccount(contact)
         const { accountId: _, types: __, label: ___, ...customerContact } = customerSavedAddress
-        await updateOrderShippingInfo.mutateAsync({ checkout, contact: customerContact })
+        await updateOrderShippingInfo.mutateAsync({
+          checkout,
+          contact: customerContact,
+          shippingMethodCode: lastSavedShippingMethod.code,
+          shippingMethodName: lastSavedShippingMethod.name,
+        })
         setSelectedShippingAddressId(customerSavedAddress?.id as number)
       } else {
-        await updateOrderShippingInfo.mutateAsync({ checkout, contact })
+        await updateOrderShippingInfo.mutateAsync({
+          checkout,
+          contact,
+          shippingMethodCode: lastSavedShippingMethod.code,
+          shippingMethodName: lastSavedShippingMethod.name,
+        })
         setSelectedShippingAddressId((contact?.id as number) || DefaultId.ADDRESSID)
       }
       setIsAddressSavedToAccount(false)
@@ -273,6 +288,7 @@ const StandardShippingStep = (props: ShippingProps) => {
         shippingMethodCode,
         shippingMethodName,
       })
+      setLastSavedShippingMethod({ code: shippingMethodCode, name: shippingMethodName })
       return true
     } catch (error) {
       console.error(error)

@@ -273,7 +273,7 @@ const ShippingPreferenceTemplate = (props: ShippingPreferenceTemplateProps) => {
             variant="standard"
             fullWidth
             value={fedexDraft}
-            label={t('ending')}
+            placeholder={String(t('enter-your-fedex-account-number'))}
             error={Boolean(fedexError)}
             helperText={fedexError}
             onChange={(event) => {
