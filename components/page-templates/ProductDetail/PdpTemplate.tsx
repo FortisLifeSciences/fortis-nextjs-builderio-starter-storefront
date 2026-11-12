@@ -184,6 +184,8 @@ interface PdpTemplateProps {
   citationApiKey?: string | null
 }
 
+const MAX_INITIAL_DOCUMENTS = 6
+
 const scrollToSection = (id: string) => {
   const element = document.getElementById(id)
   if (!element) return
@@ -413,18 +415,21 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     findProperty(updatedProduct, 'tenant~validation-text')
   )[0]
 
-  const documents = (digitalDocumentData ?? []).filter((doc: any) => {
+  const allDocuments = (digitalDocumentData ?? []).filter((doc: any) => {
     const type = doc?.properties?.assettype
-    if (!type || type === 'ProductImage') return false
-    return showAllDocs || doc?.properties?.displayonpdp === 'True'
+    return Boolean(type) && type !== 'ProductImage'
   })
-  const hasHiddenDocs = (digitalDocumentData ?? []).some(
-    (doc: any) =>
-      doc?.properties?.assettype &&
-      doc?.properties?.assettype !== 'ProductImage' &&
-      doc?.properties?.displayonpdp !== 'True'
+  const featuredDocuments = allDocuments.filter(
+    (doc: any) => doc?.properties?.displayonpdp === 'True'
   )
-  const hasDocuments = documents.length > 0 || hasHiddenDocs
+  const orderedDocuments = [
+    ...featuredDocuments,
+    ...allDocuments.filter((doc: any) => doc?.properties?.displayonpdp !== 'True'),
+  ]
+  const initialDocuments = orderedDocuments.slice(0, MAX_INITIAL_DOCUMENTS)
+  const documents = showAllDocs ? orderedDocuments : initialDocuments
+  const hasHiddenDocs = orderedDocuments.length > initialDocuments.length
+  const hasDocuments = orderedDocuments.length > 0
   const currentLot = getPropertyValues(
     findProperty(currentProduct, 'tenant~current-lot-variant')
   )[0]
@@ -1077,40 +1082,44 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     documents: hasDocuments ? (
       <section className={styles.documents} id="document-section">
         <h2 className={styles.heading}>Documents</h2>
-        {documents.map((doc: any) => {
-          const lot = doc?.properties?.assetlotnumber
-          const lotLabel = lot ? `${lot}${lot === currentLot ? ' (current lot)' : ''}` : null
-          return (
-            <a
-              className={styles.documentLink}
-              key={doc.id}
-              href={`/cms/files/${doc.properties.salsifyname}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <div className={styles.documentRow}>
-                <span className={styles.docIcon}>
-                  <DocIcon />
-                </span>
-                <span>
-                  <span className={styles.docTitle}>
-                    {doc?.properties?.assettype === 'Datasheet'
-                      ? 'Product Datasheet'
-                      : 'Safety Data Sheet'}
-                  </span>
-                  <span className={styles.docSub}>
-                    PDF{catalogNumber ? ` · ${catalogNumber}` : ''}
-                    {lotLabel ? ` · Lot ${lotLabel}` : ''}
-                  </span>
-                </span>
-                <span className={styles.docAction}>
-                  <span>Open</span>
-                  <Arrow />
-                </span>
-              </div>
-            </a>
-          )
-        })}
+        {documents.length > 0 ? (
+          <div className={styles.documentGrid}>
+            {documents.map((doc: any) => {
+              const lot = doc?.properties?.assetlotnumber
+              const lotLabel = lot ? `${lot}${lot === currentLot ? ' (current lot)' : ''}` : null
+              return (
+                <a
+                  className={styles.documentLink}
+                  key={doc.id}
+                  href={`/cms/files/${doc.properties.salsifyname}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <div className={styles.documentRow}>
+                    <span className={styles.docIcon}>
+                      <DocIcon />
+                    </span>
+                    <span>
+                      <span className={styles.docTitle}>
+                        {doc?.properties?.assettype === 'Datasheet'
+                          ? 'Product Datasheet'
+                          : 'Safety Data Sheet'}
+                      </span>
+                      <span className={styles.docSub}>
+                        PDF{catalogNumber ? ` · ${catalogNumber}` : ''}
+                        {lotLabel ? ` · Lot ${lotLabel}` : ''}
+                      </span>
+                    </span>
+                    <span className={styles.docAction}>
+                      <span>Open</span>
+                      <Arrow />
+                    </span>
+                  </div>
+                </a>
+              )
+            })}
+          </div>
+        ) : null}
         {hasHiddenDocs ? (
           <button
             type="button"
@@ -1260,14 +1269,27 @@ const PdpTemplate = (props: PdpTemplateProps) => {
         ) : null}
 
         <div className={styles.heroGrid}>
+          <aside className={styles.rail}>
+            <div className={styles.mediaCard}>{mediaCardInner}</div>
+            {brandCard}
+          </aside>
+
           <div className={styles.heroCopy}>
             {brandName ? <div className={styles.eyebrow}>{brandName}</div> : null}
             <div className={styles.titleLine}>
               <h1 className={styles.title}>
                 {heroTitle}
-                {newProduct ? <span className={styles.titleNew}>{t('new')}</span> : null}
+                {newProduct ? (
+                  <>
+                    {' '}
+                    <span className={styles.titleNew}>{t('new')}</span>
+                  </>
+                ) : null}
                 {discountPercent ? (
-                  <span className={styles.titleDiscount}>−{discountPercent}%</span>
+                  <>
+                    {' '}
+                    <span className={styles.titleDiscount}>−{discountPercent}%</span>
+                  </>
                 ) : null}
               </h1>
             </div>
@@ -1339,11 +1361,6 @@ const PdpTemplate = (props: PdpTemplateProps) => {
               <React.Fragment key={id}>{sectionNodes[id]}</React.Fragment>
             ))}
           </div>
-
-          <aside className={styles.rail}>
-            <div className={styles.mediaCard}>{mediaCardInner}</div>
-            {brandCard}
-          </aside>
         </div>
 
         {brandConfig.belowSections.map((id) => (
@@ -1360,7 +1377,7 @@ const PdpTemplate = (props: PdpTemplateProps) => {
             aria-expanded={drawerOpen}
             tabIndex={drawerOpen ? 0 : -1}
           >
-            <span className={styles.mobileSupportLabel}>See Support</span>
+            <span className={styles.mobileSupportLabel}>See more</span>
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M6 15l6-6 6 6" />
             </svg>
@@ -1385,7 +1402,7 @@ const PdpTemplate = (props: PdpTemplateProps) => {
             onClick={() => setDrawerOpen(!drawerOpen)}
             aria-expanded={drawerOpen}
           >
-            <span className={styles.mobileSupportLabel}>See Support</span>
+            <span className={styles.mobileSupportLabel}>See more</span>
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M6 15l6-6 6 6" />
             </svg>

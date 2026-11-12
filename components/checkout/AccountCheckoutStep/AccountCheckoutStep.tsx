@@ -47,7 +47,7 @@ import {
 } from '@/components/common'
 import { toE164PhoneNumber } from '@/components/common/KiboPhoneInput/KiboPhoneInput'
 import { useAuthContext } from '@/context'
-import { useUpdateOrder } from '@/hooks'
+import { useGetCurrentCustomer, useUpdateOrder } from '@/hooks'
 import { AccountType, CurrencyCode, PaymentType, PaymentWorkflow } from '@/lib/constants'
 import { cardGetters, orderGetters, userGetters } from '@/lib/getters'
 import {
@@ -56,6 +56,10 @@ import {
   getCvvLengthForCardType,
   tokenizeCreditCardPayment,
 } from '@/lib/helpers'
+import {
+  CARDHOLDER_NAME_MAX_LENGTH,
+  isCardholderNameValid,
+} from '@/lib/helpers/validations/validations'
 import { checkoutKeys } from '@/lib/react-query/queryKeys'
 import type {
   CardForm,
@@ -181,6 +185,18 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   const { user } = useAuthContext()
   const { updateOrder } = useUpdateOrder()
   const queryClient = useQueryClient()
+  const { data: customerAccountForShippingPreference } = useGetCurrentCustomer()
+  const shippingPreferenceAttr = customerAccountForShippingPreference?.attributes?.find(
+    (attr) => attr?.fullyQualifiedName === 'tenant~shipping-method'
+  )
+  const shippingPreferenceValue = shippingPreferenceAttr?.values?.[0] || ''
+  const preferredShippingMethodLabel = shippingPreferenceValue.includes('FedEx Account')
+    ? 'FedEx Account'
+    : shippingPreferenceValue.includes('UPS Account')
+    ? 'UPS Account'
+    : shippingPreferenceValue
+    ? String(t('fortis-overnight-shipping'))
+    : undefined
 
   const isB2BUser = user?.accountType?.toLowerCase() === AccountType.B2B.toLowerCase()
   const isPOEnabled = !!customerPurchaseOrderAccount?.isEnabled
@@ -245,6 +261,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   const [cardFormData, setCardFormData] = useState<CardForm>({})
   const [isCardFormValid, setIsCardFormValid] = useState(false)
   const [cardholderName, setCardholderName] = useState('')
+  const [isCardholderNameTouched, setIsCardholderNameTouched] = useState(false)
   const [saveCard, setSaveCard] = useState(false)
   const [billingSameAsShipping, setBillingSameAsShipping] = useState(true)
   const [billingContactForm, setBillingContactForm] = useState<CrContact | undefined>()
@@ -516,8 +533,9 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   }
 
   const isCardholderNameMissing = !cardholderName.trim()
-  const savedCardCvvLength = getCvvLengthForCardType(selectedSavedCard?.cardInfo?.cardType)
-  const isSavedCardCvvValid = new RegExp(`^\\d{${savedCardCvvLength}}$`).test(cvv)
+ 
+  if (selectedSavedCard) return isSavedCardCvvValid
+  if (isCardholderNameMissing || isCardholderNameInvalid || !isCardFormValid) return false
 
   const getPlaceOrderIssues = () => {
     if (isPurchaseOrder) return []
@@ -525,7 +543,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     if (selectedSavedCard) {
       if (!isSavedCardCvvValid) issues.push(t('please-complete-card-details'))
     } else {
-      if (isCardholderNameMissing || !isCardFormValid) {
+      if (isCardholderNameMissing || isCardholderNameInvalid || !isCardFormValid) {
         issues.push(t('please-complete-card-details'))
       }
       if (!billingSameAsShipping && !isBillingFormValid) {
@@ -653,8 +671,10 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       }
       return true
     }
-    if (selectedSavedCard) return isSavedCardCvvValid
-    if (isCardholderNameMissing || !isCardFormValid) return false
+    
+    const savedCardCvvLength = getCvvLengthForCardType(selectedSavedCard?.cardInfo?.cardType)
+    const isSavedCardCvvValid = new RegExp(`^\\d{${savedCardCvvLength}}$`).test(cvv)
+    const isCardholderNameInvalid = !isCardholderNameMissing && !isCardholderNameValid(cardholderName)
     if (!billingSameAsShipping && !isBillingFormValid) return false
     return true
   }, [
@@ -671,6 +691,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     selectedSavedCard,
     cvv,
     isCardholderNameMissing,
+    isCardholderNameInvalid,
     isCardFormValid,
     billingSameAsShipping,
     isBillingFormValid,
@@ -875,7 +896,11 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       )}
 
       {isShippingLocked ? (
-        <ContactShippingSummary checkout={checkout} onEdit={() => setPhase('shipping')} />
+        <ContactShippingSummary
+          checkout={checkout}
+          onEdit={() => setPhase('shipping')}
+          preferredShippingMethodLabel={preferredShippingMethodLabel}
+        />
       ) : (
         <ContactShippingForm
           checkout={checkout}
@@ -1258,13 +1283,23 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                       value={cardholderName}
                       label={t('cardholder-name')}
                       required
-                      error={showPlaceOrderIssues && isCardholderNameMissing}
+                      error={
+                        (showPlaceOrderIssues || isCardholderNameTouched) &&
+                        (isCardholderNameMissing || isCardholderNameInvalid)
+                      }
                       helperText={
-                        showPlaceOrderIssues && isCardholderNameMissing
+                        (showPlaceOrderIssues || isCardholderNameTouched) && isCardholderNameMissing
                           ? t('cardholder-name-required')
+                          : (showPlaceOrderIssues || isCardholderNameTouched) &&
+                            isCardholderNameInvalid
+                          ? t('cardholder-name-invalid')
                           : ''
                       }
-                      onChange={(_name, value) => setCardholderName(value)}
+                      inputProps={{ maxLength: CARDHOLDER_NAME_MAX_LENGTH }}
+                      onChange={(_name, value) =>
+                        setCardholderName(value.slice(0, CARDHOLDER_NAME_MAX_LENGTH))
+                      }
+                      onBlur={() => setIsCardholderNameTouched(true)}
                     />
                     <CardDetailsForm
                       validateForm={false}

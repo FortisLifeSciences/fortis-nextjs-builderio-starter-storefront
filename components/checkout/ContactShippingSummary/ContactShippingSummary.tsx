@@ -11,15 +11,17 @@ import type { CrOrder } from '@/lib/gql/types'
 export interface ContactShippingSummaryProps {
   checkout: CrOrder
   onEdit: () => void
+  preferredShippingMethodLabel?: string
 }
 
 // Read-only "already collected" view of the contact & shipping details - shown once the
 // shopper has moved past that step, in both guest checkout and the logged-in PO checkout.
 const ContactShippingSummary = (props: ContactShippingSummaryProps) => {
-  const { checkout, onEdit } = props
+  const { checkout, onEdit, preferredShippingMethodLabel } = props
   const { t } = useTranslation('common')
   const contact = orderGetters.getShippingContact(checkout)
-  const shippingMethodName = orderGetters.getShippingMethodName(checkout)
+  const shippingMethodName =
+    preferredShippingMethodLabel || orderGetters.getShippingMethodName(checkout)
   const address = contact?.address
 
   return (

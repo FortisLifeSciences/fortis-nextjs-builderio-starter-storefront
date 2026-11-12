@@ -9,6 +9,9 @@ const KNOWN_ERROR_MESSAGES: Record<string, string> = {
 
 const PAYMENT_ERROR_MESSAGE = 'Error on payment. Please check billing details and try again.'
 
+const ADDRESS_VERIFY_FAILURE_MESSAGE =
+  "We couldn't verify this address. Please check that the street, city, state and zip code are correct, then try again."
+
 const DISPLAYABLE_ERROR_MESSAGES: Record<string, string> = {
   'Validation Error: Unable to adjust payments to match order total.': PAYMENT_ERROR_MESSAGE,
 }
@@ -105,6 +108,14 @@ const queryClientHandler = (error: any, showSnackbar: any) => {
     parsedError?.response?.message?.includes('Password must be different from the previous')
   ) {
     showSnackbar(parsedError.response.message, status)
+    return
+  } else if (
+    [parsedError?.response?.message, error?.response?.message, error?.message].some(
+      (message) =>
+        message?.includes('ADDRESS.VERIFY.FAILURE') || message?.includes('Unable to verify address')
+    )
+  ) {
+    showSnackbar(ADDRESS_VERIFY_FAILURE_MESSAGE, status)
     return
   }
 
