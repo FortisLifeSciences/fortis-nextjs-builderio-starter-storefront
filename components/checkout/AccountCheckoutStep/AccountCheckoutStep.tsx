@@ -52,6 +52,7 @@ import { cardGetters, orderGetters, userGetters } from '@/lib/getters'
 import {
   buildCardPaymentActionForCheckoutParams,
   buildPurchaseOrderPaymentActionForCheckoutParams,
+  getCvvLengthForCardType,
   tokenizeCreditCardPayment,
 } from '@/lib/helpers'
 import { checkoutKeys } from '@/lib/react-query/queryKeys'
@@ -536,6 +537,27 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     }
   }
 
+  const isCardholderNameMissing = !cardholderName.trim()
+  const savedCardCvvLength = getCvvLengthForCardType(selectedSavedCard?.cardInfo?.cardType)
+  const isSavedCardCvvValid = new RegExp(`^\\d{${savedCardCvvLength}}$`).test(cvv)
+
+  const getPlaceOrderIssues = () => {
+    if (isPurchaseOrder) return []
+    const issues: string[] = agreeWithTerms ? [] : [t('please-agree-to-terms')]
+    if (selectedSavedCard) {
+      if (!isSavedCardCvvValid) issues.push(t('please-complete-card-details'))
+    } else {
+      if (isCardholderNameMissing || !isCardFormValid) {
+        issues.push(t('please-complete-card-details'))
+      }
+      if (!billingSameAsShipping && !isBillingFormValid) {
+        issues.push(t('please-complete-billing-information'))
+      }
+    }
+    return issues
+  }
+  const placeOrderIssues = getPlaceOrderIssues()
+
   const validateBeforePlacingOrder = () => {
     if (!agreeWithTerms) {
       setPlaceOrderError(t('please-agree-to-terms'))
@@ -624,8 +646,8 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       }
       return true
     }
-    if (selectedSavedCard) return /^\d{3,4}$/.test(cvv)
-    if (!isCardFormValid) return false
+    if (selectedSavedCard) return isSavedCardCvvValid
+    if (isCardholderNameMissing || !isCardFormValid) return false
     if (!billingSameAsShipping && !isBillingFormValid) return false
     return true
   }, [
@@ -1127,8 +1149,9 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                     required
                     error={!!cvvError}
                     helperText={cvvError}
+                    inputProps={{ maxLength: savedCardCvvLength }}
                     onChange={(_name, value) => {
-                      setCvv(value.replace(/\D/g, '').slice(0, 4))
+                      setCvv(value.replace(/\D/g, '').slice(0, savedCardCvvLength))
                       setCvvError('')
                       setPlaceOrderError('')
                     }}
