@@ -19,7 +19,7 @@ type PasswordFieldType = 'currentPassword' | 'newPassword' | 'confirmPassword'
 export interface ProfileDetailsFormProps extends ProfileDetails {
   isEmailForm?: boolean
   isPasswordForm?: boolean
-  isCompanyEditable?: boolean
+  isOrganizationForm?: boolean
   onSaveProfileData: <T extends UpdateProfileDataParam>(profileData: T) => void
   onCancel: () => void
 }
@@ -37,14 +37,25 @@ const useCardSchema = () => {
     .test('not-blank', t('this-field-is-required'), (value) => !!value?.trim())
 
   return yup.object({
-    firstName: yup.string().when(['$isEmailForm', '$isPasswordForm'], {
-      is: (isEmailForm: boolean, isPasswordForm: boolean) => !isEmailForm && !isPasswordForm,
+    firstName: yup.string().when(['$isEmailForm', '$isPasswordForm', '$isOrganizationForm'], {
+      is: (isEmailForm: boolean, isPasswordForm: boolean, isOrganizationForm: boolean) =>
+        !isEmailForm && !isPasswordForm && !isOrganizationForm,
       then: nameSchema.required(t('this-field-is-required')),
     }),
-    lastName: yup.string().when(['$isEmailForm', '$isPasswordForm'], {
-      is: (isEmailForm: boolean, isPasswordForm: boolean) => !isEmailForm && !isPasswordForm,
+    lastName: yup.string().when(['$isEmailForm', '$isPasswordForm', '$isOrganizationForm'], {
+      is: (isEmailForm: boolean, isPasswordForm: boolean, isOrganizationForm: boolean) =>
+        !isEmailForm && !isPasswordForm && !isOrganizationForm,
       then: nameSchema.required(t('this-field-is-required')),
     }),
+    companyOrOrganization: yup
+      .string()
+      .when('$isOrganizationForm', (isOrganizationForm, schema) => {
+        if (isOrganizationForm) {
+          return schema
+            .required(t('this-field-is-required'))
+            .test('not-blank', t('this-field-is-required'), (value: string) => !!value?.trim())
+        }
+      }),
     emailAddress: yup.string().when('$isEmailForm', (isEmailForm, schema) => {
       if (isEmailForm) {
         return schema
@@ -84,7 +95,7 @@ const ProfileDetailsForm = (props: ProfileDetailsFormProps) => {
     companyOrOrganization = '',
     isEmailForm = false,
     isPasswordForm = false,
-    isCompanyEditable = true,
+    isOrganizationForm = false,
     onSaveProfileData,
     onCancel,
   } = props
@@ -108,7 +119,7 @@ const ProfileDetailsForm = (props: ProfileDetailsFormProps) => {
     criteriaMode: 'firstError',
     resolver: yupResolver(cardSchema),
     shouldFocusError: true,
-    context: { isEmailForm, isPasswordForm },
+    context: { isEmailForm, isPasswordForm, isOrganizationForm },
   })
   const userEnteredPassword = watch('newPassword')
   const confirmationPassword = watch('confirmPassword')
@@ -118,13 +129,14 @@ const ProfileDetailsForm = (props: ProfileDetailsFormProps) => {
       return { emailAddress: formData.emailAddress }
     }
 
+    if (formData.companyOrOrganization !== undefined && formData.firstName === undefined) {
+      return { companyOrOrganization: formData.companyOrOrganization }
+    }
+
     if (formData.firstName && formData.lastName) {
       return {
         firstName: formData.firstName,
         lastName: formData.lastName,
-        ...(formData.companyOrOrganization !== undefined && {
-          companyOrOrganization: formData.companyOrOrganization,
-        }),
       }
     }
 
@@ -238,7 +250,7 @@ const ProfileDetailsForm = (props: ProfileDetailsFormProps) => {
             </>
           )}
 
-          {!isEmailForm && !isPasswordForm && (
+          {!isEmailForm && !isPasswordForm && !isOrganizationForm && (
             <>
               <Controller
                 name="firstName"
@@ -272,24 +284,26 @@ const ProfileDetailsForm = (props: ProfileDetailsFormProps) => {
                   />
                 )}
               />
-              {isCompanyEditable && (
-                <Controller
-                  name="companyOrOrganization"
-                  control={control}
-                  defaultValue={companyOrOrganization}
-                  render={({ field }) => (
-                    <KiboTextBox
-                      value={field.value || ''}
-                      label={t('company-institution-or-organization')}
-                      onChange={(_name, value) => field.onChange(value)}
-                      onBlur={field.onBlur}
-                      error={!!errors?.companyOrOrganization}
-                      helperText={errors?.companyOrOrganization?.message as string}
-                    />
-                  )}
+            </>
+          )}
+
+          {isOrganizationForm && (
+            <Controller
+              name="companyOrOrganization"
+              control={control}
+              defaultValue={companyOrOrganization}
+              render={({ field }) => (
+                <KiboTextBox
+                  value={field.value || ''}
+                  label={t('company-institution-or-organization')}
+                  required
+                  onChange={(_name, value) => field.onChange(value)}
+                  onBlur={field.onBlur}
+                  error={!!errors?.companyOrOrganization}
+                  helperText={errors?.companyOrOrganization?.message as string}
                 />
               )}
-            </>
+            />
           )}
 
           <Stack direction="row" alignItems="center" gap={2} sx={{ marginTop: '1rem' }}>
