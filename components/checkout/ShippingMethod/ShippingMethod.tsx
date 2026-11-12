@@ -887,7 +887,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                 : ''
             }
             align="center"
-            boxSx={shippingMethodCardSx}
+            boxSx={{ ...shippingMethodCardSx, '&:not(:last-of-type)': { mb: '12px' } }}
             onChange={(value) => {
               selectShippingMethod('fortis')
               handleShippingMethodChange(value)
