@@ -36,20 +36,20 @@ const StyledCardDiv = styled('div', {
   paddingLeft: '0.5rem',
 }))
 
-const cardInputSx = {
+const getCardInputSx = (error: boolean) => ({
   height: '44px',
   borderRadius: '8px',
   borderColor: '#C9C8D9',
   transition: 'border-color 0.2s, box-shadow 0.2s',
   '&:hover': { borderColor: '#30299A' },
   '&.MuiInputBase-root:focus-within': {
-    borderColor: '#30299A',
-    boxShadow: '0 0 0 3px rgba(48, 41, 154, 0.15)',
+    borderColor: error ? 'error.main' : '#30299A',
+    boxShadow: error ? '0 0 0 3px rgba(211, 47, 47, 0.15)' : '0 0 0 3px rgba(48, 41, 154, 0.15)',
   },
   '&.Mui-error': { borderColor: 'error.main' },
   '& .MuiInputBase-input': { padding: '0 14px', letterSpacing: '0.02em' },
   '& .MuiInputBase-input::placeholder': { color: '#8C8BA3', opacity: 1 },
-}
+})
 
 const useCardSchema = (showCvv: boolean) => {
   const { t } = useTranslation('common')
@@ -165,7 +165,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                   value={field.value || ''}
                   label={t('card-number')}
                   required={true}
-                  sx={cardInputSx}
+                  sx={getCardInputSx(!!errors?.cardNumber)}
                   onChange={(_name, value) => {
                     const sanitizedValue = value.replace(/\D/g, '').substring(0, 19)
                     handleCardType(field, sanitizedValue)
@@ -203,7 +203,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                   value={field.value || ''}
                   label={t('expires-mm-yyyy')}
                   placeholder={t('expiry-date-placeholder')}
-                  sx={cardInputSx}
+                  sx={getCardInputSx(!!errors?.expiryDate)}
                   required={true}
                   onChange={(_name, value) => {
                     const previous = field.value || ''
@@ -267,7 +267,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                         label={t('cvv-code')}
                         placeholder={t('cvv-placeholder')}
                         required={true}
-                        sx={cardInputSx}
+                        sx={getCardInputSx(!!errors?.cvv)}
                         onChange={(_name, value) => {
                           const sanitizedValue = value.replace(/\D/g, '').substring(0, 4)
                           field.onChange(sanitizedValue)
