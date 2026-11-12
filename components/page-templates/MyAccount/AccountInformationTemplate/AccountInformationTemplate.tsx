@@ -113,7 +113,7 @@ const AccountInformationTemplate = (props: AccountInformationTemplateProps) => {
       await updateCustomerB2bUser.mutateAsync({ ...variables })
 
       if (profileFormData.companyOrOrganization !== undefined) {
-        const accountParams = buildUpdateCustomerB2bAccountParams(
+        const accountParams: any = buildUpdateCustomerB2bAccountParams(
           {
             companyOrOrganization: profileFormData.companyOrOrganization,
             taxId: user.taxId as string | undefined,
@@ -125,8 +125,6 @@ const AccountInformationTemplate = (props: AccountInformationTemplateProps) => {
         )
         await updateCustomerB2bAccount.mutateAsync(accountParams)
       }
-
-      await queryClient.invalidateQueries({ queryKey: loginKeys.user })
     } catch (err) {
       console.error(err)
     }
