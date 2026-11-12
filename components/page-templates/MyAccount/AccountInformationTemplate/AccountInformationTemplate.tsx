@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 
 import { Box } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'next-i18next'
 
 import {
@@ -20,6 +21,7 @@ import {
   buildUpdateCustomerB2bUserParams,
   buildUpdateCustomerB2bAccountParams,
 } from '@/lib/helpers'
+import { loginKeys } from '@/lib/react-query/queryKeys'
 import { UpdateProfileDataParam, PasswordTypes } from '@/lib/types'
 
 import type { B2BAccount, B2BUser, CustomerAccount } from '@/lib/gql/types'
@@ -60,6 +62,7 @@ const AccountInformationTemplate = (props: AccountInformationTemplateProps) => {
   const { user, isB2BUser } = props
   const { t } = useTranslation('common')
 
+  const queryClient = useQueryClient()
   const { updateUserData } = useUpdateCustomerProfile()
   const { changePassword } = useChangePassword()
   const { updateCustomerB2bUser } = useUpdateCustomerB2bUserMutation()

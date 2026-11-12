@@ -28,7 +28,12 @@ const OptionLabel = ({ option }: { option: PdpVariantOption }) => {
   return (
     <span className={styles.sizeMain}>
       {option.label}
-      {option.isNew ? <span className={styles.optionNew}>{t('new')}</span> : null}
+      {option.isNew ? (
+        <>
+          {' '}
+          <span className={styles.optionNew}>{t('new')}</span>
+        </>
+      ) : null}
     </span>
   )
 }
