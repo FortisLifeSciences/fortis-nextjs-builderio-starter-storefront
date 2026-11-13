@@ -31,6 +31,12 @@ import {
   accountSelectMenuProps,
 } from '@/components/my-account/common'
 import { CountryCode } from '@/lib/constants'
+import {
+  cityNamePattern,
+  organizationNamePattern,
+  personNamePattern,
+  streetAddressPattern,
+} from '@/lib/helpers/validations/validations'
 
 import type { CustomerContact } from '@/lib/gql/types'
 
@@ -103,16 +109,33 @@ const styles = {
 
 const useAddressSchema = () => {
   const { t } = useTranslation('common')
+  const requiredText = (pattern: RegExp) =>
+    yup
+      .string()
+      .trim()
+      .required(t('this-field-is-required'))
+      .matches(pattern, t('enter-valid-characters'))
+
+  const lettersOnlyText = (pattern: RegExp) =>
+    yup
+      .string()
+      .trim()
+      .required(t('this-field-is-required'))
+      .test('valid-letters-only', function (value) {
+        if (!value) return true
+        const hasNumbers = /\d/.test(value)
+        const withoutDigits = value.replace(/\d/g, '').trim()
+        const hasSpecialChars = withoutDigits.length > 0 && !pattern.test(withoutDigits)
+        if (hasNumbers && hasSpecialChars)
+          return this.createError({ message: t('remove-numbers-and-special-characters') })
+        if (hasNumbers) return this.createError({ message: t('remove-numbers') })
+        if (hasSpecialChars) return this.createError({ message: t('enter-valid-characters') })
+        return true
+      })
 
   return yup.object().shape({
-    firstName: yup
-      .string()
-      .required(t('this-field-is-required'))
-      .test('not-blank', t('this-field-is-required'), (value) => !!value?.trim()),
-    lastNameOrSurname: yup
-      .string()
-      .required(t('this-field-is-required'))
-      .test('not-blank', t('this-field-is-required'), (value) => !!value?.trim()),
+    firstName: lettersOnlyText(personNamePattern),
+    lastNameOrSurname: lettersOnlyText(personNamePattern),
     email: yup
       .string()
       .trim()
@@ -124,24 +147,23 @@ const useAddressSchema = () => {
       .test('is-valid-phone-number', t('enter-valid-phone-number'), (value) =>
         value ? isValidPhoneNumber(value) : false
       ),
-    companyOrOrganization: yup
+    companyOrOrganization: requiredText(organizationNamePattern),
+    address1: requiredText(streetAddressPattern),
+    address2: yup
       .string()
-      .required(t('this-field-is-required'))
-      .test('not-blank', t('this-field-is-required'), (value) => !!value?.trim()),
-    address1: yup
-      .string()
-      .required(t('this-field-is-required'))
-      .test('not-blank', t('this-field-is-required'), (value) => !!value?.trim()),
-    address2: yup.string().trim().nullable(true).notRequired(),
+      .trim()
+      .nullable(true)
+      .notRequired()
+      .matches(streetAddressPattern, {
+        message: t('enter-valid-characters'),
+        excludeEmptyString: true,
+      }),
     countryCode: yup.string().required(t('this-field-is-required')),
     stateOrProvince: yup.string().when('countryCode', {
       is: (value: string) => [CountryCode.US, CountryCode.CA].includes(value),
       then: yup.string().required(t('this-field-is-required')),
     }),
-    cityOrTown: yup
-      .string()
-      .required(t('this-field-is-required'))
-      .test('not-blank', t('this-field-is-required'), (value) => !!value?.trim()),
+    cityOrTown: lettersOnlyText(cityNamePattern),
     postalOrZipCode: yup
       .string()
       .trim()
@@ -171,6 +193,7 @@ const AddressEditForm = (props: AddressEditFormProps) => {
     control,
     handleSubmit,
     watch,
+    trigger,
     formState: { errors },
   } = useForm<AddressEditFormValues>({
     mode: 'onBlur',
@@ -195,6 +218,9 @@ const AddressEditForm = (props: AddressEditFormProps) => {
   })
 
   const isStateRequired = [CountryCode.US, CountryCode.CA].includes(watch('countryCode'))
+  React.useEffect(() => {
+    if (customerContact) trigger()
+  }, [])
 
   const renderField = (
     name: keyof AddressEditFormValues,
@@ -311,7 +337,9 @@ const AddressEditForm = (props: AddressEditFormProps) => {
 
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              {renderField('firstName', String(t('first-name')), { required: true })}
+              {renderField('firstName', String(t('first-name')), {
+                required: true,
+              })}
             </Grid>
             <Grid item xs={12} sm={6}>
               {renderField('lastNameOrSurname', String(t('last-name-or-sur-name')), {

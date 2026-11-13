@@ -50,9 +50,33 @@ export const useFormSchema = (internationalPhoneInput = false) => {
       .required(t('this-field-is-required'))
       .matches(pattern, t('enter-valid-characters'))
 
+  const lettersOnlyText = (pattern: RegExp) =>
+    yup
+      .string()
+      .trim()
+      .required(t('this-field-is-required'))
+      .test('valid-letters-only', function (value) {
+        if (!value) return true
+
+        const hasNumbers = /\d/.test(value)
+        const withoutDigits = value.replace(/\d/g, '').trim()
+        const hasSpecialChars = withoutDigits.length > 0 && !pattern.test(withoutDigits)
+
+        if (hasNumbers && hasSpecialChars) {
+          return this.createError({ message: t('remove-numbers-and-special-characters') })
+        }
+        if (hasNumbers) {
+          return this.createError({ message: t('remove-numbers') })
+        }
+        if (hasSpecialChars) {
+          return this.createError({ message: t('enter-valid-characters') })
+        }
+        return true
+      })
+
   return yup.object().shape({
-    firstName: requiredText(personNamePattern),
-    lastNameOrSurname: requiredText(personNamePattern),
+    firstName: lettersOnlyText(personNamePattern),
+    lastNameOrSurname: lettersOnlyText(personNamePattern),
     companyOrOrganization: requiredText(organizationNamePattern),
     address: yup.object().shape({
       address1: requiredText(streetAddressPattern),

@@ -770,5 +770,7 @@
   "fedex-account-number-length": "FedEx account number must be 9 digits",
   "ups-account-number-length": "UPS account number must be 6 digits",
   "shipping-preference-saved": "Shipping preference updated",
-  "shipping-account-saved": "Shipping account updated"
+  "shipping-account-saved": "Shipping account updated",
+  "remove-numbers": "Please remove numbers",
+  "remove-numbers-and-special-characters": "Please remove numbers and special characters"
 }

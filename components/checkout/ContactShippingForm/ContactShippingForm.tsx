@@ -26,6 +26,12 @@ import { toE164PhoneNumber } from '@/components/common/KiboPhoneInput/KiboPhoneI
 import { useUpdateOrderShippingInfo, useGetShippingMethods } from '@/hooks'
 import { AddressType, CountryCode, DefaultId } from '@/lib/constants'
 import { orderGetters, userGetters } from '@/lib/getters'
+import {
+  cityNamePattern,
+  organizationNamePattern,
+  personNamePattern,
+  streetAddressPattern,
+} from '@/lib/helpers/validations/validations'
 
 import type {
   CrContact,
@@ -58,14 +64,41 @@ interface Country {
 
 const useContactShippingSchema = () => {
   const { t } = useTranslation('common')
+
+  const requiredText = (pattern: RegExp) =>
+    yup
+      .string()
+      .trim()
+      .required(t('this-field-is-required'))
+      .matches(pattern, t('enter-valid-characters'))
+
+  const lettersOnlyText = (pattern: RegExp) =>
+    yup
+      .string()
+      .trim()
+      .required(t('this-field-is-required'))
+      .test('valid-letters-only', function (value) {
+        if (!value) return true
+        const hasNumbers = /\d/.test(value)
+        const withoutDigits = value.replace(/\d/g, '').trim()
+        const hasSpecialChars = withoutDigits.length > 0 && !pattern.test(withoutDigits)
+
+        if (hasNumbers && hasSpecialChars) {
+          return this.createError({ message: t('remove-numbers-and-special-characters') })
+        }
+        if (hasNumbers) return this.createError({ message: t('remove-numbers') })
+        if (hasSpecialChars) return this.createError({ message: t('enter-valid-characters') })
+        return true
+      })
+
   return yup.object().shape({
-    firstName: yup.string().required(t('this-field-is-required')),
-    lastNameOrSurname: yup.string().required(t('this-field-is-required')),
+    firstName: lettersOnlyText(personNamePattern),
+    lastNameOrSurname: lettersOnlyText(personNamePattern),
     workEmail: yup
       .string()
       .email(t('please-enter-a-valid-email-address'))
       .required(t('this-field-is-required')),
-    companyOrOrganization: yup.string().required(t('this-field-is-required')),
+    companyOrOrganization: requiredText(organizationNamePattern),
     phoneNumbers: yup.object().shape({
       home: yup
         .string()
@@ -75,27 +108,18 @@ const useContactShippingSchema = () => {
         ),
     }),
     address: yup.object().shape({
-      address1: yup.string().required(t('this-field-is-required')),
-      address2: yup.string().nullable(true).notRequired(),
-      cityOrTown: yup.string().required(t('this-field-is-required')),
-      stateOrProvince: yup.string().when('countryCode', {
-        is: (value: string) => [CountryCode.US, CountryCode.CA].includes(value),
-        then: yup.string().required(t('this-field-is-required')),
-      }),
-      postalOrZipCode: yup
+      address1: requiredText(streetAddressPattern),
+      address2: yup
         .string()
-        .required(t('this-field-is-required'))
-        .when('countryCode', {
-          is: CountryCode.US,
-          then: yup.string().matches(/^\d{5}(-\d{4})?$/, t('enter-valid-zip-code')),
-        })
-        .when('countryCode', {
-          is: CountryCode.CA,
-          then: yup
-            .string()
-            .matches(/^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/, t('enter-valid-zip-code')),
+        .trim()
+        .nullable(true)
+        .notRequired()
+        .matches(streetAddressPattern, {
+          message: t('enter-valid-characters'),
+          excludeEmptyString: true,
         }),
-      countryCode: yup.string().required(t('this-field-is-required')),
+      cityOrTown: lettersOnlyText(cityNamePattern),
+      // stateOrProvince, postalOrZipCode, countryCode: leave exactly as they are
     }),
   })
 }
@@ -152,6 +176,19 @@ const getAddressDedupeKey = (contact?: Maybe<DefaultContact>) =>
     .join('|')
     .toLowerCase()
 
+const isOk = (value: string | null | undefined, pattern: RegExp) =>
+  !value?.trim() || pattern.test(value.trim())
+
+const isContactInvalid = (contact?: Maybe<DefaultContact>) =>
+  !!contact &&
+  !(
+    isOk(contact.firstName, personNamePattern) &&
+    isOk(contact.lastNameOrSurname, personNamePattern) &&
+    isOk(contact.companyOrOrganization, organizationNamePattern) &&
+    isOk(contact.address?.address1, streetAddressPattern) &&
+    isOk(contact.address?.address2, streetAddressPattern) &&
+    isOk(contact.address?.cityOrTown, cityNamePattern)
+  )
 // Contact & shipping collection form shared by guest checkout and the logged-in
 // checkout - identical fields/validation/mutations, only what happens on a valid
 // "Continue" differs per caller.
@@ -211,6 +248,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
         : defaultContact,
     [hasOrderShippingAddress, orderShippingContact, matchedSavedAddress]
   )
+  const [invalidSavedNotice, setInvalidSavedNotice] = useState(false)
 
   const getInitialAddressId = () => {
     if (hasOrderShippingAddress) {
@@ -280,6 +318,9 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
         postalOrZipCode: initialContact.address?.postalOrZipCode || '',
       },
     })
+    if (hasOrderShippingAddress && isContactInvalid(initialContact)) {
+      setTimeout(() => trigger(), 0)
+    }
   }, [initialContact])
 
   const applySavedAddress = (address: CustomerContact) => {
@@ -326,8 +367,15 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   }, [savedShippingAddresses?.length])
 
   const handleSelectSavedAddress = (address: CustomerContact) => {
-    setSelectedAddressId(String(address.id))
     applySavedAddress(address)
+    if (isContactInvalid(address)) {
+      // keep the values, but open the form so the errors are visible
+      setSelectedAddressId(NEW_ADDRESS_OPTION)
+      setInvalidSavedNotice(true)
+    } else {
+      setSelectedAddressId(String(address.id))
+      setInvalidSavedNotice(false)
+    }
   }
 
   const handleSelectNewAddress = () => {
@@ -414,35 +462,31 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   const canContinue = isValid && !contactSaveError && hasShippingMethod && !isSavingShippingInfo
 
   const handleContinue = async () => {
-    // A shipping-info save still in flight means `checkoutShippingMethodCode` (and therefore
-    // `hasShippingMethod` below) is stale - wait for it to settle rather than letting the click
-    // through on an outdated value.
     if (isValidatingShipping || isSavingShippingInfo) return
     setIsValidatingShipping(true)
     try {
-      // Force-validate on submit (mode: 'onChange' skips untouched fields otherwise). Only
-      // validate the "Add New Address" fields when that's the active mode - they stay mounted
-      // but hidden when a saved address is selected instead.
-      const fieldsToValidate =
-        selectedAddressId === NEW_ADDRESS_OPTION
-          ? ([
-              'firstName',
-              'lastNameOrSurname',
-              'workEmail',
-              'phoneNumbers.home',
-              'companyOrOrganization',
-              'address.address1',
-              'address.cityOrTown',
-              'address.stateOrProvince',
-              'address.postalOrZipCode',
-              'address.countryCode',
-            ] as const)
-          : (['firstName', 'lastNameOrSurname', 'workEmail', 'phoneNumbers.home'] as const)
+      const fieldsToValidate = [
+        'firstName',
+        'lastNameOrSurname',
+        'workEmail',
+        'phoneNumbers.home',
+        'companyOrOrganization',
+        'address.address1',
+        'address.address2',
+        'address.cityOrTown',
+        'address.stateOrProvince',
+        'address.postalOrZipCode',
+        'address.countryCode',
+      ] as const
       const isFormValid = await trigger(fieldsToValidate as any)
 
       setShippingMethodError(hasShippingMethod ? '' : t('please-select-shipping-method'))
 
-      if (!isFormValid || contactSaveError) {
+      if (!isFormValid) {
+        if (selectedAddressId !== NEW_ADDRESS_OPTION) {
+          setSelectedAddressId(NEW_ADDRESS_OPTION) // reveal the hidden fields
+          setInvalidSavedNotice(true)
+        }
         for (const name of fieldsToValidate) {
           // eslint-disable-next-line no-await-in-loop
           const fieldIsValid = await trigger(name as any)
