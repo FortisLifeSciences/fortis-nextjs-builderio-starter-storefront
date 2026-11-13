@@ -60,6 +60,12 @@ import {
   CARDHOLDER_NAME_MAX_LENGTH,
   isCardholderNameValid,
 } from '@/lib/helpers/validations/validations'
+import {
+  cityNamePattern,
+  organizationNamePattern,
+  personNamePattern,
+  streetAddressPattern,
+} from '@/lib/helpers/validations/validations'
 import { checkoutKeys } from '@/lib/react-query/queryKeys'
 import type {
   CardForm,
@@ -137,6 +143,19 @@ const sameAsShippingLabelSx = {
   },
 }
 
+const isOk = (value: string | null | undefined, pattern: RegExp) =>
+  !value?.trim() || pattern.test(value.trim())
+
+const isContactInvalid = (contact?: Maybe<CrContact>) =>
+  !!contact &&
+  !(
+    isOk(contact.firstName, personNamePattern) &&
+    isOk(contact.lastNameOrSurname, personNamePattern) &&
+    isOk(contact.companyOrOrganization, organizationNamePattern) &&
+    isOk(contact.address?.address1, streetAddressPattern) &&
+    isOk(contact.address?.address2, streetAddressPattern) &&
+    isOk(contact.address?.cityOrTown, cityNamePattern)
+  )
 const US_ZIP_REGEX = /^\d{5}(-\d{4})?$/
 const ContactAddressSummary = ({ contact }: { contact?: Maybe<CrContact> }) => {
   const address = contact?.address
@@ -273,6 +292,9 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     getShippingMethodType(currentShippingPreference) ===
       getShippingMethodType(selectedShippingMethodName)
   const isShippingStepComplete = hasShippingDetails && shippingPreferenceMatchesOrder
+  !isContactInvalid(shippingContact) &&
+    (orderGetters.getShipItems(checkout).length === 0 ||
+      !!orderGetters.getShippingMethodCode(checkout))
   const [phase, setPhase] = useState<'shipping' | 'payment'>(
     isShippingStepComplete ? 'payment' : 'shipping'
   )
