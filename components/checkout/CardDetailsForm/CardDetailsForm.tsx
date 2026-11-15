@@ -274,11 +274,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                         }}
                         onBlur={() => {
                           const value = field.value || ''
-                          const expectedLength = getCvvLength(getValues('cardNumber'))
-                          const isValidLength = expectedLength
-                            ? value.length === expectedLength
-                            : /^\d{3,4}$/.test(value)
-                          if (value && !isValidLength) field.onChange('')
+                          if (value && !/^\d{3,4}$/.test(value)) field.onChange('')
                           field.onBlur()
                         }}
                         error={!!errors?.cvv}
