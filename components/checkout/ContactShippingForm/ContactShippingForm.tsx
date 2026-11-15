@@ -213,7 +213,8 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   // Signature of the contact fields last successfully saved - lets a re-selected saved address
   // (valid before and after, so `isValid` never flips) still trigger a fresh save.
   const lastSavedContactSignatureRef = useRef<string | null>(null)
-  const shippingMethodSaveQueueRef = useRef<Promise<boolean>>(Promise.resolve(true))
+  const contactSaveQueueRef = useRef<Promise<void | boolean>>(Promise.resolve())
+  const shippingMethodSaveQueueRef = contactSaveQueueRef
   const shippingMethodSectionRef = useRef<HTMLDivElement>(null)
 
   // Primary sorted first, deduped by address content.

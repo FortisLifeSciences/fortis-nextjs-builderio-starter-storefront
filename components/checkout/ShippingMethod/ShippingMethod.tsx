@@ -415,7 +415,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       const hasManuallySelectedForThisOrder =
         !!manualSelectionStorageKey && sessionStorage.getItem(manualSelectionStorageKey) === '1'
       if (
-        !hasManuallySelectedForThisOrder &&
+        !selectedShippingMethodCode &&
         !manualSelectionRef.current &&
         shippingMethod?.shippingMethodCode &&
         shippingMethod.shippingMethodCode !== appliedPreferredShippingMethodCodeRef.current &&
