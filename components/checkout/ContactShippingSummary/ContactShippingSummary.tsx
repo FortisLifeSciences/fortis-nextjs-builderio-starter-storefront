@@ -21,7 +21,7 @@ const ContactShippingSummary = (props: ContactShippingSummaryProps) => {
   const { t } = useTranslation('common')
   const contact = orderGetters.getShippingContact(checkout)
   const shippingMethodName =
-    preferredShippingMethodLabel || orderGetters.getShippingMethodName(checkout)
+    orderGetters.getShippingMethodName(checkout) || preferredShippingMethodLabel
   const address = contact?.address
 
   return (
