@@ -55,7 +55,13 @@ export const useUpdateOrderShippingInfo = (options?: { suppressErrorSnackbar?: b
     updateOrderShippingInfo: useMutation({
       mutationFn: updateShippingInfo,
       meta: { suppressErrorSnackbar: options?.suppressErrorSnackbar },
-      onSuccess: () => {
+      onSuccess: (fulfillmentInfo, variables) => {
+        const orderId = variables.checkout?.id
+        if (orderId) {
+          queryClient.setQueryData(checkoutKeys.detail(orderId), (old: any) =>
+            old ? { ...old, fulfillmentInfo } : old
+          )
+        }
         queryClient.invalidateQueries({ queryKey: checkoutKeys.all })
       },
     }),
