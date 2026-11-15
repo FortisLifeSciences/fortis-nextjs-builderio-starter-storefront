@@ -259,6 +259,11 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   const shipItems = orderGetters.getShipItems(checkout)
   const pickupItems = orderGetters.getPickupItems(checkout)
   const checkoutShippingMethodCode = orderGetters.getShippingMethodCode(checkout)
+  const checkoutShippingMethodName = orderGetters.getShippingMethodName(checkout)
+  const [lastSavedShippingMethod, setLastSavedShippingMethod] = useState<{
+    code?: string
+    name?: string
+  }>({ code: checkoutShippingMethodCode, name: checkoutShippingMethodName })
 
   // A destination address may already be on the checkout from an earlier visit or an
   // auto-applied saved address - don't wait on `isNewAddressAdded`, a purely local flag.
@@ -402,6 +407,8 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
         checkout,
         contact: buildContact(formData),
         email: formData.workEmail,
+        shippingMethodCode: lastSavedShippingMethod.code,
+        shippingMethodName: lastSavedShippingMethod.name,
       })
       lastSavedContactSignatureRef.current = signature
       setIsNewAddressAdded(true)
@@ -434,9 +441,12 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
           shippingMethodCode,
           shippingMethodName,
         })
+        setLastSavedShippingMethod({ code: shippingMethodCode, name: shippingMethodName })
+        setShippingMethodError('')
         return true
       } catch (error) {
         console.error(error)
+        setShippingMethodError(t('unable-to-save-shipping-method'))
         return false
       }
     })
