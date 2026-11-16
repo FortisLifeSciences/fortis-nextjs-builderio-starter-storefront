@@ -53,9 +53,9 @@ const KiboStateSelect = (props: KiboStateSelectProps) => {
   const [search, setSearch] = useState('')
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  const filteredOptions = search
-    ? (options ?? []).filter((option) => option.name.toLowerCase().includes(search.toLowerCase()))
-    : options ?? []
+  const filteredOptions = (options ?? [])
+    .filter((option) => option.name.toLowerCase().startsWith(search.trim().toLowerCase()))
+    .sort((a, b) => a.name.localeCompare(b.name))
 
   const selectedLabel = options?.find((option) => option.code === value)?.name ?? ''
 
@@ -105,6 +105,7 @@ const KiboStateSelect = (props: KiboStateSelectProps) => {
         renderValue={() => selectedLabel || placeholder || ''}
         MenuProps={{
           autoFocus: false,
+          disableScrollLock: true,
           // Select's own Menu always needs to own `onClose` to actually close (it builds the
           // menu as `{ onClose: <its real close handler>, ...MenuProps }`, so a custom
           // `onClose` here would silently replace it, not add to it, and the dropdown would
@@ -114,6 +115,7 @@ const KiboStateSelect = (props: KiboStateSelectProps) => {
             onEntered: () => searchInputRef.current?.focus(),
             onExited: () => setSearch(''),
           },
+          MenuListProps: { autoFocusItem: false },
           PaperProps: {
             style: {
               maxHeight: ITEM_HEIGHT * 5.5 + ITEM_PADDING_TOP,
@@ -127,7 +129,6 @@ const KiboStateSelect = (props: KiboStateSelectProps) => {
               },
             },
           },
-          MenuListProps: { autoFocusItem: false },
         }}
         sx={{
           borderColor: error ? 'error.main' : '#D3D7D9',
@@ -160,8 +161,8 @@ const KiboStateSelect = (props: KiboStateSelectProps) => {
             py: 0.75,
             borderBottom: '1px solid #eee',
           }}
-          // Keep typing/clicking in the search box from reaching the Select's own keyboard
-          // handling (which would otherwise close the menu or jump-select on each keystroke).
+          onClickCapture={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
         >
