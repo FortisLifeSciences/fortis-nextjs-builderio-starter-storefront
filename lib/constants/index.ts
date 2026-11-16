@@ -219,6 +219,12 @@ export const CountryCode = {
   CA: 'CA',
 }
 
+export const SESSION_EXPIRED = {
+  CODE: 'SESSION_EXPIRED',
+  EVENT: 'kibo:session-expired',
+  COOKIE: 'session_expired',
+}
+
 export const KIBO_HEADERS = {
   CORRELATION_ID: 'x-vol-correlation',
   TENANT: 'x-vol-tenant',

@@ -1,10 +1,5 @@
-import {
-  fetcher,
-  getAdditionalHeader,
-  getOperationDetails,
-  getUserClaimsFromRequest,
-} from '../util'
-import { KIBO_HEADERS } from '@/lib/constants'
+import { fetcher, getAdditionalHeader, getOperationDetails, resolveUserClaims } from '../util'
+import { KIBO_HEADERS, SESSION_EXPIRED } from '@/lib/constants'
 import { NextApiRequestWithLogger } from '@/lib/types'
 
 import type { NextApiResponse } from 'next'
@@ -59,7 +54,13 @@ export default async function graphQLHandler(req: NextApiRequestWithLogger, res:
     req.logger.info('incoming graphql request', { gql: gqlDetails })
 
     const headers = getAdditionalHeader(req)
-    const userClaims = await getUserClaimsFromRequest(req, res)
+    const { userClaims, sessionExpired } = await resolveUserClaims(req, res)
+
+    if (sessionExpired) {
+      req.logger.info('shopper session expired', { gql: gqlDetails })
+      return res.status(401).json({ message: 'Session expired', code: SESSION_EXPIRED.CODE })
+    }
+
     const response = await fetcher({ query, variables }, { userClaims, headers })
 
     const correlationId = response.headers && response.headers.get(KIBO_HEADERS.CORRELATION_ID)
