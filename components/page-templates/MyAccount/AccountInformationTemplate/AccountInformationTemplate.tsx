@@ -34,6 +34,7 @@ interface AccountInformationTemplateProps {
 enum EditableSection {
   ContactDetails = 'contact-details',
   Email = 'email',
+  Organization = 'organization',
   Password = 'password',
 }
 
@@ -113,7 +114,7 @@ const AccountInformationTemplate = (props: AccountInformationTemplateProps) => {
       await updateCustomerB2bUser.mutateAsync({ ...variables })
 
       if (profileFormData.companyOrOrganization !== undefined) {
-        const accountParams = buildUpdateCustomerB2bAccountParams(
+        const accountParams: any = buildUpdateCustomerB2bAccountParams(
           {
             companyOrOrganization: profileFormData.companyOrOrganization,
             taxId: user.taxId as string | undefined,
@@ -125,8 +126,6 @@ const AccountInformationTemplate = (props: AccountInformationTemplateProps) => {
         )
         await updateCustomerB2bAccount.mutateAsync(accountParams)
       }
-
-      await queryClient.invalidateQueries({ queryKey: loginKeys.user })
     } catch (err) {
       console.error(err)
     }
@@ -181,8 +180,15 @@ const AccountInformationTemplate = (props: AccountInformationTemplateProps) => {
             firstName={firstName}
             lastName={lastName}
             emailAddress={emailAddress}
+            onSaveProfileData={(data) =>
+              isB2BUser ? handleUpdateB2BProfileData(data) : handleUpdateProfileData(data)
+            }
+            onCancel={() => setEditingSection(null)}
+          />
+        ) : editingSection === EditableSection.Organization ? (
+          <ProfileDetailsForm
+            isOrganizationForm
             companyOrOrganization={companyOrOrganization}
-            isCompanyEditable
             onSaveProfileData={(data) =>
               isB2BUser ? handleUpdateB2BProfileData(data) : handleUpdateProfileData(data)
             }
@@ -203,7 +209,7 @@ const AccountInformationTemplate = (props: AccountInformationTemplateProps) => {
             <InlineField
               label={String(t('company-institution-or-organization'))}
               value={companyOrOrganization}
-              action={editButton(EditableSection.ContactDetails)}
+              action={editButton(EditableSection.Organization)}
               last
             />
           </>

@@ -213,11 +213,8 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   // Signature of the contact fields last successfully saved - lets a re-selected saved address
   // (valid before and after, so `isValid` never flips) still trigger a fresh save.
   const lastSavedContactSignatureRef = useRef<string | null>(null)
-  // Serializes contact/address auto-saves so overlapping edits (e.g. quickly retyping the zip)
-  // can't resolve out of order and leave a stale value saved on the order - same pattern as
-  // shippingMethodSaveQueueRef below.
-  const contactSaveQueueRef = useRef<Promise<void>>(Promise.resolve())
-  const shippingMethodSaveQueueRef = useRef<Promise<boolean>>(Promise.resolve(true))
+  const contactSaveQueueRef = useRef<Promise<void | boolean>>(Promise.resolve())
+  const shippingMethodSaveQueueRef = contactSaveQueueRef
   const shippingMethodSectionRef = useRef<HTMLDivElement>(null)
 
   // Primary sorted first, deduped by address content.
@@ -263,6 +260,11 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   const shipItems = orderGetters.getShipItems(checkout)
   const pickupItems = orderGetters.getPickupItems(checkout)
   const checkoutShippingMethodCode = orderGetters.getShippingMethodCode(checkout)
+  const checkoutShippingMethodName = orderGetters.getShippingMethodName(checkout)
+  const [lastSavedShippingMethod, setLastSavedShippingMethod] = useState<{
+    code?: string
+    name?: string
+  }>({ code: checkoutShippingMethodCode, name: checkoutShippingMethodName })
 
   // A destination address may already be on the checkout from an earlier visit or an
   // auto-applied saved address - don't wait on `isNewAddressAdded`, a purely local flag.
@@ -406,6 +408,8 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
         checkout,
         contact: buildContact(formData),
         email: formData.workEmail,
+        shippingMethodCode: lastSavedShippingMethod.code,
+        shippingMethodName: lastSavedShippingMethod.name,
       })
       lastSavedContactSignatureRef.current = signature
       setIsNewAddressAdded(true)
@@ -442,9 +446,12 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
           shippingMethodCode,
           shippingMethodName,
         })
+        setLastSavedShippingMethod({ code: shippingMethodCode, name: shippingMethodName })
+        setShippingMethodError('')
         return true
       } catch (error) {
         console.error(error)
+        setShippingMethodError(t('unable-to-save-shipping-method'))
         return false
       }
     })

@@ -53,6 +53,7 @@ import { cardGetters, orderGetters, userGetters } from '@/lib/getters'
 import {
   buildCardPaymentActionForCheckoutParams,
   buildPurchaseOrderPaymentActionForCheckoutParams,
+  getCvvLengthForCardType,
   tokenizeCreditCardPayment,
 } from '@/lib/helpers'
 import {
@@ -185,6 +186,13 @@ const ContactAddressSummary = ({ contact }: { contact?: Maybe<CrContact> }) => {
   )
 }
 
+const getShippingMethodType = (shippingMethodName?: string) => {
+  const name = shippingMethodName?.toLowerCase() ?? ''
+  if (name.includes('fedex account')) return 'fedex'
+  if (name.includes('ups account')) return 'ups'
+  return 'fortis'
+}
+
 const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   const {
     checkout,
@@ -208,6 +216,53 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     (attr) => attr?.fullyQualifiedName === 'tenant~shipping-method'
   )
   const shippingPreferenceValue = shippingPreferenceAttr?.values?.[0] || ''
+  const customerAccountId = customerAccountForShippingPreference?.id
+  const customerUserId = customerAccountForShippingPreference?.userId
+  const [freshShippingPreference, setFreshShippingPreference] = useState<string>()
+
+  useEffect(() => {
+    if (!customerAccountId || !customerUserId) {
+      setFreshShippingPreference(undefined)
+      return
+    }
+
+    let isActive = true
+    setFreshShippingPreference(undefined)
+
+    const fetchShippingPreference = async () => {
+      try {
+        const response = await fetch('/api/user/getCustomerAttribute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            payload: {
+              userId: customerUserId,
+              accountId: customerAccountId,
+              attributeFqn: 'tenant~shipping-method',
+            },
+          }),
+        })
+        if (!response.ok) {
+          throw new Error(`Failed to fetch shipping preference: ${response.status}`)
+        }
+
+        const attributeDetails = await response.json()
+        if (isActive) {
+          setFreshShippingPreference(attributeDetails?.data?.values?.[0] ?? '')
+        }
+      } catch (error) {
+        console.error('Failed to fetch the current shipping preference:', error)
+        if (isActive) setFreshShippingPreference(shippingPreferenceValue)
+      }
+    }
+
+    fetchShippingPreference()
+    return () => {
+      isActive = false
+    }
+  }, [customerAccountId, customerUserId])
+
+  const currentShippingPreference = freshShippingPreference ?? shippingPreferenceValue
   const preferredShippingMethodLabel = shippingPreferenceValue.includes('FedEx Account')
     ? 'FedEx Account'
     : shippingPreferenceValue.includes('UPS Account')
@@ -221,17 +276,31 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
 
   const shippingContact = orderGetters.getShippingContact(checkout)
   const shippingAddress = shippingContact?.address
-  const isShippingStepComplete =
+  const hasShippableItems = orderGetters.getShipItems(checkout).length > 0
+  const hasShippingDetails =
     !!shippingContact?.email &&
     !isContactInvalid(shippingContact) &&
     (orderGetters.getShipItems(checkout).length === 0 ||
       !!orderGetters.getShippingMethodCode(checkout))
+    (!hasShippableItems || !!orderGetters.getShippingMethodCode(checkout))
+  const selectedShippingMethodName = orderGetters.getShippingMethodName(checkout)
+  const hasManuallySelectedShippingMethod =
+    typeof window !== 'undefined' &&
+    !!checkout?.id &&
+    sessionStorage.getItem(`preferenceApplied:${checkout.id}`) === '1'
+  const shippingPreferenceMatchesOrder =
+    !hasShippableItems ||
+    !currentShippingPreference ||
+    hasManuallySelectedShippingMethod ||
+    getShippingMethodType(currentShippingPreference) ===
+      getShippingMethodType(selectedShippingMethodName)
+  const isShippingStepComplete = hasShippingDetails && shippingPreferenceMatchesOrder
   const [phase, setPhase] = useState<'shipping' | 'payment'>(
     isShippingStepComplete ? 'payment' : 'shipping'
   )
   useEffect(() => {
     setPhase(isShippingStepComplete ? 'payment' : 'shipping')
-  }, [checkout?.id])
+  }, [checkout?.id, isShippingStepComplete])
   const isShippingLocked = phase !== 'shipping'
 
   const contactShippingDefaults = {
@@ -553,7 +622,8 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
 
   const isCardholderNameMissing = !cardholderName.trim()
   const isCardholderNameInvalid = !isCardholderNameMissing && !isCardholderNameValid(cardholderName)
-  const isSavedCardCvvValid = /^\d{3,4}$/.test(cvv)
+  const savedCardCvvLength = getCvvLengthForCardType(selectedSavedCard?.cardInfo?.cardType)
+  const isSavedCardCvvValid = new RegExp(`^\\d{${savedCardCvvLength}}$`).test(cvv)
 
   const getPlaceOrderIssues = () => {
     if (isPurchaseOrder) return []
@@ -645,7 +715,10 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       setShowPlaceOrderIssues(true)
       setPlaceOrderError('')
       if (selectedSavedCard) {
-        if (!isSavedCardCvvValid) setCvvError(cvv ? t('invalid-cvv') : t('cvv-is-required'))
+        if (!isSavedCardCvvValid) {
+          setCvvError(cvv ? t('invalid-cvv') : t('cvv-is-required'))
+          if (cvv) setCvv('')
+        }
       } else {
         setCardValidationRequest((count) => count + 1)
       }
@@ -686,8 +759,8 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       }
       return true
     }
-    if (selectedSavedCard) return /^\d{3,4}$/.test(cvv)
-    if (isCardholderNameMissing || isCardholderNameInvalid || !isCardFormValid) return false
+    if (selectedSavedCard) return isSavedCardCvvValid
+    if (isCardholderNameMissing || !isCardFormValid) return false
     if (!billingSameAsShipping && !isBillingFormValid) return false
     return true
   }, [
@@ -1283,8 +1356,9 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                     required
                     error={!!cvvError}
                     helperText={cvvError}
+                    inputProps={{ maxLength: savedCardCvvLength }}
                     onChange={(_name, value) => {
-                      setCvv(value.replace(/\D/g, '').slice(0, 4))
+                      setCvv(value.replace(/\D/g, '').slice(0, savedCardCvvLength))
                       setCvvError('')
                       setPlaceOrderError('')
                     }}
