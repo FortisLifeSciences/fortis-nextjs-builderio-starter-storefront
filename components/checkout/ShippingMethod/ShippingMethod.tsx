@@ -666,10 +666,8 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
           fedExAccountNumber
         )
       }
-      if (lastOrderAttrsRef.current.ups !== '') {
-        lastOrderAttrsRef.current.ups = ''
-        upsertOrderAttribute(checkout.id as string, 'tenant~customerUpsAccountNumber', '')
-      }
+      lastOrderAttrsRef.current.ups = ''
+      upsertOrderAttribute(checkout.id as string, 'tenant~customerUpsAccountNumber', '')
     } else if (isUpsMethodSelected && upsAccountNumber && upsAccountNumber.length === 6) {
       if (
         lastOrderAttrsRef.current.ups !== upsAccountNumber ||
@@ -682,10 +680,8 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
           upsAccountNumber
         )
       }
-      if (lastOrderAttrsRef.current.fedEx !== '') {
-        lastOrderAttrsRef.current.fedEx = ''
-        upsertOrderAttribute(checkout.id as string, 'tenant~customerFedexAccountNumber', '')
-      }
+      lastOrderAttrsRef.current.fedEx = ''
+      upsertOrderAttribute(checkout.id as string, 'tenant~customerFedexAccountNumber', '')
     }
   }, [
     customerAccount?.companyOrOrganization,
