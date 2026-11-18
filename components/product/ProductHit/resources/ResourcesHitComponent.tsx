@@ -1,21 +1,8 @@
-import React, { useState, useEffect, useRef, PropsWithChildren, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 
-import { Add, ExpandLess, ExpandMore } from '@mui/icons-material'
-import Apps from '@mui/icons-material/Apps'
-import ReorderRounded from '@mui/icons-material/ReorderRounded'
-import {
-  Grid,
-  MenuItem,
-  Box,
-  Button,
-  Link,
-  Typography,
-  Breadcrumbs,
-  Stack,
-  useMediaQuery,
-} from '@mui/material'
-import getConfig from 'next/config'
-import { useRouter } from 'next/router'
+import { FilterList } from '@mui/icons-material'
+import { Box, Button, IconButton, useMediaQuery } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { useTranslation } from 'next-i18next'
 import {
   useInfiniteHits,
@@ -28,7 +15,7 @@ import {
 } from 'react-instantsearch-hooks-web'
 
 import { PLPStyles } from '@/components/page-templates/ProductListingTemplate/ProductListingTemplate.styles'
-import { ResourceHitListView, ResourceHitGridView } from '@/components/product'
+import { ResourceHitGridView } from '@/components/product'
 import CustomRefinementList from '@/components/product/AlgoliaFacets/CustomRefinementList'
 import CustomSortBy from '@/components/product/AlgoliaFacets/CustomSortBy'
 import DesktopRefinement from '@/components/product/AlgoliaFacets/DesktopRefinment'
@@ -36,22 +23,15 @@ import { getFacetLabel } from '@/lib/helpers/facetMapping'
 
 import type { BaseHit } from 'instantsearch.js'
 
-interface RefinementListItem {
-  label: string
-  value: string
-  count: number
-  isRefined: boolean
-}
-
 const ResourcesHitComponent = ({ categoryCode }: { categoryCode: string }) => {
   const infiniteHits = useInfiniteHits<BaseHit>(),
     results = infiniteHits.results,
-    isMobile = useMediaQuery('(max-width:600px)')
-  const [isListView, setIsListView] = useState<boolean>(true)
+    theme = useTheme(),
+    isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { t } = useTranslation('common')
 
   useEffect(() => {
-    if (!isListView) {
+    {
       const syncHeights = () => {
         const elements = document.querySelectorAll('.resourceCardGrid')
         let maxHeight = 0
@@ -78,20 +58,9 @@ const ResourcesHitComponent = ({ categoryCode }: { categoryCode: string }) => {
         window.removeEventListener('resize', syncHeights)
       }
     }
-  }, [results, isListView])
+  }, [results])
 
-  // const [expandedFacets, setExpandedFacets] = useState<{ [key: string]: boolean }>({})
-  // const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [isFilterOpen, setIsFilterOpen] = useState(false)
-
-  const { publicRuntimeConfig } = getConfig()
-  const expandedFacetsRef = useRef<{ [key: string]: boolean }>({})
-  const [, forceUpdate] = useState(0) // manual trigger
-
-  const toggleFacet = (attribute: string) => {
-    expandedFacetsRef.current[attribute] = !expandedFacetsRef.current[attribute]
-    forceUpdate((n) => n + 1) // force re-render
-  }
 
   const onFilterByClose = () => {
     setIsFilterOpen(false)
@@ -102,35 +71,31 @@ const ResourcesHitComponent = ({ categoryCode }: { categoryCode: string }) => {
   }
 
   function FallbackComponent({ attribute }: { attribute: string }) {
-    const isExpanded = !!expandedFacetsRef.current[attribute]
-
     return (
       <Box
         className="ais-Panel"
-        style={{ cursor: 'pointer', borderBottom: '1px solid #000' }}
-        sx={{ ...PLPStyles.Facetpanel }}
+        sx={{ ...PLPStyles.Facetpanel, borderBottom: '1px solid #EAEAF1' }}
       >
-        <Box
-          className="ais-Panel-header"
-          onClick={() => toggleFacet(attribute)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            cursor: 'pointer',
-            fontWeight: 500,
-            padding: '8px 0',
-          }}
-        >
-          <span>{getFacetLabel(attribute)}</span>
-          <span>{isExpanded ? <ExpandLess /> : <ExpandMore />}</span>
+        <Box className="ais-Panel-header" style={{ padding: '16px 0' }}>
+          <span
+            style={{
+              fontFamily: 'Poppins',
+              fontWeight: 800,
+              fontSize: '12.5px',
+              lineHeight: '20px',
+              letterSpacing: '0.5px',
+              textTransform: 'uppercase',
+              verticalAlign: 'middle',
+              color: '#1B1A24',
+            }}
+          >
+            {getFacetLabel(attribute)}
+          </span>
         </Box>
 
-        {isExpanded && (
-          <div className="ais-Panel-body" style={{ padding: '8px 0' }}>
-            <CustomRefinementList attribute={attribute} searchableAttributes={[]} />
-          </div>
-        )}
+        <div className="ais-Panel-body" style={{ padding: '0px 0px 16px 0px' }}>
+          <CustomRefinementList attribute={attribute} searchableAttributes={[]} />
+        </div>
       </Box>
     )
   }
@@ -154,7 +119,7 @@ const ResourcesHitComponent = ({ categoryCode }: { categoryCode: string }) => {
         sx={{
           display: {
             xs: 'block',
-            sm: 'none',
+            md: 'none',
           },
         }}
       >
@@ -183,33 +148,34 @@ const ResourcesHitComponent = ({ categoryCode }: { categoryCode: string }) => {
           flexDirection: 'column', // Make vertical layout
           width: {
             xs: isFilterOpen ? '100%' : '0',
-            sm: '20%',
+            md: '250px',
           },
           padding: {
             xs: '0',
-            sm: '20px 0',
+            md: '20px 0',
           },
+          flexShrink: 0,
           overflow: 'hidden',
           transition: 'all 0.3s ease',
           backgroundColor: {
             xs: '#fff',
-            sm: 'transparent',
+            md: 'transparent',
           },
           position: {
             xs: 'absolute',
-            sm: 'static',
+            md: 'static',
           },
           zIndex: {
             xs: 1200,
-            sm: 'auto',
+            md: 'auto',
           },
           height: {
             xs: '100vh',
-            sm: 'auto',
+            md: 'auto',
           },
           boxShadow: {
             xs: isFilterOpen ? 3 : 0,
-            sm: 0,
+            md: 0,
           },
           ...PLPStyles.FacetSection,
         }}
@@ -231,75 +197,54 @@ const ResourcesHitComponent = ({ categoryCode }: { categoryCode: string }) => {
       {/* </div> */}
 
       {/* Right Column – Results */}
-      <Box sx={{ flex: 1, padding: { xs: '0', md: '20px 0 20px 20px' } }} id="productHitsView">
+      <Box
+        sx={{ flex: 1, padding: { xs: '20px 16px 0', md: '20px 0 20px 34px' }, minWidth: 0 }}
+        id="productHitsView"
+      >
         <Box id="product-listing-section" sx={{ ...PLPStyles.plpGrid }}>
-          <Box sx={{ ...PLPStyles.navBar }}>
-            <Box sx={{ ...PLPStyles.navBarMain }}>
-              <Box sx={{ ...PLPStyles.navBarView }}>
-                <Box
-                  onClick={() => setIsListView(true)}
-                  title="List View"
-                  sx={{ cursor: 'pointer' }}
-                  tabIndex={0}
-                >
-                  <ReorderRounded fontSize="medium" {...(isListView && { color: 'primary' })} />
-                </Box>
-                <Box
-                  onClick={() => setIsListView(false)}
-                  title="Grid View"
-                  sx={{ cursor: 'pointer' }}
-                  tabIndex={0}
-                >
-                  <Apps fontSize="medium" {...(!isListView && { color: 'primary' })} />
-                </Box>
-              </Box>
-
-              <Box sx={{ ...PLPStyles.navBarSort }}>
-                <Box sx={{ ...PLPStyles.sorting, justifyContent: 'end' }}>
-                  <Typography component="span" sx={{ ...PLPStyles.navBarLabel }}>
-                    {t('sort')}
-                  </Typography>
-                  <CustomSortBy items={sortingOptions} />
-                </Box>
-                <Box sx={{ ...PLPStyles.filterBy }}>
-                  <Button
-                    onClick={() => setIsFilterOpen(!isFilterOpen)}
-                    variant="outlined"
-                    endIcon={<Add fontSize="small" />}
-                    sx={{ ...PLPStyles.filterByButton }}
-                  >
-                    Filter By
-                  </Button>
-                </Box>
-              </Box>
-            </Box>
+          <Box sx={{ display: 'flex' }}>
+            <DesktopRefinement />
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex', margin: '1rem 0 0 1rem' }}>
-              <DesktopRefinement />
-            </Box>
-            <Box sx={{ ...PLPStyles.totalResults }} pb={1}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', md: 'row' },
+              justifyContent: 'space-between',
+              alignItems: { xs: 'stretch', md: 'center' },
+              gap: 1,
+            }}
+          >
+            <Box sx={{ ...PLPStyles.totalResults, marginTop: 0 }}>
               {results?.index === 'products'
                 ? t('no-of-products', { count: results?.nbHits ?? 0 })
                 : t('no-of-resources', { count: results?.nbHits ?? 0 })}
             </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Box sx={{ ...PLPStyles.filterBy, minWidth: 'auto', marginTop: 0 }}>
+                <IconButton
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
+                  aria-label="Filter By"
+                  title="Filter By"
+                  sx={{
+                    border: '1px solid #EAEAF1',
+                    borderRadius: '9px',
+                    width: '39px',
+                    height: '39px',
+                    color: '#1B1A24',
+                    '&:hover': {
+                      backgroundColor: '#F6F6FA',
+                      borderColor: '#C9C7D6',
+                    },
+                  }}
+                >
+                  <FilterList fontSize="small" />
+                </IconButton>
+              </Box>
+              <CustomSortBy items={sortingOptions} />
+            </Box>
           </Box>
-          <Box
-            className={
-              isMobile
-                ? 'product-grid-view'
-                : isListView
-                ? 'product-list-view'
-                : 'product-grid-view'
-            }
-          >
-            {isMobile ? (
-              <Hits hitComponent={ResourceHitGridView} />
-            ) : isListView ? (
-              <Hits hitComponent={ResourceHitListView} />
-            ) : (
-              <Hits hitComponent={ResourceHitGridView} />
-            )}
+          <Box className="product-grid-view" sx={{ marginLeft: '0 !important', marginTop: '18px' }}>
+            <Hits hitComponent={ResourceHitGridView} />
           </Box>
         </Box>
         <Box className="AlgoliaPagination" sx={{ textAlign: 'center', marginTop: 2 }}>
