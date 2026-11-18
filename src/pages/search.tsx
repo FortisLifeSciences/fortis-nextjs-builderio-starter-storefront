@@ -3,12 +3,13 @@ import { useEffect, useState } from 'react'
 import { BuilderComponent, builder } from '@builder.io/react'
 import { setPixelProperties } from '@builder.io/utils'
 import '@builder.io/widgets'
-import { Add, Apps, ReorderRounded } from '@mui/icons-material'
+import { FilterList } from '@mui/icons-material'
 import {
   Grid,
   MenuItem,
   Box,
   Button,
+  IconButton,
   Link,
   Typography,
   Breadcrumbs,
@@ -16,6 +17,7 @@ import {
   useMediaQuery,
 } from '@mui/material'
 import { CircularProgress } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { liteClient as algoliasearch } from 'algoliasearch/lite'
 import 'swiper/css'
 import 'swiper/css/navigation'
@@ -28,7 +30,7 @@ import { FullWidthDivider } from '@/components/common'
 import KiboBreadcrumbs from '@/components/core/Breadcrumbs/KiboBreadcrumbs'
 import ResourceSearchSliders from '@/components/layout/Algolia/ResourceSearchSliders'
 import { PLPStyles } from '@/components/page-templates/ProductListingTemplate/ProductListingTemplate.styles'
-import { ProductHitListView, ProductHitGridView } from '@/components/product'
+import { ProductHitGridView } from '@/components/product'
 import AlgoliaPagination from '@/components/product/AlgoliaFacets/AlgoliaPagination'
 import ManualFacetBlock from '@/components/product/AlgoliaFacets/ManualFacetBlock'
 import ManualFilterControls from '@/components/product/AlgoliaFacets/ManualFilterControls'
@@ -117,8 +119,8 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
   const router = useRouter()
   const sortFromQuery = typeof router.query.sort === 'string' ? router.query.sort : 'products'
   const [sortIndex, setSortIndex] = useState(sortFromQuery)
-  const isMobile = useMediaQuery('(max-width:600px)')
-  const [isListView, setIsListView] = useState(true)
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [pagination, setPagination] = useState({
     productsPage: 0,
   })
@@ -418,35 +420,36 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
                       sx={{
                         display: 'flex',
                         flexDirection: 'column', // Make vertical layout
+                        flexShrink: 0,
                         width: {
                           xs: isFilterOpen ? '100%' : '0',
-                          sm: '20%',
+                          md: '250px',
                         },
                         padding: {
                           xs: '0',
-                          sm: '20px 0',
+                          md: '20px 0',
                         },
                         overflow: 'hidden',
                         transition: 'all 0.3s ease',
                         backgroundColor: {
                           xs: '#fff',
-                          sm: 'transparent',
+                          md: 'transparent',
                         },
                         position: {
                           xs: 'absolute',
-                          sm: 'static',
+                          md: 'static',
                         },
                         zIndex: {
                           xs: 1200,
-                          sm: 'auto',
+                          md: 'auto',
                         },
                         height: {
                           xs: 'auto',
-                          sm: 'auto',
+                          md: 'auto',
                         },
                         boxShadow: {
                           xs: isFilterOpen ? 3 : 0,
-                          sm: 0,
+                          md: 0,
                         },
                         ...PLPStyles.FacetSection,
                       }}
@@ -509,88 +512,63 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
                         },
                         padding: {
                           xs: '0',
-                          md: '2px 0px 20px 20px',
+                          md: '2px 0px 20px 34px',
                         },
                       }}
                     >
-                      {/* List and grid View */}
-
-                      {/* toggle grid and list view */}
-
-                      <div className="gridListViewContainer">
-                        <Box sx={{ ...PLPStyles.navBarMain }}>
-                          {!isMobile && (
-                            <Box
-                              className="switchListAndGrid"
-                              sx={{ display: 'flex', margin: '1rem 0 0 1rem' }}
-                            >
-                              <Box
-                                onClick={() => setIsListView(true)}
-                                title="List View"
-                                sx={{ cursor: 'pointer' }}
-                                tabIndex={0}
-                              >
-                                <ReorderRounded
-                                  fontSize="medium"
-                                  {...(isListView && { color: 'primary' })}
-                                />
-                              </Box>
-                              <Box
-                                onClick={() => setIsListView(false)}
-                                title="Grid View"
-                                sx={{ cursor: 'pointer' }}
-                                tabIndex={0}
-                              >
-                                <Apps
-                                  fontSize="medium"
-                                  {...(!isListView && { color: 'primary' })}
-                                />
-                              </Box>
-                            </Box>
-                          )}
-                          {/* Custom sort for search start */}
-                          <Box sx={{ ...PLPStyles.navBarSort }}>
-                            <Box sx={{ ...PLPStyles.sorting }}>
-                              <ManualSortDropdown
-                                sortIndex={sortIndex}
-                                onChangeSort={setSortIndex}
-                              />
-                            </Box>
-                            <Box sx={{ ...PLPStyles.filterBy }}>
-                              <Button
-                                onClick={() => setIsFilterOpen(!isFilterOpen)}
-                                variant="outlined"
-                                endIcon={<Add fontSize="small" />}
-                                sx={{ ...PLPStyles.filterByButton }}
-                              >
-                                Filter By
-                              </Button>
-                            </Box>
-                          </Box>
-                        </Box>
-                        {/* Custom sort for search end */}
-                      </div>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Box sx={{ display: 'flex', margin: '1rem 0 0 1rem' }}>
-                          <SelectedFiltersChips
-                            selectedFilters={selectedFilters}
-                            onFilterRemove={handleRemoveFilter}
-                            onClearAll={handleClearAllFilters}
-                          />
-                        </Box>
-                        <Box sx={{ ...PLPStyles.totalResults }} pb={1}>
-                          {t('no-of-products', { count: result?.nbHits ?? 0 })}
-                        </Box>
+                      <Box>
+                        <SelectedFiltersChips
+                          selectedFilters={selectedFilters}
+                          onFilterRemove={handleRemoveFilter}
+                          onClearAll={handleClearAllFilters}
+                        />
                       </Box>
                       <Box
-                        className={
-                          isMobile
-                            ? 'product-grid-view'
-                            : isListView
-                            ? 'product-list-view'
-                            : 'product-grid-view'
-                        }
+                        className="gridListViewContainer"
+                        sx={{
+                          display: 'flex',
+                          flexDirection: { xs: 'column', md: 'row' },
+                          justifyContent: 'space-between',
+                          alignItems: { xs: 'stretch', md: 'center' },
+                          gap: 1,
+                        }}
                       >
+                        <Box sx={{ ...PLPStyles.totalResults, marginTop: 0 }}>
+                          {t('no-of-products', { count: result?.nbHits ?? 0 })}
+                        </Box>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: 1,
+                          }}
+                        >
+                          <Box sx={{ ...PLPStyles.filterBy, minWidth: 'auto', marginTop: 0 }}>
+                            <IconButton
+                              onClick={() => setIsFilterOpen(!isFilterOpen)}
+                              aria-label="Filter By"
+                              title="Filter By"
+                              sx={{
+                                display: { md: 'none' },
+                                border: '1px solid #EAEAF1',
+                                borderRadius: '9px',
+                                width: '39px',
+                                height: '39px',
+                                color: '#1B1A24',
+                                '&:hover': {
+                                  backgroundColor: '#F6F6FA',
+                                  borderColor: '#C9C7D6',
+                                },
+                              }}
+                            >
+                              <FilterList fontSize="small" />
+                            </IconButton>
+                          </Box>
+                          <ManualSortDropdown sortIndex={sortIndex} onChangeSort={setSortIndex} />
+                        </Box>
+                      </Box>
+                      <Box className="product-grid-view" sx={{ marginTop: '18px' }}>
                         <div className="productviewstructure">
                           {result.hits.slice(0, 16).map((hit: any, i: number) => (
                             <div
@@ -598,31 +576,13 @@ const SearchPage: NextPage<SearchPageType> = (props) => {
                               key={i}
                               data-insights-index={result?.index}
                             >
-                              {isMobile ? (
-                                <ProductHitGridView
-                                  hit={hit}
-                                  position={pagination.productsPage * HITS_PER_PAGE + i + 1}
-                                  algoliaIndex={result?.index}
-                                  queryId={result?.queryID ?? ''}
-                                  dataInsideMethod={'clickedObjectIDsAfterSearch'}
-                                />
-                              ) : isListView ? (
-                                <ProductHitListView
-                                  hit={hit}
-                                  position={pagination.productsPage * HITS_PER_PAGE + i + 1}
-                                  algoliaIndex={result?.index}
-                                  queryId={result?.queryID ?? ''}
-                                  dataInsideMethod={'clickedObjectIDsAfterSearch'}
-                                />
-                              ) : (
-                                <ProductHitGridView
-                                  hit={hit}
-                                  position={pagination.productsPage * HITS_PER_PAGE + i + 1}
-                                  algoliaIndex={result?.index}
-                                  queryId={result?.queryID ?? ''}
-                                  dataInsideMethod={'clickedObjectIDsAfterSearch'}
-                                />
-                              )}
+                              <ProductHitGridView
+                                hit={hit}
+                                position={pagination.productsPage * HITS_PER_PAGE + i + 1}
+                                algoliaIndex={result?.index}
+                                queryId={result?.queryID ?? ''}
+                                dataInsideMethod={'clickedObjectIDsAfterSearch'}
+                              />
                             </div>
                           ))}
                         </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-import { Add, Remove, ExpandMore, ExpandLess, ArrowForwardIos } from '@mui/icons-material'
+import { Add, Remove, ArrowForwardIos, CheckBox, CheckBoxOutlineBlank } from '@mui/icons-material'
 import {
   Checkbox,
   FormControlLabel,
@@ -8,7 +8,6 @@ import {
   Box,
   Button,
   useMediaQuery,
-  Collapse,
   TextField,
   InputAdornment,
 } from '@mui/material'
@@ -34,18 +33,10 @@ const ManualFacetBlock = ({
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-  const [expandedFacets, setExpandedFacets] = useState<Record<string, boolean>>({})
   const [showAllValues, setShowAllValues] = useState<Record<string, boolean>>({})
   const [searchQueries, setSearchQueries] = useState<Record<string, string>>({})
 
   const searchableAttributes = getStaticSearchableFacets()
-
-  const toggleSection = (facet: string) => {
-    setExpandedFacets((prev) => ({
-      ...prev,
-      [facet]: !prev[facet],
-    }))
-  }
 
   const toggleShowAll = (facet: string) => {
     setShowAllValues((prev) => ({
@@ -66,7 +57,6 @@ const ManualFacetBlock = ({
       {facets.map((facet) => {
         const values = facetValues[facet] || {}
         const entries = Object.entries(values)
-        const isSectionExpanded = expandedFacets[facet] ?? false
         const isShowAll = showAllValues[facet] ?? false
         const isSearchableFacet = isMobile && searchableAttributes.includes(facet)
         const searchQuery = searchQueries[facet] || ''
@@ -82,33 +72,27 @@ const ManualFacetBlock = ({
         return (
           <Box
             key={facet}
-            style={{ cursor: 'pointer', borderBottom: '1px solid #000' }}
-            sx={{ ...PLPStyles.Facetpanel }}
+            className="ais-Panel"
+            sx={{ ...PLPStyles.Facetpanel, borderBottom: '1px solid #EAEAF1' }}
           >
-            {/* Collapsible Header */}
-            <Box
-              display="flex"
-              alignItems="center"
-              className="ais-Panel-header"
-              justifyContent="space-between"
-              sx={{ cursor: 'pointer' }}
-              onClick={() => toggleSection(facet)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                cursor: 'pointer',
-                fontWeight: 500,
-                padding: '8px 0',
-              }}
-            >
-              <span>{getFacetLabel(facet)}</span>
-              <span style={{ color: 'rgba(0, 0, 0, 0.54)' }}>
-                {isSectionExpanded ? <ExpandLess /> : <ExpandMore />}
+            <Box className="ais-Panel-header" style={{ padding: '16px 0' }}>
+              <span
+                style={{
+                  fontFamily: 'Poppins',
+                  fontWeight: 800,
+                  fontSize: '12.5px',
+                  lineHeight: '20px',
+                  letterSpacing: '0.5px',
+                  textTransform: 'uppercase',
+                  verticalAlign: 'middle',
+                  color: '#1B1A24',
+                }}
+              >
+                {getFacetLabel(facet)}
               </span>
             </Box>
 
-            <Collapse in={isSectionExpanded} timeout="auto" unmountOnExit>
+            <Box sx={{ paddingBottom: '16px' }}>
               {/* Search input for mobile searchable facets */}
               {isSearchableFacet && (
                 <TextField
@@ -157,7 +141,13 @@ const ManualFacetBlock = ({
 
               {/* Facet Checkboxes */}
               {visibleEntries.map(([value, count]) => (
-                <Box key={value} display="flex" alignItems="center" justifyContent="space-between">
+                <Box
+                  key={value}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  sx={{ width: '100%', padding: '8px 0' }}
+                >
                   <FormControlLabel
                     control={
                       <Checkbox
@@ -165,6 +155,14 @@ const ManualFacetBlock = ({
                         data-insights-filter={`${facet}:${value}`}
                         onChange={() => onFilterChange(facet, value)}
                         size="small"
+                        icon={<CheckBoxOutlineBlank />}
+                        checkedIcon={<CheckBox />}
+                        sx={{
+                          padding: '4px 8px 4px 0',
+                          color: '#C9C7D6',
+                          '& .MuiSvgIcon-root': { fontSize: '18px', borderRadius: '4px' },
+                          '&.Mui-checked': { color: '#30299A' },
+                        }}
                         inputProps={
                           {
                             'data-insights-filter': `${facet}:${value}`,
@@ -176,15 +174,27 @@ const ManualFacetBlock = ({
                     label={value}
                     sx={{
                       width: '100%',
-                      fontSize: theme.typography.body2.fontSize,
+                      margin: 0,
                       '& .MuiFormControlLabel-label': {
-                        fontSize: '14px',
-                        fontWeight: 300,
+                        fontFamily: 'Poppins',
+                        fontSize: '13.5px',
+                        lineHeight: '22px',
+                        color: selectedFilters[facet]?.includes(value) ? '#1B1A24' : '#5C5A70',
+                        fontWeight: selectedFilters[facet]?.includes(value) ? 600 : 400,
                       },
                     }}
                   />
-                  <Typography variant="body2" fontSize={'16px'}>
-                    ({count})
+                  <Typography
+                    component="span"
+                    sx={{
+                      fontFamily: 'Poppins',
+                      fontSize: '11.5px',
+                      lineHeight: '18px',
+                      color: '#8B8AA0',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {count}
                   </Typography>
                 </Box>
               ))}
@@ -195,12 +205,21 @@ const ManualFacetBlock = ({
                   onClick={() => toggleShowAll(facet)}
                   startIcon={isShowAll ? <Remove fontSize="small" /> : <Add fontSize="small" />}
                   variant="text"
-                  sx={{ paddingLeft: 0, fontSize: '16px', textTransform: 'capitalize' }}
+                  sx={{
+                    paddingLeft: 0,
+                    marginTop: '8px',
+                    textTransform: 'none',
+                    color: '#30299A',
+                    fontFamily: 'Poppins',
+                    fontWeight: 600,
+                    fontSize: '12.5px',
+                    '&:hover': { backgroundColor: 'transparent', textDecoration: 'underline' },
+                  }}
                 >
                   {isShowAll ? 'View Less' : 'View More'}
                 </Button>
               )}
-            </Collapse>
+            </Box>
           </Box>
         )
       })}
