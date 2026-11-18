@@ -71,7 +71,9 @@ const PdpVariantPicker = ({
               <span className={styles.optionRadio} aria-hidden="true" />
               <OptionLabel option={option} />
               {option.sku ? <span className={styles.sizeSku}>{option.sku}</span> : null}
-              {showPrices && option.price ? <OptionPrice option={option} /> : null}
+              {showPrices && option.price ? (
+                <span className={styles.sizePrice}>{option.price}</span>
+              ) : null}
             </button>
           )
         })}
@@ -106,7 +108,7 @@ export const PdpMobileSizePicker = ({
     <>
       <OptionLabel option={option} />
       <span className={styles.sizeSku}>{option.sku}</span>
-      {showPrices ? <OptionPrice option={option} /> : <span className={styles.sizePrice} />}
+      <span className={styles.sizePrice}>{showPrices ? option.price : null}</span>
     </>
   )
 

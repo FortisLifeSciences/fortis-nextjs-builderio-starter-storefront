@@ -775,9 +775,15 @@
   border-radius: 12px;
   padding: 9px 11px;
   background: #fff;
-  display: flex;
+  display: grid;
+  grid-template-columns: 15px minmax(0, 1fr) auto;
+  grid-template-areas:
+    'radio main price'
+    'radio sku price';
+  align-content: center;
   align-items: center;
-  gap: 8px;
+  column-gap: 8px;
+  row-gap: 2px;
   text-align: left;
   color: var(--ink);
   transition: border-color 0.16s ease, color 0.16s ease;
@@ -819,6 +825,23 @@
   height: 7px;
   border-radius: 50%;
   background: var(--accent);
+}
+
+.sizeOption .optionRadio {
+  grid-area: radio;
+}
+
+.sizeOption .sizeMain {
+  grid-area: main;
+}
+
+.sizeOption .sizeSku {
+  grid-area: sku;
+}
+
+.sizeOption .sizePrice {
+  grid-area: price;
+  justify-self: end;
 }
 
 .sizeMain {
@@ -2758,23 +2781,43 @@
 .mobileSizeSelected,
 .mobileSizeOption {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'main price'
+    'sku price';
   column-gap: 10px;
+  row-gap: 2px;
   align-items: center;
   min-width: 0;
 }
 
 .mobileSizeSelected {
   flex: 1 1 auto;
+  row-gap: 0;
+}
+
+.mobileSizeSelected .sizeMain,
+.mobileSizeOption .sizeMain {
+  grid-area: main;
+}
+
+.mobileSizeSelected .sizeMain {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .mobileSizeSelected .sizeSku,
 .mobileSizeOption .sizeSku {
-  flex-shrink: 1;
+  grid-area: sku;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+.mobileSizeSelected .sizePrice,
+.mobileSizeOption .sizePrice {
+  grid-area: price;
 }
 
 .mobileSizeSelected .sizePrice,
