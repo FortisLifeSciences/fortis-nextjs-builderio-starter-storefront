@@ -823,6 +823,15 @@
   background: var(--accent);
 }
 
+.sizeInfo {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
 .sizeMain {
   min-width: 0;
   font-size: 13px;
@@ -831,9 +840,8 @@
 }
 
 .sizeSku {
-  flex: 1 0 auto;
-  margin-left: 0;
   font-size: 10px;
+  line-height: 1.3;
   color: var(--muted);
   white-space: nowrap;
 }
@@ -2660,7 +2668,7 @@
 .mobileSizeSelected,
 .mobileSizeOption {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   column-gap: 10px;
   align-items: center;
   min-width: 0;
@@ -2670,13 +2678,22 @@
   flex: 1 1 auto;
 }
 
-.mobileSizeSelected .sizeSku,
-.mobileSizeOption .sizeSku {
-  flex-shrink: 1;
-  min-width: 0;
+.mobileSizeSelected .sizeMain {
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.mobileSizeSelected .sizeInfo {
+  gap: 0;
+}
+
+.mobileSizeSelected .sizeSku,
+.mobileSizeOption .sizeSku {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .mobileSizeSelected .sizePrice,
