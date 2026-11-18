@@ -28,13 +28,6 @@ const OptionLabel = ({ option }: { option: PdpVariantOption }) => {
   )
 }
 
-const OptionInfo = ({ option }: { option: PdpVariantOption }) => (
-  <span className={styles.sizeInfo}>
-    <OptionLabel option={option} />
-    {option.sku ? <span className={styles.sizeSku}>{option.sku}</span> : null}
-  </span>
-)
-
 interface PdpVariantPickerProps {
   options: PdpVariantOption[]
   selected?: string | null
@@ -66,7 +59,8 @@ const PdpVariantPicker = ({
               className={`${styles.sizeOption} ${isSelected ? styles.sizeOptionSelected : ''}`}
             >
               <span className={styles.optionRadio} aria-hidden="true" />
-              <OptionInfo option={option} />
+              <OptionLabel option={option} />
+              {option.sku ? <span className={styles.sizeSku}>{option.sku}</span> : null}
               {showPrices && option.price ? (
                 <span className={styles.sizePrice}>{option.price}</span>
               ) : null}
@@ -102,7 +96,8 @@ export const PdpMobileSizePicker = ({
 
   const optionContent = (option: PdpVariantOption) => (
     <>
-      <OptionInfo option={option} />
+      <OptionLabel option={option} />
+      <span className={styles.sizeSku}>{option.sku}</span>
       <span className={styles.sizePrice}>{showPrices ? option.price : null}</span>
     </>
   )
