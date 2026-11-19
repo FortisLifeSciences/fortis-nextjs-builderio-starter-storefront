@@ -267,10 +267,8 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                         value={field.value || ''}
                         label={t('cvv-code')}
                         placeholder={
-                          expectedCvvLength === 4
-                            ? t('cvv-placeholder-4')
-                            : expectedCvvLength === 3
-                            ? t('cvv-placeholder-3')
+                          expectedCvvLength
+                            ? t('cvv-placeholder', { count: expectedCvvLength })
                             : t('cvv-placeholder-unknown')
                         }
                         required={true}
