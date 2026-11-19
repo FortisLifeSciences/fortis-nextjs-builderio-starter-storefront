@@ -318,6 +318,8 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
 
   const [cvv, setCvv] = useState('')
   const [cvvError, setCvvError] = useState('')
+  const savedCardCvvLength = getCvvLengthForCardType(selectedSavedCard?.cardInfo?.cardType)
+  const isSavedCardCvvValid = new RegExp(`^\\d{${savedCardCvvLength}}$`).test(cvv)
   const [cardFormData, setCardFormData] = useState<CardForm>({})
   const [isCardFormValid, setIsCardFormValid] = useState(false)
   const [cardholderName, setCardholderName] = useState('')
@@ -538,8 +540,6 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   }
 
   const isCardholderNameMissing = !cardholderName.trim()
-  const savedCardCvvLength = getCvvLengthForCardType(selectedSavedCard?.cardInfo?.cardType)
-  const isSavedCardCvvValid = new RegExp(`^\\d{${savedCardCvvLength}}$`).test(cvv)
 
   const getPlaceOrderIssues = () => {
     if (isPurchaseOrder) return []
@@ -598,8 +598,10 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     }
 
     if (selectedSavedCard) {
-      if (!/^\d{3,4}$/.test(cvv)) {
-        setCvvError(cvv ? t('invalid-cvv') : t('cvv-is-required'))
+      if (!isSavedCardCvvValid) {
+        setCvvError(
+          cvv ? t('invalid-cvv-length', { count: savedCardCvvLength }) : t('cvv-is-required')
+        )
         setPlaceOrderError(t('please-complete-card-details'))
         return false
       }
