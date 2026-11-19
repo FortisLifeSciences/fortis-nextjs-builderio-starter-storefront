@@ -168,8 +168,17 @@ const ShippingPreferenceTemplate = (props: ShippingPreferenceTemplateProps) => {
     ) {
       return
     }
-    const isSaved = await shippingMethod.saveAttribute(SHIPPING_METHOD_ATTRIBUTE_VALUE[method])
-    if (isSaved) queryClient.invalidateQueries({ queryKey: loginKeys.user })
+    const newPreference = SHIPPING_METHOD_ATTRIBUTE_VALUE[method]
+    const isSaved = await shippingMethod.saveAttribute(newPreference)
+    if (isSaved) {
+      if (shippingMethod.value !== newPreference) {
+        for (let index = sessionStorage.length - 1; index >= 0; index -= 1) {
+          const key = sessionStorage.key(index)
+          if (key?.startsWith('preferenceApplied:')) sessionStorage.removeItem(key)
+        }
+      }
+      queryClient.invalidateQueries({ queryKey: loginKeys.user })
+    }
     showSnackbar(
       String(isSaved ? t('shipping-preference-saved') : t('something-went-wrong')),
       isSaved ? 'success' : 'error'
@@ -273,7 +282,7 @@ const ShippingPreferenceTemplate = (props: ShippingPreferenceTemplateProps) => {
             variant="standard"
             fullWidth
             value={fedexDraft}
-            label={t('ending')}
+            placeholder={String(t('enter-your-fedex-account-number'))}
             error={Boolean(fedexError)}
             helperText={fedexError}
             onChange={(event) => {

@@ -48,7 +48,11 @@ const resetPasswordStyles = {
 
 const customMaxWidth = '832px'
 
-const ExistingUserDialog = () => {
+interface ExistingUserDialogProps {
+  onLoginSuccess?: () => void | Promise<void>
+}
+
+const ExistingUserDialog = ({ onLoginSuccess }: ExistingUserDialogProps = {}) => {
   const { t } = useTranslation('common')
   const theme = useTheme()
   const mdScreen = useMediaQuery(theme.breakpoints.up('md'))
@@ -56,7 +60,7 @@ const ExistingUserDialog = () => {
   const { showModal, closeModal } = useModalContext()
 
   const gotoLogin = () => {
-    showModal({ Component: LoginDialog })
+    showModal({ Component: LoginDialog, props: onLoginSuccess ? { onLoginSuccess } : undefined })
   }
 
   const contactUs = async () => {

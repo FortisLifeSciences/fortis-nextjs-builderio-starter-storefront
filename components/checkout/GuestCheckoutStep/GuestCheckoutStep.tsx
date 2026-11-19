@@ -30,7 +30,7 @@ import {
   checkoutPrimaryButtonSx,
 } from '@/components/checkout/checkoutStyles'
 import { AddressForm, KiboTextBox } from '@/components/common'
-import { LoginDialog } from '@/components/layout'
+import { ExistingUserDialog, LoginDialog } from '@/components/layout'
 import { useModalContext } from '@/context'
 import { useB2BAccountRequest, useInitiateOrder, useUpdateOrder } from '@/hooks'
 import { CurrencyCode, PaymentType, PaymentWorkflow } from '@/lib/constants'
@@ -101,10 +101,20 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
   // Purchase Order is a login-required option - opening the login dialog from here (rather
   // than a plain link) lets the shopper come straight back into checkout once they're signed
   // in. `checkoutPaymentIntent` tells the post-login PO checkout to default to the PO tab.
-  const moveToCheckoutForSignedInUser = async () => {
+  const getSignedInCartId = async (attemptsLeft = 3): Promise<string | undefined> => {
     try {
       const response = await makeGraphQLClient().request({ document: getCartQuery, variables: {} })
-      const cartId = response?.currentCart?.id
+      return response?.currentCart?.id
+    } catch (error) {
+      if (attemptsLeft <= 1) throw error
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      return getSignedInCartId(attemptsLeft - 1)
+    }
+  }
+
+  const moveToCheckoutForSignedInUser = async () => {
+    try {
+      const cartId = await getSignedInCartId()
       if (!cartId) return
       const userCheckout = await initiateOrder.mutateAsync({ cartId })
       if (userCheckout?.id && userCheckout.id !== checkout.id) {
@@ -115,16 +125,22 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
     }
   }
 
-  const openLoginModal = () =>
+  const continueCheckoutAfterLogin = (paymentIntent?: PaymentType) => async () => {
+    if (paymentIntent) sessionStorage.setItem('checkoutPaymentIntent', paymentIntent)
+    closeModal()
+    await moveToCheckoutForSignedInUser()
+  }
+
+  const openLoginModal = (paymentIntent?: PaymentType) =>
     showModal({
       Component: LoginDialog,
-      props: {
-        onLoginSuccess: async () => {
-          sessionStorage.setItem('checkoutPaymentIntent', PaymentType.PURCHASEORDER)
-          closeModal()
-          await moveToCheckoutForSignedInUser()
-        },
-      },
+      props: { onLoginSuccess: continueCheckoutAfterLogin(paymentIntent) },
+    })
+
+  const openExistingAccountModal = () =>
+    showModal({
+      Component: ExistingUserDialog,
+      props: { onLoginSuccess: continueCheckoutAfterLogin() },
     })
 
   const isShippingLocked = phase !== 'shipping'
@@ -162,6 +178,36 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
     setIsPlacingOrder(true)
     setPlaceOrderError('')
     try {
+      let activeCheckout = checkout
+      let accountStatus: AccountAtCheckoutResult['status'] | undefined
+      if (wantsAccount) {
+        const accountResult =
+          accountResultRef.current ?? (await createAccountAtCheckout(checkout.id as string))
+        if (accountResult.status === 'failed') {
+          throw new Error('Account creation at checkout failed')
+        }
+        if (accountResult.status === 'exists') {
+          setPlaceOrderError(t('account-already-exists-for-email'))
+          openExistingAccountModal()
+          return
+        }
+        accountResultRef.current = accountResult
+        accountStatus = accountResult.status
+        if (accountResult.checkout) {
+          activeCheckout = accountResult.checkout
+          if (accountResult.status === 'guest' && activeCheckout.id !== checkout.id) {
+            router.replace(
+              {
+                pathname: router.pathname,
+                query: { ...router.query, checkoutId: activeCheckout.id },
+              },
+              undefined,
+              { shallow: true }
+            )
+          }
+        }
+      }
+
       const billingContact = billingSameAsShipping
         ? orderGetters.getShippingContact(checkout)
         : (billingContactForm as CrContact)
@@ -186,31 +232,6 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
       const tokenizedData: TokenizedCard = {
         id: tokenizedCardResponse.id,
         numberPart: tokenizedCardResponse.numberPart,
-      }
-
-      let activeCheckout = checkout
-      let accountStatus: AccountAtCheckoutResult['status'] | undefined
-      if (wantsAccount) {
-        const accountResult =
-          accountResultRef.current ?? (await createAccountAtCheckout(checkout.id as string))
-        if (accountResult.status === 'failed') {
-          throw new Error('Account creation at checkout failed')
-        }
-        accountResultRef.current = accountResult
-        accountStatus = accountResult.status
-        if (accountResult.checkout) {
-          activeCheckout = accountResult.checkout
-          if (accountResult.status === 'guest' && activeCheckout.id !== checkout.id) {
-            router.replace(
-              {
-                pathname: router.pathname,
-                query: { ...router.query, checkoutId: activeCheckout.id },
-              },
-              undefined,
-              { shallow: true }
-            )
-          }
-        }
       }
 
       const paymentAction = buildCardPaymentActionForCheckoutParams(
@@ -278,7 +299,7 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
             title={t('purchase-order')}
             description={t('purchase-order-option-description')}
             disabled
-            onClick={openLoginModal}
+            onClick={() => openLoginModal(PaymentType.PURCHASEORDER)}
           />
         </Stack>
       </Stack>

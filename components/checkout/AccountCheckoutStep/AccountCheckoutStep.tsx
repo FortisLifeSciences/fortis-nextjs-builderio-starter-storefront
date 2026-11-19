@@ -60,6 +60,12 @@ import {
   CARDHOLDER_NAME_MAX_LENGTH,
   isCardholderNameValid,
 } from '@/lib/helpers/validations/validations'
+import {
+  cityNamePattern,
+  organizationNamePattern,
+  personNamePattern,
+  streetAddressPattern,
+} from '@/lib/helpers/validations/validations'
 import { checkoutKeys } from '@/lib/react-query/queryKeys'
 import type {
   CardForm,
@@ -137,6 +143,19 @@ const sameAsShippingLabelSx = {
   },
 }
 
+const isOk = (value: string | null | undefined, pattern: RegExp) =>
+  !value?.trim() || pattern.test(value.trim())
+
+const isContactInvalid = (contact?: Maybe<CrContact>) =>
+  !!contact &&
+  !(
+    isOk(contact.firstName, personNamePattern) &&
+    isOk(contact.lastNameOrSurname, personNamePattern) &&
+    isOk(contact.companyOrOrganization, organizationNamePattern) &&
+    isOk(contact.address?.address1, streetAddressPattern) &&
+    isOk(contact.address?.address2, streetAddressPattern) &&
+    isOk(contact.address?.cityOrTown, cityNamePattern)
+  )
 const US_ZIP_REGEX = /^\d{5}(-\d{4})?$/
 const ContactAddressSummary = ({ contact }: { contact?: Maybe<CrContact> }) => {
   const address = contact?.address
@@ -167,6 +186,13 @@ const ContactAddressSummary = ({ contact }: { contact?: Maybe<CrContact> }) => {
   )
 }
 
+const getShippingMethodType = (shippingMethodName?: string) => {
+  const name = shippingMethodName?.toLowerCase() ?? ''
+  if (name.includes('fedex account')) return 'fedex'
+  if (name.includes('ups account')) return 'ups'
+  return 'fortis'
+}
+
 const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   const {
     checkout,
@@ -190,6 +216,53 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     (attr) => attr?.fullyQualifiedName === 'tenant~shipping-method'
   )
   const shippingPreferenceValue = shippingPreferenceAttr?.values?.[0] || ''
+  const customerAccountId = customerAccountForShippingPreference?.id
+  const customerUserId = customerAccountForShippingPreference?.userId
+  const [freshShippingPreference, setFreshShippingPreference] = useState<string>()
+
+  useEffect(() => {
+    if (!customerAccountId || !customerUserId) {
+      setFreshShippingPreference(undefined)
+      return
+    }
+
+    let isActive = true
+    setFreshShippingPreference(undefined)
+
+    const fetchShippingPreference = async () => {
+      try {
+        const response = await fetch('/api/user/getCustomerAttribute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            payload: {
+              userId: customerUserId,
+              accountId: customerAccountId,
+              attributeFqn: 'tenant~shipping-method',
+            },
+          }),
+        })
+        if (!response.ok) {
+          throw new Error(`Failed to fetch shipping preference: ${response.status}`)
+        }
+
+        const attributeDetails = await response.json()
+        if (isActive) {
+          setFreshShippingPreference(attributeDetails?.data?.values?.[0] ?? '')
+        }
+      } catch (error) {
+        console.error('Failed to fetch the current shipping preference:', error)
+        if (isActive) setFreshShippingPreference(shippingPreferenceValue)
+      }
+    }
+
+    fetchShippingPreference()
+    return () => {
+      isActive = false
+    }
+  }, [customerAccountId, customerUserId])
+
+  const currentShippingPreference = freshShippingPreference ?? shippingPreferenceValue
   const preferredShippingMethodLabel = shippingPreferenceValue.includes('FedEx Account')
     ? 'FedEx Account'
     : shippingPreferenceValue.includes('UPS Account')
@@ -203,8 +276,23 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
 
   const shippingContact = orderGetters.getShippingContact(checkout)
   const shippingAddress = shippingContact?.address
-  const isShippingStepComplete =
+  const hasShippableItems = orderGetters.getShipItems(checkout).length > 0
+  const hasShippingDetails =
     !!shippingContact?.email &&
+    (!hasShippableItems || !!orderGetters.getShippingMethodCode(checkout))
+  const selectedShippingMethodName = orderGetters.getShippingMethodName(checkout)
+  const hasManuallySelectedShippingMethod =
+    typeof window !== 'undefined' &&
+    !!checkout?.id &&
+    sessionStorage.getItem(`preferenceApplied:${checkout.id}`) === '1'
+  const shippingPreferenceMatchesOrder =
+    !hasShippableItems ||
+    !currentShippingPreference ||
+    hasManuallySelectedShippingMethod ||
+    getShippingMethodType(currentShippingPreference) ===
+      getShippingMethodType(selectedShippingMethodName)
+  const isShippingStepComplete = hasShippingDetails && shippingPreferenceMatchesOrder
+  !isContactInvalid(shippingContact) &&
     (orderGetters.getShipItems(checkout).length === 0 ||
       !!orderGetters.getShippingMethodCode(checkout))
   const [phase, setPhase] = useState<'shipping' | 'payment'>(
@@ -212,7 +300,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   )
   useEffect(() => {
     setPhase(isShippingStepComplete ? 'payment' : 'shipping')
-  }, [checkout?.id])
+  }, [checkout?.id, isShippingStepComplete])
   const isShippingLocked = phase !== 'shipping'
 
   const contactShippingDefaults = {
@@ -536,6 +624,8 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
 
   const isCardholderNameMissing = !cardholderName.trim()
   const isCardholderNameInvalid = !isCardholderNameMissing && !isCardholderNameValid(cardholderName)
+  const savedCardCvvLength = getCvvLengthForCardType(selectedSavedCard?.cardInfo?.cardType)
+  const isSavedCardCvvValid = new RegExp(`^\\d{${savedCardCvvLength}}$`).test(cvv)
 
   const getPlaceOrderIssues = () => {
     if (isPurchaseOrder) return []
