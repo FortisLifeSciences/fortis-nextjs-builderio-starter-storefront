@@ -260,17 +260,12 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                   control={control}
                   defaultValue={cardValue?.cvv}
                   render={({ field }) => {
-                    const expectedCvvLength = getCvvLength(getValues('cardNumber'))
                     return !cardValue ? (
                       <KiboTextBox
                         type="password"
                         value={field.value || ''}
                         label={t('cvv-code')}
-                        placeholder={
-                          expectedCvvLength
-                            ? t('cvv-placeholder', { count: expectedCvvLength })
-                            : t('cvv-placeholder-unknown')
-                        }
+                        placeholder={t('cvv-placeholder')}
                         required={true}
                         sx={getCardInputSx(!!errors?.cvv)}
                         onChange={(_name, value) => {
