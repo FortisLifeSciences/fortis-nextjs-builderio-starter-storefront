@@ -624,8 +624,6 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
 
   const isCardholderNameMissing = !cardholderName.trim()
   const isCardholderNameInvalid = !isCardholderNameMissing && !isCardholderNameValid(cardholderName)
-  const savedCardCvvLength = getCvvLengthForCardType(selectedSavedCard?.cardInfo?.cardType)
-  const isSavedCardCvvValid = new RegExp(`^\\d{${savedCardCvvLength}}$`).test(cvv)
 
   const getPlaceOrderIssues = () => {
     if (isPurchaseOrder) return []
