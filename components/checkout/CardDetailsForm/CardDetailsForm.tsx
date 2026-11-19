@@ -118,6 +118,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
   })
 
   const watchedFormData = useWatch({ control })
+  const expectedCvvLength = getCvvLength(watchedFormData?.cardNumber)
 
   const onValid = async (formData: CardForm) => {
     const cardData = prepareCardDataParams(formData)
@@ -270,7 +271,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                           expectedCvvLength === 4
                             ? t('cvv-placeholder-4')
                             : expectedCvvLength === 3
-                            ? t('cvv-placeholder-3')
+                            ? t('cvv-placeholder')
                             : t('cvv-placeholder-unknown')
                         }
                         required={true}
