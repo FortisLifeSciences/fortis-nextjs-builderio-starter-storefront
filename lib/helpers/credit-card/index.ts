@@ -81,7 +81,7 @@ export const getCvvLength = (cardNumber: string | undefined) => {
 // For a saved card, only its type (e.g. "AMEX") is known - there's no card number to run
 // through credit-card-type, so CVV length has to be looked up by type name instead.
 export const getCvvLengthForCardType = (cardType: string | undefined) =>
-  cardType?.toUpperCase() === 'AMEX' ? 4 : 3
+  ['AMEX', 'AMERICANEXPRESS'].includes(cardType?.toUpperCase().replace(/[\s_-]/g, '') ?? '') ? 4 : 3
 
 export const isCardTypeValid = (cardNumber: string | undefined) => {
   if (!cardNumber) return false
