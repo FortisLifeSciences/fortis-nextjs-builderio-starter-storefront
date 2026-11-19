@@ -348,6 +348,12 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   const [cvvError, setCvvError] = useState('')
   const savedCardCvvLength = getCvvLengthForCardType(selectedSavedCard?.cardInfo?.cardType)
   const isSavedCardCvvValid = new RegExp(`^\\d{${savedCardCvvLength}}$`).test(cvv)
+  const getSavedCardCvvError = (value: string) => {
+    if (!value) return t('cvv-is-required')
+    return new RegExp(`^\\d{${savedCardCvvLength}}$`).test(value)
+      ? ''
+      : t(savedCardCvvLength === 4 ? 'invalid-cvv-length-4' : 'invalid-cvv-length-3')
+  }
   const [cardFormData, setCardFormData] = useState<CardForm>({})
   const [isCardFormValid, setIsCardFormValid] = useState(false)
   const [cardholderName, setCardholderName] = useState('')
@@ -716,9 +722,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       setPlaceOrderError('')
       if (selectedSavedCard) {
         if (!isSavedCardCvvValid) {
-          setCvvError(
-            cvv ? t('invalid-cvv-length', { count: savedCardCvvLength }) : t('cvv-is-required')
-          )
+          setCvvError(getSavedCardCvvError(cvv))
         }
       } else {
         setCardValidationRequest((count) => count + 1)
@@ -1356,16 +1360,20 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                   <KiboTextBox
                     value={cvv}
                     label={t('cvv-code')}
-                    placeholder={t('cvv-placeholder')}
+                    placeholder={t(
+                      savedCardCvvLength === 4 ? 'cvv-placeholder-4' : 'cvv-placeholder-3'
+                    )}
                     required
                     error={!!cvvError}
                     helperText={cvvError}
                     inputProps={{ maxLength: savedCardCvvLength }}
                     onChange={(_name, value) => {
-                      setCvv(value.replace(/\D/g, '').slice(0, savedCardCvvLength))
-                      setCvvError('')
+                      const sanitizedValue = value.replace(/\D/g, '').slice(0, savedCardCvvLength)
+                      setCvv(sanitizedValue)
+                      setCvvError(sanitizedValue ? getSavedCardCvvError(sanitizedValue) : '')
                       setPlaceOrderError('')
                     }}
+                    onBlur={() => setCvvError(getSavedCardCvvError(cvv))}
                   />
                 ) : (
                   <>
