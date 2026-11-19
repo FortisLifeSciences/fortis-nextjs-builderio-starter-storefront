@@ -32,29 +32,42 @@ const ManualSortDropdown = ({ sortIndex, onChangeSort }: Props) => {
         className="sortWrapper"
         fullWidth
         size="small"
-        sx={{ minWidth: 120 }}
+        sx={{ minWidth: 200 }}
         variant="outlined"
       >
-        <span>Sort: </span>
         <Select
           aria-label="Sort"
           value={selectedSort}
           onChange={handleChange}
           size="small"
           displayEmpty
+          renderValue={(value) => {
+            const selected = options.find((option) => option.value === value)
+            return `Sort: ${selected?.label ?? ''}`
+          }}
           sx={{
             borderWidth: '1px',
             borderStyle: 'solid',
-            //borderColor: '#ccc',
-            borderRadius: '5px',
-            fontSize: '14px !important',
-            height: '32px',
-            color: '#2B2B2B',
+            borderColor: '#EAEAF1',
+            borderRadius: '9px',
+            fontSize: '13px !important',
+            height: '39px',
+            backgroundColor: '#FFFFFF',
+            color: '#1B1A24',
             fontFamily: 'Poppins',
             fontStyle: 'normal',
             fontWeight: '400',
-            lineHeight: '20px',
+            lineHeight: '19px',
             padding: '4.5px 12px',
+            '& .MuiOutlinedInput-notchedOutline': {
+              borderColor: '#EAEAF1',
+            },
+            '&:hover .MuiOutlinedInput-notchedOutline': {
+              borderColor: '#C9C7D6',
+            },
+            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+              borderColor: '#30299A',
+            },
           }}
           inputProps={{
             id: 'custom-sort-by',
@@ -66,12 +79,12 @@ const ManualSortDropdown = ({ sortIndex, onChangeSort }: Props) => {
               key={option.value}
               value={option.value}
               sx={{
-                color: '#2B2B2B',
+                color: '#1B1A24',
                 fontFamily: 'Poppins',
-                fontSize: '14px',
+                fontSize: '13px',
                 fontStyle: 'normal',
                 fontWeight: '400',
-                lineHeight: '20px',
+                lineHeight: '19px',
               }}
             >
               {option.label}
