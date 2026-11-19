@@ -343,6 +343,8 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
 
   const [cvv, setCvv] = useState('')
   const [cvvError, setCvvError] = useState('')
+  const savedCardCvvLength = getCvvLengthForCardType(selectedSavedCard?.cardInfo?.cardType)
+  const isSavedCardCvvValid = new RegExp(`^\\d{${savedCardCvvLength}}$`).test(cvv)
   const [cardFormData, setCardFormData] = useState<CardForm>({})
   const [isCardFormValid, setIsCardFormValid] = useState(false)
   const [cardholderName, setCardholderName] = useState('')
@@ -630,8 +632,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   }
 
   const isCardholderNameMissing = !cardholderName.trim()
-  const savedCardCvvLength = getCvvLengthForCardType(selectedSavedCard?.cardInfo?.cardType)
-  const isSavedCardCvvValid = new RegExp(`^\\d{${savedCardCvvLength}}$`).test(cvv)
+  const isCardholderNameInvalid = !isCardholderNameMissing && !isCardholderNameValid(cardholderName)
 
   const getPlaceOrderIssues = () => {
     if (isPurchaseOrder) return []
@@ -723,8 +724,9 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       setPlaceOrderError('')
       if (selectedSavedCard) {
         if (!isSavedCardCvvValid) {
-          setCvvError(cvv ? t('invalid-cvv') : t('cvv-is-required'))
-          if (cvv) setCvv('')
+          setCvvError(
+            cvv ? t('invalid-cvv-length', { count: savedCardCvvLength }) : t('cvv-is-required')
+          )
         }
       } else {
         setCardValidationRequest((count) => count + 1)
@@ -766,8 +768,12 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       }
       return true
     }
-    if (selectedSavedCard) return isSavedCardCvvValid
-    if (isCardholderNameMissing || !isCardFormValid) return false
+    if (
+      !selectedSavedCard &&
+      (isCardholderNameMissing || isCardholderNameInvalid || !isCardFormValid)
+    ) {
+      return false
+    }
     if (!billingSameAsShipping && !isBillingFormValid) return false
     return true
   }, [
@@ -782,7 +788,6 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     billingAddressSameAsShipping,
     billingAddressOverride,
     selectedSavedCard,
-    cvv,
     isCardholderNameMissing,
     isCardFormValid,
     billingSameAsShipping,
