@@ -14,6 +14,7 @@ export const validatePassword = (password: string) => {
   }
 }
 
+export const nameMaxLength = 25
 export const isPasswordValid = (password: string) => {
   const {
     isHavingAtLeastEightCharacters,

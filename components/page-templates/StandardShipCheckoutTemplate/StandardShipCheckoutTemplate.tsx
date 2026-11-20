@@ -76,11 +76,12 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
         checkoutId: checkoutId as string,
         couponCode,
       })
-      if (response?.invalidCoupons?.length) {
+      const invalidCoupon = response?.invalidCoupons?.find(
+        (coupon: any) => coupon?.couponCode?.toLowerCase() === couponCode.toLowerCase()
+      )
+      if (invalidCoupon) {
         setPromoError(
-          `<strong>${couponCode}</strong> ${
-            response.invalidCoupons[0]?.reason || t('invalidPromoError')
-          }`
+          `<strong>${couponCode}</strong> ${invalidCoupon.reason || t('invalidPromoError')}`
         )
       }
     } catch (err) {
@@ -89,6 +90,7 @@ const StandardShipCheckoutTemplate = (props: StandardShipCheckoutProps) => {
   }
   const handleRemoveCouponCode = async (couponCode: string) => {
     try {
+      setPromoError('')
       await deleteOrderCoupon.mutateAsync({
         checkoutId: checkoutId as string,
         couponCode,

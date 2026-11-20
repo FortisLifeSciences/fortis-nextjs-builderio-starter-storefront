@@ -780,5 +780,6 @@
   "shipping-preference-saved": "Shipping preference updated",
   "shipping-account-saved": "Shipping account updated",
   "remove-numbers": "Please remove numbers",
-  "remove-numbers-and-special-characters": "Please remove numbers and special characters"
+  "remove-numbers-and-special-characters": "Please remove numbers and special characters",
+  "name-max-length": "Must be {{max}} characters or less"
 }
