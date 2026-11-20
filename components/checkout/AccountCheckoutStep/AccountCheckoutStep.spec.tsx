@@ -261,10 +261,22 @@ describe('[component] AccountCheckoutStep', () => {
   it('requires the CVV before paying with a saved card', async () => {
     const { user, onAddPayment } = setup({ cards: cardCollection })
 
+    expect(screen.getByLabelText('cvv-code')).toHaveAttribute('type', 'password')
     await agreeToTermsAndPlaceOrder(user)
 
     expect(screen.getByText('cvv-is-required')).toBeVisible()
     expect(onAddPayment).not.toHaveBeenCalled()
+  })
+
+  it('clears an incorrectly sized saved-card CVV on blur and shows the card-specific error', async () => {
+    const { user } = setup({ cards: cardCollection })
+    const cvvInput = screen.getByLabelText('cvv-code')
+
+    await user.type(cvvInput, '12')
+    await user.tab()
+
+    expect(cvvInput).toHaveValue('')
+    expect(screen.getByText('invalid-cvv-length')).toBeVisible()
   })
 
   it('pays with a saved card by re-tokenizing its CVV', async () => {
@@ -275,7 +287,7 @@ describe('[component] AccountCheckoutStep', () => {
     })
     const { user, onAddPayment, onCreateOrder } = setup({ cards: cardCollection })
 
-    await user.type(screen.getByRole('textbox', { name: 'cvv-code' }), '123')
+    await user.type(screen.getByLabelText('cvv-code'), '123')
     await agreeToTermsAndPlaceOrder(user)
 
     await waitFor(() => expect(onCreateOrder).toHaveBeenCalled())
