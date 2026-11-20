@@ -414,14 +414,24 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         : undefined
       const hasManuallySelectedForThisOrder =
         !!manualSelectionStorageKey && sessionStorage.getItem(manualSelectionStorageKey) === '1'
+      const autoAppliedStorageKey = checkout?.id
+        ? `preferenceAutoApplied:${checkout.id}`
+        : undefined
+      const hasAutoAppliedForThisOrder =
+        !!autoAppliedStorageKey && sessionStorage.getItem(autoAppliedStorageKey) === '1'
       if (
+        !selectedShippingMethodCode &&
         !hasManuallySelectedForThisOrder &&
+        !hasAutoAppliedForThisOrder &&
         !manualSelectionRef.current &&
         shippingMethod?.shippingMethodCode &&
         shippingMethod.shippingMethodCode !== appliedPreferredShippingMethodCodeRef.current &&
         (isAccountMethodReady || (!isFedExAccountMethod && !isUpsAccountMethod))
       ) {
         appliedPreferredShippingMethodCodeRef.current = shippingMethod.shippingMethodCode
+        if (autoAppliedStorageKey) {
+          sessionStorage.setItem(autoAppliedStorageKey, '1')
+        }
         handleShippingMethodSelectChange(
           shippingMethod.shippingMethodName as string,
           shippingMethod.shippingMethodCode as string
