@@ -65,6 +65,7 @@ import {
   organizationNamePattern,
   personNamePattern,
   streetAddressPattern,
+  nameMaxLength,
 } from '@/lib/helpers/validations/validations'
 import { checkoutKeys } from '@/lib/react-query/queryKeys'
 import type {
@@ -145,12 +146,15 @@ const sameAsShippingLabelSx = {
 
 const isOk = (value: string | null | undefined, pattern: RegExp) =>
   !value?.trim() || pattern.test(value.trim())
-
+const isWithinLimit = (value: string | null | undefined) =>
+  (value?.trim().length ?? 0) <= nameMaxLength
 const isContactInvalid = (contact?: Maybe<CrContact>) =>
   !!contact &&
   !(
     isOk(contact.firstName, personNamePattern) &&
+    isWithinLimit(contact.firstName) &&
     isOk(contact.lastNameOrSurname, personNamePattern) &&
+    isWithinLimit(contact.lastNameOrSurname) &&
     isOk(contact.companyOrOrganization, organizationNamePattern) &&
     isOk(contact.address?.address1, streetAddressPattern) &&
     isOk(contact.address?.address2, streetAddressPattern) &&
@@ -291,13 +295,25 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     hasManuallySelectedShippingMethod ||
     getShippingMethodType(currentShippingPreference) ===
       getShippingMethodType(selectedShippingMethodName)
-  const isShippingStepComplete = hasShippingDetails && shippingPreferenceMatchesOrder
+  const isShippingStepComplete =
+    hasShippingDetails &&
+    shippingPreferenceMatchesOrder &&
+    !isContactInvalid(shippingContact) &&
+    (orderGetters.getShipItems(checkout).length === 0 ||
+      !!orderGetters.getShippingMethodCode(checkout))
+  const isPreferenceReady =
+    !customerAccountId || !customerUserId || freshShippingPreference !== undefined
+
   const [phase, setPhase] = useState<'shipping' | 'payment'>(
     isShippingStepComplete ? 'payment' : 'shipping'
   )
+  const initializedForCheckoutRef = useRef<string>()
   useEffect(() => {
+    if (!checkout?.id || !isPreferenceReady) return
+    if (initializedForCheckoutRef.current === checkout.id) return
+    initializedForCheckoutRef.current = checkout.id
     setPhase(isShippingStepComplete ? 'payment' : 'shipping')
-  }, [checkout?.id, isShippingStepComplete])
+  }, [checkout?.id, isPreferenceReady, isShippingStepComplete])
   const isShippingLocked = phase !== 'shipping'
 
   const contactShippingDefaults = {
