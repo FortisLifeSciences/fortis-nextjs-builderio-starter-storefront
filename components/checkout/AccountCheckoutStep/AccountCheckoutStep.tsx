@@ -352,7 +352,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     if (!value) return t('cvv-is-required')
     return new RegExp(`^\\d{${savedCardCvvLength}}$`).test(value)
       ? ''
-      : t(savedCardCvvLength === 4 ? 'invalid-cvv-length-4' : 'invalid-cvv-length-3')
+      : t('invalid-cvv-length', { count: savedCardCvvLength })
   }
   const [cardFormData, setCardFormData] = useState<CardForm>({})
   const [isCardFormValid, setIsCardFormValid] = useState(false)
@@ -1358,6 +1358,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                 )}
                 {selectedSavedCard ? (
                   <KiboTextBox
+                    type="password"
                     value={cvv}
                     label={t('cvv-code')}
                     placeholder={t(
@@ -1373,7 +1374,11 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                       setCvvError(sanitizedValue ? getSavedCardCvvError(sanitizedValue) : '')
                       setPlaceOrderError('')
                     }}
-                    onBlur={() => setCvvError(getSavedCardCvvError(cvv))}
+                    onBlur={() => {
+                      const error = getSavedCardCvvError(cvv)
+                      if (cvv && error) setCvv('')
+                      setCvvError(error)
+                    }}
                   />
                 ) : (
                   <>

@@ -75,12 +75,17 @@ const useCardSchema = (showCvv: boolean) => {
       if (!isEdit && showCvv) {
         return schema
           .required(t('cvv-is-required'))
-          .matches(/^\d{3,4}$/g, t('invalid-cvv'))
+          .matches(/^\d+$/g, t('invalid-cvv'))
           .test('cvv-length', function (this: yup.TestContext, value?: string) {
             const expectedLength = getCvvLength(this.parent.cardNumber)
-            if (!value || !expectedLength || value.length === expectedLength) return true
+            if (!value) return true
+            if (expectedLength ? value.length === expectedLength : /^\d{3,4}$/.test(value)) {
+              return true
+            }
             return this.createError({
-              message: t('invalid-cvv-length', { count: expectedLength }),
+              message: expectedLength
+                ? t('invalid-cvv-length', { count: expectedLength })
+                : t('invalid-cvv'),
             })
           })
       }
