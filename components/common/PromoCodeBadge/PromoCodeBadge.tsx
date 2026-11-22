@@ -119,40 +119,69 @@ const PromoCodeBadge = (props: PromoCodeBadgeProps) => {
   return (
     <>
       {isEdit && (
-        <KiboTextBox
-          name="promocode"
-          label={couponLabel}
-          value={promo}
-          placeholder={t('promo-code')}
-          onChange={(_name, value) => setPromo(value)}
-          error={!!errorMessage}
-          helperText={errorMessage}
-          data-testid="promo-input"
-          icon={
-            isApplying ? (
-              <CircularProgress size={15} data-testid="promo-button-loading" />
-            ) : (
-              <Typography
-                sx={{
-                  fontFamily: 'Poppins',
-                  fontWeight: 700,
-                  fontSize: '15px',
-                  color: 'primary.main',
-                  whiteSpace: 'nowrap',
-                  // handleApplyCouponCode already no-ops when the input is empty - reflect that
-                  // visually instead of looking clickable and silently doing nothing.
-                  opacity: promo ? 1 : 0.4,
-                  cursor: promo ? 'pointer' : 'default',
-                  pointerEvents: promo ? 'auto' : 'none',
-                }}
-                data-testid="promo-button"
-              >
-                {t('apply')}
-              </Typography>
-            )
-          }
-          onIconClick={promo ? handleApplyCouponCode : undefined}
-        />
+        <Box
+          sx={{
+            position: 'relative',
+            minWidth: 0,
+            '& .MuiFormHelperText-root': {
+              overflowWrap: 'anywhere',
+              wordBreak: 'break-word',
+              paddingRight: errorMessage ? '24px' : undefined,
+            },
+          }}
+        >
+          <KiboTextBox
+            name="promocode"
+            label={couponLabel}
+            value={promo}
+            placeholder={t('promo-code')}
+            onChange={(_name, value) => {
+              setPromo(value)
+              if (errorMessage) setErrorMessage('')
+            }}
+            error={!!errorMessage}
+            helperText={errorMessage}
+            data-testid="promo-input"
+            icon={
+              isApplying ? (
+                <CircularProgress size={15} data-testid="promo-button-loading" />
+              ) : (
+                <Typography
+                  sx={{
+                    fontFamily: 'Poppins',
+                    fontWeight: 700,
+                    fontSize: '15px',
+                    color: 'primary.main',
+                    whiteSpace: 'nowrap',
+                    opacity: promo ? 1 : 0.4,
+                    cursor: promo ? 'pointer' : 'default',
+                    pointerEvents: promo ? 'auto' : 'none',
+                  }}
+                  data-testid="promo-button"
+                >
+                  {t('apply')}
+                </Typography>
+              )
+            }
+            onIconClick={promo ? handleApplyCouponCode : undefined}
+          />
+
+          {errorMessage && (
+            <CloseIcon
+              aria-label="dismiss-promo-error"
+              data-testid="promo-error-dismiss"
+              onClick={() => setErrorMessage('')}
+              sx={{
+                position: 'absolute',
+                right: 0,
+                bottom: 2,
+                fontSize: '1rem',
+                cursor: 'pointer',
+                color: 'error.main',
+              }}
+            />
+          )}
+        </Box>
       )}
       {!!appliedCoupons?.length && (
         <Box sx={{ mt: '12px' }}>
