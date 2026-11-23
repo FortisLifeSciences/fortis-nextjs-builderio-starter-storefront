@@ -387,12 +387,16 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   const [billingAddressOverride, setBillingAddressOverride] = useState<BillingAddressOverride>(
     emptyBillingAddressOverride
   )
+  const [billingContactTouched, setBillingContactTouched] = useState<
+    Partial<Record<keyof BillingContactOverride, boolean>>
+  >({})
   const [billingAddressTouched, setBillingAddressTouched] = useState<
     Partial<Record<keyof BillingAddressOverride, boolean>>
   >({})
   const [instructionsValue, setInstructionsValue] = useState('')
   const [agreeWithTerms, setAgreeWithTerms] = useState(false)
   const [agreePOAuthorization, setAgreePOAuthorization] = useState(false)
+  const [poAuthorizationError, setPoAuthorizationError] = useState(false)
   const [authorizerName, setAuthorizerName] = useState('')
   const [authorizerPhone, setAuthorizerPhone] = useState('')
   const [authorizerNameError, setAuthorizerNameError] = useState('')
@@ -441,10 +445,24 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   }
   const getRequiredFieldError = (value: string) =>
     value?.trim() ? '' : t('this-field-is-required')
+  const getEmailFieldError = (value: string) => {
+    if (!value?.trim()) return t('this-field-is-required')
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? '' : t('please-enter-a-valid-email-address')
+  }
+  const getPhoneFieldError = (value: string) => {
+    if (!value) return t('this-field-is-required')
+    return isValidPhoneNumber(value) ? '' : t('enter-valid-phone-number')
+  }
   const getPostalCodeError = (value: string) => {
     const zip = value?.trim() ?? ''
     if (!zip) return t('this-field-is-required')
     return US_ZIP_REGEX.test(zip) ? '' : t('enter-valid-zip-code')
+  }
+  const billingContactErrors = {
+    firstName: getRequiredFieldError(billingContactOverride.firstName),
+    lastNameOrSurname: getRequiredFieldError(billingContactOverride.lastNameOrSurname),
+    email: getEmailFieldError(billingContactOverride.email),
+    phone: getPhoneFieldError(billingContactOverride.phone),
   }
   const billingAddressErrors = {
     companyOrOrganization: getRequiredFieldError(billingAddressOverride.companyOrOrganization),
@@ -462,11 +480,20 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       !!billingAddressErrors.stateOrProvince ||
       !!billingAddressErrors.postalOrZipCode ||
       !!billingAddressErrors.countryCode)
+  const isBillingContactInvalid =
+    !billingContactSameAsContact &&
+    (!!billingContactErrors.firstName ||
+      !!billingContactErrors.lastNameOrSurname ||
+      !!billingContactErrors.email ||
+      !!billingContactErrors.phone)
+  const markBillingContactTouched = (field: keyof BillingContactOverride) =>
+    setBillingContactTouched((prev) => ({ ...prev, [field]: true }))
   const markBillingAddressTouched = (field: keyof BillingAddressOverride) =>
     setBillingAddressTouched((prev) => ({ ...prev, [field]: true }))
 
   const handlePOAuthorizationChange = (checked: boolean) => {
     setAgreePOAuthorization(checked)
+    setPoAuthorizationError(false)
     setPlaceOrderError('')
     if (!checked) {
       setAuthorizerName('')
@@ -649,34 +676,23 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
 
   const isReadyToPlaceOrder = () => {
     setShowPlaceOrderIssues(true)
-    if (isPurchaseOrder && !agreeWithTerms) {
-      setPlaceOrderError(t('please-agree-to-terms'))
-      return false
-    }
-
     if (isPurchaseOrder) {
-      if (!agreePOAuthorization) {
-        setPlaceOrderError(t('please-complete-billing-information'))
-        return false
-      }
-
       const isPoNumberMissing = !poNumber.trim()
       const nameError = getAuthorizerNameError(authorizerName)
       const phoneError = getAuthorizerPhoneError(authorizerPhone)
+      setPoAuthorizationError(!agreePOAuthorization)
       if (isPoNumberMissing) setPoNumberError(t('this-field-is-required'))
       setAuthorizerNameError(nameError)
       setAuthorizerPhoneError(phoneError)
-      if (isPoNumberMissing || nameError || phoneError) {
-        setPlaceOrderError(t('please-complete-billing-information'))
-        return false
-      }
-      if (
-        (!billingContactSameAsContact &&
-          (!billingContactOverride.firstName ||
-            !billingContactOverride.lastNameOrSurname ||
-            !billingContactOverride.email)) ||
-        isBillingAddressInvalid
-      ) {
+      if (isBillingContactInvalid || isBillingAddressInvalid) {
+        if (isBillingContactInvalid) {
+          setBillingContactTouched({
+            firstName: true,
+            lastNameOrSurname: true,
+            email: true,
+            phone: true,
+          })
+        }
         if (isBillingAddressInvalid) {
           setBillingAddressTouched({
             companyOrOrganization: true,
@@ -687,7 +703,19 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
             countryCode: true,
           })
         }
-        setPlaceOrderError(t('please-complete-billing-information'))
+      }
+      if (
+        !agreeWithTerms ||
+        !agreePOAuthorization ||
+        isPoNumberMissing ||
+        !!nameError ||
+        !!phoneError ||
+        isBillingContactInvalid ||
+        isBillingAddressInvalid
+      ) {
+        setPlaceOrderError(
+          !agreeWithTerms ? t('please-agree-to-terms') : t('please-complete-billing-information')
+        )
         return false
       }
       return true
@@ -715,14 +743,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       if (!poNumber.trim()) return false
       if (!authorizerName.trim()) return false
       if (!isValidPhoneNumber(authorizerPhone)) return false
-      if (
-        !billingContactSameAsContact &&
-        (!billingContactOverride.firstName ||
-          !billingContactOverride.lastNameOrSurname ||
-          !billingContactOverride.email)
-      ) {
-        return false
-      }
+      if (isBillingContactInvalid) return false
       if (isBillingAddressInvalid) return false
       return true
     }
@@ -899,6 +920,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                 <Checkbox
                   checked={agreePOAuthorization}
                   onChange={(_e, checked) => handlePOAuthorizationChange(checked)}
+                  color={poAuthorizationError ? 'error' : 'primary'}
                   inputProps={{ 'aria-label': 'poAuthorization' }}
                 />
               }
@@ -910,7 +932,10 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                   </Typography>
                 </>
               }
-              sx={{ ...checkoutCheckboxLabelSx }}
+              sx={{
+                ...checkoutCheckboxLabelSx,
+                ...(poAuthorizationError && { color: 'error.main' }),
+              }}
             />
             <Stack direction={{ xs: 'column', sm: 'row' }} gap={2}>
               <KiboTextBox
@@ -985,7 +1010,10 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         checked={billingContactSameAsContact}
                         onChange={(_e, checked) => {
                           setBillingContactSameAsContact(checked)
-                          if (checked) setPlaceOrderError('')
+                          if (checked) {
+                            setPlaceOrderError('')
+                            setBillingContactTouched({})
+                          }
                         }}
                         inputProps={{ 'aria-label': t('same-as-contact') }}
                       />
@@ -1019,9 +1047,14 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         value={billingContactOverride.firstName}
                         label={t('first-name')}
                         required
+                        error={billingContactTouched.firstName && !!billingContactErrors.firstName}
+                        helperText={
+                          billingContactTouched.firstName ? billingContactErrors.firstName : ''
+                        }
                         onChange={(_name, value) =>
                           setBillingContactOverride((prev) => ({ ...prev, firstName: value }))
                         }
+                        onBlur={() => markBillingContactTouched('firstName')}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -1029,12 +1062,22 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         value={billingContactOverride.lastNameOrSurname}
                         label={t('last-name-or-sur-name')}
                         required
+                        error={
+                          billingContactTouched.lastNameOrSurname &&
+                          !!billingContactErrors.lastNameOrSurname
+                        }
+                        helperText={
+                          billingContactTouched.lastNameOrSurname
+                            ? billingContactErrors.lastNameOrSurname
+                            : ''
+                        }
                         onChange={(_name, value) =>
                           setBillingContactOverride((prev) => ({
                             ...prev,
                             lastNameOrSurname: value,
                           }))
                         }
+                        onBlur={() => markBillingContactTouched('lastNameOrSurname')}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -1042,18 +1085,25 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         value={billingContactOverride.email}
                         label={t('invoice-email')}
                         required
+                        error={billingContactTouched.email && !!billingContactErrors.email}
+                        helperText={billingContactTouched.email ? billingContactErrors.email : ''}
                         onChange={(_name, value) =>
                           setBillingContactOverride((prev) => ({ ...prev, email: value }))
                         }
+                        onBlur={() => markBillingContactTouched('email')}
                       />
                     </Grid>
                     <Grid item xs={12}>
                       <KiboPhoneInput
                         value={billingContactOverride.phone}
                         label={t('phone-number-home')}
+                        required
+                        error={billingContactTouched.phone && !!billingContactErrors.phone}
+                        helperText={billingContactTouched.phone ? billingContactErrors.phone : ''}
                         onChange={(_name, value) =>
                           setBillingContactOverride((prev) => ({ ...prev, phone: value }))
                         }
+                        onBlur={() => markBillingContactTouched('phone')}
                       />
                     </Grid>
                   </Grid>
