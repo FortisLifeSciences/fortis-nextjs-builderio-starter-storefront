@@ -35,9 +35,6 @@ const CustomSortBy: React.FC<CustomSortByProps> = ({ items }) => {
             return `Sort: ${selected?.label ?? ''}`
           }}
           sx={{
-            borderWidth: '1px',
-            borderStyle: 'solid',
-            borderColor: '#EAEAF1',
             borderRadius: '9px',
             fontSize: '13px !important',
             height: '39px',
@@ -50,6 +47,9 @@ const CustomSortBy: React.FC<CustomSortByProps> = ({ items }) => {
             padding: '4.5px 12px',
             '& .MuiOutlinedInput-notchedOutline': {
               borderColor: '#EAEAF1',
+            },
+            '& .MuiOutlinedInput-notchedOutline legend': {
+              maxWidth: 0,
             },
             '&:hover .MuiOutlinedInput-notchedOutline': {
               borderColor: '#C9C7D6',
