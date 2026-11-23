@@ -40,9 +40,9 @@ export const ProductHitGridViewStyles = {
   newTag: {
     width: 80,
     height: 41,
-    top: '0px',
+    top: '14px',
     position: 'absolute',
-    left: '0px',
+    left: '14px',
     zIndex: 2,
   },
   cardMedia: {
