@@ -95,7 +95,7 @@ const setupKibo = (failAt?: string, overrides: Record<string, any> = {}) => {
   return calls
 }
 
-const run = async () => {
+const run = async (extraBody: Record<string, any> = {}) => {
   const headers: Record<string, string> = {}
   let payload: any
   const res: any = {
@@ -105,7 +105,7 @@ const run = async () => {
   }
   const req: any = {
     method: 'POST',
-    body: { checkoutId: 'checkout-1', reCaptchaScore: 0.9 },
+    body: { checkoutId: 'checkout-1', reCaptchaScore: 0.9, ...extraBody },
     logger: { error: jest.fn() },
   }
   await createAccountAtCheckoutHandler(req, res)
@@ -147,6 +147,31 @@ describe('[handlers] createAccountAtCheckout', () => {
     expect(payload.status).toBe('exists')
     expect(did(calls, 'POST', /\/customer\/b2baccounts$/)).toBe(false)
     expect(headers['Set-Cookie']).toBeUndefined()
+  })
+
+  it('only reports exists in check-only mode and never creates an account', async () => {
+    const calls = setupKibo(undefined, { accountIds: [7], account: { isAnonymous: false } })
+    const { payload, headers } = await run({ checkOnly: true })
+
+    expect(payload.status).toBe('exists')
+    expect(did(calls, 'GET', /entitylists/)).toBe(false)
+    expect(did(calls, 'POST', /\/customer\/b2baccounts$/)).toBe(false)
+    expect(headers['Set-Cookie']).toBeUndefined()
+  })
+
+  it('reports guest in check-only mode when the email has no account', async () => {
+    const calls = setupKibo()
+    const { payload } = await run({ checkOnly: true })
+
+    expect(payload.status).toBe('guest')
+    expect(did(calls, 'POST', /\/customer\/b2baccounts$/)).toBe(false)
+  })
+
+  it('reports guest in check-only mode when the existence lookup fails', async () => {
+    setupKibo('existence')
+    const { payload } = await run({ checkOnly: true })
+
+    expect(payload.status).toBe('guest')
   })
 
   it('ignores anonymous guest records in the existence check', async () => {

@@ -65,7 +65,7 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
   const apiHost = publicRuntimeConfig?.apiHost as string
   const { showModal, closeModal } = useModalContext()
   const { updateOrder } = useUpdateOrder()
-  const { createAccountAtCheckout } = useB2BAccountRequest()
+  const { createAccountAtCheckout, hasExistingAccountAtCheckout } = useB2BAccountRequest()
   const { initiateOrder } = useInitiateOrder()
   const router = useRouter()
   const accountResultRef = useRef<AccountAtCheckoutResult>()
@@ -88,6 +88,7 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
   const stepRef = React.useRef<HTMLDivElement>(null)
   const [cardValidationRequest, setCardValidationRequest] = useState(0)
   const [wantsAccount, setWantsAccount] = useState(false)
+  const [existingAccountError, setExistingAccountError] = useState('')
 
   const isCardholderNameMissing = !cardholderName.trim()
   const isCardholderNameInvalid = !isCardholderNameMissing && !isCardholderNameValid(cardholderName)
@@ -142,6 +143,16 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
       Component: ExistingUserDialog,
       props: { onLoginSuccess: continueCheckoutAfterLogin() },
     })
+
+  const continueToPayment = async () => {
+    setExistingAccountError('')
+    if (await hasExistingAccountAtCheckout(checkout.id as string)) {
+      setExistingAccountError(t('account-already-exists-for-email'))
+      openExistingAccountModal()
+      return
+    }
+    setPhase('payment')
+  }
 
   const isShippingLocked = phase !== 'shipping'
 
@@ -307,11 +318,18 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
       {isShippingLocked ? (
         <ContactShippingSummary checkout={checkout} onEdit={() => setPhase('shipping')} />
       ) : (
-        <ContactShippingForm
-          checkout={checkout}
-          updateCheckoutPersonalInfo={updateCheckoutPersonalInfo}
-          onContinue={() => setPhase('payment')}
-        />
+        <>
+          <ContactShippingForm
+            checkout={checkout}
+            updateCheckoutPersonalInfo={updateCheckoutPersonalInfo}
+            onContinue={continueToPayment}
+          />
+          {existingAccountError && (
+            <Typography sx={{ color: 'error.main', fontSize: '14px' }}>
+              {existingAccountError}
+            </Typography>
+          )}
+        </>
       )}
 
       <Stack gap={2} sx={phase !== 'payment' ? { opacity: 0.5, pointerEvents: 'none' } : undefined}>

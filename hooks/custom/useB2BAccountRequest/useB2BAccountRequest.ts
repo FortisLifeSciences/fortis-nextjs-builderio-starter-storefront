@@ -211,5 +211,24 @@ export const useB2BAccountRequest = () => {
     }
   }
 
-  return { submitAccountRequest, createAccountAtCheckout, isSubmitting, isReady }
+  const hasExistingAccountAtCheckout = async (checkoutId: string): Promise<boolean> => {
+    try {
+      const result: AccountAtCheckoutResult = await postJson('/api/user/createAccountAtCheckout', {
+        checkoutId,
+        checkOnly: true,
+      })
+      return result?.status === 'exists'
+    } catch (error) {
+      console.error('Existing account check at checkout error:', error)
+      return false
+    }
+  }
+
+  return {
+    submitAccountRequest,
+    createAccountAtCheckout,
+    hasExistingAccountAtCheckout,
+    isSubmitting,
+    isReady,
+  }
 }
