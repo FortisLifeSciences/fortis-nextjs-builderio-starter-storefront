@@ -56,6 +56,7 @@ const ManualSortDropdown = ({ sortIndex, onChangeSort }: Props) => {
             lineHeight: '20px',
             padding: '4.5px 12px',
           }}
+          MenuProps={{ disableScrollLock: true }}
           inputProps={{
             id: 'custom-sort-by',
             'aria-label': 'Sort',

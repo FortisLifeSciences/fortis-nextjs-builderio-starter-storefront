@@ -58,6 +58,7 @@ const CustomSortBy: React.FC<CustomSortByProps> = ({ items }) => {
               borderColor: '#30299A',
             },
           }}
+          MenuProps={{ disableScrollLock: true }}
           inputProps={{
             id: 'custom-sort-by',
             'aria-label': 'Sort',
