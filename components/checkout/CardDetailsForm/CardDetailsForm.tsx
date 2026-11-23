@@ -269,7 +269,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                           expectedCvvLength === 4
                             ? t('cvv-placeholder-4')
                             : expectedCvvLength === 3
-                            ? t('cvv-placeholder')
+                            ? t('cvv-placeholder-3')
                             : t('cvv-placeholder-unknown')
                         }
                         required={true}
