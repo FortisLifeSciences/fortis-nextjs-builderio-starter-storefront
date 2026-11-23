@@ -177,14 +177,7 @@ const ProductHitGridView = ({
               <Box>
                 {newProduct ? (
                   <Box
-                    sx={{
-                      width: 80,
-                      height: 41,
-                      top: '0px',
-                      position: 'absolute',
-                      left: '0px',
-                      zIndex: 2,
-                    }}
+                    sx={ProductCardStyles.newTag}
                     style={{
                       backgroundImage: `url('/NewTag.svg')`,
                     }}
@@ -192,12 +185,9 @@ const ProductHitGridView = ({
                 ) : newVariantProduct ? (
                   <Box
                     sx={{
+                      ...ProductCardStyles.newTag,
                       width: 120,
                       height: 45,
-                      top: '0px',
-                      position: 'absolute',
-                      left: '0px',
-                      zIndex: 2,
                     }}
                     style={{
                       backgroundImage: `url('/NewVariantLogo.png')`,
