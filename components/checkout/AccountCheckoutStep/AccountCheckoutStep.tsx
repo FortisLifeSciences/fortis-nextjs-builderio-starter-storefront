@@ -65,6 +65,7 @@ import {
   organizationNamePattern,
   personNamePattern,
   streetAddressPattern,
+  nameMaxLength,
 } from '@/lib/helpers/validations/validations'
 import { checkoutKeys } from '@/lib/react-query/queryKeys'
 import type {
@@ -145,12 +146,15 @@ const sameAsShippingLabelSx = {
 
 const isOk = (value: string | null | undefined, pattern: RegExp) =>
   !value?.trim() || pattern.test(value.trim())
-
+const isWithinLimit = (value: string | null | undefined) =>
+  (value?.trim().length ?? 0) <= nameMaxLength
 const isContactInvalid = (contact?: Maybe<CrContact>) =>
   !!contact &&
   !(
     isOk(contact.firstName, personNamePattern) &&
+    isWithinLimit(contact.firstName) &&
     isOk(contact.lastNameOrSurname, personNamePattern) &&
+    isWithinLimit(contact.lastNameOrSurname) &&
     isOk(contact.companyOrOrganization, organizationNamePattern) &&
     isOk(contact.address?.address1, streetAddressPattern) &&
     isOk(contact.address?.address2, streetAddressPattern) &&
@@ -291,16 +295,25 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     hasManuallySelectedShippingMethod ||
     getShippingMethodType(currentShippingPreference) ===
       getShippingMethodType(selectedShippingMethodName)
-  const isShippingStepComplete = hasShippingDetails && shippingPreferenceMatchesOrder
-  !isContactInvalid(shippingContact) &&
+  const isShippingStepComplete =
+    hasShippingDetails &&
+    shippingPreferenceMatchesOrder &&
+    !isContactInvalid(shippingContact) &&
     (orderGetters.getShipItems(checkout).length === 0 ||
       !!orderGetters.getShippingMethodCode(checkout))
+  const isPreferenceReady =
+    !customerAccountId || !customerUserId || freshShippingPreference !== undefined
+
   const [phase, setPhase] = useState<'shipping' | 'payment'>(
     isShippingStepComplete ? 'payment' : 'shipping'
   )
+  const initializedForCheckoutRef = useRef<string>()
   useEffect(() => {
+    if (!checkout?.id || !isPreferenceReady) return
+    if (initializedForCheckoutRef.current === checkout.id) return
+    initializedForCheckoutRef.current = checkout.id
     setPhase(isShippingStepComplete ? 'payment' : 'shipping')
-  }, [checkout?.id, isShippingStepComplete])
+  }, [checkout?.id, isPreferenceReady, isShippingStepComplete])
   const isShippingLocked = phase !== 'shipping'
 
   const contactShippingDefaults = {
@@ -348,6 +361,12 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   const [cvvError, setCvvError] = useState('')
   const savedCardCvvLength = getCvvLengthForCardType(selectedSavedCard?.cardInfo?.cardType)
   const isSavedCardCvvValid = new RegExp(`^\\d{${savedCardCvvLength}}$`).test(cvv)
+  const getSavedCardCvvError = (value: string) => {
+    if (!value) return t('cvv-is-required')
+    return new RegExp(`^\\d{${savedCardCvvLength}}$`).test(value)
+      ? ''
+      : t('invalid-cvv-length', { count: savedCardCvvLength })
+  }
   const [cardFormData, setCardFormData] = useState<CardForm>({})
   const [isCardFormValid, setIsCardFormValid] = useState(false)
   const [cardholderName, setCardholderName] = useState('')
@@ -382,6 +401,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   const [instructionsValue, setInstructionsValue] = useState('')
   const [agreeWithTerms, setAgreeWithTerms] = useState(false)
   const [agreePOAuthorization, setAgreePOAuthorization] = useState(false)
+  const [poAuthorizationError, setPoAuthorizationError] = useState(false)
   const [authorizerName, setAuthorizerName] = useState('')
   const [authorizerPhone, setAuthorizerPhone] = useState('')
   const [authorizerNameError, setAuthorizerNameError] = useState('')
@@ -468,6 +488,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
 
   const handlePOAuthorizationChange = (checked: boolean) => {
     setAgreePOAuthorization(checked)
+    setPoAuthorizationError(false)
     setPlaceOrderError('')
     if (!checked) {
       setAuthorizerName('')
@@ -649,27 +670,14 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   }
 
   const isReadyToPlaceOrder = () => {
-    if (isPurchaseOrder && !agreeWithTerms) {
-      setPlaceOrderError(t('please-agree-to-terms'))
-      return false
-    }
-
     if (isPurchaseOrder) {
-      if (!agreePOAuthorization) {
-        setPlaceOrderError(t('please-complete-billing-information'))
-        return false
-      }
-
       const isPoNumberMissing = !poNumber.trim()
       const nameError = getAuthorizerNameError(authorizerName)
       const phoneError = getAuthorizerPhoneError(authorizerPhone)
+      setPoAuthorizationError(!agreePOAuthorization)
       if (isPoNumberMissing) setPoNumberError(t('this-field-is-required'))
       setAuthorizerNameError(nameError)
       setAuthorizerPhoneError(phoneError)
-      if (isPoNumberMissing || nameError || phoneError) {
-        setPlaceOrderError(t('please-complete-billing-information'))
-        return false
-      }
       const isBillingContactInvalid =
         !billingContactSameAsContact &&
         (!!billingContactErrors.firstName ||
@@ -705,10 +713,27 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
             countryCode: true,
           })
         }
-        setPlaceOrderError(t('please-complete-billing-information'))
+      }
+      if (
+        !agreeWithTerms ||
+        !agreePOAuthorization ||
+        isPoNumberMissing ||
+        !!nameError ||
+        !!phoneError ||
+        isBillingContactInvalid ||
+        isBillingAddressInvalid
+      ) {
+        setPlaceOrderError(
+          !agreeWithTerms ? t('please-agree-to-terms') : t('please-complete-billing-information')
+        )
         return false
       }
       return true
+    }
+
+    if (!agreeWithTerms) {
+      setPlaceOrderError(t('please-agree-to-terms'))
+      return false
     }
 
     if (placeOrderIssues.length) {
@@ -716,9 +741,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       setPlaceOrderError('')
       if (selectedSavedCard) {
         if (!isSavedCardCvvValid) {
-          setCvvError(
-            cvv ? t('invalid-cvv-length', { count: savedCardCvvLength }) : t('cvv-is-required')
-          )
+          setCvvError(getSavedCardCvvError(cvv))
         }
       } else {
         setCardValidationRequest((count) => count + 1)
@@ -935,6 +958,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                 <Checkbox
                   checked={agreePOAuthorization}
                   onChange={(_e, checked) => handlePOAuthorizationChange(checked)}
+                  color={poAuthorizationError ? 'error' : 'primary'}
                   inputProps={{ 'aria-label': 'poAuthorization' }}
                 />
               }
@@ -946,7 +970,10 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                   </Typography>
                 </>
               }
-              sx={{ ...checkoutCheckboxLabelSx }}
+              sx={{
+                ...checkoutCheckboxLabelSx,
+                ...(poAuthorizationError && { color: 'error.main' }),
+              }}
             />
             <Stack direction={{ xs: 'column', sm: 'row' }} gap={2}>
               <KiboTextBox
@@ -1354,17 +1381,26 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                 )}
                 {selectedSavedCard ? (
                   <KiboTextBox
+                    type="password"
                     value={cvv}
                     label={t('cvv-code')}
-                    placeholder={t('cvv-placeholder')}
+                    placeholder={t(
+                      savedCardCvvLength === 4 ? 'cvv-placeholder-4' : 'cvv-placeholder-3'
+                    )}
                     required
                     error={!!cvvError}
                     helperText={cvvError}
                     inputProps={{ maxLength: savedCardCvvLength }}
                     onChange={(_name, value) => {
-                      setCvv(value.replace(/\D/g, '').slice(0, savedCardCvvLength))
-                      setCvvError('')
+                      const sanitizedValue = value.replace(/\D/g, '').slice(0, savedCardCvvLength)
+                      setCvv(sanitizedValue)
+                      setCvvError(sanitizedValue ? getSavedCardCvvError(sanitizedValue) : '')
                       setPlaceOrderError('')
+                    }}
+                    onBlur={() => {
+                      const error = getSavedCardCvvError(cvv)
+                      if (cvv && error) setCvv('')
+                      setCvvError(error)
                     }}
                   />
                 ) : (

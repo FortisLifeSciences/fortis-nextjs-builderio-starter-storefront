@@ -415,17 +415,28 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       const hasManuallySelectedForThisOrder =
         !!manualSelectionStorageKey && sessionStorage.getItem(manualSelectionStorageKey) === '1'
       if (
+        selectedShippingMethodCode !== shippingMethod?.shippingMethodCode &&
         !hasManuallySelectedForThisOrder &&
         !manualSelectionRef.current &&
         shippingMethod?.shippingMethodCode &&
-        shippingMethod.shippingMethodCode !== appliedPreferredShippingMethodCodeRef.current &&
+        `${checkout?.id ?? ''}:${shippingMethod.shippingMethodCode}` !==
+          appliedPreferredShippingMethodCodeRef.current &&
         (isAccountMethodReady || (!isFedExAccountMethod && !isUpsAccountMethod))
       ) {
-        appliedPreferredShippingMethodCodeRef.current = shippingMethod.shippingMethodCode
-        handleShippingMethodSelectChange(
+        const appliedPreferenceKey = `${checkout?.id ?? ''}:${shippingMethod.shippingMethodCode}`
+        appliedPreferredShippingMethodCodeRef.current = appliedPreferenceKey
+        const saveResult = handleShippingMethodSelectChange(
           shippingMethod.shippingMethodName as string,
           shippingMethod.shippingMethodCode as string
         )
+        void saveResult?.then((saved) => {
+          if (
+            saved === false &&
+            appliedPreferredShippingMethodCodeRef.current === appliedPreferenceKey
+          ) {
+            appliedPreferredShippingMethodCodeRef.current = undefined
+          }
+        })
         setIsFedExMethodSelected(!!isFedExAccountMethod)
         setIsUpsMethodSelected(!!isUpsAccountMethod)
         setIsOtherShippingMethod(!isFedExAccountMethod && !isUpsAccountMethod)
@@ -438,6 +449,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
     selectedShippingMethodCode,
     fedExAccountNumber,
     upsAccountNumber,
+    checkout?.id,
   ])
 
   // Prioritize input
@@ -516,15 +528,18 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   const previousFedExAccountNumber = useRef('')
   const previousUpsAccountNumber = useRef('')
 
-  const saveShippingMethod = (value: string, name?: string) => {
+  const saveShippingMethod = (value: string, name?: string): Promise<void | boolean> => {
     requestedShippingMethodCodeRef.current = value
     setLocalSelectedShippingMethodCode(value)
-    Promise.resolve(onShippingMethodChange && onShippingMethodChange(value, name)).then((saved) => {
-      if (saved === false && requestedShippingMethodCodeRef.current === value) {
-        requestedShippingMethodCodeRef.current = undefined
-        setLocalSelectedShippingMethodCode(selectedShippingMethodCode)
+    return Promise.resolve(onShippingMethodChange && onShippingMethodChange(value, name)).then(
+      (saved) => {
+        if (saved === false && requestedShippingMethodCodeRef.current === value) {
+          requestedShippingMethodCodeRef.current = undefined
+          setLocalSelectedShippingMethodCode(selectedShippingMethodCode)
+        }
+        return saved
       }
-    })
+    )
   }
   const handleShippingMethodChange = (value: string, name?: string) => {
     saveShippingMethod(value, name)
@@ -534,10 +549,13 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         block: 'start',
       })
   }
-  const handleShippingMethodSelectChange = (name: string, value: string, shouldSave = true) => {
+  const handleShippingMethodSelectChange = (
+    name: string,
+    value: string,
+    shouldSave = true
+  ): Promise<void | boolean> | undefined => {
     if (!name && !value) {
-      shouldSave && saveShippingMethod('', '')
-      return
+      return shouldSave ? saveShippingMethod('', '') : undefined
     }
 
     const shippingMethod = find(
@@ -545,10 +563,9 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       (shipMethod) => value === shipMethod?.shippingMethodCode
     ) as CrShippingRate
     if (!shippingMethod) {
-      shouldSave && saveShippingMethod('', '')
-      return
+      return shouldSave ? saveShippingMethod('', '') : undefined
     }
-    shouldSave && saveShippingMethod(value, name)
+    const saveResult = shouldSave ? saveShippingMethod(value, name) : undefined
     if (shippingMethod?.shippingMethodName?.includes('FedEx Account')) {
       setFedExAccountShippingMethod(shippingMethod)
     } else if (shippingMethod?.shippingMethodName?.includes('UPS Account')) {
@@ -567,6 +584,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       setIsFedexAccountMethodUpdated(false)
       setIsUpsAccountUpdated(false)
     }
+    return saveResult
   }
 
   const getFortisShippingMethods = () => {

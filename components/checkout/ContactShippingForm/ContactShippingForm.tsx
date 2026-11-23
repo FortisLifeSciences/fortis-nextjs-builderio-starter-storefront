@@ -31,6 +31,7 @@ import {
   organizationNamePattern,
   personNamePattern,
   streetAddressPattern,
+  nameMaxLength,
 } from '@/lib/helpers/validations/validations'
 
 import type {
@@ -92,8 +93,14 @@ const useContactShippingSchema = () => {
       })
 
   return yup.object().shape({
-    firstName: lettersOnlyText(personNamePattern),
-    lastNameOrSurname: lettersOnlyText(personNamePattern),
+    firstName: lettersOnlyText(personNamePattern).max(
+      nameMaxLength,
+      t('name-max-length', { max: nameMaxLength })
+    ),
+    lastNameOrSurname: lettersOnlyText(personNamePattern).max(
+      nameMaxLength,
+      t('name-max-length', { max: nameMaxLength })
+    ),
     workEmail: yup
       .string()
       .email(t('please-enter-a-valid-email-address'))
@@ -119,7 +126,24 @@ const useContactShippingSchema = () => {
           excludeEmptyString: true,
         }),
       cityOrTown: lettersOnlyText(cityNamePattern),
-      // stateOrProvince, postalOrZipCode, countryCode: leave exactly as they are
+      stateOrProvince: yup.string().when('countryCode', {
+        is: (value: string) => [CountryCode.US, CountryCode.CA].includes(value),
+        then: yup.string().required(t('this-field-is-required')),
+      }),
+      postalOrZipCode: yup
+        .string()
+        .required(t('this-field-is-required'))
+        .when('countryCode', {
+          is: CountryCode.US,
+          then: yup.string().matches(/^\d{5}(-\d{4})?$/, t('enter-valid-zip-code')),
+        })
+        .when('countryCode', {
+          is: CountryCode.CA,
+          then: yup
+            .string()
+            .matches(/^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/, t('enter-valid-zip-code')),
+        }),
+      countryCode: yup.string().required(t('this-field-is-required')),
     }),
   })
 }
@@ -179,11 +203,16 @@ const getAddressDedupeKey = (contact?: Maybe<DefaultContact>) =>
 const isOk = (value: string | null | undefined, pattern: RegExp) =>
   !value?.trim() || pattern.test(value.trim())
 
+const isWithinLimit = (value: string | null | undefined) =>
+  (value?.trim().length ?? 0) <= nameMaxLength
+
 const isContactInvalid = (contact?: Maybe<DefaultContact>) =>
   !!contact &&
   !(
     isOk(contact.firstName, personNamePattern) &&
+    isWithinLimit(contact.firstName) &&
     isOk(contact.lastNameOrSurname, personNamePattern) &&
+    isWithinLimit(contact.lastNameOrSurname) &&
     isOk(contact.companyOrOrganization, organizationNamePattern) &&
     isOk(contact.address?.address1, streetAddressPattern) &&
     isOk(contact.address?.address2, streetAddressPattern) &&
@@ -546,6 +575,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                   onBlur={field.onBlur}
                   required
                   autoComplete="new-first-name"
+                  inputProps={{ maxLength: nameMaxLength }}
                 />
               )}
             />
@@ -565,6 +595,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                   onBlur={field.onBlur}
                   required
                   autoComplete="new-last-name"
+                  inputProps={{ maxLength: nameMaxLength }}
                 />
               )}
             />

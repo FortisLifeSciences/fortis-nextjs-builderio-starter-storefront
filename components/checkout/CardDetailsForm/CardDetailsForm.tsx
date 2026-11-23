@@ -75,12 +75,17 @@ const useCardSchema = (showCvv: boolean) => {
       if (!isEdit && showCvv) {
         return schema
           .required(t('cvv-is-required'))
-          .matches(/^\d{3,4}$/g, t('invalid-cvv'))
+          .matches(/^\d+$/g, t('invalid-cvv'))
           .test('cvv-length', function (this: yup.TestContext, value?: string) {
             const expectedLength = getCvvLength(this.parent.cardNumber)
-            if (!value || !expectedLength || value.length === expectedLength) return true
+            if (!value) return true
+            if (expectedLength ? value.length === expectedLength : /^\d{3,4}$/.test(value)) {
+              return true
+            }
             return this.createError({
-              message: t('invalid-cvv-length', { count: expectedLength }),
+              message: expectedLength
+                ? t('invalid-cvv-length', { count: expectedLength })
+                : t('invalid-cvv'),
             })
           })
       }
@@ -118,6 +123,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
   })
 
   const watchedFormData = useWatch({ control })
+  const expectedCvvLength = getCvvLength(watchedFormData?.cardNumber)
 
   const onValid = async (formData: CardForm) => {
     const cardData = prepareCardDataParams(formData)
@@ -265,7 +271,13 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                         type="password"
                         value={field.value || ''}
                         label={t('cvv-code')}
-                        placeholder={t('cvv-placeholder')}
+                        placeholder={
+                          expectedCvvLength === 4
+                            ? t('cvv-placeholder-4')
+                            : expectedCvvLength === 3
+                            ? t('cvv-placeholder')
+                            : t('cvv-placeholder-unknown')
+                        }
                         required={true}
                         sx={getCardInputSx(!!errors?.cvv)}
                         onChange={(_name, value) => {

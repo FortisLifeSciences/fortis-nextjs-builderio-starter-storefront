@@ -36,6 +36,7 @@ import {
   organizationNamePattern,
   personNamePattern,
   streetAddressPattern,
+  nameMaxLength,
 } from '@/lib/helpers/validations/validations'
 
 import type { CustomerContact } from '@/lib/gql/types'
@@ -134,8 +135,14 @@ const useAddressSchema = () => {
       })
 
   return yup.object().shape({
-    firstName: lettersOnlyText(personNamePattern),
-    lastNameOrSurname: lettersOnlyText(personNamePattern),
+    firstName: lettersOnlyText(personNamePattern).max(
+      nameMaxLength,
+      t('name-max-length', { max: nameMaxLength })
+    ),
+    lastNameOrSurname: lettersOnlyText(personNamePattern).max(
+      nameMaxLength,
+      t('name-max-length', { max: nameMaxLength })
+    ),
     email: yup
       .string()
       .trim()
@@ -339,11 +346,13 @@ const AddressEditForm = (props: AddressEditFormProps) => {
             <Grid item xs={12} sm={6}>
               {renderField('firstName', String(t('first-name')), {
                 required: true,
+                maxLength: nameMaxLength,
               })}
             </Grid>
             <Grid item xs={12} sm={6}>
               {renderField('lastNameOrSurname', String(t('last-name-or-sur-name')), {
                 required: true,
+                maxLength: nameMaxLength,
               })}
             </Grid>
             <Grid item xs={12}>
