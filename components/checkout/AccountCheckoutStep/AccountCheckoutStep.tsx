@@ -411,6 +411,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   const [instructionsValue, setInstructionsValue] = useState('')
   const [agreeWithTerms, setAgreeWithTerms] = useState(false)
   const [agreePOAuthorization, setAgreePOAuthorization] = useState(false)
+  const [poAuthorizationError, setPoAuthorizationError] = useState(false)
   const [authorizerName, setAuthorizerName] = useState('')
   const [authorizerPhone, setAuthorizerPhone] = useState('')
   const [authorizerNameError, setAuthorizerNameError] = useState('')
@@ -499,6 +500,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
 
   const handlePOAuthorizationChange = (checked: boolean) => {
     setAgreePOAuthorization(checked)
+    setPoAuthorizationError(false)
     setPlaceOrderError('')
     if (!checked) {
       setAuthorizerName('')
@@ -680,27 +682,14 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   }
 
   const isReadyToPlaceOrder = () => {
-    if (isPurchaseOrder && !agreeWithTerms) {
-      setPlaceOrderError(t('please-agree-to-terms'))
-      return false
-    }
-
     if (isPurchaseOrder) {
-      if (!agreePOAuthorization) {
-        setPlaceOrderError(t('please-complete-billing-information'))
-        return false
-      }
-
       const isPoNumberMissing = !poNumber.trim()
       const nameError = getAuthorizerNameError(authorizerName)
       const phoneError = getAuthorizerPhoneError(authorizerPhone)
+      setPoAuthorizationError(!agreePOAuthorization)
       if (isPoNumberMissing) setPoNumberError(t('this-field-is-required'))
       setAuthorizerNameError(nameError)
       setAuthorizerPhoneError(phoneError)
-      if (isPoNumberMissing || nameError || phoneError) {
-        setPlaceOrderError(t('please-complete-billing-information'))
-        return false
-      }
       const isBillingContactInvalid =
         !billingContactSameAsContact &&
         (!!billingContactErrors.firstName ||
@@ -735,10 +724,27 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
             postalOrZipCode: true,
           })
         }
-        setPlaceOrderError(t('please-complete-billing-information'))
+      }
+      if (
+        !agreeWithTerms ||
+        !agreePOAuthorization ||
+        isPoNumberMissing ||
+        !!nameError ||
+        !!phoneError ||
+        isBillingContactInvalid ||
+        isBillingAddressInvalid
+      ) {
+        setPlaceOrderError(
+          !agreeWithTerms ? t('please-agree-to-terms') : t('please-complete-billing-information')
+        )
         return false
       }
       return true
+    }
+
+    if (!agreeWithTerms) {
+      setPlaceOrderError(t('please-agree-to-terms'))
+      return false
     }
 
     if (placeOrderIssues.length) {
@@ -962,6 +968,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                 <Checkbox
                   checked={agreePOAuthorization}
                   onChange={(_e, checked) => handlePOAuthorizationChange(checked)}
+                  color={poAuthorizationError ? 'error' : 'primary'}
                   inputProps={{ 'aria-label': 'poAuthorization' }}
                 />
               }
@@ -973,7 +980,10 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                   </Typography>
                 </>
               }
-              sx={{ ...checkoutCheckboxLabelSx }}
+              sx={{
+                ...checkoutCheckboxLabelSx,
+                ...(poAuthorizationError && { color: 'error.main' }),
+              }}
             />
             <Stack direction={{ xs: 'column', sm: 'row' }} gap={2}>
               <KiboTextBox
