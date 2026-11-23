@@ -69,6 +69,7 @@ const ManualSortDropdown = ({ sortIndex, onChangeSort }: Props) => {
               borderColor: '#30299A',
             },
           }}
+          MenuProps={{ disableScrollLock: true }}
           inputProps={{
             id: 'custom-sort-by',
             'aria-label': 'Sort',
