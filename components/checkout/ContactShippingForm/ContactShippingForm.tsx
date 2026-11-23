@@ -113,7 +113,7 @@ interface DefaultContact {
 export interface ContactShippingFormProps {
   checkout: CrOrder
   updateCheckoutPersonalInfo: (params: { email: Maybe<string> | undefined }) => Promise<void>
-  onContinue: () => void
+  onContinue: () => void | Promise<void>
   continueLabel?: string
   // A logged-in shopper's saved contact/address (e.g. their default shipping address) -
   // when present, the form hydrates from it instead of starting blank.
@@ -441,7 +441,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
         return
       }
 
-      if (hasShippingMethod) onContinue()
+      if (hasShippingMethod) await onContinue()
     } finally {
       setIsValidatingShipping(false)
     }

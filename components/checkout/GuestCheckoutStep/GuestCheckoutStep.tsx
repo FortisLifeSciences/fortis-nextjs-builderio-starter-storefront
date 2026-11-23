@@ -60,7 +60,7 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
   const apiHost = publicRuntimeConfig?.apiHost as string
   const { showModal, closeModal } = useModalContext()
   const { updateOrder } = useUpdateOrder()
-  const { createAccountAtCheckout } = useB2BAccountRequest()
+  const { createAccountAtCheckout, hasExistingAccountAtCheckout } = useB2BAccountRequest()
   const { initiateOrder } = useInitiateOrder()
   const router = useRouter()
   const accountResultRef = useRef<AccountAtCheckoutResult>()
@@ -79,6 +79,7 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
   const [isPlacingOrder, setIsPlacingOrder] = useState(false)
   const [placeOrderError, setPlaceOrderError] = useState('')
   const [wantsAccount, setWantsAccount] = useState(false)
+  const [existingAccountError, setExistingAccountError] = useState('')
 
   // Purchase Order is a login-required option - opening the login dialog from here (rather
   // than a plain link) lets the shopper come straight back into checkout once they're signed
@@ -124,6 +125,16 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
       Component: ExistingUserDialog,
       props: { onLoginSuccess: continueCheckoutAfterLogin() },
     })
+
+  const continueToPayment = async () => {
+    setExistingAccountError('')
+    if (await hasExistingAccountAtCheckout(checkout.id as string)) {
+      setExistingAccountError(t('account-already-exists-for-email'))
+      openExistingAccountModal()
+      return
+    }
+    setPhase('payment')
+  }
 
   const isShippingLocked = phase !== 'shipping'
 
@@ -287,11 +298,18 @@ const GuestCheckoutStep = (props: GuestCheckoutStepProps) => {
       {isShippingLocked ? (
         <ContactShippingSummary checkout={checkout} onEdit={() => setPhase('shipping')} />
       ) : (
-        <ContactShippingForm
-          checkout={checkout}
-          updateCheckoutPersonalInfo={updateCheckoutPersonalInfo}
-          onContinue={() => setPhase('payment')}
-        />
+        <>
+          <ContactShippingForm
+            checkout={checkout}
+            updateCheckoutPersonalInfo={updateCheckoutPersonalInfo}
+            onContinue={continueToPayment}
+          />
+          {existingAccountError && (
+            <Typography sx={{ color: 'error.main', fontSize: '14px' }}>
+              {existingAccountError}
+            </Typography>
+          )}
+        </>
       )}
 
       <Stack gap={2} sx={phase !== 'payment' ? { opacity: 0.5, pointerEvents: 'none' } : undefined}>
