@@ -1,5 +1,13 @@
 {
   "add-to-cart": "Add to Cart",
+  "price-on-request": "Price on request",
+  "choose-a-size": "Choose a size",
+  "sizes-count_one": "{{count}} size",
+  "sizes-count_other": "{{count}} sizes",
+  "price-from": "from {{price}}",
+  "close-size-picker": "Close size picker",
+  "change-size": "Change size, currently {{size}}",
+  "add-to-cart-error": "We couldn't add this item to your cart. Please try again or view the product details.",
   "add-to-wishlist": "Add to Wishlist",
   "one-click-checkout": "1-Click Checkout",
   "go-to-checkout": "Go To Checkout",

@@ -966,6 +966,28 @@ section[data-autocomplete-source-id='builder-page'] {
   }
 }
 
+@media (max-width: 767px) {
+  body .product-grid-view .ais-Hits-list {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    margin: 0 -32px;
+    border-top: 1px solid #eaeaf1;
+  }
+
+  body .rightSearchContainer .product-grid-view .productviewstructure {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    margin: 0 -16px;
+    border-top: 1px solid #eaeaf1;
+  }
+
+  body .rightSearchContainer .product-grid-view .productviewstructure .productviewlistItem {
+    justify-self: stretch !important;
+    width: 100%;
+    margin-bottom: 0;
+  }
+}
+
 .AlgoliaPagination .ais-Pagination-list {
   font-family: 'Poppins';
   display: flex;

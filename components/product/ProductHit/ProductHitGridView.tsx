@@ -5,6 +5,12 @@ import { Box, Button, Typography, Card, CardMedia } from '@mui/material'
 import Link from 'next/link'
 
 import { KiboImage } from '@/components/common'
+import ProductCardBuyBox from '@/components/product/ProductHit/ProductCardBuyBox'
+import { ProductCardLayoutStyles as CardLayout } from '@/components/product/ProductHit/ProductCardLayout.styles'
+import {
+  hasCardData,
+  type ProductCardRecord,
+} from '@/components/product/ProductHit/productCardState'
 import { ProductHitGridViewStyles as ProductCardStyles } from '@/components/product/ProductHit/ProductHitGridView.styles'
 import abcore from '@/public/Brand_Logo/abcore-logo.png'
 import arista from '@/public/Brand_Logo/arista-logo.png'
@@ -22,7 +28,8 @@ import nanocomposixLogo from '@/public/BrandLogos/nanocomposix_logo.png'
 import vectorLogo from '@/public/BrandLogos/vector_logo.png'
 import DefaultImage from '@/public/noImage.png'
 
-type Product = {
+type Product = ProductCardRecord & {
+  category_labels?: string | string[]
   __position: any
   __queryID: any
   formulation: any
@@ -86,7 +93,6 @@ const ProductHitGridView = ({
   queryId,
   dataInsideMethod,
 }: ProductHitGridViewProps): JSX.Element => {
-  const imageHeight = 247.5
   const placeholderImageUrl = DefaultImage,
     kiboImagesData = hit?.product_images,
     variationProductCode = hit?.sku,
@@ -142,36 +148,39 @@ const ProductHitGridView = ({
     }
   })()
 
+  const showBuyBox = hasCardData(hit)
+  const catalogNumber = sliceValue ? variationProductCode : ProductCatalogNumber
+
   return (
     <>
       <Box
-        sx={ProductCardStyles.main}
+        sx={[ProductCardStyles.main, CardLayout.main]}
         data-id={hit.plp_catalog_number}
         className="product-card"
         data-index={algoliaIndex || 'products'}
       >
-        <Link
-          href={`/product/${productCode}`}
-          as={productHref}
-          passHref
-          data-testid="product-card-link"
-          aria-label={title ? `View details for ${title}` : 'Product details'}
-          data-insights-object-id={hit.objectID}
-          data-insights-position={position !== undefined ? position : '1'}
-          data-insights-query-id={queryId || hit.__queryID}
-          data-insights-index={algoliaIndex || 'products'}
-          data-insights-method={
-            dataInsideMethod ||
-            (queryId || hit.__queryID ? 'clickedObjectIDsAfterSearch' : 'clickedObjectIDs')
-          }
-          className={
-            dataInsideMethod === 'clickedObjectIDsAfterSearch'
-              ? 'product-card-search'
-              : 'product-card'
-          }
-        >
-          <Box sx={{ height: '100%' }}>
-            <Card sx={ProductCardStyles.cardRoot} data-testid="product-card">
+        <Card sx={[ProductCardStyles.cardRoot, CardLayout.cardRoot]} data-testid="product-card">
+          <Link
+            href={`/product/${productCode}`}
+            as={productHref}
+            passHref
+            data-testid="product-card-link"
+            aria-label={title ? `View details for ${title}` : 'Product details'}
+            data-insights-object-id={hit.objectID}
+            data-insights-position={position !== undefined ? position : '1'}
+            data-insights-query-id={queryId || hit.__queryID}
+            data-insights-index={algoliaIndex || 'products'}
+            data-insights-method={
+              dataInsideMethod ||
+              (queryId || hit.__queryID ? 'clickedObjectIDsAfterSearch' : 'clickedObjectIDs')
+            }
+            className={
+              dataInsideMethod === 'clickedObjectIDsAfterSearch'
+                ? 'product-card-search'
+                : 'product-card'
+            }
+          >
+            <Box sx={CardLayout.cardLinkBody}>
               <Box>
                 {newProduct ? (
                   <Box
@@ -205,10 +214,7 @@ const ProductHitGridView = ({
               </Box>
               <CardMedia
                 className="product-image"
-                sx={{
-                  ...ProductCardStyles.cardMedia,
-                  height: imageHeight,
-                }}
+                sx={[ProductCardStyles.cardMedia, CardLayout.cardMedia]}
               >
                 <KiboImage
                   src={firstImage || placeholderImageUrl}
@@ -217,41 +223,65 @@ const ProductHitGridView = ({
                   data-testid="product-image"
                 />
               </CardMedia>
-              <Box sx={ProductCardStyles.cardContent} className="product-info">
-                {brandLabel && (
-                  <Typography component="span" sx={ProductCardStyles.brandLabel}>
-                    {brandLabel}
-                  </Typography>
-                )}
+              <Box
+                sx={[ProductCardStyles.cardContent, CardLayout.cardContent]}
+                className="product-info"
+              >
+                <Box sx={CardLayout.eyebrow}>
+                  {brandLabel && (
+                    <Typography
+                      component="span"
+                      sx={[ProductCardStyles.brandLabel, CardLayout.brandLabel]}
+                    >
+                      {brandLabel}
+                    </Typography>
+                  )}
+                  {brandLabel && catalogNumber && (
+                    <Box component="span" aria-hidden="true" sx={CardLayout.eyebrowSeparator}>
+                      ·
+                    </Box>
+                  )}
+                  {catalogNumber && (
+                    <Typography
+                      component="span"
+                      sx={[ProductCardStyles.catalogNum, CardLayout.catalogNum]}
+                    >
+                      {catalogNumber}
+                    </Typography>
+                  )}
+                </Box>
                 <Typography
                   component="p"
                   className="productNameStyle"
-                  sx={{ ...ProductCardStyles.productNameStyle, marginTop: '4px' }}
+                  sx={[ProductCardStyles.productNameStyle, CardLayout.productNameStyle]}
                   tabIndex={0}
                 >
                   {sliceValue ? variantProductName : title}
                 </Typography>
-                {(sliceValue ? variationProductCode : ProductCatalogNumber) && (
-                  <Typography component="span" sx={ProductCardStyles.catalogNum}>
-                    {sliceValue ? variationProductCode : ProductCatalogNumber}
-                  </Typography>
-                )}
                 {tags.length > 0 && (
-                  <Box sx={ProductCardStyles.tagsRow}>
+                  <Box sx={[ProductCardStyles.tagsRow, CardLayout.tagsRow]}>
                     {tags.map((tag, idx) => (
-                      <Box key={idx} component="span" sx={ProductCardStyles.tagPill}>
+                      <Box
+                        key={idx}
+                        component="span"
+                        sx={[ProductCardStyles.tagPill, CardLayout.tagPill]}
+                      >
                         {tag}
                       </Box>
                     ))}
                   </Box>
                 )}
                 {(validated || trialSizeAvailable || citation || formulation) && (
-                  <Box sx={ProductCardStyles.badgeRow}>
+                  <Box sx={[ProductCardStyles.badgeRow, CardLayout.badgeRow]}>
                     {validated && (
                       <Box sx={ProductCardStyles.badgeItem}>
                         <Typography
                           component="span"
-                          sx={{ ...ProductCardStyles.badgeText, color: '#348345' }}
+                          sx={[
+                            ProductCardStyles.badgeText,
+                            { color: '#348345' },
+                            CardLayout.badgeText,
+                          ]}
                         >
                           Validated
                         </Typography>
@@ -261,7 +291,11 @@ const ProductHitGridView = ({
                       <Box sx={ProductCardStyles.badgeItem}>
                         <Typography
                           component="span"
-                          sx={{ ...ProductCardStyles.badgeText, color: '#1468C8' }}
+                          sx={[
+                            ProductCardStyles.badgeText,
+                            { color: '#1468C8' },
+                            CardLayout.badgeText,
+                          ]}
                         >
                           Trial Size Available
                         </Typography>
@@ -271,7 +305,11 @@ const ProductHitGridView = ({
                       <Box sx={ProductCardStyles.badgeItem}>
                         <Typography
                           component="span"
-                          sx={{ ...ProductCardStyles.badgeText, color: '#9E6C00' }}
+                          sx={[
+                            ProductCardStyles.badgeText,
+                            { color: '#9E6C00' },
+                            CardLayout.badgeText,
+                          ]}
                         >
                           {formulation}
                         </Typography>
@@ -281,7 +319,11 @@ const ProductHitGridView = ({
                       <Box sx={ProductCardStyles.badgeItem}>
                         <Typography
                           component="span"
-                          sx={{ ...ProductCardStyles.badgeText, color: '#30299A' }}
+                          sx={[
+                            ProductCardStyles.badgeText,
+                            { color: '#30299A' },
+                            CardLayout.badgeText,
+                          ]}
                         >
                           Citations ({citation})
                         </Typography>
@@ -289,20 +331,31 @@ const ProductHitGridView = ({
                     )}
                   </Box>
                 )}
-                <Box sx={ProductCardStyles.ctaButton}>
-                  <Button
-                    component="span"
-                    endIcon={<ArrowForwardIos sx={{ fontSize: '12px !important' }} />}
-                    title="View product details"
-                    aria-label="View product details"
-                  >
-                    View Details
-                  </Button>
-                </Box>
+                {!showBuyBox && (
+                  <Box sx={[ProductCardStyles.ctaButton, CardLayout.ctaButton]}>
+                    <Button
+                      component="span"
+                      endIcon={<ArrowForwardIos sx={{ fontSize: '12px !important' }} />}
+                      title="View product details"
+                      aria-label="View product details"
+                    >
+                      View Details
+                    </Button>
+                  </Box>
+                )}
               </Box>
-            </Card>
-          </Box>
-        </Link>
+            </Box>
+          </Link>
+          {showBuyBox && (
+            <ProductCardBuyBox
+              hit={hit}
+              productHref={productHref}
+              queryId={queryId || hit.__queryID}
+              position={position}
+              algoliaIndex={algoliaIndex}
+            />
+          )}
+        </Card>
       </Box>
     </>
   )
