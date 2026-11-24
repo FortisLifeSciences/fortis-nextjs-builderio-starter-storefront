@@ -182,7 +182,7 @@ export default async function createAccountAtCheckoutHandler(
     return
   }
 
-  const { checkoutId, reCaptchaScore } = req.body || {}
+  const { checkoutId, reCaptchaScore, checkOnly } = req.body || {}
   const userClaims = await getUserClaimsFromRequest(req, res)
   if (!checkoutId || !userClaims) {
     res.status(200).json({ status: 'guest' })
@@ -202,9 +202,24 @@ export default async function createAccountAtCheckoutHandler(
     !checkoutResponse.ok ||
     checkout?.status !== 'Pending' ||
     checkout?.customerAccountId ||
-    !emailAddress ||
-    !contact?.companyOrOrganization
+    !emailAddress
   ) {
+    res.status(200).json({ status: 'guest' })
+    return
+  }
+
+  if (checkOnly) {
+    try {
+      const exists = await hasExistingAccount(emailAddress)
+      res.status(200).json({ status: exists ? 'exists' : 'guest' })
+    } catch (error: any) {
+      req.logger.error(error, 'Existing account check at checkout failed')
+      res.status(200).json({ status: 'guest' })
+    }
+    return
+  }
+
+  if (!contact?.companyOrOrganization) {
     res.status(200).json({ status: 'guest' })
     return
   }

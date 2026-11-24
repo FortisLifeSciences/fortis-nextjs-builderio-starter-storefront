@@ -11,6 +11,7 @@ import type { CardForm } from '@/lib/types'
 import type { CrOrder } from '@/lib/gql/types'
 
 const mockCreateAccountAtCheckout = jest.fn()
+const mockHasExistingAccountAtCheckout = jest.fn()
 const mockShowModal = jest.fn()
 const mockCloseModal = jest.fn()
 
@@ -36,7 +37,10 @@ jest.mock('@/components/common', () => ({
 }))
 
 jest.mock('@/hooks', () => ({
-  useB2BAccountRequest: () => ({ createAccountAtCheckout: mockCreateAccountAtCheckout }),
+  useB2BAccountRequest: () => ({
+    createAccountAtCheckout: mockCreateAccountAtCheckout,
+    hasExistingAccountAtCheckout: mockHasExistingAccountAtCheckout,
+  }),
   useUpdateOrder: () => ({ updateOrder: { mutateAsync: jest.fn() } }),
   useInitiateOrder: () => ({ initiateOrder: { mutateAsync: jest.fn() } }),
 }))
@@ -130,6 +134,7 @@ describe('[components] GuestCheckoutStep', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     localStorage.clear()
+    mockHasExistingAccountAtCheckout.mockResolvedValue(false)
     ;(tokenizeCreditCardPayment as jest.Mock).mockResolvedValue({
       id: 'token-1',
       numberPart: '************1111',
@@ -161,7 +166,32 @@ describe('[components] GuestCheckoutStep', () => {
     expect(sessionStorage.getItem('checkoutPaymentIntent')).toBeNull()
   })
 
-  it('should place the order as a guest without any account message when the box is not ticked', async () => {
+  it('should keep a guest whose email already has an account on the shipping step and ask them to sign in', async () => {
+    mockHasExistingAccountAtCheckout.mockResolvedValue(true)
+    const user = userEvent.setup()
+
+    render(
+      <GuestCheckoutStep
+        checkout={checkout}
+        updateCheckoutPersonalInfo={jest.fn()}
+        onVoidPayment={jest.fn()}
+        onAddPayment={jest.fn()}
+        onCreateOrder={jest.fn()}
+      />
+    )
+
+    await user.click(screen.getByRole('button', { name: 'continue-to-payment' }))
+
+    expect(mockHasExistingAccountAtCheckout).toHaveBeenCalledWith('order-1')
+    expect(await screen.findByText('account-already-exists-for-email')).toBeVisible()
+    expect(mockShowModal).toHaveBeenCalledWith(
+      expect.objectContaining({ Component: ExistingUserDialog })
+    )
+    expect(screen.queryByRole('button', { name: 'fill-card' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Place Order' })).not.toBeInTheDocument()
+  })
+
+  it('should place the order as a guest without any account message when the email has no account and the box is not ticked', async () => {
     localStorage.setItem('accountCreationResult', JSON.stringify({ status: 'exists' }))
 
     const { onAddPayment, onCreateOrder } = await setup({ wantsAccount: false })
