@@ -11,6 +11,7 @@ import { resolveDefaultOptionValue } from '@/components/page-templates/ProductDe
 import { ProductRecommendations } from '@/components/product'
 import {
   getProduct,
+  getProductByAnyCode,
   getCategoryTree,
   productSearch,
   getProductSearchVariations,
@@ -42,6 +43,7 @@ interface ProductPageType extends PageWithMetaData {
   product?: Product
   relatedProducts: any
   pairingProducts?: any[]
+  otherFormatProducts?: any[]
   productVariations?: FilteredProduct[]
   PDPCustomAndBulkDisplayContentSection?: any
   PDPCustomAndBulkDisplaySectionKey?: string
@@ -88,6 +90,53 @@ function getMetaData(product: Product): MetaData {
   }
 }
 
+const PAIRING_ATTRIBUTES = ['tenant~pair-partner', 'tenant~pairing-products']
+const OTHER_FORMATS_ATTRIBUTES = ['tenant~also_available_as', 'tenant~also-available-as']
+
+const findPropertyValue = (product: any, attributeFQN: string): string =>
+  product?.properties?.find((item: any) => item?.attributeFQN?.toLowerCase() === attributeFQN)
+    ?.values?.[0]?.stringValue || ''
+
+async function getLinkedProducts(product: any, attributeFQNs: string[]) {
+  const rawCodes = attributeFQNs.map((fqn) => findPropertyValue(product, fqn)).find(Boolean) || ''
+  const codes = Array.from(
+    new Set(
+      rawCodes
+        .split('|')
+        .map((code: string) => code.trim())
+        .filter((code: string) => code && code !== product?.productCode)
+    )
+  )
+
+  const linkedProducts = await Promise.all(
+    codes.map(async (code) => {
+      try {
+        const linkedProduct = await getProductByAnyCode(code)
+        if (!linkedProduct) {
+          console.warn(`No linked product found for code: ${code}`)
+          return null
+        }
+        return {
+          code,
+          productCode: linkedProduct?.productCode,
+          categoryCode: linkedProduct?.categories?.[0]?.categoryCode,
+          seoFriendlyUrl: linkedProduct?.content?.seoFriendlyUrl,
+          title: linkedProduct?.content?.productName,
+          plpCatalogNumber: findPropertyValue(linkedProduct, 'tenant~plp-catalog-number'),
+          conjugate:
+            findPropertyValue(linkedProduct, 'tenant~conjugate-type') ||
+            findPropertyValue(linkedProduct, 'tenant~conjugate-type-variant'),
+        }
+      } catch (error) {
+        console.error(`Failed to fetch linked product: ${code}`, error)
+        return null
+      }
+    })
+  )
+
+  return linkedProducts.filter(Boolean)
+}
+
 export async function getStaticProps(
   context: GetStaticPropsContext
 ): Promise<GetStaticPropsResult<any>> {
@@ -108,9 +157,21 @@ export async function getStaticProps(
           ?.values?.[0]?.stringValue
       : null
   if (relatedProductData) {
-    const relatedProductCodes = relatedProductData?.split('|')
+    const relatedProductCodes: string[] = Array.from(
+      new Set(
+        relatedProductData
+          .split('|')
+          .map((code: string) => code.trim())
+          .filter((code: string) => code && code !== productCode)
+      )
+    )
     for (const data of relatedProductCodes) {
-      const product = await getProduct(data)
+      let product = null
+      try {
+        product = await getProductByAnyCode(data)
+      } catch (error) {
+        console.error(`Failed to fetch related product: ${data}`, error)
+      }
       if (product) {
         const productData = {
           productCode: product?.productCode,
@@ -118,9 +179,10 @@ export async function getStaticProps(
           seoFriendlyUrl: product?.content?.seoFriendlyUrl,
           title: product?.content?.productName,
           productImages: product?.content?.productImages,
-          brand: (product?.properties?.find(
-            (item: any) => item?.attributeFQN === publicRuntimeConfig.brandAttrName
-          )).values[0],
+          brand:
+            product?.properties?.find(
+              (item: any) => item?.attributeFQN === publicRuntimeConfig.brandAttrName
+            )?.values?.[0] || null,
           pData: product,
           plpCatalogNumber:
             product?.properties?.find(
@@ -134,29 +196,8 @@ export async function getStaticProps(
     }
   }
 
-  const pairingProducts = []
-  const pairingProductData =
-    product?.properties?.find((item: any) => item?.attributeFQN === 'tenant~pairing-products')
-      ?.values?.[0]?.stringValue || null
-  if (pairingProductData) {
-    for (const code of pairingProductData.split('|')) {
-      const pairedProduct = await getProduct(code.trim())
-      if (!pairedProduct) {
-        console.warn(`No pairing product found for code: ${code}`)
-        continue
-      }
-      pairingProducts.push({
-        productCode: pairedProduct?.productCode,
-        categoryCode: pairedProduct?.categories?.[0]?.categoryCode,
-        seoFriendlyUrl: pairedProduct?.content?.seoFriendlyUrl,
-        title: pairedProduct?.content?.productName,
-        plpCatalogNumber:
-          pairedProduct?.properties?.find(
-            (item: any) => item?.attributeFQN?.toLowerCase() === 'tenant~plp-catalog-number'
-          )?.values?.[0]?.stringValue || '',
-      })
-    }
-  }
+  const pairingProducts = await getLinkedProducts(product, PAIRING_ATTRIBUTES)
+  const otherFormatProducts = await getLinkedProducts(product, OTHER_FORMATS_ATTRIBUTES)
 
   let productVariations = []
   try {
@@ -336,6 +377,7 @@ export async function getStaticProps(
       PDPCustomAndBulkDisplaySectionKey: PDPCustomAndBulkDisplaySectionKey || '',
       relatedProducts,
       pairingProducts,
+      otherFormatProducts,
       schemaJson: schemaJson || '',
       digitalAssets,
       configuredVariant: configuredVariant ? JSON.parse(JSON.stringify(configuredVariant)) : null,
@@ -365,6 +407,7 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
     productVariations,
     relatedProducts,
     pairingProducts,
+    otherFormatProducts,
     PDPCustomAndBulkDisplayContentSection,
     PDPCustomAndBulkDisplaySectionKey,
     schemaJson,
@@ -410,6 +453,7 @@ const ProductDetailPage: NextPage<ProductPageType> = (props) => {
           productVariations={productVariations}
           relatedProducts={relatedProducts}
           pairingProducts={pairingProducts}
+          otherFormatProducts={otherFormatProducts}
           breadcrumbs={breadcrumbs}
           sliceValue={sliceValue}
           selectedUrlVariant={selected}

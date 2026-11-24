@@ -112,6 +112,7 @@ interface PdpTemplateProps {
   isB2B?: boolean
   relatedProducts?: []
   pairingProducts?: any[]
+  otherFormatProducts?: any[]
   getCurrentProduct?: (
     addToCartPayload: any,
     currentProduct: ProductCustom,
@@ -146,6 +147,7 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     isB2B = false,
     relatedProducts,
     pairingProducts = [],
+    otherFormatProducts = [],
     PDPCustomAndBulkDisplayContentSection,
     digitalAssets,
     configuredVariant,
@@ -162,6 +164,7 @@ const PdpTemplate = (props: PdpTemplateProps) => {
   const [copied, setCopied] = useState(false)
   const [showAllDocs, setShowAllDocs] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [formatsOpen, setFormatsOpen] = useState(true)
   const [validationOpen, setValidationOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
 
@@ -492,8 +495,55 @@ const PdpTemplate = (props: PdpTemplateProps) => {
     ? t('distributorMessage')
     : t('nonDistributorMessage')
 
+  const conjugateLabels = otherFormatProducts.map((data: any) => data?.conjugate || '')
+  const useConjugateLabels =
+    conjugateLabels.every(Boolean) && new Set(conjugateLabels).size === conjugateLabels.length
+
+  const otherFormatsCard =
+    otherFormatProducts.length > 0 ? (
+      <div className={styles.formatsCard}>
+        <button
+          type="button"
+          className={styles.formatsHeader}
+          onClick={() => setFormatsOpen(!formatsOpen)}
+          aria-expanded={formatsOpen}
+        >
+          <span className={styles.formatsIcon}>
+            <CheckIcon />
+          </span>
+          <span className={styles.formatsTitle}>
+            {useConjugateLabels ? 'Available Conjugates' : 'Other Formats'}
+          </span>
+          <span
+            className={`${styles.formatsChevron} ${formatsOpen ? styles.formatsChevronOpen : ''}`}
+          >
+            <Arrow />
+          </span>
+        </button>
+        {formatsOpen ? (
+          <ul className={styles.formatsList}>
+            {otherFormatProducts.map((data: any, index: number) => (
+              <li key={data?.productCode}>
+                <Link
+                  className={`${styles.formatsLink} ${
+                    useConjugateLabels ? styles.formatsLinkUpper : ''
+                  }`}
+                  href={productHref(data)}
+                >
+                  {useConjugateLabels
+                    ? conjugateLabels[index]
+                    : data?.code || data?.plpCatalogNumber || data?.productCode}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
+    ) : null
+
   const supportRows = (
     <>
+      {otherFormatsCard}
       {brandContent.supportRows.map((row) => {
         const RowIcon = SUPPORT_ICONS[row.icon]
         const rowContent = (

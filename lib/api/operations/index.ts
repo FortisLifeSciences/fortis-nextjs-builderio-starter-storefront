@@ -1,4 +1,5 @@
 export { default as getProduct } from './get-product'
+export { default as getProductByAnyCode } from './get-product-by-any-code'
 export { default as productSearch } from './get-product-search'
 export { default as getCheckout } from './get-checkout'
 export { default as getCart } from './get-cart'
