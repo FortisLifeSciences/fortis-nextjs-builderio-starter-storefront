@@ -1200,7 +1200,8 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                       helperText={
                         (showPlaceOrderIssues || isCardholderNameTouched) && isCardholderNameMissing
                           ? t('cardholder-name-required')
-                          : showPlaceOrderIssues || isCardholderNameTouched
+                          : (showPlaceOrderIssues || isCardholderNameTouched) &&
+                            isCardholderNameInvalid
                           ? t('cardholder-name-invalid')
                           : ''
                       }
