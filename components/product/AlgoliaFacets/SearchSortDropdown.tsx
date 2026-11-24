@@ -46,9 +46,6 @@ const ManualSortDropdown = ({ sortIndex, onChangeSort }: Props) => {
             return `Sort: ${selected?.label ?? ''}`
           }}
           sx={{
-            borderWidth: '1px',
-            borderStyle: 'solid',
-            borderColor: '#EAEAF1',
             borderRadius: '9px',
             fontSize: '13px !important',
             height: '39px',
@@ -62,6 +59,9 @@ const ManualSortDropdown = ({ sortIndex, onChangeSort }: Props) => {
             '& .MuiOutlinedInput-notchedOutline': {
               borderColor: '#EAEAF1',
             },
+            '& .MuiOutlinedInput-notchedOutline legend': {
+              maxWidth: 0,
+            },
             '&:hover .MuiOutlinedInput-notchedOutline': {
               borderColor: '#C9C7D6',
             },
@@ -69,6 +69,7 @@ const ManualSortDropdown = ({ sortIndex, onChangeSort }: Props) => {
               borderColor: '#30299A',
             },
           }}
+          MenuProps={{ disableScrollLock: true }}
           inputProps={{
             id: 'custom-sort-by',
             'aria-label': 'Sort',
