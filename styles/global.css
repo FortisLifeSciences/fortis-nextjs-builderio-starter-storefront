@@ -999,6 +999,25 @@ section[data-autocomplete-source-id='builder-page'] {
     color 0.15s ease-in-out;
 }
 
+@media only screen and (max-width: 767px) {
+  .AlgoliaPagination .ais-Pagination-list {
+    width: 100%;
+    gap: 0;
+  }
+
+  .AlgoliaPagination .ais-Pagination-item {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+  }
+
+  .AlgoliaPagination .ais-Pagination-link {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+  }
+}
+
 .AlgoliaPagination .ais-Pagination-link:hover {
   background-color: #f6f6fa;
   border-color: #eaeaf1;

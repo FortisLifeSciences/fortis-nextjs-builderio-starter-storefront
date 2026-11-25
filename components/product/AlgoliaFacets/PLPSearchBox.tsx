@@ -27,7 +27,7 @@ const PLPSearchBox = () => {
           textTransform: 'uppercase',
           verticalAlign: 'middle',
           color: '#1B1A24',
-          padding: '0 0 8px',
+          padding: '10px 0 8px',
         }}
       >
         Filter by keyword

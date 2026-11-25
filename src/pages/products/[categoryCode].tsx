@@ -1,4 +1,4 @@
-import React, { useState, useEffect, PropsWithChildren, useCallback } from 'react'
+import React, { useState, useEffect, useRef, PropsWithChildren, useCallback } from 'react'
 
 import { BuilderComponent, builder } from '@builder.io/react'
 import { setPixelProperties } from '@builder.io/utils'
@@ -236,6 +236,14 @@ const MyHitsComponent = ({
     localStorage.setItem('algoliaQueryId', '')
   }
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const currentRefinements = useCurrentRefinements().items
+  const refinementSignature = JSON.stringify(
+    currentRefinements.map(({ attribute, refinements }) => [
+      attribute,
+      refinements.map(({ value }) => value),
+    ])
+  )
+  const previousRefinementSignature = useRef(refinementSignature)
 
   const { publicRuntimeConfig } = getConfig()
   const algoliaFacets = facets
@@ -247,12 +255,33 @@ const MyHitsComponent = ({
     clickAnalytics: true,
   } as any)
 
+  const shouldScrollToResults = useRef(false)
+
+  useEffect(() => {
+    if (isFilterOpen || !shouldScrollToResults.current) return
+
+    shouldScrollToResults.current = false
+    document.getElementById('product-listing-section')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+  }, [isFilterOpen])
+
+  useEffect(() => {
+    if (previousRefinementSignature.current === refinementSignature) return
+
+    previousRefinementSignature.current = refinementSignature
+    if (isMobile) return
+
+    document.getElementById('product-listing-section')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+  }, [isMobile, refinementSignature])
+
   const onFilterByClose = () => {
+    shouldScrollToResults.current = true
     setIsFilterOpen(false)
-    const resultsSection = document.getElementById('product-listing-section')
-    if (resultsSection) {
-      resultsSection.scrollIntoView({ behavior: 'smooth' })
-    }
   }
 
   function FallbackComponent({ attribute }: { attribute: string }) {

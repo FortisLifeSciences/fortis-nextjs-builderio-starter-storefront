@@ -111,7 +111,7 @@ function CustomRefinementList({ attribute, searchableAttributes }: CustomRefinem
         <TextField
           value={query}
           onChange={handleSearch}
-          placeholder="Begin typing..."
+          placeholder="Search for reactivity"
           variant="standard"
           size="small"
           fullWidth
