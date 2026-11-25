@@ -500,6 +500,8 @@
   "firstname-error": "Please enter a first name",
   "lastname-error": "Please enter a last name",
   "cardholder-name": "Cardholder Name",
+  "cardholder-name-required": "Please enter the cardholder name",
+  "cardholder-name-invalid": "Please enter a valid cardholder name",
   "billing-contact": "Billing Contact",
   "active": "Active",
   "in-active": "In Active",

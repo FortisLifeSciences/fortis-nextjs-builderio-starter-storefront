@@ -55,6 +55,10 @@ import {
   getCvvLengthForCardType,
   tokenizeCreditCardPayment,
 } from '@/lib/helpers'
+import {
+  CARDHOLDER_NAME_MAX_LENGTH,
+  isCardholderNameValid,
+} from '@/lib/helpers/validations/validations'
 import { checkoutKeys } from '@/lib/react-query/queryKeys'
 import type {
   CardForm,
@@ -329,6 +333,8 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   const [cardFormData, setCardFormData] = useState<CardForm>({})
   const [isCardFormValid, setIsCardFormValid] = useState(false)
   const [cardholderName, setCardholderName] = useState('')
+  const [isCardholderNameTouched, setIsCardholderNameTouched] = useState(false)
+  const [showPlaceOrderIssues, setShowPlaceOrderIssues] = useState(false)
   const [saveCard, setSaveCard] = useState(false)
   const [billingSameAsShipping, setBillingSameAsShipping] = useState(true)
   const [billingContactForm, setBillingContactForm] = useState<CrContact | undefined>()
@@ -546,6 +552,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   }
 
   const isCardholderNameMissing = !cardholderName.trim()
+  const isCardholderNameInvalid = !isCardholderNameMissing && !isCardholderNameValid(cardholderName)
 
   const getPlaceOrderIssues = () => {
     if (isPurchaseOrder) return []
@@ -553,7 +560,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     if (selectedSavedCard) {
       if (!isSavedCardCvvValid) issues.push(t('please-complete-card-details'))
     } else {
-      if (isCardholderNameMissing || !isCardFormValid) {
+      if (isCardholderNameMissing || isCardholderNameInvalid || !isCardFormValid) {
         issues.push(t('please-complete-card-details'))
       }
       if (!billingSameAsShipping && !isBillingFormValid) {
@@ -565,6 +572,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   const placeOrderIssues = getPlaceOrderIssues()
 
   const validateBeforePlacingOrder = () => {
+    setShowPlaceOrderIssues(true)
     if (!agreeWithTerms) {
       setPlaceOrderError(t('please-agree-to-terms'))
       return false
@@ -612,6 +620,11 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       return true
     }
 
+    if (isCardholderNameMissing || isCardholderNameInvalid) {
+      setPlaceOrderError(t('please-complete-card-details'))
+      return false
+    }
+
     if (!isCardFormValid) {
       setPlaceOrderError(t('please-complete-card-details'))
       return false
@@ -653,7 +666,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       return true
     }
     if (selectedSavedCard) return isSavedCardCvvValid
-    if (isCardholderNameMissing || !isCardFormValid) return false
+    if (isCardholderNameMissing || isCardholderNameInvalid || !isCardFormValid) return false
     if (!billingSameAsShipping && !isBillingFormValid) return false
     return true
   }, [
@@ -668,7 +681,10 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     billingAddressSameAsShipping,
     billingAddressOverride,
     selectedSavedCard,
+    cardholderName,
     cvv,
+    isCardholderNameMissing,
+    isCardholderNameInvalid,
     isCardFormValid,
     billingSameAsShipping,
     isBillingFormValid,
@@ -1176,7 +1192,23 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                     <KiboTextBox
                       value={cardholderName}
                       label={t('cardholder-name')}
-                      onChange={(_name, value) => setCardholderName(value)}
+                      required
+                      error={
+                        (showPlaceOrderIssues || isCardholderNameTouched) &&
+                        (isCardholderNameMissing || isCardholderNameInvalid)
+                      }
+                      helperText={
+                        (showPlaceOrderIssues || isCardholderNameTouched) && isCardholderNameMissing
+                          ? t('cardholder-name-required')
+                          : showPlaceOrderIssues || isCardholderNameTouched
+                          ? t('cardholder-name-invalid')
+                          : ''
+                      }
+                      inputProps={{ maxLength: CARDHOLDER_NAME_MAX_LENGTH }}
+                      onChange={(_name, value) =>
+                        setCardholderName(value.slice(0, CARDHOLDER_NAME_MAX_LENGTH))
+                      }
+                      onBlur={() => setIsCardholderNameTouched(true)}
                     />
                     <CardDetailsForm
                       validateForm={false}

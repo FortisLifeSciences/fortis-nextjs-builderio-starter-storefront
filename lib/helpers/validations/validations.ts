@@ -32,6 +32,10 @@ export const isPasswordValid = (password: string) => {
 
 export const personNamePattern = new RegExp("^[\\p{L}\\p{M}][\\p{L}\\p{M} '’.-]*$", 'u')
 
+export const CARDHOLDER_NAME_MAX_LENGTH = 50
+
+export const isCardholderNameValid = (name: string) => /[A-Za-zÀ-ɏ]/.test(name.trim())
+
 export const organizationNamePattern = new RegExp(
   "^[\\p{L}\\p{M}\\p{N}][\\p{L}\\p{M}\\p{N} &'\u2019.,()/-]*$",
   'u'

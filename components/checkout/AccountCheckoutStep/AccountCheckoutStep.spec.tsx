@@ -225,6 +225,17 @@ describe('[component] AccountCheckoutStep', () => {
     expect(onAddPayment).not.toHaveBeenCalled()
   })
 
+  it('rejects a cardholder name without letters', async () => {
+    const { user, onAddPayment } = setup()
+
+    await user.type(screen.getByLabelText('cardholder-name'), '12345')
+    await user.click(screen.getByRole('button', { name: 'fill-card' }))
+    await agreeToTermsAndPlaceOrder(user)
+
+    expect(screen.getByText('cardholder-name-invalid')).toBeVisible()
+    expect(onAddPayment).not.toHaveBeenCalled()
+  })
+
   it('clears an incorrectly sized saved-card CVV on blur and shows the card-specific error', async () => {
     const { user } = setup({ cards: cardCollection })
     const cvvInput = screen.getByLabelText('cvv-code')
