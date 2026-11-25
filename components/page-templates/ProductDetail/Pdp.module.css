@@ -987,6 +987,99 @@
   color: #fff;
 }
 
+.formatsCard {
+  margin: 2px 0 6px;
+  padding: 14px 14px 16px;
+  border-radius: 14px;
+  background: var(--tint);
+}
+
+.formatsHeader {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 22px;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.formatsIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--white);
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+}
+
+.formatsIcon svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.formatsTitle {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.formatsChevron {
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  transition: transform 0.18s ease;
+}
+
+.formatsChevronOpen {
+  transform: rotate(90deg);
+}
+
+.formatsChevron svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.formatsList {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0 0 0 50px;
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.formatsLink {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+}
+
+.formatsLinkUpper {
+  text-transform: uppercase;
+}
+
+.formatsLink:hover {
+  text-decoration: underline;
+}
+
 /* ---------- brand card ---------- */
 
 .brandCard {
