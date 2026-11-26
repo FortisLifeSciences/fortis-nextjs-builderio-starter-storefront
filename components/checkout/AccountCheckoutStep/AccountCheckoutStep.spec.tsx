@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { QueryClient } from '@tanstack/react-query'
-import { screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import AccountCheckoutStep from './AccountCheckoutStep'
@@ -26,10 +26,12 @@ jest.mock('../CardDetailsForm/CardDetailsForm', () => ({
   __esModule: true,
   default: ({
     onFormStatusChange,
+    validationRequest,
   }: {
     onFormStatusChange: (isValid: boolean, cardData?: CardForm) => void
+    validationRequest?: number
   }) => (
-    <div data-testid="card-form-mock">
+    <div data-testid="card-form-mock" data-validation-request={validationRequest}>
       <button
         type="button"
         onClick={() =>
@@ -164,6 +166,11 @@ const agreeToTermsAndPlaceOrder = async (user: ReturnType<typeof userEvent.setup
   await user.click(screen.getByRole('button', { name: 'Place Order' }))
 }
 
+const fillNewCard = async (user: ReturnType<typeof userEvent.setup>) => {
+  await user.type(screen.getByRole('textbox', { name: 'cardholder-name' }), 'Jane Doe')
+  await user.click(screen.getByRole('button', { name: 'fill-card' }))
+}
+
 describe('[component] AccountCheckoutStep', () => {
   beforeEach(() => {
     jest.mocked(tokenizeCreditCardPayment).mockReset()
@@ -200,6 +207,28 @@ describe('[component] AccountCheckoutStep', () => {
     expect(screen.queryByText('payment-information')).not.toBeInTheDocument()
   })
 
+  it('requires a valid state and ZIP for a separate PO billing address', async () => {
+    const { user, onAddPayment } = setup({
+      user: b2bUser,
+      customerPurchaseOrderAccount: { isEnabled: true } as CustomerPurchaseOrderAccount,
+    })
+
+    await user.click(screen.getByText('purchase-order'))
+    await user.type(screen.getByRole('textbox', { name: 'po-number' }), 'PO-123')
+    await user.click(screen.getByRole('checkbox', { name: 'poAuthorization' }))
+    await user.click(screen.getByRole('checkbox', { name: 'same-as-shipping' }))
+    await user.type(screen.getByRole('textbox', { name: 'company-or-organization' }), 'Acme Labs')
+    await user.type(screen.getByRole('textbox', { name: 'street-address-1' }), '1 Main Street')
+    await user.type(screen.getByRole('textbox', { name: 'city-or-town' }), 'Boston')
+    fireEvent.blur(screen.getByRole('combobox', { name: 'state-or-province' }))
+    await user.type(screen.getByRole('textbox', { name: 'postal-or-zip-code' }), '1234A')
+    await agreeToTermsAndPlaceOrder(user)
+
+    expect(screen.getByText('enter-valid-zip-code')).toBeVisible()
+    expect(screen.getByText('this-field-is-required')).toBeVisible()
+    expect(onAddPayment).not.toHaveBeenCalled()
+  })
+
   it('lists saved cards, disables expired ones and preselects the default card', () => {
     setup({ cards: cardCollection })
 
@@ -215,13 +244,72 @@ describe('[component] AccountCheckoutStep', () => {
     expect(screen.getByText('9 Billing Road')).toBeVisible()
   })
 
+  it('lists every missing item at once and flags the card fields', async () => {
+    const { user, onAddPayment } = setup()
+
+    await user.click(screen.getByRole('button', { name: 'Place Order' }))
+
+    expect(screen.getByText('please-agree-to-terms')).toBeVisible()
+    expect(screen.getByText('please-complete-card-details')).toBeVisible()
+    expect(screen.getByText('cardholder-name-required')).toBeVisible()
+    expect(screen.getByTestId('card-form-mock')).toHaveAttribute('data-validation-request', '1')
+    expect(onAddPayment).not.toHaveBeenCalled()
+  })
+
+  it('scrolls to and focuses the first field that needs fixing', async () => {
+    const { user } = setup()
+
+    await user.click(screen.getByRole('button', { name: 'Place Order' }))
+
+    const cardholderName = screen.getByRole('textbox', { name: 'cardholder-name' })
+    await waitFor(() => expect(cardholderName).toHaveFocus())
+    expect(Element.prototype.scrollIntoView).toHaveBeenCalled()
+  })
+
+  it('requires the cardholder name for a new card', async () => {
+    const { user, onAddPayment } = setup()
+
+    await user.click(screen.getByRole('button', { name: 'fill-card' }))
+    await user.click(screen.getByRole('checkbox', { name: 'termsConditions' }))
+
+    expect(screen.getByRole('button', { name: 'Place Order' })).toBeDisabled()
+    expect(onAddPayment).not.toHaveBeenCalled()
+
+    await user.type(screen.getByRole('textbox', { name: 'cardholder-name' }), 'Jane Doe')
+
+    expect(screen.getByRole('button', { name: 'Place Order' })).toBeEnabled()
+  })
+
   it('requires the CVV before paying with a saved card', async () => {
     const { user, onAddPayment } = setup({ cards: cardCollection })
 
+    expect(screen.getByLabelText('cvv-code')).toHaveAttribute('type', 'password')
     await agreeToTermsAndPlaceOrder(user)
 
     expect(screen.getByText('cvv-is-required')).toBeVisible()
     expect(onAddPayment).not.toHaveBeenCalled()
+  })
+
+  it('rejects a cardholder name without letters', async () => {
+    const { user, onAddPayment } = setup()
+
+    await user.type(screen.getByLabelText('cardholder-name'), '12345')
+    await user.click(screen.getByRole('button', { name: 'fill-card' }))
+    await agreeToTermsAndPlaceOrder(user)
+
+    expect(screen.getByText('cardholder-name-invalid')).toBeVisible()
+    expect(onAddPayment).not.toHaveBeenCalled()
+  })
+
+  it('clears an incorrectly sized saved-card CVV on blur and shows the card-specific error', async () => {
+    const { user } = setup({ cards: cardCollection })
+    const cvvInput = screen.getByLabelText('cvv-code')
+
+    await user.type(cvvInput, '12')
+    await user.tab()
+
+    expect(cvvInput).toHaveValue('')
+    expect(screen.getByText('invalid-cvv-length')).toBeVisible()
   })
 
   it('pays with a saved card by re-tokenizing its CVV', async () => {
@@ -232,7 +320,7 @@ describe('[component] AccountCheckoutStep', () => {
     })
     const { user, onAddPayment, onCreateOrder } = setup({ cards: cardCollection })
 
-    await user.type(screen.getByRole('textbox', { name: 'cvv-code' }), '123')
+    await user.type(screen.getByLabelText('cvv-code'), '123')
     await agreeToTermsAndPlaceOrder(user)
 
     await waitFor(() => expect(onCreateOrder).toHaveBeenCalled())
@@ -269,7 +357,7 @@ describe('[component] AccountCheckoutStep', () => {
       })
       const { user, onAddPayment, onCreateOrder } = setup()
 
-      await user.click(screen.getByRole('button', { name: 'fill-card' }))
+      await fillNewCard(user)
       if (saveCard) await user.click(screen.getByRole('checkbox', { name: 'saveCard' }))
       await agreeToTermsAndPlaceOrder(user)
 
@@ -308,7 +396,7 @@ describe('[component] AccountCheckoutStep', () => {
     } as Partial<CrOrder>)
     const { user, onVoidPayment, onAddPayment, onCreateOrder } = setup({ checkout })
 
-    await user.click(screen.getByRole('button', { name: 'fill-card' }))
+    await fillNewCard(user)
     await agreeToTermsAndPlaceOrder(user)
 
     await waitFor(() => expect(onCreateOrder).toHaveBeenCalled())
@@ -341,7 +429,7 @@ describe('[component] AccountCheckoutStep', () => {
     } as Partial<CrOrder>)
     const { user, onVoidPayment, onAddPayment, onCreateOrder } = setup({ checkout })
 
-    await user.click(screen.getByRole('button', { name: 'fill-card' }))
+    await fillNewCard(user)
     await agreeToTermsAndPlaceOrder(user)
 
     await waitFor(() => expect(onCreateOrder).toHaveBeenCalled())
@@ -359,7 +447,7 @@ describe('[component] AccountCheckoutStep', () => {
     const { user, onCreateOrder } = setup()
     onCreateOrder.mockRejectedValue(new Error('Auth declined'))
 
-    await user.click(screen.getByRole('button', { name: 'fill-card' }))
+    await fillNewCard(user)
     await agreeToTermsAndPlaceOrder(user)
 
     await waitFor(() =>
@@ -377,7 +465,7 @@ describe('[component] AccountCheckoutStep', () => {
     const { user, onCreateOrder } = setup()
     onCreateOrder.mockRejectedValue(new Error('createOrder failed'))
 
-    await user.click(screen.getByRole('button', { name: 'fill-card' }))
+    await fillNewCard(user)
     await agreeToTermsAndPlaceOrder(user)
 
     expect(await screen.findByText('something-went-wrong')).toBeVisible()
@@ -396,7 +484,7 @@ describe('[component] AccountCheckoutStep', () => {
     const { user, onAddPayment, onCreateOrder } = setup()
     onAddPayment.mockResolvedValue(orderWithPayment)
 
-    await user.click(screen.getByRole('button', { name: 'fill-card' }))
+    await fillNewCard(user)
     await user.click(screen.getByRole('checkbox', { name: 'saveCard' }))
     await agreeToTermsAndPlaceOrder(user)
 

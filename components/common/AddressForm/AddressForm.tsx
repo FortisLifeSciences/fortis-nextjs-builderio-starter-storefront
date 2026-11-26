@@ -18,6 +18,7 @@ import {
   organizationNamePattern,
   personNamePattern,
   streetAddressPattern,
+  nameMaxLength,
 } from '@/lib/helpers/validations/validations'
 import type { Address, ContactForm } from '@/lib/types'
 
@@ -50,9 +51,39 @@ export const useFormSchema = (internationalPhoneInput = false) => {
       .required(t('this-field-is-required'))
       .matches(pattern, t('enter-valid-characters'))
 
+  const lettersOnlyText = (pattern: RegExp) =>
+    yup
+      .string()
+      .trim()
+      .required(t('this-field-is-required'))
+      .test('valid-letters-only', function (value) {
+        if (!value) return true
+
+        const hasNumbers = /\d/.test(value)
+        const withoutDigits = value.replace(/\d/g, '').trim()
+        const hasSpecialChars = withoutDigits.length > 0 && !pattern.test(withoutDigits)
+
+        if (hasNumbers && hasSpecialChars) {
+          return this.createError({ message: t('remove-numbers-and-special-characters') })
+        }
+        if (hasNumbers) {
+          return this.createError({ message: t('remove-numbers') })
+        }
+        if (hasSpecialChars) {
+          return this.createError({ message: t('enter-valid-characters') })
+        }
+        return true
+      })
+
   return yup.object().shape({
-    firstName: requiredText(personNamePattern),
-    lastNameOrSurname: requiredText(personNamePattern),
+    firstName: lettersOnlyText(personNamePattern).max(
+      nameMaxLength,
+      t('name-max-length', { max: nameMaxLength })
+    ),
+    lastNameOrSurname: lettersOnlyText(personNamePattern).max(
+      nameMaxLength,
+      t('name-max-length', { max: nameMaxLength })
+    ),
     companyOrOrganization: requiredText(organizationNamePattern),
     address: yup.object().shape({
       address1: requiredText(streetAddressPattern),
@@ -195,6 +226,7 @@ const AddressForm = (props: AddressFormProps) => {
                 onBlur={field.onBlur}
                 autoFocus={setAutoFocus}
                 required={true}
+                inputProps={{ maxLength: nameMaxLength }}
               />
             )}
           />
@@ -216,6 +248,7 @@ const AddressForm = (props: AddressFormProps) => {
                 onChange={(_name: string, value: string) => field.onChange(value)}
                 onBlur={field.onBlur}
                 required={true}
+                inputProps={{ maxLength: nameMaxLength }}
               />
             )}
           />

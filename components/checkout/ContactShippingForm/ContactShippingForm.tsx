@@ -20,6 +20,13 @@ import { toE164PhoneNumber } from '@/components/common/KiboPhoneInput/KiboPhoneI
 import { useUpdateOrderShippingInfo, useGetShippingMethods } from '@/hooks'
 import { AddressType, CountryCode, DefaultId } from '@/lib/constants'
 import { orderGetters, userGetters } from '@/lib/getters'
+import {
+  cityNamePattern,
+  organizationNamePattern,
+  personNamePattern,
+  streetAddressPattern,
+  nameMaxLength,
+} from '@/lib/helpers/validations/validations'
 
 import type {
   CrContact,
@@ -52,14 +59,47 @@ interface Country {
 
 const useContactShippingSchema = () => {
   const { t } = useTranslation('common')
+
+  const requiredText = (pattern: RegExp) =>
+    yup
+      .string()
+      .trim()
+      .required(t('this-field-is-required'))
+      .matches(pattern, t('enter-valid-characters'))
+
+  const lettersOnlyText = (pattern: RegExp) =>
+    yup
+      .string()
+      .trim()
+      .required(t('this-field-is-required'))
+      .test('valid-letters-only', function (value) {
+        if (!value) return true
+        const hasNumbers = /\d/.test(value)
+        const withoutDigits = value.replace(/\d/g, '').trim()
+        const hasSpecialChars = withoutDigits.length > 0 && !pattern.test(withoutDigits)
+
+        if (hasNumbers && hasSpecialChars) {
+          return this.createError({ message: t('remove-numbers-and-special-characters') })
+        }
+        if (hasNumbers) return this.createError({ message: t('remove-numbers') })
+        if (hasSpecialChars) return this.createError({ message: t('enter-valid-characters') })
+        return true
+      })
+
   return yup.object().shape({
-    firstName: yup.string().required(t('this-field-is-required')),
-    lastNameOrSurname: yup.string().required(t('this-field-is-required')),
+    firstName: lettersOnlyText(personNamePattern).max(
+      nameMaxLength,
+      t('name-max-length', { max: nameMaxLength })
+    ),
+    lastNameOrSurname: lettersOnlyText(personNamePattern).max(
+      nameMaxLength,
+      t('name-max-length', { max: nameMaxLength })
+    ),
     workEmail: yup
       .string()
       .email(t('please-enter-a-valid-email-address'))
       .required(t('this-field-is-required')),
-    companyOrOrganization: yup.string().required(t('this-field-is-required')),
+    companyOrOrganization: requiredText(organizationNamePattern),
     phoneNumbers: yup.object().shape({
       home: yup
         .string()
@@ -69,9 +109,17 @@ const useContactShippingSchema = () => {
         ),
     }),
     address: yup.object().shape({
-      address1: yup.string().required(t('this-field-is-required')),
-      address2: yup.string().nullable(true).notRequired(),
-      cityOrTown: yup.string().required(t('this-field-is-required')),
+      address1: requiredText(streetAddressPattern),
+      address2: yup
+        .string()
+        .trim()
+        .nullable(true)
+        .notRequired()
+        .matches(streetAddressPattern, {
+          message: t('enter-valid-characters'),
+          excludeEmptyString: true,
+        }),
+      cityOrTown: lettersOnlyText(cityNamePattern),
       stateOrProvince: yup.string().when('countryCode', {
         is: (value: string) => [CountryCode.US, CountryCode.CA].includes(value),
         then: yup.string().required(t('this-field-is-required')),
@@ -146,6 +194,24 @@ const getAddressDedupeKey = (contact?: Maybe<DefaultContact>) =>
     .join('|')
     .toLowerCase()
 
+const isOk = (value: string | null | undefined, pattern: RegExp) =>
+  !value?.trim() || pattern.test(value.trim())
+
+const isWithinLimit = (value: string | null | undefined) =>
+  (value?.trim().length ?? 0) <= nameMaxLength
+
+const isContactInvalid = (contact?: Maybe<DefaultContact>) =>
+  !!contact &&
+  !(
+    isOk(contact.firstName, personNamePattern) &&
+    isWithinLimit(contact.firstName) &&
+    isOk(contact.lastNameOrSurname, personNamePattern) &&
+    isWithinLimit(contact.lastNameOrSurname) &&
+    isOk(contact.companyOrOrganization, organizationNamePattern) &&
+    isOk(contact.address?.address1, streetAddressPattern) &&
+    isOk(contact.address?.address2, streetAddressPattern) &&
+    isOk(contact.address?.cityOrTown, cityNamePattern)
+  )
 // Contact & shipping collection form shared by guest checkout and the logged-in
 // checkout - identical fields/validation/mutations, only what happens on a valid
 // "Continue" differs per caller.
@@ -170,7 +236,9 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   // Signature of the contact fields last successfully saved - lets a re-selected saved address
   // (valid before and after, so `isValid` never flips) still trigger a fresh save.
   const lastSavedContactSignatureRef = useRef<string | null>(null)
-  const shippingMethodSaveQueueRef = useRef<Promise<boolean>>(Promise.resolve(true))
+  const contactSaveQueueRef = useRef<Promise<void | boolean>>(Promise.resolve())
+  const shippingMethodSaveQueueRef = contactSaveQueueRef
+  const shippingMethodSectionRef = useRef<HTMLDivElement>(null)
 
   // Primary sorted first, deduped by address content.
   const savedShippingAddresses = uniqBy(
@@ -200,6 +268,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
         : defaultContact,
     [hasOrderShippingAddress, orderShippingContact, matchedSavedAddress]
   )
+  const [invalidSavedNotice, setInvalidSavedNotice] = useState(false)
 
   const getInitialAddressId = () => {
     if (hasOrderShippingAddress) {
@@ -214,12 +283,17 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   const shipItems = orderGetters.getShipItems(checkout)
   const pickupItems = orderGetters.getPickupItems(checkout)
   const checkoutShippingMethodCode = orderGetters.getShippingMethodCode(checkout)
+  const checkoutShippingMethodName = orderGetters.getShippingMethodName(checkout)
+  const [lastSavedShippingMethod, setLastSavedShippingMethod] = useState<{
+    code?: string
+    name?: string
+  }>({ code: checkoutShippingMethodCode, name: checkoutShippingMethodName })
 
   // A destination address may already be on the checkout from an earlier visit or an
   // auto-applied saved address - don't wait on `isNewAddressAdded`, a purely local flag.
   const hasDestinationAddress = isNewAddressAdded || hasOrderShippingAddress
 
-  const { updateOrderShippingInfo } = useUpdateOrderShippingInfo()
+  const { updateOrderShippingInfo } = useUpdateOrderShippingInfo({ suppressErrorSnackbar: true })
   const { data: shippingMethods, isLoading: isLoadingShippingMethods } = useGetShippingMethods(
     checkout?.id,
     hasDestinationAddress,
@@ -269,6 +343,9 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
         postalOrZipCode: initialContact.address?.postalOrZipCode || '',
       },
     })
+    if (hasOrderShippingAddress && isContactInvalid(initialContact)) {
+      setTimeout(() => trigger(), 0)
+    }
   }, [initialContact])
 
   const applySavedAddress = (address: CustomerContact) => {
@@ -315,8 +392,15 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   }, [savedShippingAddresses?.length])
 
   const handleSelectSavedAddress = (address: CustomerContact) => {
-    setSelectedAddressId(String(address.id))
     applySavedAddress(address)
+    if (isContactInvalid(address)) {
+      // keep the values, but open the form so the errors are visible
+      setSelectedAddressId(NEW_ADDRESS_OPTION)
+      setInvalidSavedNotice(true)
+    } else {
+      setSelectedAddressId(String(address.id))
+      setInvalidSavedNotice(false)
+    }
   }
 
   const handleSelectNewAddress = () => {
@@ -347,27 +431,24 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
         checkout,
         contact: buildContact(formData),
         email: formData.workEmail,
+        shippingMethodCode: lastSavedShippingMethod.code,
+        shippingMethodName: lastSavedShippingMethod.name,
       })
       lastSavedContactSignatureRef.current = signature
       setIsNewAddressAdded(true)
     } catch (error) {
       console.error(error)
-      // /api/graphql proxies the backend error as either `{ errors: [...] }` or `{ message }`.
-      const backendMessage =
-        (error as any)?.response?.errors?.[0]?.message ||
-        (error as any)?.response?.message ||
-        (error as any)?.message
-      setContactSaveError(
-        backendMessage
-          ? `${t('unable-to-save-shipping-address')} (${backendMessage})`
-          : t('unable-to-save-shipping-address')
-      )
+      setContactSaveError(t('unable-to-save-shipping-address'))
     }
   }
 
   useEffect(() => {
-    if (!isValid || contactSignature === lastSavedContactSignatureRef.current) return
-    handleSubmit((formData) => onValidContact(formData, contactSignature))()
+    if (contactSignature === lastSavedContactSignatureRef.current) return
+    contactSaveQueueRef.current = contactSaveQueueRef.current.then(async () => {
+      const isCurrentlyValid = await trigger()
+      if (!isCurrentlyValid) return
+      await handleSubmit((formData) => onValidContact(formData, contactSignature))()
+    })
   }, [isValid, contactSignature])
 
   useEffect(() => {
@@ -383,14 +464,17 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
       try {
         await updateOrderShippingInfo.mutateAsync({
           checkout,
-          contact: undefined,
+          contact: buildContact(getValues()),
           email: checkout?.email as string,
           shippingMethodCode,
           shippingMethodName,
         })
+        setLastSavedShippingMethod({ code: shippingMethodCode, name: shippingMethodName })
+        setShippingMethodError('')
         return true
       } catch (error) {
         console.error(error)
+        setShippingMethodError(t('unable-to-save-shipping-method'))
         return false
       }
     })
@@ -401,35 +485,38 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
   // ship items - a pickup-only order has nothing to select and shouldn't be blocked on it.
   const needsShippingMethod = shipItems.length > 0
   const hasShippingMethod = !needsShippingMethod || !!checkoutShippingMethodCode
-  const canContinue = isValid && hasShippingMethod
+  // `checkoutShippingMethodCode` only updates once the shipping-info save round-trips to the
+  // server - while that save is in flight (e.g. right after switching methods), it still holds
+  // the previous method's code, which would otherwise let Continue through on a stale value.
+  const isSavingShippingInfo = updateOrderShippingInfo.isPending
+  const canContinue = isValid && !contactSaveError && hasShippingMethod && !isSavingShippingInfo
 
   const handleContinue = async () => {
-    if (isValidatingShipping) return
+    if (isValidatingShipping || isSavingShippingInfo) return
     setIsValidatingShipping(true)
     try {
-      // Force-validate on submit (mode: 'onChange' skips untouched fields otherwise). Only
-      // validate the "Add New Address" fields when that's the active mode - they stay mounted
-      // but hidden when a saved address is selected instead.
-      const fieldsToValidate =
-        selectedAddressId === NEW_ADDRESS_OPTION
-          ? ([
-              'firstName',
-              'lastNameOrSurname',
-              'workEmail',
-              'phoneNumbers.home',
-              'companyOrOrganization',
-              'address.address1',
-              'address.cityOrTown',
-              'address.stateOrProvince',
-              'address.postalOrZipCode',
-              'address.countryCode',
-            ] as const)
-          : (['firstName', 'lastNameOrSurname', 'workEmail', 'phoneNumbers.home'] as const)
+      const fieldsToValidate = [
+        'firstName',
+        'lastNameOrSurname',
+        'workEmail',
+        'phoneNumbers.home',
+        'companyOrOrganization',
+        'address.address1',
+        'address.address2',
+        'address.cityOrTown',
+        'address.stateOrProvince',
+        'address.postalOrZipCode',
+        'address.countryCode',
+      ] as const
       const isFormValid = await trigger(fieldsToValidate as any)
 
       setShippingMethodError(hasShippingMethod ? '' : t('please-select-shipping-method'))
 
       if (!isFormValid) {
+        if (selectedAddressId !== NEW_ADDRESS_OPTION) {
+          setSelectedAddressId(NEW_ADDRESS_OPTION) // reveal the hidden fields
+          setInvalidSavedNotice(true)
+        }
         for (const name of fieldsToValidate) {
           // eslint-disable-next-line no-await-in-loop
           const fieldIsValid = await trigger(name as any)
@@ -478,6 +565,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                   onBlur={field.onBlur}
                   required
                   autoComplete="new-first-name"
+                  inputProps={{ maxLength: nameMaxLength }}
                 />
               )}
             />
@@ -497,6 +585,7 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
                   onBlur={field.onBlur}
                   required
                   autoComplete="new-last-name"
+                  inputProps={{ maxLength: nameMaxLength }}
                 />
               )}
             />
@@ -760,6 +849,12 @@ const ContactShippingForm = (props: ContactShippingFormProps) => {
             </Typography>
           )}
         </Stack>
+      )}
+
+      {!isValid && isDirty && (
+        <Typography sx={{ fontSize: '13px', color: 'error.main' }}>
+          {t('address-changes-not-saved')}
+        </Typography>
       )}
 
       <Box>

@@ -56,6 +56,9 @@ const cardSx = {
   borderRadius: '12px',
   padding: '20px',
   height: '100%',
+  minWidth: 0,
+  overflowWrap: 'anywhere',
+  wordBreak: 'break-word',
 }
 
 const infoCardSx = {
@@ -260,14 +263,8 @@ const OrderConfirmation = ({ order }: { order: CrOrder }) => {
       </Grid>
 
       <Box sx={{ ...cardSx, mb: '20px' }}>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="flex-start"
-          flexWrap="wrap"
-          gap={2}
-        >
-          <Box>
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={2}>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography sx={{ fontWeight: 600, fontSize: '18px', color: colors.subtitle, mb: 1.5 }}>
               {t('billing-information')}
             </Typography>
@@ -298,7 +295,7 @@ const OrderConfirmation = ({ order }: { order: CrOrder }) => {
             </Stack>
           </Box>
           {paymentMethods?.[0] && (
-            <Box textAlign={{ xs: 'left', sm: 'right' }}>
+            <Box textAlign={{ xs: 'left', sm: 'right' }} sx={{ flexShrink: 0 }}>
               <Typography sx={{ fontSize: '13px', color: colors.placeholder }}>
                 {t('payment-method')}
               </Typography>
@@ -311,7 +308,7 @@ const OrderConfirmation = ({ order }: { order: CrOrder }) => {
             </Box>
           )}
           {!paymentMethods?.[0] && purchaseOrderPaymentMethods?.[0] && (
-            <Box textAlign={{ xs: 'left', sm: 'right' }}>
+            <Box textAlign={{ xs: 'left', sm: 'right' }} sx={{ flexShrink: 0 }}>
               <Typography sx={{ fontSize: '13px', color: colors.placeholder }}>
                 {t('payment-method')}
               </Typography>
