@@ -18,7 +18,7 @@ import { useTranslation } from 'next-i18next'
 import { StandardShippingStepStyle } from './standardShippingStep.style'
 import { ShippingMethod } from '@/components/checkout'
 import { AddressCard, AddressForm, KiboRadio } from '@/components/common'
-import { useCheckoutStepContext, STEP_STATUS, useAuthContext } from '@/context'
+import { useCheckoutStepContext, STEP_STATUS, useAuthContext, useSnackbarContext } from '@/context'
 import {
   useUpdateOrderShippingInfo,
   useGetShippingMethods,
@@ -58,6 +58,11 @@ const StandardShippingStep = (props: ShippingProps) => {
   const { user } = useAuthContext()
   const checkoutShippingContact = orderGetters.getShippingContact(checkout)
   const checkoutShippingMethodCode = orderGetters.getShippingMethodCode(checkout)
+  const checkoutShippingMethodName = orderGetters.getShippingMethodName(checkout)
+  const [lastSavedShippingMethod, setLastSavedShippingMethod] = useState<{
+    code?: string
+    name?: string
+  }>({ code: checkoutShippingMethodCode, name: checkoutShippingMethodName })
   // getting shipping address from all addresses returned from server
   const userShippingAddress = isAuthenticated
     ? userGetters.getUserShippingAddress(addresses?.items as CustomerContact[])
@@ -140,6 +145,7 @@ const StandardShippingStep = (props: ShippingProps) => {
   }, [selectedShippingAddressId, fallbackShippingId])
 
   const { t } = useTranslation('common')
+  const { showSnackbar } = useSnackbarContext()
   const shippingAddressRef = useRef<HTMLDivElement>(null)
 
   const {
@@ -194,10 +200,20 @@ const StandardShippingStep = (props: ShippingProps) => {
       if (isAddressSavedToAccount) {
         const customerSavedAddress = await handleSaveAddressToAccount(contact)
         const { accountId: _, types: __, label: ___, ...customerContact } = customerSavedAddress
-        await updateOrderShippingInfo.mutateAsync({ checkout, contact: customerContact })
+        await updateOrderShippingInfo.mutateAsync({
+          checkout,
+          contact: customerContact,
+          shippingMethodCode: lastSavedShippingMethod.code,
+          shippingMethodName: lastSavedShippingMethod.name,
+        })
         setSelectedShippingAddressId(customerSavedAddress?.id as number)
       } else {
-        await updateOrderShippingInfo.mutateAsync({ checkout, contact })
+        await updateOrderShippingInfo.mutateAsync({
+          checkout,
+          contact,
+          shippingMethodCode: lastSavedShippingMethod.code,
+          shippingMethodName: lastSavedShippingMethod.name,
+        })
         setSelectedShippingAddressId((contact?.id as number) || DefaultId.ADDRESSID)
       }
       setIsAddressSavedToAccount(false)
@@ -272,8 +288,12 @@ const StandardShippingStep = (props: ShippingProps) => {
         shippingMethodCode,
         shippingMethodName,
       })
+      setLastSavedShippingMethod({ code: shippingMethodCode, name: shippingMethodName })
+      return true
     } catch (error) {
       console.error(error)
+      showSnackbar(t('shipping-method-update-failed'), 'error')
+      return false
     }
   }
 
@@ -504,15 +524,17 @@ const StandardShippingStep = (props: ShippingProps) => {
             </NoSsr>
           </Stack>
           {shippingMethods.length > 0 && (
-            <ShippingMethod
-              shipItems={shipItems}
-              pickupItems={pickupItems}
-              orderShipmentMethods={[...shippingMethods]}
-              selectedShippingMethodCode={checkoutShippingMethodCode}
-              onShippingMethodChange={handleSaveShippingMethod}
-              onStoreLocatorClick={handleStoreLocatorClick}
-              checkout={checkout}
-            />
+            <Box sx={{ mt: 3 }}>
+              <ShippingMethod
+                shipItems={shipItems}
+                pickupItems={pickupItems}
+                orderShipmentMethods={[...shippingMethods]}
+                selectedShippingMethodCode={checkoutShippingMethodCode}
+                onShippingMethodChange={handleSaveShippingMethod}
+                onStoreLocatorClick={handleStoreLocatorClick}
+                checkout={checkout}
+              />
+            </Box>
           )}
         </>
       )}

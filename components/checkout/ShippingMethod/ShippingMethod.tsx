@@ -175,6 +175,8 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
     fedEx: '',
     ups: '',
   })
+  const appliedPreferredShippingMethodCodeRef = useRef<string | undefined>(undefined)
+  const manualSelectionRef = useRef(false)
 
   const fedExSchema = useFedExSchema()
 
@@ -203,6 +205,33 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   const { data: customerAccount } = useGetCurrentCustomer()
   const [fedexTrigger, setFedexTrigger] = useState(0)
   const [upsTrigger, setUpsTrigger] = useState(0)
+  // `customerAccount.attributes` comes from the cached current-customer query, which can still
+  // be serving a value from before the shopper's latest Shipping Preference save (the cache
+  // invalidation on save doesn't guarantee the refetch has landed by the time this mounts).
+  // Fetch the preference directly instead, same as the FedEx/UPS account numbers below, so the
+  // very first auto-apply on a fresh checkout always sees the true current value.
+  const [freshShippingMethodPreference, setFreshShippingMethodPreference] = useState<
+    string | undefined
+  >(undefined)
+
+  useEffect(() => {
+    const fetchShippingMethodPreference = async () => {
+      if (!customerAccount?.id || !customerAccount?.userId) return
+      const payload = {
+        userId: customerAccount.userId,
+        accountId: customerAccount.id,
+        attributeFqn: 'tenant~shipping-method',
+      }
+      const entityResponse = await fetch('/api/user/getCustomerAttribute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payload }),
+      })
+      const attributeDetails = await entityResponse.json()
+      setFreshShippingMethodPreference(attributeDetails?.data?.values?.[0] ?? '')
+    }
+    fetchShippingMethodPreference()
+  }, [customerAccount?.id, customerAccount?.userId])
 
   useEffect(() => {
     const fetchUpsSettings = async () => {
@@ -273,22 +302,10 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       requestedShippingMethodCodeRef.current = undefined
     }
 
-    const fedExShippings = getFedExShippingMethods()
-    const upsShippings = getUPSShippingMethods()
     const fortisShippings = getFortisShippingMethods()
-
     const selectedFortisMethod = find(
       fortisShippings,
       (fortisShip) => fortisShip?.shippingMethodCode === selectedShippingMethodCode
-    )
-
-    const selectedFedExMethod = find(
-      fedExShippings,
-      (fedExShip) => fedExShip?.shippingMethodCode === selectedShippingMethodCode
-    )
-    const selectedUpsMethod = find(
-      upsShippings,
-      (upsShip) => upsShip?.shippingMethodCode === selectedShippingMethodCode
     )
 
     if (selectedFortisMethod) {
@@ -300,7 +317,22 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       setIsFedExMethodSelected(false)
       setIsUpsMethodSelected(false)
       setIsOtherShippingMethod(true)
-    } else if (
+      return
+    }
+
+    const fedExShippings = getFedExShippingMethods()
+    const upsShippings = getUPSShippingMethods()
+
+    const selectedFedExMethod = find(
+      fedExShippings,
+      (fedExShip) => fedExShip?.shippingMethodCode === selectedShippingMethodCode
+    )
+    const selectedUpsMethod = find(
+      upsShippings,
+      (upsShip) => upsShip?.shippingMethodCode === selectedShippingMethodCode
+    )
+
+    if (
       fedExShippings &&
       selectedFedExMethod &&
       fedExAccountNumber &&
@@ -329,10 +361,16 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       setIsUpsMethodSelected(true)
       setIsOtherShippingMethod(false)
     }
-  }, [selectedShippingMethodCode, fedExAccountNumber, upsAccountNumber, t])
+  }, [
+    selectedShippingMethodCode,
+    fedExAccountNumber,
+    upsAccountNumber,
+    customerAccount?.attributes,
+    t,
+  ])
 
   useEffect(() => {
-    if (customerAccount?.attributes?.length) {
+    if (customerAccount?.attributes?.length && freshShippingMethodPreference !== undefined) {
       if (fedExAccountNumberInput) {
         setFedExAccountNumber(fedExAccountNumberInput)
       }
@@ -341,16 +379,18 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         setUpsAccountNumber(upsAccountNumberInput)
       }
 
-      // Get FedEx account shipping method name
-
-      const customerShippingMethodAttr = find(customerAccount?.attributes, {
-        fullyQualifiedName: 'tenant~shipping-method',
-      })
-      const shippingMethodName = customerShippingMethodAttr?.values?.length
-        ? customerShippingMethodAttr.values[0]
-        : ''
-      const shippingMethod = find(orderShipmentMethods, (shipMethod) =>
-        shippingMethodName?.includes(shipMethod?.shippingMethodName)
+      const shippingMethodName = freshShippingMethodPreference
+      const fortisMethods = getFortisShippingMethods()
+      const shippingMethod = (
+        shippingMethodName.includes('FedEx Account')
+          ? getFedExShippingMethods()?.[0]
+          : shippingMethodName.includes('UPS Account')
+          ? getUPSShippingMethods()?.[0]
+          : shippingMethodName
+          ? find(fortisMethods, (shipMethod) =>
+              shipMethod?.shippingMethodName?.toLowerCase().includes('overnight')
+            ) || fortisMethods?.[0]
+          : undefined
       ) as CrShippingRate
       if (
         shippingMethod?.shippingMethodName &&
@@ -363,8 +403,54 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       ) {
         setUpsAccountShippingMethod(shippingMethod)
       }
+
+      const isFedExAccountMethod = shippingMethod?.shippingMethodName?.includes('FedEx Account')
+      const isUpsAccountMethod = shippingMethod?.shippingMethodName?.includes('UPS Account')
+      const isAccountMethodReady =
+        (isFedExAccountMethod && fedExAccountNumber?.length === 9) ||
+        (isUpsAccountMethod && upsAccountNumber?.length === 6)
+      const manualSelectionStorageKey = checkout?.id
+        ? `preferenceApplied:${checkout.id}`
+        : undefined
+      const hasManuallySelectedForThisOrder =
+        !!manualSelectionStorageKey && sessionStorage.getItem(manualSelectionStorageKey) === '1'
+      if (
+        selectedShippingMethodCode !== shippingMethod?.shippingMethodCode &&
+        !hasManuallySelectedForThisOrder &&
+        !manualSelectionRef.current &&
+        shippingMethod?.shippingMethodCode &&
+        `${checkout?.id ?? ''}:${shippingMethod.shippingMethodCode}` !==
+          appliedPreferredShippingMethodCodeRef.current &&
+        (isAccountMethodReady || (!isFedExAccountMethod && !isUpsAccountMethod))
+      ) {
+        const appliedPreferenceKey = `${checkout?.id ?? ''}:${shippingMethod.shippingMethodCode}`
+        appliedPreferredShippingMethodCodeRef.current = appliedPreferenceKey
+        const saveResult = handleShippingMethodSelectChange(
+          shippingMethod.shippingMethodName as string,
+          shippingMethod.shippingMethodCode as string
+        )
+        void saveResult?.then((saved) => {
+          if (
+            saved === false &&
+            appliedPreferredShippingMethodCodeRef.current === appliedPreferenceKey
+          ) {
+            appliedPreferredShippingMethodCodeRef.current = undefined
+          }
+        })
+        setIsFedExMethodSelected(!!isFedExAccountMethod)
+        setIsUpsMethodSelected(!!isUpsAccountMethod)
+        setIsOtherShippingMethod(!isFedExAccountMethod && !isUpsAccountMethod)
+      }
     }
-  }, [customerAccount?.attributes, orderShipmentMethods])
+  }, [
+    customerAccount?.attributes,
+    freshShippingMethodPreference,
+    orderShipmentMethods,
+    selectedShippingMethodCode,
+    fedExAccountNumber,
+    upsAccountNumber,
+    checkout?.id,
+  ])
 
   // Prioritize input
   useEffect(() => {
@@ -442,15 +528,18 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   const previousFedExAccountNumber = useRef('')
   const previousUpsAccountNumber = useRef('')
 
-  const saveShippingMethod = (value: string, name?: string) => {
+  const saveShippingMethod = (value: string, name?: string): Promise<void | boolean> => {
     requestedShippingMethodCodeRef.current = value
     setLocalSelectedShippingMethodCode(value)
-    Promise.resolve(onShippingMethodChange && onShippingMethodChange(value, name)).then((saved) => {
-      if (saved === false && requestedShippingMethodCodeRef.current === value) {
-        requestedShippingMethodCodeRef.current = undefined
-        setLocalSelectedShippingMethodCode(selectedShippingMethodCode)
+    return Promise.resolve(onShippingMethodChange && onShippingMethodChange(value, name)).then(
+      (saved) => {
+        if (saved === false && requestedShippingMethodCodeRef.current === value) {
+          requestedShippingMethodCodeRef.current = undefined
+          setLocalSelectedShippingMethodCode(selectedShippingMethodCode)
+        }
+        return saved
       }
-    })
+    )
   }
   const handleShippingMethodChange = (value: string, name?: string) => {
     saveShippingMethod(value, name)
@@ -460,10 +549,13 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         block: 'start',
       })
   }
-  const handleShippingMethodSelectChange = (name: string, value: string, shouldSave = true) => {
+  const handleShippingMethodSelectChange = (
+    name: string,
+    value: string,
+    shouldSave = true
+  ): Promise<void | boolean> | undefined => {
     if (!name && !value) {
-      shouldSave && saveShippingMethod('', '')
-      return
+      return shouldSave ? saveShippingMethod('', '') : undefined
     }
 
     const shippingMethod = find(
@@ -471,10 +563,9 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       (shipMethod) => value === shipMethod?.shippingMethodCode
     ) as CrShippingRate
     if (!shippingMethod) {
-      shouldSave && saveShippingMethod('', '')
-      return
+      return shouldSave ? saveShippingMethod('', '') : undefined
     }
-    shouldSave && saveShippingMethod(value, name)
+    const saveResult = shouldSave ? saveShippingMethod(value, name) : undefined
     if (shippingMethod?.shippingMethodName?.includes('FedEx Account')) {
       setFedExAccountShippingMethod(shippingMethod)
     } else if (shippingMethod?.shippingMethodName?.includes('UPS Account')) {
@@ -493,6 +584,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
       setIsFedexAccountMethodUpdated(false)
       setIsUpsAccountUpdated(false)
     }
+    return saveResult
   }
 
   const getFortisShippingMethods = () => {
@@ -629,13 +721,13 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
     fedExShippingMethodName: string
   ) => {
     try {
-      // Update customer attributes for FedEx
+      // Remember the FedEx account number for next time - this must not touch
+      // `tenant~shipping-method`, the shopper's permanent Shipping Preference. Choosing a
+      // method during checkout only applies to this order.
       const updatedCustomerAccountAttributes = customerAccount?.attributes?.length
         ? customerAccount?.attributes?.map((attribute) => {
             if (attribute?.fullyQualifiedName === 'tenant~customer-fedex-account-number') {
               attribute.values = [fedExAccountNumber]
-            } else if (attribute?.fullyQualifiedName === 'tenant~shipping-method') {
-              attribute.values = [fedExShippingMethodName]
             }
             return attribute
           })
@@ -643,10 +735,6 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
             {
               fullyQualifiedName: 'tenant~customer-fedex-account-number',
               values: [fedExAccountNumber],
-            },
-            {
-              fullyQualifiedName: 'tenant~shipping-method',
-              values: [fedExShippingMethodName],
             },
           ]
 
@@ -660,16 +748,6 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         updatedCustomerAccountAttributes.push({
           fullyQualifiedName: 'tenant~customer-fedex-account-number',
           values: [fedExAccountNumber],
-        })
-      }
-
-      if (
-        !find(updatedCustomerAccountAttributes, { fullyQualifiedName: 'tenant~shipping-method' }) &&
-        fedExShippingMethodName
-      ) {
-        updatedCustomerAccountAttributes.push({
-          fullyQualifiedName: 'tenant~shipping-method',
-          values: [fedExShippingMethodName],
         })
       }
 
@@ -691,13 +769,13 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
     upsShippingMethodName: string
   ) => {
     try {
-      // Update customer attributes for UPS
+      // Remember the UPS account number for next time - this must not touch
+      // `tenant~shipping-method`, the shopper's permanent Shipping Preference. Choosing a
+      // method during checkout only applies to this order.
       const updatedCustomerAccountAttributes = customerAccount?.attributes?.length
         ? customerAccount?.attributes?.map((attribute) => {
             if (attribute?.fullyQualifiedName === 'tenant~customer-ups-account-number') {
               attribute.values = [upsAccountNumber]
-            } else if (attribute?.fullyQualifiedName === 'tenant~shipping-method') {
-              attribute.values = [upsShippingMethodName]
             }
             return attribute
           })
@@ -705,10 +783,6 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
             {
               fullyQualifiedName: 'tenant~customer-ups-account-number',
               values: [upsAccountNumber],
-            },
-            {
-              fullyQualifiedName: 'tenant~shipping-method',
-              values: [upsShippingMethodName],
             },
           ]
 
@@ -725,16 +799,6 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
         })
       }
 
-      if (
-        !find(updatedCustomerAccountAttributes, { fullyQualifiedName: 'tenant~shipping-method' }) &&
-        upsShippingMethodName
-      ) {
-        updatedCustomerAccountAttributes.push({
-          fullyQualifiedName: 'tenant~shipping-method',
-          values: [upsShippingMethodName],
-        })
-      }
-
       await updateUserData.mutateAsync({
         accountId: customerAccount.id,
         customerAccountInput: {
@@ -748,6 +812,8 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
   }
 
   const selectShippingMethod = (method: 'fortis' | 'fedex' | 'ups') => {
+    manualSelectionRef.current = true
+    if (checkout?.id) sessionStorage.setItem(`preferenceApplied:${checkout.id}`, '1')
     localStorage.setItem('selectedShippingMethod', method)
 
     if (method === 'fortis') {
@@ -839,7 +905,7 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                 : ''
             }
             align="center"
-            boxSx={shippingMethodCardSx}
+            boxSx={{ ...shippingMethodCardSx, '&:not(:last-of-type)': { mb: '12px' } }}
             onChange={(value) => {
               selectShippingMethod('fortis')
               handleShippingMethodChange(value)
@@ -914,8 +980,8 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                       value={field.value ?? fedExAccountNumber}
                       label={'FedEx Account Number'}
                       ref={null}
-                      error={!!localError}
-                      helperText={localError}
+                      error={fedExAccountNumber?.length !== 9 && !!localError}
+                      helperText={fedExAccountNumber?.length !== 9 ? localError : ''}
                       onChange={(_name: string, value: string) => {
                         // Allow only digits and ensure the length doesn't exceed 9 characters
                         const sanitizedValue = value.replace(/[^0-9]/g, '').slice(0, 9)
@@ -1018,8 +1084,8 @@ const ShipItemList = (shipProps: ShipItemListProps) => {
                       value={field.value ?? upsAccountNumber}
                       label={'UPS Account Number'}
                       ref={null}
-                      error={!!localUpsError}
-                      helperText={localUpsError}
+                      error={upsAccountNumber?.length !== 6 && !!localUpsError}
+                      helperText={upsAccountNumber?.length !== 6 ? localUpsError : ''}
                       onChange={(_name: string, value: string) => {
                         // Allow only alphanumeric and max 6 chars
                         const sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 6)

@@ -11,7 +11,7 @@ import {
 } from '@/lib/helpers/buildCheckoutShippingParams'
 import { checkoutKeys } from '@/lib/react-query/queryKeys'
 
-import type { CrFulfillmentInfoInput } from '@/lib/gql/types'
+import type { CrFulfillmentInfoInput, CrOrder } from '@/lib/gql/types'
 
 /**
  * @hidden
@@ -43,18 +43,25 @@ const updateShippingInfo = async (params: CheckoutShippingParams) => {
  *
  * Parameters passed to function updateShippingInfo(params: CheckoutShippingParams) => expects object of type ' ShippingInfo' containing  orderId and fulfillmentInfoInput
  *
- * On success, calls invalidateQueries on checkoutKeys and fetches the updated result.
+ * On success, updates the cached fulfillment info and invalidates checkout queries.
  *
  * @returns 'response?.updateOrderBillingInfo', which contains updated shipping checkout information
  */
 
-export const useUpdateOrderShippingInfo = () => {
+export const useUpdateOrderShippingInfo = (options?: { suppressErrorSnackbar?: boolean }) => {
   const queryClient = useQueryClient()
 
   return {
     updateOrderShippingInfo: useMutation({
       mutationFn: updateShippingInfo,
-      onSuccess: () => {
+      meta: { suppressErrorSnackbar: options?.suppressErrorSnackbar },
+      onSuccess: (fulfillmentInfo, variables) => {
+        const orderId = variables.checkout?.id
+        if (orderId && fulfillmentInfo) {
+          queryClient.setQueryData<CrOrder>(checkoutKeys.detail(orderId), (old) =>
+            old ? { ...old, fulfillmentInfo } : old
+          )
+        }
         queryClient.invalidateQueries({ queryKey: checkoutKeys.all })
       },
     }),

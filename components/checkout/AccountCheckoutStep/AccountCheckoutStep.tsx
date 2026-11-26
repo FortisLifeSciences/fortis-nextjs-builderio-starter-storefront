@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import CreditCardIcon from '@mui/icons-material/CreditCard'
 import RequestQuoteOutlinedIcon from '@mui/icons-material/RequestQuoteOutlined'
@@ -27,6 +27,7 @@ import {
   ContactShippingSummary,
   PaymentOptionCard,
   SavedCardPicker,
+  scrollToFirstFieldError,
 } from '@/components/checkout'
 import {
   checkoutColors,
@@ -46,14 +47,24 @@ import {
 } from '@/components/common'
 import { toE164PhoneNumber } from '@/components/common/KiboPhoneInput/KiboPhoneInput'
 import { useAuthContext } from '@/context'
-import { useUpdateOrder } from '@/hooks'
+import { useGetCurrentCustomer, useUpdateOrder } from '@/hooks'
 import { AccountType, CurrencyCode, PaymentType, PaymentWorkflow } from '@/lib/constants'
 import { cardGetters, orderGetters, userGetters } from '@/lib/getters'
 import {
   buildCardPaymentActionForCheckoutParams,
   buildPurchaseOrderPaymentActionForCheckoutParams,
+  getCvvLengthForCardType,
   tokenizeCreditCardPayment,
 } from '@/lib/helpers'
+import {
+  CARDHOLDER_NAME_MAX_LENGTH,
+  cityNamePattern,
+  isCardholderNameValid,
+  organizationNamePattern,
+  personNamePattern,
+  streetAddressPattern,
+  nameMaxLength,
+} from '@/lib/helpers/validations/validations'
 import { checkoutKeys } from '@/lib/react-query/queryKeys'
 import type {
   CardForm,
@@ -131,6 +142,23 @@ const sameAsShippingLabelSx = {
   },
 }
 
+const isOk = (value: string | null | undefined, pattern: RegExp) =>
+  !value?.trim() || pattern.test(value.trim())
+const isWithinLimit = (value: string | null | undefined) =>
+  (value?.trim().length ?? 0) <= nameMaxLength
+const isContactInvalid = (contact?: Maybe<CrContact>) =>
+  !!contact &&
+  !(
+    isOk(contact.firstName, personNamePattern) &&
+    isWithinLimit(contact.firstName) &&
+    isOk(contact.lastNameOrSurname, personNamePattern) &&
+    isWithinLimit(contact.lastNameOrSurname) &&
+    isOk(contact.companyOrOrganization, organizationNamePattern) &&
+    isOk(contact.address?.address1, streetAddressPattern) &&
+    isOk(contact.address?.address2, streetAddressPattern) &&
+    isOk(contact.address?.cityOrTown, cityNamePattern)
+  )
+const US_ZIP_REGEX = /^\d{5}(-\d{4})?$/
 const ContactAddressSummary = ({ contact }: { contact?: Maybe<CrContact> }) => {
   const address = contact?.address
   return (
@@ -160,6 +188,13 @@ const ContactAddressSummary = ({ contact }: { contact?: Maybe<CrContact> }) => {
   )
 }
 
+const getShippingMethodType = (shippingMethodName?: string) => {
+  const name = shippingMethodName?.toLowerCase() ?? ''
+  if (name.includes('fedex account')) return 'fedex'
+  if (name.includes('ups account')) return 'ups'
+  return 'fortis'
+}
+
 const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   const {
     checkout,
@@ -178,22 +213,104 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   const { user } = useAuthContext()
   const { updateOrder } = useUpdateOrder()
   const queryClient = useQueryClient()
+  const { data: customerAccountForShippingPreference } = useGetCurrentCustomer()
+  const shippingPreferenceAttr = customerAccountForShippingPreference?.attributes?.find(
+    (attr) => attr?.fullyQualifiedName === 'tenant~shipping-method'
+  )
+  const shippingPreferenceValue = shippingPreferenceAttr?.values?.[0] || ''
+  const customerAccountId = customerAccountForShippingPreference?.id
+  const customerUserId = customerAccountForShippingPreference?.userId
+  const [freshShippingPreference, setFreshShippingPreference] = useState<string>()
+
+  useEffect(() => {
+    if (!customerAccountId || !customerUserId) {
+      setFreshShippingPreference(undefined)
+      return
+    }
+
+    let isActive = true
+    setFreshShippingPreference(undefined)
+
+    const fetchShippingPreference = async () => {
+      try {
+        const response = await fetch('/api/user/getCustomerAttribute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            payload: {
+              userId: customerUserId,
+              accountId: customerAccountId,
+              attributeFqn: 'tenant~shipping-method',
+            },
+          }),
+        })
+        if (!response.ok) {
+          throw new Error(`Failed to fetch shipping preference: ${response.status}`)
+        }
+
+        const attributeDetails = await response.json()
+        if (isActive) {
+          setFreshShippingPreference(attributeDetails?.data?.values?.[0] ?? '')
+        }
+      } catch (error) {
+        console.error('Failed to fetch the current shipping preference:', error)
+        if (isActive) setFreshShippingPreference(shippingPreferenceValue)
+      }
+    }
+
+    fetchShippingPreference()
+    return () => {
+      isActive = false
+    }
+  }, [customerAccountId, customerUserId])
+
+  const currentShippingPreference = freshShippingPreference ?? shippingPreferenceValue
+  const preferredShippingMethodLabel = shippingPreferenceValue.includes('FedEx Account')
+    ? 'FedEx Account'
+    : shippingPreferenceValue.includes('UPS Account')
+    ? 'UPS Account'
+    : shippingPreferenceValue
+    ? String(t('fortis-overnight-shipping'))
+    : undefined
 
   const isB2BUser = user?.accountType?.toLowerCase() === AccountType.B2B.toLowerCase()
   const isPOEnabled = !!customerPurchaseOrderAccount?.isEnabled
 
   const shippingContact = orderGetters.getShippingContact(checkout)
   const shippingAddress = shippingContact?.address
-  const isShippingStepComplete =
+  const hasShippableItems = orderGetters.getShipItems(checkout).length > 0
+  const hasShippingDetails =
     !!shippingContact?.email &&
+    (!hasShippableItems || !!orderGetters.getShippingMethodCode(checkout))
+  const selectedShippingMethodName = orderGetters.getShippingMethodName(checkout)
+  const hasManuallySelectedShippingMethod =
+    typeof window !== 'undefined' &&
+    !!checkout?.id &&
+    sessionStorage.getItem(`preferenceApplied:${checkout.id}`) === '1'
+  const shippingPreferenceMatchesOrder =
+    !hasShippableItems ||
+    !currentShippingPreference ||
+    hasManuallySelectedShippingMethod ||
+    getShippingMethodType(currentShippingPreference) ===
+      getShippingMethodType(selectedShippingMethodName)
+  const isShippingStepComplete =
+    hasShippingDetails &&
+    shippingPreferenceMatchesOrder &&
+    !isContactInvalid(shippingContact) &&
     (orderGetters.getShipItems(checkout).length === 0 ||
       !!orderGetters.getShippingMethodCode(checkout))
+  const isPreferenceReady =
+    !customerAccountId || !customerUserId || freshShippingPreference !== undefined
   const [phase, setPhase] = useState<'shipping' | 'payment'>(
     isShippingStepComplete ? 'payment' : 'shipping'
   )
+  const initializedForCheckoutRef = useRef<string>()
   useEffect(() => {
+    if (!checkout?.id || !isPreferenceReady) return
+    if (initializedForCheckoutRef.current === checkout.id) return
+    initializedForCheckoutRef.current = checkout.id
     setPhase(isShippingStepComplete ? 'payment' : 'shipping')
-  }, [checkout?.id])
+  }, [checkout?.id, isPreferenceReady, isShippingStepComplete])
   const isShippingLocked = phase !== 'shipping'
 
   const contactShippingDefaults = {
@@ -239,9 +356,19 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
 
   const [cvv, setCvv] = useState('')
   const [cvvError, setCvvError] = useState('')
+  const savedCardCvvLength = getCvvLengthForCardType(selectedSavedCard?.cardInfo?.cardType)
+  const isSavedCardCvvValid = new RegExp(`^\\d{${savedCardCvvLength}}$`).test(cvv)
+  const getSavedCardCvvError = (value: string) => {
+    if (!value) return t('cvv-is-required')
+    return new RegExp(`^\\d{${savedCardCvvLength}}$`).test(value)
+      ? ''
+      : t('invalid-cvv-length', { count: savedCardCvvLength })
+  }
   const [cardFormData, setCardFormData] = useState<CardForm>({})
   const [isCardFormValid, setIsCardFormValid] = useState(false)
   const [cardholderName, setCardholderName] = useState('')
+  const [isCardholderNameTouched, setIsCardholderNameTouched] = useState(false)
+  const [showPlaceOrderIssues, setShowPlaceOrderIssues] = useState(false)
   const [saveCard, setSaveCard] = useState(false)
   const [billingSameAsShipping, setBillingSameAsShipping] = useState(true)
   const [billingContactForm, setBillingContactForm] = useState<CrContact | undefined>()
@@ -260,9 +387,16 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   const [billingAddressOverride, setBillingAddressOverride] = useState<BillingAddressOverride>(
     emptyBillingAddressOverride
   )
+  const [billingContactTouched, setBillingContactTouched] = useState<
+    Partial<Record<keyof BillingContactOverride, boolean>>
+  >({})
+  const [billingAddressTouched, setBillingAddressTouched] = useState<
+    Partial<Record<keyof BillingAddressOverride, boolean>>
+  >({})
   const [instructionsValue, setInstructionsValue] = useState('')
   const [agreeWithTerms, setAgreeWithTerms] = useState(false)
   const [agreePOAuthorization, setAgreePOAuthorization] = useState(false)
+  const [poAuthorizationError, setPoAuthorizationError] = useState(false)
   const [authorizerName, setAuthorizerName] = useState('')
   const [authorizerPhone, setAuthorizerPhone] = useState('')
   const [authorizerNameError, setAuthorizerNameError] = useState('')
@@ -270,6 +404,8 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   const [referenceNumber, setReferenceNumber] = useState('')
   const [isPlacingOrder, setIsPlacingOrder] = useState(false)
   const [placeOrderError, setPlaceOrderError] = useState('')
+  const stepRef = useRef<HTMLDivElement>(null)
+  const [cardValidationRequest, setCardValidationRequest] = useState(0)
 
   const countries = publicRuntimeConfig.countries
   const provinces = publicRuntimeConfig.provinces
@@ -307,9 +443,57 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     if (!value) return t('this-field-is-required')
     return isValidPhoneNumber(value) ? '' : t('enter-valid-phone-number')
   }
+  const getRequiredFieldError = (value: string) =>
+    value?.trim() ? '' : t('this-field-is-required')
+  const getEmailFieldError = (value: string) => {
+    if (!value?.trim()) return t('this-field-is-required')
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? '' : t('please-enter-a-valid-email-address')
+  }
+  const getPhoneFieldError = (value: string) => {
+    if (!value) return t('this-field-is-required')
+    return isValidPhoneNumber(value) ? '' : t('enter-valid-phone-number')
+  }
+  const getPostalCodeError = (value: string) => {
+    const zip = value?.trim() ?? ''
+    if (!zip) return t('this-field-is-required')
+    return US_ZIP_REGEX.test(zip) ? '' : t('enter-valid-zip-code')
+  }
+  const billingContactErrors = {
+    firstName: getRequiredFieldError(billingContactOverride.firstName),
+    lastNameOrSurname: getRequiredFieldError(billingContactOverride.lastNameOrSurname),
+    email: getEmailFieldError(billingContactOverride.email),
+    phone: getPhoneFieldError(billingContactOverride.phone),
+  }
+  const billingAddressErrors = {
+    companyOrOrganization: getRequiredFieldError(billingAddressOverride.companyOrOrganization),
+    address1: getRequiredFieldError(billingAddressOverride.address1),
+    cityOrTown: getRequiredFieldError(billingAddressOverride.cityOrTown),
+    postalOrZipCode: getPostalCodeError(billingAddressOverride.postalOrZipCode),
+    countryCode: getRequiredFieldError(billingAddressOverride.countryCode),
+    stateOrProvince: getRequiredFieldError(billingAddressOverride.stateOrProvince),
+  }
+  const isBillingAddressInvalid =
+    !billingAddressSameAsShipping &&
+    (!!billingAddressErrors.companyOrOrganization ||
+      !!billingAddressErrors.address1 ||
+      !!billingAddressErrors.cityOrTown ||
+      !!billingAddressErrors.stateOrProvince ||
+      !!billingAddressErrors.postalOrZipCode ||
+      !!billingAddressErrors.countryCode)
+  const isBillingContactInvalid =
+    !billingContactSameAsContact &&
+    (!!billingContactErrors.firstName ||
+      !!billingContactErrors.lastNameOrSurname ||
+      !!billingContactErrors.email ||
+      !!billingContactErrors.phone)
+  const markBillingContactTouched = (field: keyof BillingContactOverride) =>
+    setBillingContactTouched((prev) => ({ ...prev, [field]: true }))
+  const markBillingAddressTouched = (field: keyof BillingAddressOverride) =>
+    setBillingAddressTouched((prev) => ({ ...prev, [field]: true }))
 
   const handlePOAuthorizationChange = (checked: boolean) => {
     setAgreePOAuthorization(checked)
+    setPoAuthorizationError(false)
     setPlaceOrderError('')
     if (!checked) {
       setAuthorizerName('')
@@ -324,6 +508,12 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     setCvv('')
     setCvvError('')
     setPlaceOrderError('')
+    setShowPlaceOrderIssues(false)
+  }
+
+  const handleSelectOption = (option: string) => {
+    setSelectedOption(option)
+    setShowPlaceOrderIssues(false)
   }
 
   const buildPurchaseOrderPaymentAction = (): PaymentActionInput => {
@@ -458,60 +648,86 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     }
   }
 
-  const validateBeforePlacingOrder = () => {
-    if (!agreeWithTerms) {
-      setPlaceOrderError(t('please-agree-to-terms'))
-      return false
-    }
+  const isCardholderNameMissing = !cardholderName.trim()
+  const isCardholderNameInvalid = !isCardholderNameMissing && !isCardholderNameValid(cardholderName)
 
-    if (isPurchaseOrder) {
-      if (!agreePOAuthorization) {
-        setPlaceOrderError(t('please-complete-billing-information'))
-        return false
+  const getPlaceOrderIssues = () => {
+    if (isPurchaseOrder) return []
+    const issues: string[] = agreeWithTerms ? [] : [t('please-agree-to-terms')]
+    if (selectedSavedCard) {
+      if (!isSavedCardCvvValid) issues.push(t('please-complete-card-details'))
+    } else {
+      if (isCardholderNameMissing || isCardholderNameInvalid || !isCardFormValid) {
+        issues.push(t('please-complete-card-details'))
       }
+      if (!billingSameAsShipping && !isBillingFormValid) {
+        issues.push(t('please-complete-billing-information'))
+      }
+    }
+    return issues
+  }
+  const placeOrderIssues = getPlaceOrderIssues()
 
+  const validateBeforePlacingOrder = () => {
+    const isReady = isReadyToPlaceOrder()
+    if (!isReady) scrollToFirstFieldError(stepRef.current)
+    return isReady
+  }
+
+  const isReadyToPlaceOrder = () => {
+    setShowPlaceOrderIssues(true)
+    if (isPurchaseOrder) {
       const isPoNumberMissing = !poNumber.trim()
       const nameError = getAuthorizerNameError(authorizerName)
       const phoneError = getAuthorizerPhoneError(authorizerPhone)
+      setPoAuthorizationError(!agreePOAuthorization)
       if (isPoNumberMissing) setPoNumberError(t('this-field-is-required'))
       setAuthorizerNameError(nameError)
       setAuthorizerPhoneError(phoneError)
-      if (isPoNumberMissing || nameError || phoneError) {
-        setPlaceOrderError(t('please-complete-billing-information'))
-        return false
+      if (isBillingContactInvalid || isBillingAddressInvalid) {
+        if (isBillingContactInvalid) {
+          setBillingContactTouched({
+            firstName: true,
+            lastNameOrSurname: true,
+            email: true,
+            phone: true,
+          })
+        }
+        if (isBillingAddressInvalid) {
+          setBillingAddressTouched({
+            companyOrOrganization: true,
+            address1: true,
+            cityOrTown: true,
+            stateOrProvince: true,
+            postalOrZipCode: true,
+            countryCode: true,
+          })
+        }
       }
       if (
-        (!billingContactSameAsContact &&
-          (!billingContactOverride.firstName ||
-            !billingContactOverride.lastNameOrSurname ||
-            !billingContactOverride.email)) ||
-        (!billingAddressSameAsShipping &&
-          (!billingAddressOverride.address1 ||
-            !billingAddressOverride.cityOrTown ||
-            !billingAddressOverride.postalOrZipCode ||
-            !billingAddressOverride.countryCode))
+        !agreeWithTerms ||
+        !agreePOAuthorization ||
+        isPoNumberMissing ||
+        !!nameError ||
+        !!phoneError ||
+        isBillingContactInvalid ||
+        isBillingAddressInvalid
       ) {
-        setPlaceOrderError(t('please-complete-billing-information'))
+        setPlaceOrderError(
+          !agreeWithTerms ? t('please-agree-to-terms') : t('please-complete-billing-information')
+        )
         return false
       }
       return true
     }
 
-    if (selectedSavedCard) {
-      if (!/^\d{3,4}$/.test(cvv)) {
-        setCvvError(cvv ? t('invalid-cvv') : t('cvv-is-required'))
-        setPlaceOrderError(t('please-complete-card-details'))
-        return false
+    if (placeOrderIssues.length) {
+      setPlaceOrderError('')
+      if (selectedSavedCard) {
+        if (!isSavedCardCvvValid) setCvvError(getSavedCardCvvError(cvv))
+      } else {
+        setCardValidationRequest((count) => count + 1)
       }
-      return true
-    }
-
-    if (!isCardFormValid) {
-      setPlaceOrderError(t('please-complete-card-details'))
-      return false
-    }
-    if (!billingSameAsShipping && !isBillingFormValid) {
-      setPlaceOrderError(t('please-complete-billing-information'))
       return false
     }
     return true
@@ -527,27 +743,12 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       if (!poNumber.trim()) return false
       if (!authorizerName.trim()) return false
       if (!isValidPhoneNumber(authorizerPhone)) return false
-      if (
-        !billingContactSameAsContact &&
-        (!billingContactOverride.firstName ||
-          !billingContactOverride.lastNameOrSurname ||
-          !billingContactOverride.email)
-      ) {
-        return false
-      }
-      if (
-        !billingAddressSameAsShipping &&
-        (!billingAddressOverride.address1 ||
-          !billingAddressOverride.cityOrTown ||
-          !billingAddressOverride.postalOrZipCode ||
-          !billingAddressOverride.countryCode)
-      ) {
-        return false
-      }
+      if (isBillingContactInvalid) return false
+      if (isBillingAddressInvalid) return false
       return true
     }
-    if (selectedSavedCard) return /^\d{3,4}$/.test(cvv)
-    if (!isCardFormValid) return false
+    if (selectedSavedCard) return isSavedCardCvvValid
+    if (isCardholderNameMissing || isCardholderNameInvalid || !isCardFormValid) return false
     if (!billingSameAsShipping && !isBillingFormValid) return false
     return true
   }, [
@@ -562,7 +763,10 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
     billingAddressSameAsShipping,
     billingAddressOverride,
     selectedSavedCard,
+    cardholderName,
     cvv,
+    isCardholderNameMissing,
+    isCardholderNameInvalid,
     isCardFormValid,
     billingSameAsShipping,
     isBillingFormValid,
@@ -608,7 +812,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
   }
 
   return (
-    <Stack gap={5} data-testid="account-checkout-step">
+    <Stack ref={stepRef} gap={5} data-testid="account-checkout-step">
       {isB2BUser && (
         <Stack gap={1.5}>
           <Typography sx={{ fontWeight: 600, fontSize: '18px', color: checkoutColors.subtitle }}>
@@ -620,7 +824,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
               title={t('credit-card')}
               description={t('card-payment-description')}
               selected={!isPurchaseOrder}
-              onClick={() => setSelectedOption(PaymentType.CREDITCARD)}
+              onClick={() => handleSelectOption(PaymentType.CREDITCARD)}
             />
             <PaymentOptionCard
               icon={<RequestQuoteOutlinedIcon />}
@@ -629,7 +833,9 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
               selected={isPurchaseOrder}
               disabled={!isPOEnabled}
               tooltip={isPOEnabled ? undefined : t('po-not-enabled-tooltip')}
-              onClick={isPOEnabled ? () => setSelectedOption(PaymentType.PURCHASEORDER) : undefined}
+              onClick={
+                isPOEnabled ? () => handleSelectOption(PaymentType.PURCHASEORDER) : undefined
+              }
             />
           </Stack>
         </Stack>
@@ -705,12 +911,16 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                 setPoNumber(value)
                 setPoNumberError('')
               }}
+              onBlur={() => {
+                if (!poNumber.trim()) setPoNumberError(t('this-field-is-required'))
+              }}
             />
             <FormControlLabel
               control={
                 <Checkbox
                   checked={agreePOAuthorization}
                   onChange={(_e, checked) => handlePOAuthorizationChange(checked)}
+                  color={poAuthorizationError ? 'error' : 'primary'}
                   inputProps={{ 'aria-label': 'poAuthorization' }}
                 />
               }
@@ -722,7 +932,10 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                   </Typography>
                 </>
               }
-              sx={{ ...checkoutCheckboxLabelSx }}
+              sx={{
+                ...checkoutCheckboxLabelSx,
+                ...(poAuthorizationError && { color: 'error.main' }),
+              }}
             />
             <Stack direction={{ xs: 'column', sm: 'row' }} gap={2}>
               <KiboTextBox
@@ -736,6 +949,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                   setAuthorizerName(value)
                   setAuthorizerNameError(getAuthorizerNameError(value))
                 }}
+                onBlur={() => setAuthorizerNameError(getAuthorizerNameError(authorizerName))}
               />
               <KiboPhoneInput
                 value={authorizerPhone}
@@ -748,6 +962,7 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                   setAuthorizerPhone(value)
                   setAuthorizerPhoneError(getAuthorizerPhoneError(value))
                 }}
+                onBlur={() => setAuthorizerPhoneError(getAuthorizerPhoneError(authorizerPhone))}
               />
             </Stack>
             <KiboTextBox
@@ -760,7 +975,11 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
       )}
 
       {isShippingLocked ? (
-        <ContactShippingSummary checkout={checkout} onEdit={() => setPhase('shipping')} />
+        <ContactShippingSummary
+          checkout={checkout}
+          onEdit={() => setPhase('shipping')}
+          preferredShippingMethodLabel={preferredShippingMethodLabel}
+        />
       ) : (
         <ContactShippingForm
           checkout={checkout}
@@ -791,7 +1010,10 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         checked={billingContactSameAsContact}
                         onChange={(_e, checked) => {
                           setBillingContactSameAsContact(checked)
-                          if (checked) setPlaceOrderError('')
+                          if (checked) {
+                            setPlaceOrderError('')
+                            setBillingContactTouched({})
+                          }
                         }}
                         inputProps={{ 'aria-label': t('same-as-contact') }}
                       />
@@ -825,9 +1047,14 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         value={billingContactOverride.firstName}
                         label={t('first-name')}
                         required
+                        error={billingContactTouched.firstName && !!billingContactErrors.firstName}
+                        helperText={
+                          billingContactTouched.firstName ? billingContactErrors.firstName : ''
+                        }
                         onChange={(_name, value) =>
                           setBillingContactOverride((prev) => ({ ...prev, firstName: value }))
                         }
+                        onBlur={() => markBillingContactTouched('firstName')}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -835,12 +1062,22 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         value={billingContactOverride.lastNameOrSurname}
                         label={t('last-name-or-sur-name')}
                         required
+                        error={
+                          billingContactTouched.lastNameOrSurname &&
+                          !!billingContactErrors.lastNameOrSurname
+                        }
+                        helperText={
+                          billingContactTouched.lastNameOrSurname
+                            ? billingContactErrors.lastNameOrSurname
+                            : ''
+                        }
                         onChange={(_name, value) =>
                           setBillingContactOverride((prev) => ({
                             ...prev,
                             lastNameOrSurname: value,
                           }))
                         }
+                        onBlur={() => markBillingContactTouched('lastNameOrSurname')}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -848,18 +1085,25 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         value={billingContactOverride.email}
                         label={t('invoice-email')}
                         required
+                        error={billingContactTouched.email && !!billingContactErrors.email}
+                        helperText={billingContactTouched.email ? billingContactErrors.email : ''}
                         onChange={(_name, value) =>
                           setBillingContactOverride((prev) => ({ ...prev, email: value }))
                         }
+                        onBlur={() => markBillingContactTouched('email')}
                       />
                     </Grid>
                     <Grid item xs={12}>
                       <KiboPhoneInput
                         value={billingContactOverride.phone}
                         label={t('phone-number-home')}
+                        required
+                        error={billingContactTouched.phone && !!billingContactErrors.phone}
+                        helperText={billingContactTouched.phone ? billingContactErrors.phone : ''}
                         onChange={(_name, value) =>
                           setBillingContactOverride((prev) => ({ ...prev, phone: value }))
                         }
+                        onBlur={() => markBillingContactTouched('phone')}
                       />
                     </Grid>
                   </Grid>
@@ -879,7 +1123,15 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         checked={billingAddressSameAsShipping}
                         onChange={(_e, checked) => {
                           setBillingAddressSameAsShipping(checked)
-                          if (checked) setPlaceOrderError('')
+                          if (checked) {
+                            setPlaceOrderError('')
+                            setBillingAddressTouched({})
+                          } else {
+                            setBillingAddressOverride((prev) => ({
+                              ...prev,
+                              countryCode: prev.countryCode || countries?.[0]?.code || '',
+                            }))
+                          }
                         }}
                         inputProps={{ 'aria-label': t('same-as-shipping') }}
                       />
@@ -925,12 +1177,22 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         value={billingAddressOverride.companyOrOrganization}
                         label={t('company-or-organization')}
                         required
+                        error={
+                          billingAddressTouched.companyOrOrganization &&
+                          !!billingAddressErrors.companyOrOrganization
+                        }
+                        helperText={
+                          billingAddressTouched.companyOrOrganization
+                            ? billingAddressErrors.companyOrOrganization
+                            : ''
+                        }
                         onChange={(_name, value) =>
                           setBillingAddressOverride((prev) => ({
                             ...prev,
                             companyOrOrganization: value,
                           }))
                         }
+                        onBlur={() => markBillingAddressTouched('companyOrOrganization')}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -938,9 +1200,14 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         value={billingAddressOverride.address1}
                         label={t('street-address-1')}
                         required
+                        error={billingAddressTouched.address1 && !!billingAddressErrors.address1}
+                        helperText={
+                          billingAddressTouched.address1 ? billingAddressErrors.address1 : ''
+                        }
                         onChange={(_name, value) =>
                           setBillingAddressOverride((prev) => ({ ...prev, address1: value }))
                         }
+                        onBlur={() => markBillingAddressTouched('address1')}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -958,9 +1225,16 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         label={t('country-code')}
                         value={billingAddressOverride.countryCode}
                         required
+                        error={
+                          billingAddressTouched.countryCode && !!billingAddressErrors.countryCode
+                        }
+                        helperText={
+                          billingAddressTouched.countryCode ? billingAddressErrors.countryCode : ''
+                        }
                         onChange={(_name, value) =>
                           setBillingAddressOverride((prev) => ({ ...prev, countryCode: value }))
                         }
+                        onBlur={() => markBillingAddressTouched('countryCode')}
                       >
                         {countries?.map((country: { name: string; code: string }) => (
                           <MenuItem key={country.code} value={country.code}>
@@ -975,12 +1249,23 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         label={t('state-or-province')}
                         value={billingAddressOverride.stateOrProvince}
                         options={provinces}
+                        required
+                        error={
+                          billingAddressTouched.stateOrProvince &&
+                          !!billingAddressErrors.stateOrProvince
+                        }
+                        helperText={
+                          billingAddressTouched.stateOrProvince
+                            ? billingAddressErrors.stateOrProvince
+                            : ''
+                        }
                         onChange={(_name, value) =>
                           setBillingAddressOverride((prev) => ({
                             ...prev,
                             stateOrProvince: value,
                           }))
                         }
+                        onBlur={() => markBillingAddressTouched('stateOrProvince')}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -988,9 +1273,16 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         value={billingAddressOverride.cityOrTown}
                         label={t('city-or-town')}
                         required
+                        error={
+                          billingAddressTouched.cityOrTown && !!billingAddressErrors.cityOrTown
+                        }
+                        helperText={
+                          billingAddressTouched.cityOrTown ? billingAddressErrors.cityOrTown : ''
+                        }
                         onChange={(_name, value) =>
                           setBillingAddressOverride((prev) => ({ ...prev, cityOrTown: value }))
                         }
+                        onBlur={() => markBillingAddressTouched('cityOrTown')}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -998,12 +1290,23 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                         value={billingAddressOverride.postalOrZipCode}
                         label={t('postal-or-zip-code')}
                         required
+                        error={
+                          billingAddressTouched.postalOrZipCode &&
+                          !!billingAddressErrors.postalOrZipCode
+                        }
+                        helperText={
+                          billingAddressTouched.postalOrZipCode
+                            ? billingAddressErrors.postalOrZipCode
+                            : ''
+                        }
+                        inputProps={{ maxLength: 10 }}
                         onChange={(_name, value) =>
                           setBillingAddressOverride((prev) => ({
                             ...prev,
-                            postalOrZipCode: value,
+                            postalOrZipCode: value.replace(/[^0-9-]/g, ''),
                           }))
                         }
+                        onBlur={() => markBillingAddressTouched('postalOrZipCode')}
                       />
                     </Grid>
                   </Grid>
@@ -1038,16 +1341,26 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                 )}
                 {selectedSavedCard ? (
                   <KiboTextBox
+                    type="password"
                     value={cvv}
                     label={t('cvv-code')}
-                    placeholder={t('cvv-placeholder')}
+                    placeholder={t(
+                      savedCardCvvLength === 4 ? 'cvv-placeholder-4' : 'cvv-placeholder-3'
+                    )}
                     required
                     error={!!cvvError}
                     helperText={cvvError}
+                    inputProps={{ maxLength: savedCardCvvLength }}
                     onChange={(_name, value) => {
-                      setCvv(value.replace(/\D/g, '').slice(0, 4))
-                      setCvvError('')
+                      const sanitizedValue = value.replace(/\D/g, '').slice(0, savedCardCvvLength)
+                      setCvv(sanitizedValue)
+                      setCvvError(sanitizedValue ? getSavedCardCvvError(sanitizedValue) : '')
                       setPlaceOrderError('')
+                    }}
+                    onBlur={() => {
+                      const error = getSavedCardCvvError(cvv)
+                      if (cvv && error) setCvv('')
+                      setCvvError(error)
                     }}
                   />
                 ) : (
@@ -1055,12 +1368,30 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
                     <KiboTextBox
                       value={cardholderName}
                       label={t('cardholder-name')}
-                      onChange={(_name, value) => setCardholderName(value)}
+                      required
+                      error={
+                        (showPlaceOrderIssues || isCardholderNameTouched) &&
+                        (isCardholderNameMissing || isCardholderNameInvalid)
+                      }
+                      helperText={
+                        (showPlaceOrderIssues || isCardholderNameTouched) && isCardholderNameMissing
+                          ? t('cardholder-name-required')
+                          : (showPlaceOrderIssues || isCardholderNameTouched) &&
+                            isCardholderNameInvalid
+                          ? t('cardholder-name-invalid')
+                          : ''
+                      }
+                      inputProps={{ maxLength: CARDHOLDER_NAME_MAX_LENGTH }}
+                      onChange={(_name, value) =>
+                        setCardholderName(value.slice(0, CARDHOLDER_NAME_MAX_LENGTH))
+                      }
+                      onBlur={() => setIsCardholderNameTouched(true)}
                     />
                     <CardDetailsForm
                       validateForm={false}
                       fullWidth
                       showCardTypeIcon={false}
+                      validationRequest={cardValidationRequest}
                       onSaveCardData={(cardData) => setCardFormData(cardData)}
                       onFormStatusChange={(isValid, cardData) => {
                         setIsCardFormValid(isValid)
@@ -1192,6 +1523,12 @@ const AccountCheckoutStep = (props: AccountCheckoutStepProps) => {
             )}
           </Stack>
 
+          {showPlaceOrderIssues &&
+            placeOrderIssues.map((issue) => (
+              <Typography key={issue} sx={{ color: 'error.main', fontSize: '14px' }}>
+                {issue}
+              </Typography>
+            ))}
           {placeOrderError && (
             <Typography sx={{ color: 'error.main', fontSize: '14px' }}>
               {placeOrderError}

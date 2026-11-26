@@ -14,6 +14,7 @@ import {
   isCardNumberValid,
   isCardTypeValid,
   getCreditCardLogo,
+  getCvvLength,
 } from '@/lib/helpers/credit-card'
 import type { CardForm } from '@/lib/types'
 
@@ -23,6 +24,7 @@ export interface CardDetailsFormProps {
   showCvv?: boolean
   fullWidth?: boolean
   showCardTypeIcon?: boolean
+  validationRequest?: number
   onSaveCardData: (cardData: CardForm) => void
   onFormStatusChange?: (status: boolean, formData?: CardForm) => void
 }
@@ -34,20 +36,20 @@ const StyledCardDiv = styled('div', {
   paddingLeft: '0.5rem',
 }))
 
-const cardInputSx = {
+const getCardInputSx = (error: boolean) => ({
   height: '44px',
   borderRadius: '8px',
   borderColor: '#C9C8D9',
   transition: 'border-color 0.2s, box-shadow 0.2s',
   '&:hover': { borderColor: '#30299A' },
   '&.MuiInputBase-root:focus-within': {
-    borderColor: '#30299A',
-    boxShadow: '0 0 0 3px rgba(48, 41, 154, 0.15)',
+    borderColor: error ? 'error.main' : '#30299A',
+    boxShadow: error ? '0 0 0 3px rgba(211, 47, 47, 0.15)' : '0 0 0 3px rgba(48, 41, 154, 0.15)',
   },
   '&.Mui-error': { borderColor: 'error.main' },
   '& .MuiInputBase-input': { padding: '0 14px', letterSpacing: '0.02em' },
   '& .MuiInputBase-input::placeholder': { color: '#8C8BA3', opacity: 1 },
-}
+})
 
 const useCardSchema = (showCvv: boolean) => {
   const { t } = useTranslation('common')
@@ -67,11 +69,25 @@ const useCardSchema = (showCvv: boolean) => {
     expiryDate: yup
       .string()
       .required(t('expiry-date-required'))
-      .matches(/^(0?[1-9]|1[0-2])[/]\d{4}$/g, t('invalid-expiry-date-format'))
+      .matches(/^(0?[1-9]|1[0-2])[/]\d{4}$/g, t('invalid-expiry-date'))
       .test('expiry-date', t('invalid-expiry-date'), (value) => validateExpiryDate(value)),
     cvv: yup.string().when('$isEdit', (isEdit, schema) => {
       if (!isEdit && showCvv) {
-        return schema.required(t('cvv-is-required')).matches(/^\d{3,4}$/g, t('invalid-cvv'))
+        return schema
+          .required(t('cvv-is-required'))
+          .matches(/^\d+$/g, t('invalid-cvv'))
+          .test('cvv-length', function (this: yup.TestContext, value?: string) {
+            const expectedLength = getCvvLength(this.parent.cardNumber)
+            if (!value) return true
+            if (expectedLength ? value.length === expectedLength : /^\d{3,4}$/.test(value)) {
+              return true
+            }
+            return this.createError({
+              message: expectedLength
+                ? t('invalid-cvv-length', { count: expectedLength })
+                : t('invalid-cvv'),
+            })
+          })
       }
     }),
   })
@@ -82,6 +98,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
     showCvv = true,
     fullWidth = false,
     showCardTypeIcon = true,
+    validationRequest,
     onSaveCardData,
     onFormStatusChange,
     cardValue,
@@ -94,6 +111,8 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
     formState: { errors, isValid },
     control,
     handleSubmit,
+    getValues,
+    trigger,
   } = useForm({
     mode: 'onBlur',
     reValidateMode: 'onBlur',
@@ -104,6 +123,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
   })
 
   const watchedFormData = useWatch({ control })
+  const expectedCvvLength = getCvvLength(watchedFormData?.cardNumber)
 
   const onValid = async (formData: CardForm) => {
     const cardData = prepareCardDataParams(formData)
@@ -133,6 +153,10 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
     }
   }, [isValid, validateForm, watchedFormData])
 
+  useEffect(() => {
+    if (validationRequest) trigger()
+  }, [validationRequest, trigger])
+
   return (
     <StyledCardDiv data-testid="card-details" fullWidth={fullWidth} sx={{ ml: 0, pl: 0 }}>
       <FormControl sx={{ width: '100%' }}>
@@ -147,12 +171,15 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                   value={field.value || ''}
                   label={t('card-number')}
                   required={true}
-                  sx={cardInputSx}
+                  sx={getCardInputSx(!!errors?.cardNumber)}
                   onChange={(_name, value) => {
-                    const sanitizedValue = value.replace(/\s/g, '')
+                    const sanitizedValue = value.replace(/\D/g, '').substring(0, 19)
                     handleCardType(field, sanitizedValue)
                   }}
-                  onBlur={field.onBlur}
+                  onBlur={() => {
+                    field.onBlur()
+                    if (getValues('cvv')) trigger('cvv')
+                  }}
                   error={!!errors?.cardNumber}
                   helperText={errors?.cardNumber?.message as unknown as string}
                   {...(showCardTypeIcon && {
@@ -163,7 +190,6 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                     ),
                   })}
                   {...(cardValue && { disabled: true })}
-                  inputProps={{ maxLength: 16 }}
                 />
               )}
             />
@@ -183,7 +209,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                   value={field.value || ''}
                   label={t('expires-mm-yyyy')}
                   placeholder={t('expiry-date-placeholder')}
-                  sx={cardInputSx}
+                  sx={getCardInputSx(!!errors?.expiryDate)}
                   required={true}
                   onChange={(_name, value) => {
                     const previous = field.value || ''
@@ -245,14 +271,28 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                         type="password"
                         value={field.value || ''}
                         label={t('cvv-code')}
-                        placeholder={t('cvv-placeholder')}
+                        placeholder={
+                          expectedCvvLength === 4
+                            ? t('cvv-placeholder-4')
+                            : expectedCvvLength === 3
+                            ? t('cvv-placeholder-3')
+                            : t('cvv-placeholder-unknown')
+                        }
                         required={true}
-                        sx={cardInputSx}
+                        sx={getCardInputSx(!!errors?.cvv)}
                         onChange={(_name, value) => {
                           const sanitizedValue = value.replace(/\D/g, '').substring(0, 4)
                           field.onChange(sanitizedValue)
                         }}
-                        onBlur={field.onBlur}
+                        onBlur={() => {
+                          const value = field.value || ''
+                          const expectedLength = getCvvLength(getValues('cardNumber'))
+                          const isValidLength = expectedLength
+                            ? value.length === expectedLength
+                            : /^\d{3,4}$/.test(value)
+                          if (value && !isValidLength) field.onChange('')
+                          field.onBlur()
+                        }}
                         error={!!errors?.cvv}
                         inputProps={{ maxLength: 4 }}
                         helperText={errors?.cvv?.message as unknown as string}

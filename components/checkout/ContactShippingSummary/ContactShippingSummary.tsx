@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { Box, Stack, Typography } from '@mui/material'
 import { useTranslation } from 'next-i18next'
 
 import { checkoutColors } from '@/components/checkout/checkoutStyles'
+import { useGetCurrentCustomer } from '@/hooks'
 import { orderGetters } from '@/lib/getters'
 
 import type { CrOrder } from '@/lib/gql/types'
@@ -11,16 +12,57 @@ import type { CrOrder } from '@/lib/gql/types'
 export interface ContactShippingSummaryProps {
   checkout: CrOrder
   onEdit: () => void
+  preferredShippingMethodLabel?: string
 }
 
 // Read-only "already collected" view of the contact & shipping details - shown once the
 // shopper has moved past that step, in both guest checkout and the logged-in PO checkout.
 const ContactShippingSummary = (props: ContactShippingSummaryProps) => {
-  const { checkout, onEdit } = props
+  const { checkout, onEdit, preferredShippingMethodLabel } = props
   const { t } = useTranslation('common')
   const contact = orderGetters.getShippingContact(checkout)
-  const shippingMethodName = orderGetters.getShippingMethodName(checkout)
   const address = contact?.address
+
+  const { data: customerAccount } = useGetCurrentCustomer()
+  const [freshPreferenceLabel, setFreshPreferenceLabel] = useState<string | undefined>(undefined)
+
+  useEffect(() => {
+    const fetchPreference = async () => {
+      if (!customerAccount?.id || !customerAccount?.userId) return
+      const payload = {
+        userId: customerAccount.userId,
+        accountId: customerAccount.id,
+        attributeFqn: 'tenant~shipping-method',
+      }
+      const entityResponse = await fetch('/api/user/getCustomerAttribute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payload }),
+      })
+      const attributeDetails = await entityResponse.json()
+      const resolvedValue: string = attributeDetails?.data?.values?.[0] ?? ''
+      const label = resolvedValue.includes('FedEx Account')
+        ? "Customer's FedEx Account"
+        : resolvedValue.includes('UPS Account')
+        ? "Customer's UPS Account"
+        : undefined
+      setFreshPreferenceLabel(label)
+    }
+    fetchPreference()
+  }, [checkout?.id, customerAccount?.id, customerAccount?.userId])
+
+  // If the shopper hasn't manually chosen a method for this specific order, the freshly-fetched
+  // account preference is more trustworthy than the order's own saved fulfillmentInfo, which can
+  // still be carrying a value applied before the preference cache had a chance to catch up (see
+  // the auto-apply effect in ShippingMethod.tsx for the full story). Once a manual choice is
+  // recorded for this order, always defer to what's actually saved on it instead.
+  const hasManuallySelectedForThisOrder = checkout?.id
+    ? sessionStorage.getItem(`preferenceApplied:${checkout.id}`) === '1'
+    : false
+  const shippingMethodName =
+    (!hasManuallySelectedForThisOrder && freshPreferenceLabel) ||
+    orderGetters.getShippingMethodName(checkout) ||
+    preferredShippingMethodLabel
 
   return (
     <Stack gap={1.5}>
