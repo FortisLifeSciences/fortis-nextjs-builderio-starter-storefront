@@ -111,7 +111,7 @@ async function getLinkedProducts(product: any, attributeFQNs: string[]) {
   const linkedProducts = await Promise.all(
     codes.map(async (code) => {
       try {
-        const linkedProduct = await getProductByAnyCode(code)
+        const linkedProduct = await getProductByAnyCode(code, product?.productCode)
         if (!linkedProduct) {
           console.warn(`No linked product found for code: ${code}`)
           return null
@@ -168,7 +168,7 @@ export async function getStaticProps(
     for (const data of relatedProductCodes) {
       let product = null
       try {
-        product = await getProductByAnyCode(data)
+        product = await getProductByAnyCode(data, productCode)
       } catch (error) {
         console.error(`Failed to fetch related product: ${data}`, error)
       }
