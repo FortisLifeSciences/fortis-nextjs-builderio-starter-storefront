@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
 import { FilterList } from '@mui/icons-material'
 import { Box, Button, IconButton, useMediaQuery } from '@mui/material'
@@ -62,12 +62,21 @@ const ResourcesHitComponent = ({ categoryCode }: { categoryCode: string }) => {
 
   const [isFilterOpen, setIsFilterOpen] = useState(false)
 
+  const shouldScrollToResults = useRef(false)
+
+  useEffect(() => {
+    if (isFilterOpen || !shouldScrollToResults.current) return
+
+    shouldScrollToResults.current = false
+    document.getElementById('product-listing-section')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+  }, [isFilterOpen])
+
   const onFilterByClose = () => {
+    shouldScrollToResults.current = true
     setIsFilterOpen(false)
-    const resultsSection = document.getElementById('product-listing-section')
-    if (resultsSection) {
-      resultsSection.scrollIntoView({ behavior: 'smooth' })
-    }
   }
 
   function FallbackComponent({ attribute }: { attribute: string }) {
