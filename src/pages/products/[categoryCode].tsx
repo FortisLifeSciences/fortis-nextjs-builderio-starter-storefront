@@ -526,6 +526,7 @@ const CategoryPage: NextPage<CategoryPageType> = (props) => {
       />
 
       <InstantSearch
+        key={categoryCode}
         searchClient={instantSearchClient}
         indexName="products"
         insights={
