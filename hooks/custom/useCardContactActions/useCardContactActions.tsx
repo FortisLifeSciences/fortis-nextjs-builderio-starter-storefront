@@ -30,13 +30,15 @@ export const useCardContactActions = (accountId: number, customerUserId?: string
     } else {
       response = await createCustomerAddress.mutateAsync(address)
     }
-
+    const contactId = response?.id ?? address.contactId
+    if (!contactId) {
+      throw new Error('Billing contact save did not return a contact ID')
+    }
     const params = {
       accountId: card.accountId,
       cardId: card.cardId,
-      cardInput: card.cardInput,
+      cardInput: { ...card.cardInput, contactId },
     }
-    params.cardInput.contactId = response.id
 
     // Add update card
     if (card.cardId) {

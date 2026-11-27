@@ -2,6 +2,7 @@
 
 // address
 export * from './queries/address/useGetCustomerAddresses/useGetCustomerAddresses'
+export * from './queries/address/useGetCustomerAccountContact/useGetCustomerAccountContact'
 
 // card
 export * from './queries/card/useGetCards/useGetCards'
