@@ -2,35 +2,53 @@ import { GetServerSideProps } from 'next'
 
 import redirectsData from '@/customRedirects/redirects.json'
 import { apiAuthClient } from '@/lib/api/util/api-auth-client'
+import { getCachedSitemap, setCachedSitemap } from '@/lib/sitemapCache'
 
-import { Product } from '@/lib/gql/types'
+import { Product, ProductSearchResult } from '@/lib/gql/types'
 //type definitiion for redirect entries
 interface RedirectEntry {
   source: string
   destination: string
 }
 
+const CACHE_CONTROL = 'public, s-maxage=86400, stale-while-revalidate=604800, stale-if-error=604800'
+const KIBO_REQUEST_TIMEOUT_MS = 10_000
+
 // Fetch data using cursor
 
-async function fetchCursorsData(cursorMark: any) {
-  const authToken = await apiAuthClient.getAccessToken()
-  const baseUrl = process.env.KIBO_API_HOST
-  const url = `https://${baseUrl}/api/commerce/catalog/storefront/productsearch/search?collapse=true&pageSize=200&enableSearchTuningRules=true&cursorMark=${cursorMark}&includeAllImages=false&spellcorrectOverride=Default&useSubscriptionPricing=false`
-
+async function fetchCursorsData(cursorMark: string): Promise<ProductSearchResult | null> {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), KIBO_REQUEST_TIMEOUT_MS)
   try {
+    const authToken = await apiAuthClient.getAccessToken()
+    const baseUrl = process.env.KIBO_API_HOST
+    const url = `https://${baseUrl}/api/commerce/catalog/storefront/productsearch/search?collapse=true&pageSize=200&enableSearchTuningRules=true&cursorMark=${cursorMark}&includeAllImages=false&spellcorrectOverride=Default&useSubscriptionPricing=false`
     const response = await fetch(url, {
       method: 'GET',
+      signal: controller.signal,
       headers: {
         accept: 'application/json',
         'content-type': 'application/json',
         authorization: `Bearer ${authToken}`,
       },
     })
+    if (!response.ok) {
+      console.error(`Product sitemap API returned ${response.status} for cursor ${cursorMark}`)
+      return null
+    }
+
     const data = await response.json()
-    return { response: data }
+    if (!Array.isArray(data?.items) || data.items.length === 0 || data?.errors?.length) {
+      console.error(`Product sitemap API returned an invalid response for cursor ${cursorMark}`)
+      return null
+    }
+
+    return data as ProductSearchResult
   } catch (error) {
-    console.error('Error in getting cursor', error)
-    return { error }
+    console.error(`Error fetching product sitemap batch for cursor ${cursorMark}`, error)
+    return null
+  } finally {
+    clearTimeout(timeout)
   }
 }
 
@@ -135,30 +153,39 @@ function SiteMap() {
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ res, query }) => {
-  if (typeof query.productBatchId?.[0] === 'string') {
-    const cursorMark = query.productBatchId[0]
+  const cursorMark = query.productBatchId?.[0]
+  if (typeof cursorMark !== 'string') {
+    res.statusCode = 400
+    res.end()
+    return { props: {} }
+  }
 
-    const productBatch = await fetchCursorsData(cursorMark)
-    const sitemap = generateSiteMap(productBatch?.response)
+  const cacheKey = `sitemap:productBatch:${cursorMark}`
+  res.setHeader('Content-Type', 'application/xml')
+  res.setHeader('Cache-Control', CACHE_CONTROL)
 
-    res.setHeader('Content-Type', 'text/xml')
-    // we send the XML to the browser
+  const productBatch = await fetchCursorsData(cursorMark)
+  if (productBatch) {
+    const sitemap = generateSiteMap(productBatch)
+    await setCachedSitemap(cacheKey, sitemap)
     res.write(sitemap)
     res.end()
-
-    return {
-      props: {},
-    }
-  } else {
-    res.setHeader('Content-Type', 'text/xml')
-    // we send the XML to the browser
-    res.write('')
-    res.end()
-
-    return {
-      props: {},
-    }
+    return { props: {} }
   }
+
+  const cached = await getCachedSitemap(cacheKey)
+  if (cached) {
+    res.write(cached)
+    res.end()
+    return { props: {} }
+  }
+
+  res.statusCode = 503
+  res.setHeader('Retry-After', '3600')
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+  res.setHeader('Cache-Control', 'no-store')
+  res.end()
+  return { props: {} }
 }
 
 export default SiteMap
