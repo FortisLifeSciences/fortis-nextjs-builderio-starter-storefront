@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import AddIcon from '@mui/icons-material/Add'
 import Delete from '@mui/icons-material/Delete'
@@ -11,7 +11,7 @@ import { AddressForm, KiboPagination, AddressCard, KiboRadio } from '@/component
 import PaymentBillingCard from '@/components/common/PaymentBillingCard/PaymentBillingCard'
 import { ConfirmationDialog } from '@/components/dialogs'
 import { accountActionButton, accountTextButton } from '@/components/my-account/common'
-import { useModalContext } from '@/context'
+import { useModalContext, useSnackbarContext } from '@/context'
 import { useDeleteCustomerCard, useDeleteCustomerAddress } from '@/hooks'
 import { DisplayMode, AddressType } from '@/lib/constants'
 import { addressGetters, cardGetters, userGetters } from '@/lib/getters'
@@ -116,6 +116,7 @@ const PaymentMethod = (props: PaymentMethodProps) => {
   const { t } = useTranslation('common')
 
   const { showModal } = useModalContext()
+  const { showSnackbar } = useSnackbarContext()
   const { publicRuntimeConfig } = getConfig()
   const paymentMethodPageSize = publicRuntimeConfig?.paymentMethodPageSize
 
@@ -148,10 +149,17 @@ const PaymentMethod = (props: PaymentMethodProps) => {
   const [isDefaultPaymentMethod, setIsDefaultPaymentMethod] = useState<boolean>(() =>
     initialCard ? cardGetters.getIsDefaultPayMethod(initialCard.cardInfo) : false
   )
+  const initializedCardId = useRef(
+    initialCard ? cardGetters.getCardId(initialCard.cardInfo) : undefined
+  )
 
   useEffect(() => {
     if (!initialCard) return
 
+    const cardId = cardGetters.getCardId(initialCard.cardInfo)
+    if (cardId === initializedCardId.current) return
+
+    initializedCardId.current = cardId
     setCardFormDetails(getCardFormFromSavedCard(initialCard))
     setBillingFormAddress(getBillingAddressFromSavedCard(initialCard))
     setIsDefaultPaymentMethod(cardGetters.getIsDefaultPayMethod(initialCard.cardInfo))
@@ -330,6 +338,7 @@ const PaymentMethod = (props: PaymentMethodProps) => {
     )
     if (!tokenizedCardResponse?.numberPart) {
       console.error('Error: card tokenization did not return a card number part')
+      showSnackbar(String(t('something-went-wrong')), 'error')
       return
     }
 
@@ -358,10 +367,12 @@ const PaymentMethod = (props: PaymentMethodProps) => {
       if (cardGetters.getCardId(cardFormDetails) && cardFormDetails.cardNumber?.includes('*')) {
         handleCardAndBillingAddress().catch((error) => {
           console.error('Error: save payment method', error)
+          showSnackbar(String(t('something-went-wrong')), 'error')
         })
       } else if (cardGetters.getCardNumber(cardFormDetails)) {
         handleTokenization({ ...cardFormDetails }).catch((error) => {
           console.error('Error: save payment method', error)
+          showSnackbar(String(t('something-went-wrong')), 'error')
         })
       }
     }
