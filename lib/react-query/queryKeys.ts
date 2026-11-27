@@ -89,6 +89,8 @@ export const customerAccountContactsKeys = {
   all: ['customerAccountContacts'] as const,
   addressById: (accountId: number, userId?: string) =>
     [...customerAccountContactsKeys.all, accountId, userId] as const,
+  contactById: (accountId: number, contactId?: number) =>
+    [...customerAccountContactsKeys.all, accountId, 'contact', contactId] as const,
 }
 
 export const locationKeys = {

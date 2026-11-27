@@ -179,6 +179,13 @@ export const accountHandlers = [
     return res(ctx.data(userAddressMock))
   }),
 
+  graphql.query('GetCustomerAccountContact', (req, res, ctx) => {
+    const contact = userAddressMock.customerAccountContacts.items?.find(
+      (item) => item?.id === req.variables.contactId
+    )
+    return res(ctx.data({ customerAccountContact: contact }))
+  }),
+
   graphql.mutation('createCustomerAccountContact', (_req, res, ctx) => {
     return res(ctx.data({ ...mockCreateCustomerAccount }))
   }),

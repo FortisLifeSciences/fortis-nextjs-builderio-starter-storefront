@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import AddIcon from '@mui/icons-material/Add'
 import Delete from '@mui/icons-material/Delete'
@@ -11,7 +11,7 @@ import { AddressForm, KiboPagination, AddressCard, KiboRadio } from '@/component
 import PaymentBillingCard from '@/components/common/PaymentBillingCard/PaymentBillingCard'
 import { ConfirmationDialog } from '@/components/dialogs'
 import { accountActionButton, accountTextButton } from '@/components/my-account/common'
-import { useModalContext } from '@/context'
+import { useModalContext, useSnackbarContext } from '@/context'
 import { useDeleteCustomerCard, useDeleteCustomerAddress } from '@/hooks'
 import { DisplayMode, AddressType } from '@/lib/constants'
 import { addressGetters, cardGetters, userGetters } from '@/lib/getters'
@@ -42,7 +42,11 @@ interface PaymentMethodProps {
   displayMode?: 'Edit' | 'AddNew'
   isAddressFormInDialog?: boolean
   initialCard?: PaymentAndBilling
-  onSave: (address: BillingAddress, card: CardType, isUpdatingAddress: boolean) => void
+  onSave: (
+    address: BillingAddress,
+    card: CardType,
+    isUpdatingAddress: boolean
+  ) => Promise<void> | void
   onClose?: () => void
 }
 
@@ -95,7 +99,7 @@ const getBillingAddressFromSavedCard = (cardAndAddressDetails: PaymentAndBilling
   ...initialBillingAddressData,
   contact: cardAndAddressDetails.billingAddressInfo?.contact as ContactForm,
   isAddressValid: true,
-  isDataUpdated: true,
+  isDataUpdated: false,
 })
 
 const PaymentMethod = (props: PaymentMethodProps) => {
@@ -112,6 +116,7 @@ const PaymentMethod = (props: PaymentMethodProps) => {
   const { t } = useTranslation('common')
 
   const { showModal } = useModalContext()
+  const { showSnackbar } = useSnackbarContext()
   const { publicRuntimeConfig } = getConfig()
   const paymentMethodPageSize = publicRuntimeConfig?.paymentMethodPageSize
 
@@ -137,36 +142,70 @@ const PaymentMethod = (props: PaymentMethodProps) => {
   const [isAddingNewPayment, setIsAddingNewPayment] = useState<boolean>(
     displayMode === DisplayMode.ADDNEW
   )
-  const [showBillingFormAddress, setShowBillingFormAddress] = useState<boolean>(false)
+  const [showBillingFormAddress, setShowBillingFormAddress] = useState<boolean>(
+    Boolean(initialCard)
+  )
 
   const [isDefaultPaymentMethod, setIsDefaultPaymentMethod] = useState<boolean>(() =>
     initialCard ? cardGetters.getIsDefaultPayMethod(initialCard.cardInfo) : false
   )
+  const initializedCardId = useRef(
+    initialCard ? cardGetters.getCardId(initialCard.cardInfo) : undefined
+  )
+
+  useEffect(() => {
+    if (!initialCard) return
+
+    const cardId = cardGetters.getCardId(initialCard.cardInfo)
+    if (cardId === initializedCardId.current) return
+
+    initializedCardId.current = cardId
+    setCardFormDetails(getCardFormFromSavedCard(initialCard))
+    setBillingFormAddress(getBillingAddressFromSavedCard(initialCard))
+    setIsDefaultPaymentMethod(cardGetters.getIsDefaultPayMethod(initialCard.cardInfo))
+    setShowBillingFormAddress(true)
+  }, [initialCard])
 
   const handleCardFormData = (cardData: CardForm) => {
-    setCardFormDetails({
-      ...cardFormDetails,
+    setCardFormDetails((currentDetails) => ({
+      ...currentDetails,
       ...cardData,
-    })
+    }))
   }
 
   const handleBillingFormAddress = (address: Address) => {
-    setBillingFormAddress({ ...address })
+    setBillingFormAddress((currentAddress) => ({
+      ...currentAddress,
+      ...address,
+      contact: {
+        ...currentAddress.contact,
+        ...address.contact,
+        id: address.contact.id ?? currentAddress.contact.id,
+        address: {
+          ...currentAddress.contact.address,
+          ...address.contact.address,
+        },
+        phoneNumbers: {
+          ...currentAddress.contact.phoneNumbers,
+          ...address.contact.phoneNumbers,
+        },
+      },
+    }))
   }
 
   const handleCardFormValidDetails = (isValid: boolean, cardData?: CardForm) => {
-    setCardFormDetails({
-      ...cardFormDetails,
+    setCardFormDetails((currentDetails) => ({
+      ...currentDetails,
       ...cardData,
       isCardDetailsValidated: isValid,
-    })
+    }))
   }
 
   const handleBillingFormValidDetails = (isValid: boolean) => {
-    setBillingFormAddress({
-      ...billingFormAddress,
+    setBillingFormAddress((currentAddress) => ({
+      ...currentAddress,
       isAddressValid: isValid,
-    })
+    }))
   }
 
   const handleAddressRadioSelection = (value: string) => {
@@ -189,6 +228,7 @@ const PaymentMethod = (props: PaymentMethodProps) => {
     setCardFormDetails(getCardFormFromSavedCard(cardAndAddressDetails))
     setBillingFormAddress(getBillingAddressFromSavedCard(cardAndAddressDetails))
     setIsDefaultPaymentMethod(cardGetters.getIsDefaultPayMethod(cardAndAddressDetails.cardInfo))
+    setShowBillingFormAddress(true)
   }
 
   const openDeleteConfirmation = (card: SavedCard) => {
@@ -276,13 +316,14 @@ const PaymentMethod = (props: PaymentMethodProps) => {
       id: cardId ? cardId : tokenizedCardResponse?.id,
       contactId: 0,
       cardType: cardGetters.getCardType(cardFormDetails),
-      cardNumberPart: cardGetters.getCardNumber(cardFormDetails),
+      cardNumberPart:
+        tokenizedCardResponse?.numberPart ?? cardGetters.getCardNumber(cardFormDetails),
       expireMonth: cardGetters.getExpireMonth(cardFormDetails),
       expireYear: cardGetters.getExpireYear(cardFormDetails),
       isDefaultPayMethod: isDefaultPaymentMethod,
     }
 
-    onSave(address, { accountId, cardId, cardInput }, isUpdatingAddress)
+    await onSave(address, { accountId, cardId, cardInput }, isUpdatingAddress)
     cancelAddingNewPaymentMethod()
   }
 
@@ -295,9 +336,13 @@ const PaymentMethod = (props: PaymentMethodProps) => {
       pciHost,
       apiHost
     )
-    if (!tokenizedCardResponse) return
+    if (!tokenizedCardResponse?.numberPart) {
+      console.error('Error: card tokenization did not return a card number part')
+      showSnackbar(String(t('something-went-wrong')), 'error')
+      return
+    }
 
-    handleCardAndBillingAddress(tokenizedCardResponse)
+    await handleCardAndBillingAddress(tokenizedCardResponse)
   }
   const handlePaymentMethodPagination = (value: any) => {
     const { startIndex } = value
@@ -319,10 +364,16 @@ const PaymentMethod = (props: PaymentMethodProps) => {
   // when payment card and billing address info is available, handleTokenization
   useEffect(() => {
     if (isAddingNewPayment && billingFormAddress.isDataUpdated && cardFormDetails.isDataUpdated) {
-      if (cardGetters.getCardId(cardFormDetails)) {
-        handleCardAndBillingAddress()
+      if (cardGetters.getCardId(cardFormDetails) && cardFormDetails.cardNumber?.includes('*')) {
+        handleCardAndBillingAddress().catch((error) => {
+          console.error('Error: save payment method', error)
+          showSnackbar(String(t('something-went-wrong')), 'error')
+        })
       } else if (cardGetters.getCardNumber(cardFormDetails)) {
-        handleTokenization({ ...cardFormDetails })
+        handleTokenization({ ...cardFormDetails }).catch((error) => {
+          console.error('Error: save payment method', error)
+          showSnackbar(String(t('something-went-wrong')), 'error')
+        })
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -424,6 +475,7 @@ const PaymentMethod = (props: PaymentMethodProps) => {
             })}
             validateForm={validateForm}
             showCvv={false}
+            editableCardNumber={Boolean(cardGetters.getCardId(cardFormDetails))}
             onSaveCardData={handleCardFormData}
             onFormStatusChange={(status, data) => handleCardFormValidDetails(status, data)}
           />
@@ -475,6 +527,7 @@ const PaymentMethod = (props: PaymentMethodProps) => {
                   {t('billing-address')}
                 </Typography>
                 <AddressForm
+                  contact={billingFormAddress.contact}
                   setAutoFocus={false}
                   isUserLoggedIn={true}
                   onSaveAddress={handleBillingFormAddress}

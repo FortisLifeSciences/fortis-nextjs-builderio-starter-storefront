@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 import AddIcon from '@mui/icons-material/Add'
-import { Box, Button, NoSsr, Typography } from '@mui/material'
+import { Box, Button, CircularProgress, NoSsr, Typography } from '@mui/material'
 import { useTranslation } from 'next-i18next'
 
 import SavedCardRow from './SavedCardRow'
@@ -14,19 +14,33 @@ import {
   accountType,
 } from '@/components/my-account/common'
 import { useModalContext } from '@/context'
-import { useDeleteCustomerCard, useDeleteCustomerAddress, useUpdateCustomerCard } from '@/hooks'
+import {
+  useDeleteCustomerCard,
+  useDeleteCustomerAddress,
+  useGetCustomerAccountContact,
+  useUpdateCustomerCard,
+} from '@/hooks'
 import { DisplayMode } from '@/lib/constants'
 import { cardGetters, userGetters } from '@/lib/getters'
 import { actions, hasPermission } from '@/lib/helpers'
 import type { BillingAddress, CardType, PaymentAndBilling, SavedCard } from '@/lib/types'
 
-import type { CardCollection, CustomerAccount, CustomerContactCollection } from '@/lib/gql/types'
+import type {
+  CardCollection,
+  CrContact,
+  CustomerAccount,
+  CustomerContactCollection,
+} from '@/lib/gql/types'
 
 interface PaymentTemplateProps {
   user: CustomerAccount
   cards: CardCollection
   contacts: CustomerContactCollection
-  onSave: (address: BillingAddress, card: CardType, isUpdatingAddress: boolean) => void
+  onSave: (
+    address: BillingAddress,
+    card: CardType,
+    isUpdatingAddress: boolean
+  ) => Promise<void> | void
 }
 
 const styles = {
@@ -60,6 +74,62 @@ const PaymentTemplate = (props: PaymentTemplateProps) => {
 
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingCard, setEditingCard] = useState<PaymentAndBilling>()
+  const editingCardId = cardGetters.getCardId(editingCard?.cardInfo)
+  const editingRawCard = cards?.items?.find((card) => card?.id === editingCardId)
+  const rawContactId =
+    editingRawCard?.contactId ??
+    editingCard?.cardInfo?.contactId ??
+    editingCard?.billingAddressInfo?.contact?.id
+
+  const contactId = rawContactId ?? undefined
+  const {
+    data: editingContact,
+    isLoading: isEditingContactLoading,
+    isError: isEditingContactError,
+    isSuccess: isEditingContactSuccess,
+  } = useGetCustomerAccountContact(user.id, contactId)
+
+  const hydratedEditingCard = useMemo(() => {
+    if (!editingCard || !editingContact) return editingCard
+
+    const contact: CrContact = {
+      id: editingContact.id,
+      firstName: editingContact.firstName,
+      middleNameOrInitial: editingContact.middleNameOrInitial,
+      lastNameOrSurname: editingContact.lastNameOrSurname,
+      companyOrOrganization: editingContact.companyOrOrganization,
+      email: editingContact.email,
+      phoneNumbers: editingContact.phoneNumbers
+        ? {
+            home: editingContact.phoneNumbers.home,
+            mobile: editingContact.phoneNumbers.mobile,
+            work: editingContact.phoneNumbers.work,
+          }
+        : undefined,
+      address: editingContact.address
+        ? {
+            address1: editingContact.address.address1,
+            address2: editingContact.address.address2,
+            address3: editingContact.address.address3,
+            address4: editingContact.address.address4,
+            addressType: editingContact.address.addressType,
+            cityOrTown: editingContact.address.cityOrTown,
+            countryCode: editingContact.address.countryCode,
+            isValidated: editingContact.address.isValidated,
+            postalOrZipCode: editingContact.address.postalOrZipCode,
+            stateOrProvince: editingContact.address.stateOrProvince,
+          }
+        : undefined,
+    }
+
+    return {
+      ...editingCard,
+      billingAddressInfo: {
+        ...editingCard.billingAddressInfo,
+        contact,
+      },
+    }
+  }, [editingCard, editingContact])
 
   const openAddCardForm = () => {
     setEditingCard(undefined)
@@ -74,6 +144,7 @@ const PaymentTemplate = (props: PaymentTemplateProps) => {
   const closeCardForm = () => {
     setIsFormOpen(false)
     setEditingCard(undefined)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const savedCardsAndContacts = userGetters.getSavedCardsAndBillingDetails(cards, contacts)
@@ -134,8 +205,12 @@ const PaymentTemplate = (props: PaymentTemplateProps) => {
     }
   }
 
-  const handleSave = (address: BillingAddress, card: CardType, isUpdatingAddress: boolean) => {
-    onSave(address, card, isUpdatingAddress)
+  const handleSave = async (
+    address: BillingAddress,
+    card: CardType,
+    isUpdatingAddress: boolean
+  ) => {
+    await onSave(address, card, isUpdatingAddress)
     closeCardForm()
   }
 
@@ -208,16 +283,28 @@ const PaymentTemplate = (props: PaymentTemplateProps) => {
                   <Typography component="h3" sx={{ ...styles.formTitle }}>
                     {t('card-details')}
                   </Typography>
-                  <PaymentMethod
-                    key={cardGetters.getCardId(editingCard?.cardInfo) || 'new-card'}
-                    user={user}
-                    cards={cards}
-                    contacts={contacts}
-                    displayMode={DisplayMode.ADDNEW}
-                    initialCard={editingCard}
-                    onSave={handleSave}
-                    onClose={closeCardForm}
-                  />
+                  {contactId && isEditingContactLoading ? (
+                    <CircularProgress role="status" />
+                  ) : (
+                    <>
+                      {(isEditingContactError || (isEditingContactSuccess && !editingContact)) &&
+                        !editingCard?.billingAddressInfo?.contact?.id && (
+                          <Typography role="alert" color="error">
+                            {t('something-went-wrong')}
+                          </Typography>
+                        )}
+                      <PaymentMethod
+                        key={cardGetters.getCardId(hydratedEditingCard?.cardInfo) || 'new-card'}
+                        user={user}
+                        cards={cards}
+                        contacts={contacts}
+                        displayMode={DisplayMode.ADDNEW}
+                        initialCard={hydratedEditingCard}
+                        onSave={handleSave}
+                        onClose={closeCardForm}
+                      />
+                    </>
+                  )}
                 </Box>
               )}
             </>

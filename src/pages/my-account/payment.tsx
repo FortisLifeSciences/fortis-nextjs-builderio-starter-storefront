@@ -25,18 +25,17 @@ const PaymentContent = ({ user }: { user: CustomerAccount }) => {
   const { showSnackbar } = useSnackbarContext()
 
   const submitFormWithRecaptcha = useCallback(
-    (address: BillingAddress, card: CardType, isUpdatingAddress: boolean) => {
+    async (address: BillingAddress, card: CardType, isUpdatingAddress: boolean) => {
       if (!executeRecaptcha) return
 
-      executeRecaptcha('enquiryFormSubmit').then(async (gReCaptchaToken: string) => {
-        const captcha = await validateGoogleReCaptcha(gReCaptchaToken)
+      const gRecaptchaToken = await executeRecaptcha('enquiryFormSubmit')
+      const captcha = await validateGoogleReCaptcha(gRecaptchaToken)
 
-        if (captcha?.status === 'success') {
-          await handleSave(address, card, isUpdatingAddress)
-        } else {
-          showSnackbar(captcha.message, 'error')
-        }
-      })
+      if (captcha?.status === 'success') {
+        await handleSave(address, card, isUpdatingAddress)
+      } else {
+        showSnackbar(captcha.message, 'error')
+      }
     },
     [executeRecaptcha, handleSave, showSnackbar]
   )

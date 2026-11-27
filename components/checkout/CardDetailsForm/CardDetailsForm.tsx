@@ -22,6 +22,7 @@ export interface CardDetailsFormProps {
   cardValue?: CardForm
   validateForm: boolean
   showCvv?: boolean
+  editableCardNumber?: boolean
   fullWidth?: boolean
   showCardTypeIcon?: boolean
   validationRequest?: number
@@ -54,18 +55,19 @@ const getCardInputSx = (error: boolean) => ({
 const useCardSchema = (showCvv: boolean) => {
   const { t } = useTranslation('common')
   return yup.object({
-    cardNumber: yup.string().when('$isEdit', (isEdit, schema) => {
-      if (!isEdit) {
-        return schema
-          .required(t('card-number-required'))
-          .test('card-invalid', t('invalid-card-number'), (value: string) =>
-            isCardNumberValid(value)
-          )
-          .test('card-type', t('card-not-supported'), (value: string) => isCardTypeValid(value))
-      } else {
-        return schema.required(t('card-number-required'))
-      }
-    }),
+    cardNumber: yup
+      .string()
+      .required(t('card-number-required'))
+      .test(
+        'card-invalid',
+        t('invalid-card-number'),
+        (value) => Boolean(value?.includes('*')) || isCardNumberValid(value)
+      )
+      .test(
+        'card-type',
+        t('card-not-supported'),
+        (value) => Boolean(value?.includes('*')) || isCardTypeValid(value)
+      ),
     expiryDate: yup
       .string()
       .required(t('expiry-date-required'))
@@ -96,6 +98,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
   const {
     validateForm = false,
     showCvv = true,
+    editableCardNumber = false,
     fullWidth = false,
     showCardTypeIcon = true,
     validationRequest,
@@ -112,6 +115,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
     control,
     handleSubmit,
     getValues,
+    setValue,
     trigger,
   } = useForm({
     mode: 'onBlur',
@@ -136,6 +140,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
   const handleCardType = (field: ControllerRenderProps<CardForm, 'cardNumber'>, value: string) => {
     field.onChange(value)
     const cardType = creditCardType(value)[0]
+    setValue('cardType', cardType?.niceType.toUpperCase() ?? '')
     setCardTypeLogo(getCreditCardLogo(value.length > 8 ? cardType?.niceType.toUpperCase() : ''))
   }
 
@@ -189,7 +194,7 @@ const CardDetailsForm = (props: CardDetailsFormProps) => {
                       </Box>
                     ),
                   })}
-                  {...(cardValue && { disabled: true })}
+                  {...(cardValue && !editableCardNumber && { disabled: true })}
                 />
               )}
             />
