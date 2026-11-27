@@ -97,7 +97,7 @@ const clampQuantity = (quantity: number, maxQuantity?: number) =>
 const styles = {
   searchWrapper: {
     position: 'relative',
-    maxWidth: '32rem',
+    maxWidth: '36rem',
     marginBottom: '1.5rem',
   },
   suggestions: {
@@ -110,16 +110,27 @@ const styles = {
     overflowY: 'auto',
     borderRadius: '0.5rem',
   },
+  catalogSuggestions: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    width: { xs: '150%', sm: '133.33%' },
+    zIndex: 10,
+    maxHeight: '13rem',
+    overflowY: 'auto',
+    borderRadius: '0.5rem',
+  },
   searchField: {
-    maxWidth: '32rem',
+    maxWidth: '36rem',
     '& .MuiOutlinedInput-root': {
       borderRadius: '2rem',
-      backgroundColor: 'grey.100',
+      backgroundColor: 'common.white',
       paddingRight: '1rem',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+      '& fieldset': { border: '2px solid', borderColor: 'primary.main' },
     },
-    '& fieldset': { border: 'none' },
-    '& .MuiInputBase-input': { fontSize: '0.875rem' },
-    '& .MuiInputBase-input::placeholder': { textOverflow: 'ellipsis' },
+    '& .MuiInputBase-input': { fontSize: '1rem', padding: '0.5rem 0.5rem' },
+    '& .MuiInputBase-input::placeholder': { textOverflow: 'ellipsis', opacity: 0.8 },
   },
   headerRow: {
     ...accountType.body,
@@ -133,6 +144,13 @@ const styles = {
     paddingBottom: '1rem',
     borderTop: '1px solid',
     borderColor: 'grey.300',
+  },
+  rowField: {
+    '& .MuiInputBase-input': { fontSize: '0.875rem', padding: '0.375rem 0.625rem' },
+    '& .MuiOutlinedInput-notchedOutline': { borderColor: 'grey.400' },
+    '& .MuiOutlinedInput-root.Mui-disabled .MuiOutlinedInput-notchedOutline': {
+      borderColor: 'grey.400',
+    },
   },
   productName: {
     typography: 'body2',
@@ -193,6 +211,61 @@ const styles = {
   },
 }
 
+const MIN_QUANTITY = 1
+const SEARCH_SUGGESTIONS_LIMIT = 50
+const CATALOG_NUMBER_MAX_LENGTH = 30
+const CATALOG_SUGGESTIONS_LIMIT = 10
+
+interface QuantityFieldProps {
+  value: number
+  max?: number
+  disabled?: boolean
+  label: string
+  onChange: (quantity: number) => void
+}
+
+const QuantityField = ({ value, max, disabled, label, onChange }: QuantityFieldProps) => {
+  const [draft, setDraft] = useState<string>(String(value))
+
+  useEffect(() => setDraft(String(value)), [value])
+
+  const handleChange = (raw: string) => {
+    setDraft(raw)
+    const parsed = Math.floor(Number(raw))
+    if (raw === '' || !Number.isFinite(parsed) || parsed < MIN_QUANTITY) return
+    const next = clampQuantity(parsed, max)
+    if (next !== parsed) setDraft(String(next))
+    onChange(next)
+  }
+
+  const handleBlur = () => {
+    const parsed = Math.floor(Number(draft))
+    const next = clampQuantity(
+      Number.isFinite(parsed) ? Math.max(MIN_QUANTITY, parsed) : MIN_QUANTITY,
+      max
+    )
+    setDraft(String(next))
+    onChange(next)
+  }
+
+  return (
+    <TextField
+      size="small"
+      fullWidth
+      type="number"
+      disabled={disabled}
+      value={draft}
+      sx={{ ...styles.rowField }}
+      onChange={(e) => handleChange(e.target.value)}
+      onBlur={handleBlur}
+      onKeyDown={(e) => {
+        if (['-', '+', 'e', 'E', '.', ','].includes(e.key)) e.preventDefault()
+      }}
+      inputProps={{ min: MIN_QUANTITY, max, step: 1, 'aria-label': label }}
+    />
+  )
+}
+
 const ReorderTemplate = () => {
   const { t } = useTranslation('common')
   const router = useRouter()
@@ -202,16 +275,18 @@ const ReorderTemplate = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [activeRowKey, setActiveRowKey] = useState<string | null>(null)
   const [lookupTerm, setLookupTerm] = useState('')
+  const [suggestionRowKey, setSuggestionRowKey] = useState<string | null>(null)
 
   const debouncedSearch = useDebounce(searchTerm, publicRuntimeConfig.debounceTimeout)
   const { hits: algoliaHits, isLoading: isSearching } = useAlgoliaProductSearch({
     query: debouncedSearch,
+    hitsPerPage: SEARCH_SUGGESTIONS_LIMIT,
   })
 
   const debouncedLookup = useDebounce(lookupTerm, publicRuntimeConfig.debounceTimeout)
   const { hits: lookupHits, isLoading: isLookupHitsLoading } = useAlgoliaProductSearch({
     query: debouncedLookup,
-    hitsPerPage: 5,
+    hitsPerPage: CATALOG_SUGGESTIONS_LIMIT,
   })
   const exactHit = lookupHits.find((hit) => {
     const term = debouncedLookup.trim().toLowerCase()
@@ -293,13 +368,13 @@ const ReorderTemplate = () => {
     })
     setActiveRowKey(key)
     setLookupTerm(value)
+    setSuggestionRowKey(key)
   }
 
   const handleCatalogNumberBlur = (key: string, value: string) => {
     const product = resolveProduct(value)
     if (!product) return
 
-    // Keep an already resolved (priced) product; blur must not overwrite it with the raw search item
     setRows((current) =>
       current.map((row) => (row.key === key && !row.product ? { ...row, product } : row))
     )
@@ -320,6 +395,32 @@ const ReorderTemplate = () => {
       )
     })
     setLookupTerm(hit.catalogNumber)
+  }
+
+  // Type-ahead for the catalog number field: prefer catalog numbers that start with what was typed
+  const getCatalogSuggestions = (row: ReorderRow): AlgoliaProductHit[] => {
+    const term = row.catalogNumber.trim().toLowerCase()
+    if (
+      row.key !== suggestionRowKey ||
+      row.product ||
+      !term ||
+      lookupTerm !== debouncedLookup ||
+      term !== debouncedLookup.trim().toLowerCase() ||
+      isLookupHitsLoading
+    ) {
+      return []
+    }
+
+    return lookupHits
+      .filter((hit) => hit.catalogNumber?.toLocaleLowerCase().startsWith(term))
+      .slice(0, 10)
+  }
+
+  const handleSelectSuggestion = (key: string, hit: AlgoliaProductHit) => {
+    if (!hit.catalogNumber) return
+
+    handleCatalogNumberChange(key, hit.catalogNumber)
+    setSuggestionRowKey(null)
   }
 
   const handleRemoveRow = (key: string) => {
@@ -578,12 +679,14 @@ const ReorderTemplate = () => {
       {visibleRows.map((row) => {
         const unitPrice = getUnitPrice(row.product)
         const isPriceLoading = Boolean(row.product) && !row.isPriceResolved
+        const suggestions = getCatalogSuggestions(row)
         const isNotFound =
           isLookupSettled &&
           activeRowKey === row.key &&
           row.catalogNumber === lookupTerm &&
           Boolean(row.catalogNumber.trim()) &&
-          !row.product
+          !row.product &&
+          !suggestions.length
         const isLookingUp =
           !isNotFound &&
           (isLoading || lookupTerm !== debouncedLookup) &&
@@ -592,34 +695,82 @@ const ReorderTemplate = () => {
 
         return (
           <Grid container key={row.key} sx={{ ...styles.row }}>
-            <Grid item xs={4} sm={3} sx={{ paddingRight: '0.5rem' }}>
+            <Grid
+              item
+              xs={4}
+              sm={3}
+              sx={{ paddingRight: '0.5rem', position: 'relative', alignSelf: 'center' }}
+            >
               <TextField
                 size="small"
                 fullWidth
+                autoComplete="off"
                 placeholder="eg: A700-131A"
                 value={row.catalogNumber}
+                sx={{ ...styles.rowField }}
                 onChange={(event) => handleCatalogNumberChange(row.key, event.target.value)}
-                onBlur={(event) => handleCatalogNumberBlur(row.key, event.target.value)}
-                inputProps={{ 'aria-label': String(t('catalog-number')) }}
+                onFocus={() => {
+                  if (!row.catalogNumber.trim() || row.product) return
+                  setActiveRowKey(row.key)
+                  setLookupTerm(row.catalogNumber)
+                  setSuggestionRowKey(row.key)
+                }}
+                onBlur={(event) => {
+                  handleCatalogNumberBlur(row.key, event.target.value)
+                  setSuggestionRowKey((current) => (current === row.key ? null : current))
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Escape') setSuggestionRowKey(null)
+                }}
+                inputProps={{
+                  maxLength: CATALOG_NUMBER_MAX_LENGTH,
+                  'aria-label': String(t('catalog-number')),
+                }}
               />
+              {suggestions.length > 0 && (
+                <Paper
+                  elevation={3}
+                  sx={{ ...styles.catalogSuggestions }}
+                  onMouseDown={(event) => event.preventDefault()}
+                >
+                  <List dense disablePadding>
+                    {suggestions.map((hit) => (
+                      <ListItemButton
+                        key={hit.objectID}
+                        onClick={() => handleSelectSuggestion(row.key, hit)}
+                        sx={{ py: 0.5, px: 1.5 }}
+                      >
+                        <ListItemText
+                          primary={hit.productName}
+                          secondary={hit.catalogNumber}
+                          title={hit.productName}
+                          sx={{ my: 0 }}
+                          primaryTypographyProps={{
+                            variant: 'body2',
+                            fontSize: '0.8125rem',
+                            lineHeight: 1.3,
+                            noWrap: true,
+                          }}
+                          secondaryTypographyProps={{
+                            variant: 'caption',
+                            fontSize: '0.6875rem',
+                            lineHeight: 1.2,
+                          }}
+                        />
+                      </ListItemButton>
+                    ))}
+                  </List>
+                </Paper>
+              )}
             </Grid>
 
-            <Grid item xs={2} sm={1} sx={{ paddingRight: '0.5rem' }}>
-              <TextField
-                size="small"
-                fullWidth
-                type="number"
+            <Grid item xs={2} sm={1} sx={{ paddingRight: '0.5rem', alignSelf: 'center' }}>
+              <QuantityField
+                label={String(t('qty'))}
                 disabled={!row.product || !row.isPriceResolved}
-                value={row.quantity || ''}
-                onChange={(event) =>
-                  updateRow(row.key, {
-                    quantity: clampQuantity(
-                      Math.max(0, Math.floor(Number(event.target.value))),
-                      row.maxQuantity
-                    ),
-                  })
-                }
-                inputProps={{ min: 0, max: row.maxQuantity, 'aria-label': String(t('qty')) }}
+                value={row.quantity}
+                max={row.maxQuantity}
+                onChange={(quantity) => updateRow(row.key, { quantity })}
               />
             </Grid>
 
