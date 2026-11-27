@@ -829,13 +829,21 @@
   background: var(--accent);
 }
 
-.sizeInfo {
-  flex: 1 1 auto;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
+.sizeOption .optionRadio {
+  grid-area: radio;
+}
+
+.sizeOption .sizeMain {
+  grid-area: main;
+}
+
+.sizeOption .sizeSku {
+  grid-area: sku;
+}
+
+.sizeOption .sizePrice {
+  grid-area: price;
+  justify-self: end;
 }
 
 .sizeMain {
@@ -2787,6 +2795,9 @@
 .mobileSizeOption {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'main price'
+    'sku price';
   column-gap: 10px;
   row-gap: 2px;
   align-items: center;
@@ -2809,8 +2820,10 @@
   white-space: nowrap;
 }
 
-.mobileSizeSelected .sizeMain {
-  max-width: 100%;
+.mobileSizeSelected .sizeSku,
+.mobileSizeOption .sizeSku {
+  grid-area: sku;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -2818,17 +2831,6 @@
 .mobileSizeSelected .sizePrice,
 .mobileSizeOption .sizePrice {
   grid-area: price;
-}
-
-.mobileSizeSelected .sizeInfo {
-  gap: 0;
-}
-
-.mobileSizeSelected .sizeSku,
-.mobileSizeOption .sizeSku {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .mobileSizeSelected .sizePrice,
